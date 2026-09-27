@@ -3,7 +3,7 @@ name: Deploy Docs to GitHub Pages
 # npx github:akilasatolu/tsuzuri init によって生成された、自己完結型のワークフローです。
 # ビルドスクリプト本体(.github/tsuzuri/ 配下)もこのリポジトリにコピー済みのため、
 # 実行のたびにOSS本体リポジトリ(akilasatolu/tsuzuri)を参照することはありません。
-# スクリプトを最新版に更新したい場合は、再度セットアップコマンドを実行してください。
+# スクリプトを最新版に更新したい場合は、npx github:akilasatolu/tsuzuri init --update を実行してください。
 
 on:
   push:
@@ -102,7 +102,7 @@ jobs:
 
       - name: Install build dependency
         if: steps.trigger.outputs.should_deploy != 'false'
-        run: npm install marked@12.0.2 --no-save --no-audit --no-fund --ignore-scripts
+        run: npm install marked@18.0.14 --no-save --no-audit --no-fund --ignore-scripts
 
       - name: Build
         if: steps.trigger.outputs.should_deploy != 'false'
