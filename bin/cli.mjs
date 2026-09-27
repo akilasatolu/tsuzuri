@@ -32,6 +32,9 @@ export const PACKAGE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 // tsuzuri専用の名前空間を切っている。
 export const VENDOR_DIR = ".github/tsuzuri";
 
+// init が生成するワークフローのひな形(PACKAGE_ROOT からの相対パス)。
+export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.yml";
+
 // THEME選択肢(番号選択、1始まり)。
 export const THEME_CHOICES = [
   { key: "wa", label: "和(推奨。生成り地に墨色の文字、朱色の控えめなリンク)" },
@@ -75,158 +78,31 @@ export function readMarkedVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFil
 /**
  * docs-pages.yml の内容を組み立てる。
  *
- * v3で自己完結型に変更: 以前はOSS本体リポジトリ(tsuzuri)の再利用可能ワークフロー
- * (`build.yml`)を`uses:`で呼び出す薄いラッパーだったが、実行のたびに外部リポジトリへ
- * 依存する構成をやめ、ビルド・デプロイの手順をすべてこのファイル自身に持たせる。
- * ビルドスクリプト本体(build-docs.mjs等)は `init` 実行時に
+ * 自己完結型のワークフロー。ビルドスクリプト本体(build-docs.mjs等)は `init` 実行時に
  * `${VENDOR_DIR}/` 配下へコピー済みであることが前提。
+ * 本体は templates/.github/workflows/docs-pages.yml に置いたひな形で、ここでは
+ * プレースホルダー(__OSS_REPO__ / __VENDOR_DIR__ / __MARKED_VERSION__)を置き換えるだけ。
+ * ひな形を独立したYAMLファイルにしているのは、中で使う actions のバージョンを
+ * Dependabot で自動更新できるようにするため。
+ *
+ * @param {string} [markedVersion]
+ * @param {string} [packageRoot] - テスト時に差し替え可能にするため引数化している
+ * @param {{readFileSync}} [fsImpl] - テスト用差し替え
+ * @returns {string}
  */
-export function buildDocsPagesYml(markedVersion = readMarkedVersion()) {
-  return `name: Deploy Docs to GitHub Pages
-
-# npx github:${OSS_REPO} init によって生成された、自己完結型のワークフローです。
-# ビルドスクリプト本体(${VENDOR_DIR}/ 配下)もこのリポジトリにコピー済みのため、
-# 実行のたびにOSS本体リポジトリ(${OSS_REPO})を参照することはありません。
-# スクリプトを最新版に更新したい場合は、npx github:${OSS_REPO} init --update を実行してください。
-
-on:
-  push:
-    branches: ["**"]
-  workflow_dispatch:
-
-# 既定は読み取りのみ。Pagesへの公開に必要な権限は deploy ジョブにだけ付与する。
-permissions:
-  contents: read
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    outputs:
-      should_deploy: \${{ steps.trigger.outputs.should_deploy }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Load config
-        run: |
-          CONFIG_FILE=".github/docs-pages.config"
-          if [ ! -f "$CONFIG_FILE" ]; then
-            echo "::error::設定ファイル $CONFIG_FILE が見つかりません。パッケージ一式が正しく配置されているか確認してください。"
-            exit 1
-          fi
-
-          # 前後の空白(CRLFのCRを含む)を除去する(xargsは値に ' や " が含まれると失敗するため使わない)
-          trim() { printf '%s' "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'; }
-
-          while IFS='=' read -r key value || [ -n "$key" ]; do
-            key="$(trim "$key")"
-            value="$(trim "$value")"
-            # コメント行・空行をスキップ
-            case "$key" in
-              ''|'#'*) continue ;;
-            esac
-            # 既知の設定キーだけを環境変数として取り込む。それ以外(NODE_OPTIONS等)を
-            # 設定ファイル経由で注入できないようにする。
-            case "$key" in
-              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANG|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME)
-                echo "\${key}=\${value}" >> "$GITHUB_ENV" ;;
-              *)
-                echo "::warning::未知の設定キー \${key} を無視します" ;;
-            esac
-          done < "$CONFIG_FILE"
-
-      - name: Check trigger branch
-        id: trigger
-        env:
-          CURRENT_BRANCH: \${{ github.ref_name }}
-          EVENT_NAME: \${{ github.event_name }}
-        run: |
-          # TRIGGER_BRANCH と現在の ref を比較し、一致すれば should_deploy=true、
-          # 不一致なら should_deploy=false を必ず明示的に $GITHUB_OUTPUT に書き出す。
-          if [ -z "$TRIGGER_BRANCH" ]; then
-            echo "::error::設定ファイルに TRIGGER_BRANCH が定義されていません。"
-            exit 1
-          fi
-
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            echo "手動実行のためブランチ判定をスキップします"
-            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
-          elif [ "$CURRENT_BRANCH" = "$TRIGGER_BRANCH" ]; then
-            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "TRIGGER_BRANCH=$TRIGGER_BRANCH ではない push ($CURRENT_BRANCH) のためスキップします"
-            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Determine base path / site origin
-        if: steps.trigger.outputs.should_deploy != 'false'
-        run: |
-          OWNER="\${GITHUB_REPOSITORY%%/*}"
-          REPO_NAME="\${GITHUB_REPOSITORY#*/}"
-          if [ -n "$CUSTOM_DOMAIN" ]; then
-            BASE_PATH=""
-            SITE_ORIGIN="https://\${CUSTOM_DOMAIN}"
-          elif [[ "$REPO_NAME" == *.github.io ]]; then
-            BASE_PATH=""
-            SITE_ORIGIN="https://\${REPO_NAME}"
-          else
-            BASE_PATH="/\${REPO_NAME}"
-            SITE_ORIGIN="https://\${OWNER}.github.io\${BASE_PATH}"
-          fi
-          echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"
-          echo "SITE_ORIGIN=$SITE_ORIGIN" >> "$GITHUB_ENV"
-
-      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
-        if: steps.trigger.outputs.should_deploy != 'false'
-        with:
-          node-version: 20
-
-      - name: Install build dependency
-        if: steps.trigger.outputs.should_deploy != 'false'
-        run: npm install marked@${markedVersion} --no-save --no-audit --no-fund --ignore-scripts
-
-      - name: Build
-        if: steps.trigger.outputs.should_deploy != 'false'
-        env:
-          ROOT_MD: \${{ env.ROOT_MD }}
-          OUT_DIR: \${{ env.OUT_DIR }}
-          STYLE_FILE: \${{ env.STYLE_FILE }}
-          BASE_PATH: \${{ env.BASE_PATH }}
-          SITE_ORIGIN: \${{ env.SITE_ORIGIN }}
-          LANG: \${{ env.LANG }}
-          NAV_ENABLED: \${{ env.NAV_ENABLED }}
-          FAVICON_FILE: \${{ env.FAVICON_FILE }}
-          SITE_NAME: \${{ env.SITE_NAME }}
-          CUSTOM_DOMAIN: \${{ env.CUSTOM_DOMAIN }}
-          OGP_DEFAULT_IMAGE: \${{ env.OGP_DEFAULT_IMAGE }}
-          THEME: \${{ env.THEME }}
-          # THEME解決の基準ディレクトリ。initでコピーしたベンダリング先を指す。
-          STYLE_DIR: ${VENDOR_DIR}/styles
-        run: node ${VENDOR_DIR}/build-docs.mjs
-
-      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
-        if: steps.trigger.outputs.should_deploy != 'false'
-        with:
-          path: \${{ env.OUT_DIR }}
-
-  deploy:
-    needs: build
-    if: needs.build.outputs.should_deploy == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: \${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
-`;
+export function buildDocsPagesYml(
+  markedVersion = readMarkedVersion(),
+  packageRoot = PACKAGE_ROOT,
+  fsImpl = { readFileSync },
+) {
+  const raw = fsImpl.readFileSync(join(packageRoot, WORKFLOW_TEMPLATE_PATH), "utf-8");
+  const marker = "# --- template start ---\n";
+  const markerIndex = raw.indexOf(marker);
+  const template = markerIndex >= 0 ? raw.slice(markerIndex + marker.length) : raw;
+  return template
+    .replaceAll("__OSS_REPO__", OSS_REPO)
+    .replaceAll("__VENDOR_DIR__", VENDOR_DIR)
+    .replaceAll("__MARKED_VERSION__", markedVersion);
 }
 
 /**

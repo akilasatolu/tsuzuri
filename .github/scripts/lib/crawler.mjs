@@ -24,7 +24,7 @@
  */
 
 import fs from "node:fs";
-import { resolveRepoRel, resolveInsideRepo, isMarkdownPath, isImagePath } from "./path-utils.mjs";
+import { resolveRepoRel, resolveInsideRepo, isMarkdownPath, isImagePath, isLinkedFilePath } from "./path-utils.mjs";
 import { stripCodeSpans, extractMarkdownSyntaxLinks, extractRawHtmlLinks } from "./link-extractor.mjs";
 import { parseFrontmatter } from "./frontmatter.mjs";
 
@@ -44,6 +44,7 @@ import { parseFrontmatter } from "./frontmatter.mjs";
  * @returns {{
  *   visitedMd: Map<string, VisitedMdEntry>,
  *   imageSet: Set<string>,
+ *   fileSet: Set<string>,
  *   hierarchy: Record<string, { parent: string|null, children: string[] }>,
  *   missing: MissingEntry[],
  *   rejected: RejectedEntry[],
@@ -58,6 +59,7 @@ export function crawlSite({
 }) {
   const visitedMd = new Map(); // relPath(posix) -> { content, meta }
   const imageSet = new Set(); // relPath(posix)
+  const fileSet = new Set(); // relPath(posix)。Markdown・画像以外のリンク先(PDF・zip等)
   const hierarchy = {}; // relPath -> { parent, children: [] }
   const missing = [];
   const rejected = [];
@@ -110,10 +112,12 @@ export function crawlSite({
         queue.push({ rel: repoRel, parent: rel });
       } else if (isImagePath(repoRel)) {
         imageSet.add(repoRel);
+      } else if (isLinkedFilePath(repoRel)) {
+        fileSet.add(repoRel);
       }
-      // それ以外の拡張子 (pdf など) は今回のスコープ外なのでスキップ
+      // 拡張子の無いパス(ディレクトリへのリンク等)・ドットファイルはコピー対象にしない
     }
   }
 
-  return { visitedMd, imageSet, hierarchy, missing, rejected };
+  return { visitedMd, imageSet, fileSet, hierarchy, missing, rejected };
 }

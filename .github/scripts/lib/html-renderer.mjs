@@ -58,13 +58,18 @@ export function renderTitle(content, fallback, metaTitle) {
  * `navEnabled=false` の場合は呼び出し側がそもそもこの関数を呼ばず navHtml="" とする
  * (=既存出力と完全一致を保証する)ため、本関数自体はnavEnabledを意識しない。
  *
+ * 狭い画面ではナビを折りたためるよう、JavaScriptを使わずに開閉できるチェックボックスと
+ * ラベル(「メニュー」ボタン)を出力する。開閉の見た目は base.css 側で制御する
+ * (広い画面ではボタンを隠し、常にサイドバーとして表示する)。
+ *
  * @param {import("./site-tree.mjs").DirNode} tree - buildSiteTree の戻り値(ルートディレクトリ)
  * @param {string} currentRel - 現在描画中のページのrel(aria-current付与判定用)
  * @param {string} basePath
  * @param {string} [siteName]
+ * @param {string} [menuLabel] - 狭い画面で表示する開閉ボタンの文言
  * @returns {string}
  */
-export function renderNav(tree, currentRel, basePath, siteName) {
+export function renderNav(tree, currentRel, basePath, siteName, menuLabel = "メニュー") {
   function renderNode(node) {
     if (node.type === "dir") {
       return `<li><span>${escapeHtml(node.name)}</span>${renderList(node.children)}</li>`;
@@ -79,7 +84,11 @@ export function renderNav(tree, currentRel, basePath, siteName) {
   }
 
   const heading = siteName ? `<p>${escapeHtml(siteName)}</p>` : "";
-  return `<nav aria-label="サイト内ページ">${heading}${renderList(tree.children)}</nav>`;
+  const toggle =
+    `<input type="checkbox" id="tsuzuri-nav-toggle" class="tsuzuri-nav-toggle">` +
+    `<div class="tsuzuri-nav-head">${heading}` +
+    `<label for="tsuzuri-nav-toggle" class="tsuzuri-nav-label">${escapeHtml(menuLabel)}</label></div>`;
+  return `<nav aria-label="サイト内ページ">${toggle}${renderList(tree.children)}</nav>`;
 }
 
 /**
@@ -95,6 +104,7 @@ export function renderNav(tree, currentRel, basePath, siteName) {
  *   faviconHref?: string,
  *   siteName?: string,
  * }} opts
+ * canonicalUrl があれば、canonical と同じ値を og:url としても出力する。
  * @returns {string}
  */
 export function renderMetaTags({
@@ -126,6 +136,7 @@ export function renderMetaTags({
   }
 
   if (canonicalUrl) {
+    tags.push(`<meta property="og:url" content="${escapeHtml(canonicalUrl)}">`);
     tags.push(`<link rel="canonical" href="${escapeHtml(canonicalUrl)}">`);
   }
 
@@ -138,6 +149,43 @@ export function renderMetaTags({
   }
 
   return tags.join("\n");
+}
+
+/**
+ * リポジトリ直下に 404.md が無い場合に使う、404ページ(404.html)の既定の内容(Markdown)。
+ * LANG が日本語(ja…)なら日本語、それ以外は英語にする。
+ * 「/」へのリンクはビルド時にサイトのトップURL(basePath付き)に書き換えられる。
+ *
+ * @param {string} lang
+ * @returns {string}
+ */
+export function defaultNotFoundMarkdown(lang = "ja") {
+  if (String(lang).toLowerCase().startsWith("ja")) {
+    return [
+      "---",
+      "title: ページが見つかりません",
+      "---",
+      "",
+      "# ページが見つかりません",
+      "",
+      "お探しのページは、移動または削除されたか、URLが間違っている可能性があります。",
+      "",
+      "[トップページへ戻る](/)",
+      "",
+    ].join("\n");
+  }
+  return [
+    "---",
+    "title: Page not found",
+    "---",
+    "",
+    "# Page not found",
+    "",
+    "The page you are looking for may have been moved or deleted, or the URL may be incorrect.",
+    "",
+    "[Back to the top page](/)",
+    "",
+  ].join("\n");
 }
 
 // Markdown 記法ではなく生の HTML で書かれた <img src="..">/<a href=".."> は

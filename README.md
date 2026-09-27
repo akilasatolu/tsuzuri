@@ -169,8 +169,9 @@ npx github:akilasatolu/tsuzuri#<作業ブランチ名> init
 bin/cli.mjs                 セットアップCLI(init)。生成するワークフロー・設定ファイルのテンプレートもここ
 .github/scripts/
   build-docs.mjs            ビルドのエントリーポイント
-  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / sitemap
+  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / sitemap
 styles/*.css                テーマCSSの原本(base + wa / muji / sumi / ai / shu)
+templates/.github/workflows/docs-pages.yml  initが生成するワークフローのひな形
 test/                       単体テスト・E2Eテスト(test/fixtures/ にフィクスチャ)
 .github/workflows/ci.yml    lint・testのみを行う開発用CI(Pagesへのデプロイはしない)
 ```
@@ -187,8 +188,10 @@ Dependabotが週1回、`package.json`の依存パッケージと`ci.yml`のGitHu
 マージすれば、テストで使う版と利用者に配る版が一緒に更新されます。このため`marked`の版は
 `^`などの範囲ではなく`12.0.2`のような完全一致で書いてください(範囲指定だと`init`がエラーになります)。
 
-なお、生成ワークフロー内のGitHub Actions(`actions/upload-pages-artifact`など)の版は
-`bin/cli.mjs`に直接書かれており、Dependabotの対象外です。更新する場合は手で書き換えてください。
+`init`が生成するワークフローは、`templates/.github/workflows/docs-pages.yml`のひな形から作られます
+(`bin/cli.mjs`がプレースホルダーを置き換えて出力)。ひな形の中のGitHub Actionsも
+Dependabotの更新対象に含めています。本体のCI(`ci.yml`・`sync-docs.yml`)とひな形で
+同じactionの版がずれるとテストが失敗するので、片方だけ更新された場合はもう片方も合わせてください。
 
 ## リリース
 

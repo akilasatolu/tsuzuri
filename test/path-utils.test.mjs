@@ -10,6 +10,7 @@ import {
   resolveRepoRel,
   toSiteAbsHref,
   resolveInsideRepo,
+  isLinkedFilePath,
 } from "../.github/scripts/lib/path-utils.mjs";
 
 describe("normalizeBasePath", () => {
@@ -202,5 +203,31 @@ describe("resolveInsideRepo", () => {
   });
   test("実体がリポジトリ内のシンボリックリンクは許可", () => {
     assert.equal(resolveInsideRepo("/repo", "inner-link.css", realpath), "/repo/inner-link.css");
+  });
+});
+
+describe("isLinkedFilePath", () => {
+  test("拡張子のある Markdown・画像以外のファイルは対象", () => {
+    assert.equal(isLinkedFilePath("docs/manual.pdf"), true);
+    assert.equal(isLinkedFilePath("downloads/sample.zip"), true);
+  });
+  test("Markdown・拡張子の無いパス(ディレクトリ)・ドットファイルは対象外", () => {
+    assert.equal(isLinkedFilePath("docs/a.md"), false);
+    assert.equal(isLinkedFilePath("docs"), false);
+    assert.equal(isLinkedFilePath(".env"), false);
+    assert.equal(isLinkedFilePath("config/.secret.json"), false);
+    assert.equal(isLinkedFilePath(".github/docs-pages.config"), false);
+  });
+});
+
+describe("toSiteAbsHref(ディレクトリへのリンク)", () => {
+  test("/ ・ ./ はサイトのトップURL", () => {
+    assert.equal(toSiteAbsHref("README.md", "/", "/repo"), "/repo/");
+    assert.equal(toSiteAbsHref("README.md", "./", ""), "/");
+    assert.equal(toSiteAbsHref("docs/a.md", "../", "/repo"), "/repo/");
+  });
+  test("末尾が / のディレクトリへのリンクは / を保つ", () => {
+    assert.equal(toSiteAbsHref("README.md", "docs/", "/repo"), "/repo/docs/");
+    assert.equal(toSiteAbsHref("README.md", "docs/#top", "/repo"), "/repo/docs/#top");
   });
 });

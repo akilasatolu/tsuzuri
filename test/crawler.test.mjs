@@ -146,4 +146,13 @@ describe("crawlSite", () => {
       { rel: "secret.md", referencedFrom: "README.md", reason: "outside-repo" },
     ]);
   });
+
+  test("Markdown・画像以外のリンク先ファイル(PDF等)は fileSet に集める。ディレクトリ・ドットファイルは除く", () => {
+    const { readFile, exists } = makeFs({
+      "README.md": "[pdf](docs/manual.pdf) [zip](a.zip) [dir](docs/) [env](.env) [cfg](.github/x.json) ![i](i.png)\n",
+    });
+    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    assert.deepEqual([...result.fileSet].sort(), ["a.zip", "docs/manual.pdf"]);
+    assert.deepEqual([...result.imageSet], ["i.png"]);
+  });
 });

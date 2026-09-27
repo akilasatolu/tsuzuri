@@ -8,7 +8,11 @@ updates:
 
   # .github/workflows/*.yml 内の actions/* をコミットSHA固定にしているため、
   # SHAの更新(タグへの追従)はDependabotに任せる運用とする。
+  # "/templates" は init が利用者リポジトリに生成するワークフローのひな形
+  # (templates/.github/workflows/docs-pages.yml)。ここで使う actions も更新対象にする。
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/templates"
     schedule:
       interval: "weekly"

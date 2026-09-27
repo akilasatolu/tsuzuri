@@ -1,0 +1,153 @@
+# このファイルは tsuzuri の init が利用者リポジトリに生成するワークフローのひな形。
+# bin/cli.mjs の buildDocsPagesYml() が読み込み、次のプレースホルダーを置き換えて出力する。
+#   __OSS_REPO__ / __VENDOR_DIR__ / __MARKED_VERSION__
+# (この先頭のコメントブロックは出力に含まれない)
+# templates/ 配下に .github/workflows/ の形で置いているのは、Dependabot に
+# actions のバージョン更新の対象として認識させるため(ここでワークフローとして実行はされない)。
+# --- template start ---
+name: Deploy Docs to GitHub Pages
+
+# npx github:__OSS_REPO__ init によって生成された、自己完結型のワークフローです。
+# ビルドスクリプト本体(__VENDOR_DIR__/ 配下)もこのリポジトリにコピー済みのため、
+# 実行のたびにOSS本体リポジトリ(__OSS_REPO__)を参照することはありません。
+# スクリプトを最新版に更新したい場合は、npx github:__OSS_REPO__ init --update を実行してください。
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+# 既定は読み取りのみ。Pagesへの公開に必要な権限は deploy ジョブにだけ付与する。
+permissions:
+  contents: read
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.trigger.outputs.should_deploy }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Load config
+        run: |
+          CONFIG_FILE=".github/docs-pages.config"
+          if [ ! -f "$CONFIG_FILE" ]; then
+            echo "::error::設定ファイル $CONFIG_FILE が見つかりません。パッケージ一式が正しく配置されているか確認してください。"
+            exit 1
+          fi
+
+          # 前後の空白(CRLFのCRを含む)を除去する(xargsは値に ' や " が含まれると失敗するため使わない)
+          trim() { printf '%s' "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'; }
+
+          while IFS='=' read -r key value || [ -n "$key" ]; do
+            key="$(trim "$key")"
+            value="$(trim "$value")"
+            # コメント行・空行をスキップ
+            case "$key" in
+              ''|'#'*) continue ;;
+            esac
+            # 既知の設定キーだけを環境変数として取り込む。それ以外(NODE_OPTIONS等)を
+            # 設定ファイル経由で注入できないようにする。
+            case "$key" in
+              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANG|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME)
+                echo "${key}=${value}" >> "$GITHUB_ENV" ;;
+              *)
+                echo "::warning::未知の設定キー ${key} を無視します" ;;
+            esac
+          done < "$CONFIG_FILE"
+
+      - name: Check trigger branch
+        id: trigger
+        env:
+          CURRENT_BRANCH: ${{ github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          # TRIGGER_BRANCH と現在の ref を比較し、一致すれば should_deploy=true、
+          # 不一致なら should_deploy=false を必ず明示的に $GITHUB_OUTPUT に書き出す。
+          if [ -z "$TRIGGER_BRANCH" ]; then
+            echo "::error::設定ファイルに TRIGGER_BRANCH が定義されていません。"
+            exit 1
+          fi
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "手動実行のためブランチ判定をスキップします"
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          elif [ "$CURRENT_BRANCH" = "$TRIGGER_BRANCH" ]; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "TRIGGER_BRANCH=$TRIGGER_BRANCH ではない push ($CURRENT_BRANCH) のためスキップします"
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # BASE_PATH: サイトがドメイン直下でない場合のパス(例: /repo)。
+      # SITE_ORIGIN: スキーム+ドメインのみ(パスは含めない。ページのURLは SITE_ORIGIN + BASE_PATH + パス)。
+      - name: Determine base path / site origin
+        if: steps.trigger.outputs.should_deploy != 'false'
+        run: |
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          if [ -n "$CUSTOM_DOMAIN" ]; then
+            BASE_PATH=""
+            SITE_ORIGIN="https://${CUSTOM_DOMAIN}"
+          elif [[ "$REPO_NAME" == *.github.io ]]; then
+            BASE_PATH=""
+            SITE_ORIGIN="https://${REPO_NAME}"
+          else
+            BASE_PATH="/${REPO_NAME}"
+            SITE_ORIGIN="https://${OWNER}.github.io"
+          fi
+          echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"
+          echo "SITE_ORIGIN=$SITE_ORIGIN" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: steps.trigger.outputs.should_deploy != 'false'
+        with:
+          node-version: 24
+
+      - name: Install build dependency
+        if: steps.trigger.outputs.should_deploy != 'false'
+        run: npm install marked@__MARKED_VERSION__ --no-save --no-audit --no-fund --ignore-scripts
+
+      - name: Build
+        if: steps.trigger.outputs.should_deploy != 'false'
+        env:
+          ROOT_MD: ${{ env.ROOT_MD }}
+          OUT_DIR: ${{ env.OUT_DIR }}
+          STYLE_FILE: ${{ env.STYLE_FILE }}
+          BASE_PATH: ${{ env.BASE_PATH }}
+          SITE_ORIGIN: ${{ env.SITE_ORIGIN }}
+          LANG: ${{ env.LANG }}
+          NAV_ENABLED: ${{ env.NAV_ENABLED }}
+          FAVICON_FILE: ${{ env.FAVICON_FILE }}
+          SITE_NAME: ${{ env.SITE_NAME }}
+          CUSTOM_DOMAIN: ${{ env.CUSTOM_DOMAIN }}
+          OGP_DEFAULT_IMAGE: ${{ env.OGP_DEFAULT_IMAGE }}
+          THEME: ${{ env.THEME }}
+          # THEME解決の基準ディレクトリ。initでコピーしたベンダリング先を指す。
+          STYLE_DIR: __VENDOR_DIR__/styles
+        run: node __VENDOR_DIR__/build-docs.mjs
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        if: steps.trigger.outputs.should_deploy != 'false'
+        with:
+          path: ${{ env.OUT_DIR }}
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

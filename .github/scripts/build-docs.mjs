@@ -19,10 +19,13 @@
  *   6. STYLE_FILE / FAVICON_FILE 読み込み(不在なら console.warn のみ・非致命的)
  *   7. 出力ディレクトリ作成・.nojekyll・(customDomain時)CNAME・
  *      (faviconFile時)favicon本体コピー
- *   8. 各ページの HTML 生成ループ
- *   9. 画像コピー
- *   10. sitemap.buildSitemap() 書き込み
- *   11. 完了ログ
+ *   8. 各ページの HTML 生成ループ(見出しid付与。ROOT_MD と各ディレクトリの README.md は
+ *      index.html としても出力)
+ *   9. 404.html 生成(リポジトリ直下の 404.md、無ければ既定の内容)
+ *   10. 画像・その他のリンク先ファイル(PDF等)のコピー
+ *   11. sitemap.xml / robots.txt(SITE_ORIGIN がある場合のみ)
+ *   12. sitemap.buildSitemap() 書き込み(デバッグ用 sitemap.json)
+ *   13. 完了ログ
  *
  * エラーハンドリング方針:
  *   main() 全体を呼び出し元(本ファイル末尾)で catch し、未分類の例外は
@@ -46,9 +49,12 @@ import {
   renderMetaTags,
   preprocessRawHtmlPaths,
   pageTemplate,
+  defaultNotFoundMarkdown,
 } from "./lib/html-renderer.mjs";
-import { buildSitemap } from "./lib/sitemap.mjs";
+import { buildSitemap, buildSitemapXml } from "./lib/sitemap.mjs";
 import { buildSiteTree } from "./lib/site-tree.mjs";
+import { createSlugger, htmlToText } from "./lib/slugger.mjs";
+import { parseFrontmatter } from "./lib/frontmatter.mjs";
 
 async function main() {
   const REPO_ROOT = process.cwd();
@@ -159,13 +165,14 @@ async function main() {
   }
 
   // ---------- 4. crawlSite ----------
-  const { visitedMd, imageSet, hierarchy, missing, rejected } = crawlSite({
+  const { visitedMd, imageSet, fileSet, hierarchy, missing, rejected } = crawlSite({
     repoRoot: REPO_ROOT,
     rootRel: config.rootMd,
   });
 
   console.log(`Markdown files mapped: ${visitedMd.size}`);
   console.log(`Image resources mapped: ${imageSet.size}`);
+  console.log(`Other linked files mapped: ${fileSet.size}`);
   console.log(`Base path: "${config.basePath || "(none)"}"`);
   if (missing.length) {
     console.warn(`リンク先が見つからなかったファイル: ${missing.length} 件`);
@@ -233,10 +240,33 @@ async function main() {
 
   // ナビゲーション・sitemap.json 用のサイトツリー(ディレクトリ階層)
   const siteTree = buildSiteTree(visitedMd.entries());
+  const menuLabel = config.lang.toLowerCase().startsWith("ja") ? "メニュー" : "Menu";
 
-  for (const [rel, { content, meta }] of visitedMd.entries()) {
+  // サブディレクトリの README.md は、そのディレクトリの index.html としても出力する
+  // (`/docs/` のようなディレクトリのURLで開けるようにするため)。同じディレクトリに
+  // index.md がある場合はそちらを優先し、README.md からは index.html を作らない。
+  const dirIndexRels = new Map(); // dir -> README.md の rel
+  for (const rel of visitedMd.keys()) {
+    const dir = path.posix.dirname(rel);
+    if (dir === ".") continue;
+    if (/^readme\.md$/i.test(path.posix.basename(rel)) && !visitedMd.has(`${dir}/index.md`)) {
+      dirIndexRels.set(dir, rel);
+    }
+  }
+
+  // ページの公開URLのうち basePath より後ろの部分。canonical・og:url・sitemap.xml で使う。
+  //   ROOT_MD → ""(トップURL)、ディレクトリの README.md → "dir/"、それ以外 → "dir/page.html"
+  function urlPathOf(rel) {
+    if (rel === config.rootMd) return "";
+    const dir = path.posix.dirname(rel);
+    if (dirIndexRels.get(dir) === rel) return `${dir}/`;
+    return rel.replace(/\.md$/i, ".html");
+  }
+
+  // 1ページ分のHTMLを組み立てる。
+  function renderPage(rel, content, meta, { canonical = true } = {}) {
     // marked v13以降のレンダラーAPI: 各メソッドは引数としてトークン(オブジェクト)を1つ受け取る。
-    // リンクの表示テキストはインライン要素(強調・コード等)を含みうるため、
+    // リンクの表示テキストや見出しはインライン要素(強調・コード等)を含みうるため、
     // this.parser.parseInline(tokens) でHTMLにする(this を使うためアロー関数にしない)。
     const renderer = new marked.Renderer();
     renderer.link = function ({ href, title, tokens }) {
@@ -250,16 +280,21 @@ async function main() {
         title ? ` title="${escapeHtml(title)}"` : ""
       }>`;
     };
+    // 見出しに GitHub と同じ規則の id を付け、`page.md#見出し` のリンクで飛べるようにする。
+    const slugger = createSlugger();
+    renderer.heading = function ({ tokens, depth }) {
+      const inner = this.parser.parseInline(tokens);
+      const id = slugger.slug(htmlToText(inner));
+      return `<h${depth}${id ? ` id="${escapeHtml(id)}"` : ""}>${inner}</h${depth}>\n`;
+    };
 
     const preprocessed = preprocessRawHtmlPaths(content, rel, config.basePath);
     const bodyHtml = marked.parse(preprocessed, { renderer });
     const title = renderTitle(content, rel, meta.title);
 
     const navHtml = config.navEnabled
-      ? renderNav(siteTree, rel, config.basePath, config.siteName)
+      ? renderNav(siteTree, rel, config.basePath, config.siteName, menuLabel)
       : "";
-
-    const outRel = rel.replace(/\.md$/i, ".html");
 
     // SEOメタタグは「出力すべき情報が何もない」場合は metaTagsHtml="" のままとし、
     // pageTemplate の回帰テスト(navHtml=""・metaTagsHtml=""での完全一致)と
@@ -268,9 +303,8 @@ async function main() {
     const description = meta.description || "";
     const ogImage = meta.ogImage || config.ogDefaultImage || "";
     const ogType = meta.ogType || "website";
-    const canonicalUrl = config.siteOrigin
-      ? `${config.siteOrigin}${config.basePath}/${outRel}`
-      : "";
+    const canonicalUrl =
+      canonical && config.siteOrigin ? `${config.siteOrigin}${config.basePath}/${urlPathOf(rel)}` : "";
     const noindex = meta.noindex === true;
 
     const siteName = config.siteName;
@@ -290,7 +324,7 @@ async function main() {
         })
       : "";
 
-    const html = pageTemplate({
+    return pageTemplate({
       title,
       body: bodyHtml,
       baseCss,
@@ -301,30 +335,66 @@ async function main() {
       navHtml,
       metaTagsHtml,
     });
+  }
 
+  function writeOut(outRel, html) {
     const outAbs = path.join(OUT_DIR, outRel);
     fs.mkdirSync(path.dirname(outAbs), { recursive: true });
     fs.writeFileSync(outAbs, html);
-
-    if (rel === config.rootMd) {
-      fs.writeFileSync(path.join(OUT_DIR, "index.html"), html);
-    }
   }
 
-  // ---------- 8. 画像コピー ----------
-  for (const imgRel of imageSet) {
-    const src = resolveInsideRepo(REPO_ROOT, imgRel);
+  for (const [rel, { content, meta }] of visitedMd.entries()) {
+    const html = renderPage(rel, content, meta);
+    writeOut(rel.replace(/\.md$/i, ".html"), html);
+    if (rel === config.rootMd) writeOut("index.html", html);
+    const dir = path.posix.dirname(rel);
+    if (dirIndexRels.get(dir) === rel) writeOut(`${dir}/index.html`, html);
+  }
+
+  // ---------- 7.5 404ページ ----------
+  // GitHub Pages は存在しないURLへのアクセスに 404.html を返す。リポジトリ直下に 404.md が
+  // あればそれを、無ければ既定の内容で作る(ナビ・テーマは通常のページと同じ)。
+  // 404.md がどこかからリンクされていて既に 404.html として出力済みなら何もしない。
+  if (!visitedMd.has("404.md")) {
+    const notFoundAbs = resolveInsideRepo(REPO_ROOT, "404.md");
+    const raw =
+      notFoundAbs && fs.existsSync(notFoundAbs)
+        ? fs.readFileSync(notFoundAbs, "utf-8")
+        : defaultNotFoundMarkdown(config.lang);
+    const { meta, body } = parseFrontmatter(raw);
+    writeOut("404.html", renderPage("404.md", body, { ...meta, noindex: true }, { canonical: false }));
+  }
+
+  // ---------- 8. 画像・その他のリンク先ファイルのコピー ----------
+  for (const assetRel of [...imageSet, ...fileSet]) {
+    const src = resolveInsideRepo(REPO_ROOT, assetRel);
     if (!src) {
-      console.warn(`リポジトリの外を指しているため画像をコピーしません: ${imgRel}`);
+      console.warn(`リポジトリの外を指しているためコピーしません: ${assetRel}`);
       continue;
     }
-    if (!fs.existsSync(src)) {
-      console.warn(`画像が見つかりません: ${imgRel}`);
+    if (!fs.existsSync(src) || !fs.statSync(src).isFile()) {
+      console.warn(`リンク先のファイルが見つかりません: ${assetRel}`);
       continue;
     }
-    const dest = path.join(OUT_DIR, imgRel);
+    const dest = path.join(OUT_DIR, assetRel);
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.copyFileSync(src, dest);
+  }
+
+  // ---------- 8.5 sitemap.xml / robots.txt(検索エンジン向け) ----------
+  // 公開URLが分かる(SITE_ORIGIN がある)ときだけ出力する。noindex のページは含めない。
+  if (config.siteOrigin) {
+    const urls = [...visitedMd.entries()]
+      .filter(([, { meta }]) => meta.noindex !== true)
+      .map(([rel]) => `${config.siteOrigin}${config.basePath}/${urlPathOf(rel)}`);
+    fs.writeFileSync(path.join(OUT_DIR, "sitemap.xml"), buildSitemapXml(urls));
+    // robots.txt はドメイン直下にしか置けないため、サイトがドメイン直下にあるときだけ作る
+    if (!config.basePath) {
+      fs.writeFileSync(
+        path.join(OUT_DIR, "robots.txt"),
+        `User-agent: *\nAllow: /\n\nSitemap: ${config.siteOrigin}/sitemap.xml\n`
+      );
+    }
   }
 
   // ---------- 9. sitemap.json 書き込み ----------
@@ -335,6 +405,7 @@ async function main() {
     customStyleApplied: Boolean(customCss),
     visitedMd,
     imageSet,
+    fileSet,
     hierarchy,
     tree: siteTree,
     missing,

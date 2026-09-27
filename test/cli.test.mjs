@@ -26,6 +26,7 @@ import {
   isUpdateMode,
   runUpdate,
   isDirectRunOf,
+  WORKFLOW_TEMPLATE_PATH,
 } from "../bin/cli.mjs";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
@@ -540,4 +541,37 @@ test("シンボリックリンク経由で実行した init --update が実際�
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+// --- ワークフローのひな形 ---
+
+test("buildDocsPagesYml: ひな形のプレースホルダーとヘッダーコメントが出力に残らない", () => {
+  const yml = buildDocsPagesYml();
+  assert.doesNotMatch(yml, /__[A-Z_]+__/);
+  assert.doesNotMatch(yml, /template start/);
+  assert.ok(yml.startsWith("name: Deploy Docs to GitHub Pages\n"));
+  assert.ok(yml.includes(`STYLE_DIR: ${VENDOR_DIR}/styles`));
+});
+
+test("buildDocsPagesYml: Node.js 24を使い、SITE_ORIGINにはパスを含めない(canonicalのパス二重化を防ぐ)", () => {
+  const yml = buildDocsPagesYml();
+  assert.ok(yml.includes("node-version: 24"));
+  assert.ok(yml.includes('SITE_ORIGIN="https://${OWNER}.github.io"\n'));
+  assert.doesNotMatch(yml, /SITE_ORIGIN="[^"]*\$\{BASE_PATH\}/);
+});
+
+test("ワークフローのactionsはコミットSHAで固定され、本体のCIと生成ワークフローで版がそろっている", () => {
+  const usesOf = (text) =>
+    Object.fromEntries([...text.matchAll(/uses: (actions\/[\w-]+)@([0-9a-f]+) # (v[\d.]+)/g)].map((m) => [m[1], m[2]]));
+  const template = readFileSync(join(PACKAGE_ROOT, WORKFLOW_TEMPLATE_PATH), "utf8");
+  const ci = readFileSync(join(PACKAGE_ROOT, ".github/workflows/ci.yml"), "utf8");
+  const sync = readFileSync(join(PACKAGE_ROOT, ".github/workflows/sync-docs.yml"), "utf8");
+  const tplUses = usesOf(template);
+  for (const sha of Object.values(tplUses)) assert.match(sha, /^[0-9a-f]{40}$/);
+  for (const other of [usesOf(ci), usesOf(sync)]) {
+    for (const [action, sha] of Object.entries(other)) {
+      if (tplUses[action]) assert.equal(tplUses[action], sha, `${action} の版が本体のワークフローとひな形で異なる`);
+    }
+  }
+  assert.ok(tplUses["actions/upload-pages-artifact"] && tplUses["actions/deploy-pages"]);
 });

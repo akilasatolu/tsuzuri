@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildSitemap } from "../.github/scripts/lib/sitemap.mjs";
+import { buildSitemap, buildSitemapXml } from "../.github/scripts/lib/sitemap.mjs";
 
 function baseOpts(overrides = {}) {
   const visitedMd = new Map([
@@ -114,4 +114,12 @@ test("rejectedがそのまま配列として出力される(未指定時は空�
   delete opts2.rejected;
   const result2 = buildSitemap(opts2);
   assert.deepEqual(result2.rejected, []);
+});
+
+test("buildSitemapXml: sitemaps.org形式で、URLはXMLエスケープされる", () => {
+  const xml = buildSitemapXml(["https://example.com/", "https://example.com/a.html?x=1&y=2"]);
+  assert.match(xml, /^<\?xml version="1.0" encoding="UTF-8"\?>\n<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
+  assert.match(xml, /<url><loc>https:\/\/example\.com\/<\/loc><\/url>/);
+  assert.match(xml, /<loc>https:\/\/example\.com\/a\.html\?x=1&amp;y=2<\/loc>/);
+  assert.match(xml, /<\/urlset>\n$/);
 });

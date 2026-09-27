@@ -8,6 +8,7 @@ import {
   renderMetaTags,
   pageTemplate,
   preprocessRawHtmlPaths,
+  defaultNotFoundMarkdown,
 } from "../.github/scripts/lib/html-renderer.mjs";
 import { buildSiteTree } from "../.github/scripts/lib/site-tree.mjs";
 
@@ -81,12 +82,26 @@ describe("renderNav", () => {
 
   test("siteNameが設定されていればnav先頭に見出しとして表示する", () => {
     const html = renderNav(tree, "README.md", "", "My Site");
-    assert.match(html, /<nav aria-label="サイト内ページ"><p>My Site<\/p>/);
+    assert.match(html, /<div class="tsuzuri-nav-head"><p>My Site<\/p><label/);
   });
 
   test("siteName未設定なら見出しは出力されない", () => {
     const html = renderNav(tree, "README.md", "", "");
-    assert.match(html, /<nav aria-label="サイト内ページ"><ul>/);
+    assert.match(html, /<div class="tsuzuri-nav-head"><label/);
+    assert.doesNotMatch(html, /<p>/);
+  });
+
+  test("狭い画面用の開閉チェックボックスとラベル(既定の文言は「メニュー」)を出力する", () => {
+    const html = renderNav(tree, "README.md", "", "");
+    assert.match(
+      html,
+      /^<nav aria-label="サイト内ページ"><input type="checkbox" id="tsuzuri-nav-toggle" class="tsuzuri-nav-toggle"><div class="tsuzuri-nav-head"><label for="tsuzuri-nav-toggle" class="tsuzuri-nav-label">メニュー<\/label><\/div><ul>/
+    );
+  });
+
+  test("開閉ボタンの文言は指定でき、エスケープされる", () => {
+    const html = renderNav(tree, "README.md", "", "", "Menu <x>");
+    assert.match(html, />Menu &lt;x&gt;<\/label>/);
   });
 
   test("titleはエスケープされる", () => {
@@ -149,9 +164,10 @@ describe("renderMetaTags", () => {
     assert.doesNotMatch(html, /rel="canonical"/);
   });
 
-  test("canonicalUrlが非空なら<link rel=canonical>を出力する", () => {
+  test("canonicalUrlが非空なら<link rel=canonical>とog:urlを出力する", () => {
     const html = renderMetaTags({ ogTitle: "t", canonicalUrl: "https://example.com/" });
     assert.match(html, /<link rel="canonical" href="https:\/\/example\.com\/">/);
+    assert.match(html, /<meta property="og:url" content="https:\/\/example\.com\/">/);
   });
 
   test("faviconHrefが非空なら<link rel=icon>を出力する", () => {
@@ -307,5 +323,14 @@ describe("preprocessRawHtmlPaths", () => {
     const content = `<img src="pic.png" alt="x">`;
     const result = preprocessRawHtmlPaths(content, "index.md", "");
     assert.equal(result, `<img src="/pic.png" alt="x">`);
+  });
+});
+
+describe("defaultNotFoundMarkdown", () => {
+  test("LANGが日本語なら日本語、それ以外は英語。トップへのリンク(/)を含む", () => {
+    assert.match(defaultNotFoundMarkdown("ja"), /title: ページが見つかりません/);
+    assert.match(defaultNotFoundMarkdown("ja-JP"), /ページが見つかりません/);
+    assert.match(defaultNotFoundMarkdown("en"), /title: Page not found/);
+    for (const lang of ["ja", "en"]) assert.match(defaultNotFoundMarkdown(lang), /\]\(\/\)/);
   });
 });

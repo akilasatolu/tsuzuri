@@ -20,6 +20,18 @@
 
 ### Added
 
+- 見出しにGitHubと同じ規則の`id`を付けるようにした。`page.md#見出し`形式のリンクで
+  ページ内の見出しへ移動できる(日本語の見出しにも対応)。
+- Markdown・画像以外のリンク先ファイル(PDF・zip等)もサイトにコピーするようにした
+  (拡張子の無いパスと、`.`で始まるファイル・ディレクトリは対象外)。
+- サブディレクトリの`README.md`を、そのディレクトリの`index.html`としても出力するようにした
+  (`/docs/`のようなURLで開ける)。`docs/`のようなディレクトリへのリンクも末尾の`/`を保つ。
+- `404.html`を生成するようにした。リポジトリ直下に`404.md`があればその内容、無ければ
+  既定の内容(`LANG`に応じて日本語/英語)で、通常のページと同じナビ・テーマで表示する。
+- `SITE_ORIGIN`がある場合に、検索エンジン向けの`sitemap.xml`(noindexのページは除く)と、
+  サイトがドメイン直下のときは`robots.txt`を出力するようにした。canonicalと同じ値を
+  `og:url`としても出力する。
+- 狭い画面ではナビを「メニュー」ボタンで開閉できるようにした(JavaScript不要)。
 - `init --update`を追加。対話なしで、ワークフローとビルドスクリプトだけを最新版に上書きする
   (設定ファイル・独自CSSは変更しない)。
 - `SITE_NAME`を`og:site_name`メタタグとして出力するようにした。
@@ -35,6 +47,13 @@
   テーマ層(2層目)を差し替えられるようになった([Frontmatterリファレンス](https://github.com/akilasatolu/tsuzuri/blob/docs/docs/frontmatter.md#theme)参照)。
 
 ### Changed
+
+- `init`が生成するワークフローをNode.js 24にし、actionsを最新版に更新
+  (checkout v7.0.1 / setup-node v7.0.0 / upload-pages-artifact v5.0.0 / deploy-pages v5.0.1)。
+  ひな形を`templates/.github/workflows/docs-pages.yml`に分離し、Dependabotの更新対象にした。
+- 本体のCI・sync-docsもNode.js 24に更新。
+- トップページとディレクトリの`README.md`のcanonical URLを、`README.html`ではなく
+  トップURL・ディレクトリのURLにした。
 
 - `NAV_ENABLED`・`THEME`・`LANG`を省略(未設定・空文字)したときは警告を出さずに既定値を
   使うようにした(不正な値のときだけ警告する)。
@@ -60,6 +79,8 @@
 
 ### Fixed
 
+- 生成ワークフローの`SITE_ORIGIN`にサイトのパスが含まれていたため、canonical URLが
+  `https://owner.github.io/repo/repo/...`のようにパスが二重になっていた不具合を修正。
 - `marked`を18系に更新し、v13以降のレンダラーAPI(引数がトークンオブジェクト)に対応。
   旧APIのままだと`link.startsWith is not a function`でビルドが失敗していた。
 - `npx`経由(`node_modules/.bin/`のシンボリックリンク経由)で起動すると、CLIが何もせずに

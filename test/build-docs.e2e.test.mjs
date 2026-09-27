@@ -98,7 +98,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       // index.html が README.md から生成された内容と一致
       const indexHtml = readOut(dir, "index.html");
       assert.match(indexHtml, /<title>Root Page<\/title>/);
-      assert.match(indexHtml, /<h1>Root Page<\/h1>/);
+      assert.match(indexHtml, /<h1 id="root-page">Root Page<\/h1>/);
       assert.match(indexHtml, /href="\/docs\/a\.html"/);
       assert.match(indexHtml, /src="\/docs\/img\.png"/);
 
@@ -343,7 +343,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.match(indexHtml, /<meta property="og:image" content="docs\/img\.png">/);
       assert.match(
         indexHtml,
-        /<link rel="canonical" href="https:\/\/example\.com\/README\.html">/
+        /<link rel="canonical" href="https:\/\/example\.com\/">/
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -499,7 +499,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       const indexHtml = readOut(dir, "index.html");
       assert.match(indexHtml, /<meta property="og:site_name" content="My Site">/);
-      assert.match(indexHtml, /<nav aria-label="サイト内ページ"><p>My Site<\/p>/);
+      assert.match(indexHtml, /<div class="tsuzuri-nav-head"><p>My Site<\/p>/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -586,6 +586,132 @@ describe("build-docs.mjs :: main (E2E)", () => {
         assert.equal(result.status, 1, `OUT_DIR=${outDir}`);
         assert.match(result.stderr, /OUT_DIR/);
       }
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("見出しにidが付き、他ページの見出しへのリンク(#)がそのまま使える", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        "# Root Page\n\n[テーマの説明へ](docs/a.md#テーマ設定) [A](docs/a.md)\n"
+      );
+      fs.writeFileSync(
+        path.join(dir, "docs", "a.md"),
+        "# Page A\n\n## テーマ設定\n\n## Usage `theme`\n\n## Usage `theme`\n"
+      );
+
+      const result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+
+      assert.match(readOut(dir, "index.html"), /href="\/docs\/a\.html#テーマ設定"/);
+      const aHtml = readOut(dir, "docs", "a.html");
+      assert.match(aHtml, /<h2 id="テーマ設定">テーマ設定<\/h2>/);
+      assert.match(aHtml, /<h2 id="usage-theme">Usage <code>theme<\/code><\/h2>/);
+      assert.match(aHtml, /<h2 id="usage-theme-1">/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("PDF等のリンク先ファイルもコピーされ、ドットファイルはコピーされない", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "docs", "manual.pdf"), "%PDF");
+      fs.writeFileSync(path.join(dir, ".env"), "SECRET=1");
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        "# Root Page\n\n[manual](docs/manual.pdf) [env](.env) [missing](nope.zip)\n"
+      );
+
+      const result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(readOut(dir, "docs", "manual.pdf"), "%PDF");
+      assert.ok(!fs.existsSync(path.join(dir, "_site", ".env")));
+      assert.match(result.stderr, /リンク先のファイルが見つかりません: nope\.zip/);
+      assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).files.sort(), ["docs/manual.pdf", "nope.zip"]);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("サブディレクトリのREADME.mdはそのディレクトリのindex.htmlとしても出力される", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.mkdirSync(path.join(dir, "guide"));
+      fs.writeFileSync(path.join(dir, "guide", "README.md"), "# Guide\n");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root Page\n\n[guide](guide/) [guide readme](guide/README.md)\n");
+
+      const result = runBuild(dir, { SITE_ORIGIN: "https://example.com" });
+      assert.equal(result.status, 0, result.stderr);
+      // guide/ へのディレクトリリンクもたどれるよう、README.md へのリンクも置いている
+      assert.equal(readOut(dir, "guide", "index.html"), readOut(dir, "guide", "README.html"));
+      assert.match(readOut(dir, "index.html"), /href="\/guide\/"/);
+      assert.match(readOut(dir, "guide", "index.html"), /<link rel="canonical" href="https:\/\/example\.com\/guide\/">/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("404.htmlが生成される(既定の内容。404.mdがあればその内容)", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+
+      let result = runBuild(dir, { NAV_ENABLED: "true", BASE_PATH: "/repo" });
+      assert.equal(result.status, 0, result.stderr);
+      let html = readOut(dir, "404.html");
+      assert.match(html, /<title>ページが見つかりません<\/title>/);
+      assert.match(html, /<a href="\/repo\/">トップページへ戻る<\/a>/);
+      assert.match(html, /<meta name="robots" content="noindex">/);
+      assert.match(html, /<nav aria-label="サイト内ページ">/);
+      assert.doesNotMatch(html, /rel="canonical"/);
+
+      result = runBuild(dir, { LANG: "en" });
+      assert.match(readOut(dir, "404.html"), /<title>Page not found<\/title>/);
+
+      fs.writeFileSync(path.join(dir, "404.md"), "---\ntitle: 迷子\n---\n# 迷子です\n");
+      result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      html = readOut(dir, "404.html");
+      assert.match(html, /<title>迷子<\/title>/);
+      assert.match(html, /迷子です/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("SITE_ORIGIN設定時はsitemap.xmlを出力し(noindexは除く)、ドメイン直下ならrobots.txtも出力する", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\nnoindex: true\n---\n# Page A\n");
+
+      let result = runBuild(dir, { SITE_ORIGIN: "https://owner.github.io", BASE_PATH: "/repo" });
+      assert.equal(result.status, 0, result.stderr);
+      const xml = readOut(dir, "sitemap.xml");
+      assert.match(xml, /<loc>https:\/\/owner\.github\.io\/repo\/<\/loc>/);
+      assert.doesNotMatch(xml, /a\.html/);
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "robots.txt")), "サブパス配置ではrobots.txtを作らない");
+
+      fs.rmSync(path.join(dir, "_site"), { recursive: true });
+      result = runBuild(dir, { SITE_ORIGIN: "https://docs.example.com" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(readOut(dir, "robots.txt"), /Sitemap: https:\/\/docs\.example\.com\/sitemap\.xml/);
+
+      fs.rmSync(path.join(dir, "_site"), { recursive: true });
+      result = runBuild(dir);
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "sitemap.xml")), "SITE_ORIGIN未設定ならsitemap.xmlは作らない");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

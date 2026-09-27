@@ -43,6 +43,15 @@ export function isImagePath(p) {
   return /\.(png|jpe?g|gif|svg|webp|bmp|ico)$/i.test(p);
 }
 
+// Markdown・画像以外で、リンクされていればサイトにコピーするファイル(PDF・zip等)か。
+//   - 拡張子の無いパスは対象外(`docs/` のようなディレクトリへのリンクの可能性があるため)
+//   - "." で始まる要素を含むパスは対象外(.env や .github/ 配下などを誤って公開しないため)
+export function isLinkedFilePath(p) {
+  if (isMarkdownPath(p)) return false;
+  if (p.split("/").some((seg) => seg.startsWith("."))) return false;
+  return posix.extname(p) !== "";
+}
+
 // href/src を { pathPart, rest } に分解する。rest には #anchor や ?query を含む
 export function splitHref(href) {
   let cut = href.length;
@@ -105,14 +114,21 @@ export function resolveRepoRel(fromRel, rawHref) {
 // @param {string} rawHref
 // @param {string} basePath
 // @returns {string}
+//
+// ディレクトリへのリンク("/"・"./"・"docs/" など)は、末尾の "/" を保ったまま
+// `${basePath}/` ・ `${basePath}/docs/` のように組み立てる(ディレクトリの index.html を開く)。
 export function toSiteAbsHref(fromRel, rawHref, basePath) {
   const resolved = resolveRepoRel(fromRel, rawHref);
   if (resolved.rejected) return rawHref; // 外部リンク・アンカー・拒否されたリンクはそのまま
   let { repoRel, rest } = resolved;
+  // posix.normalize は末尾の "/" を残す("docs/"・"./")ため、いったん取り除いて付け直す
+  repoRel = repoRel.replace(/\/+$/, "");
+  if (repoRel === "." || repoRel === "") return `${basePath}/${rest}`;
   if (isMarkdownPath(repoRel)) {
     repoRel = repoRel.replace(/\.md$/i, ".html");
   }
-  return `${basePath}/${repoRel}${rest}`;
+  const trailingSlash = splitHref(rawHref).pathPart.endsWith("/") ? "/" : "";
+  return `${basePath}/${repoRel}${trailingSlash}${rest}`;
 }
 
 function isInsideDir(dir, target) {
