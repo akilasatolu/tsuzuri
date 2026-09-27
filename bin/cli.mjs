@@ -11,7 +11,7 @@
 // node:fs(existsSync/mkdirSync/writeFileSync/readFileSync/readdirSync)のみを使用する。
 
 import { createInterface } from "node:readline/promises";
-import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, realpathSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -87,7 +87,7 @@ export function buildDocsPagesYml(markedVersion = readMarkedVersion()) {
 # npx github:${OSS_REPO} init によって生成された、自己完結型のワークフローです。
 # ビルドスクリプト本体(${VENDOR_DIR}/ 配下)もこのリポジトリにコピー済みのため、
 # 実行のたびにOSS本体リポジトリ(${OSS_REPO})を参照することはありません。
-# スクリプトを最新版に更新したい場合は、再度セットアップコマンドを実行してください。
+# スクリプトを最新版に更新したい場合は、npx github:${OSS_REPO} init --update を実行してください。
 
 on:
   push:
@@ -442,7 +442,7 @@ export async function writeGeneratedFiles(targets, opts) {
 
     fsImpl.mkdirSync(dirname(fullPath), { recursive: true });
     fsImpl.writeFileSync(fullPath, target.content);
-    log(`✔ ${target.relPath} を作成しました`);
+    log(`✔ ${target.relPath} を${alreadyExists ? "上書き" : "作成"}しました`);
     results.push({ ...target, status: alreadyExists ? "overwritten" : "created" });
   }
 
@@ -526,10 +526,66 @@ export async function promptAnswers(rl) {
 }
 
 /**
- * CLI本体。v1スコープでは init サブコマンドのみをサポートし、
- * それ以外(省略含む)は init 相当のデフォルト動作とする。
+ * コマンドライン引数に `--update` が含まれるかを判定する。
+ * @param {string[]} argv - process.argv.slice(2) 相当
  */
-export async function main({ cwd = process.cwd() } = {}) {
+export function isUpdateMode(argv = []) {
+  return argv.includes("--update");
+}
+
+/**
+ * `init --update`: 対話なしで、既存の利用者リポジトリの tsuzuri を最新化する。
+ *
+ * - ワークフロー(docs-pages.yml)とビルドスクリプト一式(VENDOR_DIR 配下)は上書きする
+ * - 設定ファイル(docs-pages.config)と独自CSS(custom.css)は一切触らない
+ * - 新しく増えたビルドスクリプトは追加される
+ *
+ * 設定ファイルが無い(=まだ init していない)リポジトリではエラーにする。
+ * CI(mainブランチの更新をdocsブランチへ自動反映するワークフロー等)からも使う。
+ *
+ * @param {object} opts
+ * @param {string} opts.cwd
+ * @param {(msg: string) => void} [opts.log]
+ * @param {{existsSync, mkdirSync, writeFileSync}} [opts.fsImpl] - テスト用差し替え
+ * @param {Array<{name:string, relPath:string, content:string}>} [opts.targets] - テスト用差し替え
+ * @returns {Promise<Array<{name:string, relPath:string, status: "created"|"overwritten"|"skipped"}>>}
+ */
+export async function runUpdate({
+  cwd,
+  log = () => {},
+  fsImpl = { existsSync, mkdirSync, writeFileSync },
+  targets,
+}) {
+  const configRel = ".github/docs-pages.config";
+  if (!fsImpl.existsSync(join(cwd, configRel))) {
+    throw new Error(
+      `${configRel} が見つかりません。初回は --update を付けずに init を実行してください`,
+    );
+  }
+  const updateTargets = targets ?? [
+    { name: "docs-pages.yml", relPath: ".github/workflows/docs-pages.yml", content: buildDocsPagesYml() },
+    ...buildVendorTargets(),
+  ];
+  return writeGeneratedFiles(updateTargets, {
+    cwd,
+    confirmOverwrite: () => true,
+    log,
+    fsImpl,
+  });
+}
+
+/**
+ * CLI本体。サブコマンドは init のみをサポートし、それ以外(省略含む)は init 相当の
+ * デフォルト動作とする。`--update` を付けると対話なしの更新モード(runUpdate)になる。
+ */
+export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) } = {}) {
+  if (isUpdateMode(argv)) {
+    console.log("tsuzuri を最新版に更新します(設定ファイル・独自CSSは変更しません)\n");
+    await runUpdate({ cwd, log: console.log });
+    console.log("\n更新が完了しました。変更内容は 'git diff' で確認できます。");
+    return;
+  }
+
   console.log("README → GitHub Pages 自動デプロイパッケージ セットアップ\n");
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -562,7 +618,8 @@ export async function main({ cwd = process.cwd() } = {}) {
       `mainブランチへpushするとGitHub Pagesへの初回デプロイが始まります。\n` +
       `ビルドスクリプト本体(${VENDOR_DIR}/ 配下)もこのリポジトリにコピーされているため、\n` +
       `実行時に外部リポジトリを参照することはありません。\n` +
-      `スクリプトを最新版に更新したい場合は、再度このセットアップコマンドを実行してください。\n` +
+      `スクリプトを最新版に更新したい場合は、このコマンドに --update を付けて実行してください\n` +
+      `(設定ファイル・独自CSSはそのままに、ワークフローとスクリプトだけが更新されます)。\n` +
       `変更内容は 'git diff' で確認できます。`,
   );
 }
@@ -577,16 +634,21 @@ export function reportFatalError(err, logger = console.error) {
   return 1;
 }
 
-const isDirectRun = (() => {
+// `node bin/cli.mjs` として直接実行されたか(テストからimportされただけではないか)を判定する。
+// npx は node_modules/.bin/ 配下のシンボリックリンク経由で起動するため、パス文字列の
+// 単純比較ではなく、シンボリックリンクを解決した実体パス同士で比較する。
+export function isDirectRunOf(moduleUrl, argv1, realpath = realpathSync) {
   try {
-    return import.meta.url === `file://${process.argv[1]}`;
+    return Boolean(argv1) && realpath(fileURLToPath(moduleUrl)) === realpath(argv1);
   } catch {
     return false;
   }
-})();
+}
+
+const isDirectRun = isDirectRunOf(import.meta.url, process.argv[1]);
 
 if (isDirectRun) {
-  // v1スコープではサブコマンドはinitのみ。argv[2]の値に関わらずinit相当を実行する。
+  // サブコマンドはinitのみ。argv[2]の値に関わらずinit相当を実行する(--updateのみ解釈する)。
   main().catch((err) => {
     process.exitCode = reportFatalError(err);
   });

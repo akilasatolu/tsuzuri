@@ -1,0 +1,65 @@
+name: Sync docs branch
+
+# mainブランチへのpushでCI(lint・test)が成功したら、そのコミットのtsuzuriで
+# docsブランチに `init --update` を実行し、変更があればdocsブランチへpushする。
+# docsへのpushをきっかけに、docsブランチ側の docs-pages.yml がGitHub Pagesへ公開する。
+#
+# docsへのpushには、書き込み権限付きのデプロイキー(Secret: DOCS_DEPLOY_KEY)を使う。
+# 既定の GITHUB_TOKEN でpushすると、そのpushでは docs-pages.yml が起動しないため。
+# デプロイキーの登録手順は README.md の「docsブランチへの自動反映」を参照。
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-docs
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    # mainへのpushで起動したCIが成功した場合だけ動かす(PRのCIでは動かさない)
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main (CIが成功したコミット)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          path: tsuzuri
+          persist-credentials: false
+
+      - name: Checkout docs
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: docs
+          path: docs
+          ssh-key: ${{ secrets.DOCS_DEPLOY_KEY }}
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+
+      - name: Run init --update on docs
+        working-directory: docs
+        run: node ../tsuzuri/bin/cli.mjs init --update
+
+      - name: Commit and push to docs
+        working-directory: docs
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "docsブランチに反映する変更はありません"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Sync tsuzuri from main (${SOURCE_SHA})"
+          git push origin HEAD:docs

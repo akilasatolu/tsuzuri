@@ -19,7 +19,7 @@ https://akilasatolu.github.io/tsuzuri/**
 
 - 2つのブランチは履歴を共有しない独立したブランチです。**`main`と`docs`を互いにマージしないでください**。
 - 本体の変更は`main`へのPRで行います。
-- `docs`の`.github/tsuzuri/`配下は、利用者と同じ手順(`init`の再実行)で更新します。直接編集しないでください。
+- `docs`の`.github/tsuzuri/`配下とワークフローは、`main`のCIが成功するたびに自動で更新されます(下の「`docs`ブランチへの自動反映」)。直接編集しないでください。
 - 利用者向けドキュメント(`docs`ブランチの`docs/`)の修正は、`docs`へのPRで行います。
 
 ### `docs`ブランチの公開設定(リポジトリ作成時に1回だけ)
@@ -34,6 +34,48 @@ https://akilasatolu.github.io/tsuzuri/**
 environment protection rules.`で失敗します。また、`docs-pages.yml`は`docs`ブランチにしか
 ないため、Actionsタブの手動実行(Run workflow)ボタンは表示されません。`docs`への
 pushでデプロイしてください。
+
+### `docs`ブランチへの自動反映
+
+`main`へのpushでCI(lint・test)が成功すると、`.github/workflows/sync-docs.yml`が
+そのコミットのTsuzuriで`docs`ブランチに`init --update`を実行し、変更があれば`docs`へ
+pushします。そのpushで`docs`の`docs-pages.yml`が動き、サイトが公開し直されます。
+
+```
+mainへpush → CI成功 → sync-docs.yml → docsへpush → docs-pages.yml → GitHub Pages
+```
+
+- 更新されるのは`docs`の`.github/workflows/docs-pages.yml`と`.github/tsuzuri/`配下だけです。
+  `.github/docs-pages.config`・独自CSS・README・`docs/`は変更されません。
+- CIが失敗したときや、PRのCIでは動きません。反映する変更が無いときはコミットしません。
+- `docs`への手動のpushと重なった場合は、手元で`git pull --rebase`してからpushし直してください。
+
+#### デプロイキーの登録(リポジトリ作成時に1回だけ)
+
+`docs`へのpushには、書き込み権限付きのデプロイキーを使います。GitHub Actionsの既定の
+`GITHUB_TOKEN`でpushすると、そのpushでは`docs-pages.yml`が起動せず、サイトが更新されないためです。
+
+1. 手元で鍵ペアを作る(パスフレーズなし)
+
+   ```sh
+   ssh-keygen -t ed25519 -C "tsuzuri docs sync" -N "" -f tsuzuri_docs_deploy_key
+   ```
+
+2. 公開鍵を登録する: `Settings > Deploy keys > Add deploy key`
+   - Title: `docs sync`(任意)
+   - Key: `tsuzuri_docs_deploy_key.pub`の中身
+   - **`Allow write access`にチェックを入れる**
+3. 秘密鍵をSecretに登録する: `Settings > Secrets and variables > Actions > New repository secret`
+   - Name: `DOCS_DEPLOY_KEY`
+   - Secret: `tsuzuri_docs_deploy_key`(`.pub`ではない方)の中身
+4. 手元の鍵ファイルを削除する
+
+   ```sh
+   rm tsuzuri_docs_deploy_key tsuzuri_docs_deploy_key.pub
+   ```
+
+登録していない場合、`sync-docs.yml`は`docs`のcheckoutで失敗します(`main`のCIや
+公開済みのサイトには影響しません)。
 
 ## 開発環境のセットアップ
 
@@ -103,6 +145,9 @@ python3 -m http.server --directory _site 8000
 mkdir /tmp/tsuzuri-init-test && cd /tmp/tsuzuri-init-test
 node ~/dev/tsuzuri/bin/cli.mjs
 ```
+
+既存の構成を最新化する更新モード(`node ~/dev/tsuzuri/bin/cli.mjs init --update`)も
+同じ要領で試せます。
 
 生成された`.github/tsuzuri/`を使ってビルドする場合は、1と同じ要領で
 `STYLE_DIR=.github/tsuzuri/styles node .github/tsuzuri/build-docs.mjs`を実行します。

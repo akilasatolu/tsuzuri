@@ -20,6 +20,8 @@
 
 ### Added
 
+- `init --update`を追加。対話なしで、ワークフローとビルドスクリプトだけを最新版に上書きする
+  (設定ファイル・独自CSSは変更しない)。
 - `SITE_NAME`を`og:site_name`メタタグとして出力するようにした。
 - ナビゲーションを、リポジトリのディレクトリ構成に沿った階層構造で出力するようにした。
   ページの表示名はfrontmatterの`title`、無ければファイル名。`sitemap.json`にも
@@ -53,6 +55,11 @@
   置かれるようになり、既存テーマのCSSを参考にしながら独自CSSを書けるようにした。
   `.github/docs-pages.config`の`STYLE_FILE`のデフォルト出力値もこれに合わせて変更した
   (ビルド側の内部フォールバック値`.github/docs-pages.style.css`自体は変更していない)。
+
+### Fixed
+
+- `npx`経由(`node_modules/.bin/`のシンボリックリンク経由)で起動すると、CLIが何もせずに
+  終了していた不具合を修正。
 
 ### Security
 

@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync, chmodSync } from "node:fs";
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync, chmodSync, symlinkSync, existsSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -21,6 +23,9 @@ import {
   promptAnswers,
   reportFatalError,
   createAsker,
+  isUpdateMode,
+  runUpdate,
+  isDirectRunOf,
 } from "../bin/cli.mjs";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
@@ -453,6 +458,86 @@ test("実ファイルシステムで書き込み権限がない場合、非ゼ�
     assert.equal(exitCode, 1);
   } finally {
     chmodSync(dir, 0o700);
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// --- init --update / 直接実行判定 ---
+
+test("isUpdateMode: --update が含まれるときだけ true", () => {
+  assert.equal(isUpdateMode(["init", "--update"]), true);
+  assert.equal(isUpdateMode(["--update"]), true);
+  assert.equal(isUpdateMode(["init"]), false);
+  assert.equal(isUpdateMode([]), false);
+});
+
+test("runUpdate: ワークフローとビルドスクリプトは上書き・追加し、設定ファイルと独自CSSは変更しない", async () => {
+  const dir = makeTmpDir();
+  try {
+    const configPath = join(dir, ".github/docs-pages.config");
+    const customCssPath = join(dir, VENDOR_DIR, "styles/custom.css");
+    const ymlPath = join(dir, ".github/workflows/docs-pages.yml");
+    mkdirSync(join(dir, ".github/workflows"), { recursive: true });
+    mkdirSync(join(dir, VENDOR_DIR, "styles"), { recursive: true });
+    writeFileSync(configPath, "TRIGGER_BRANCH=docs\nFAVICON_FILE=assets/favicon.svg\n");
+    writeFileSync(customCssPath, "/* my css */");
+    writeFileSync(ymlPath, "old workflow");
+
+    const results = await runUpdate({ cwd: dir });
+
+    assert.equal(readFileSync(configPath, "utf8"), "TRIGGER_BRANCH=docs\nFAVICON_FILE=assets/favicon.svg\n");
+    assert.equal(readFileSync(customCssPath, "utf8"), "/* my css */");
+    assert.equal(readFileSync(ymlPath, "utf8"), buildDocsPagesYml());
+    assert.ok(existsSync(join(dir, VENDOR_DIR, "build-docs.mjs")));
+    assert.ok(existsSync(join(dir, VENDOR_DIR, "lib/site-tree.mjs")));
+    assert.ok(!results.some((r) => r.relPath.endsWith("docs-pages.config")));
+    assert.ok(!results.some((r) => r.relPath.endsWith("custom.css")));
+    assert.equal(results.find((r) => r.relPath === ".github/workflows/docs-pages.yml").status, "overwritten");
+    assert.ok(results.every((r) => r.status !== "skipped"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("runUpdate: 設定ファイルが無い(未init)リポジトリではエラーにして何も書き込まない", async () => {
+  const dir = makeTmpDir();
+  try {
+    await assert.rejects(() => runUpdate({ cwd: dir }), /docs-pages\.config が見つかりません/);
+    assert.ok(!existsSync(join(dir, ".github")));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("isDirectRunOf: シンボリックリンク経由(npxの.bin)でも直接実行と判定する", () => {
+  const dir = makeTmpDir();
+  try {
+    const cliPath = join(PACKAGE_ROOT, "bin/cli.mjs");
+    const linkPath = join(dir, "tsuzuri");
+    symlinkSync(cliPath, linkPath);
+    const moduleUrl = pathToFileURL(cliPath).href;
+    assert.equal(isDirectRunOf(moduleUrl, cliPath), true);
+    assert.equal(isDirectRunOf(moduleUrl, linkPath), true);
+    assert.equal(isDirectRunOf(moduleUrl, join(PACKAGE_ROOT, "package.json")), false);
+    assert.equal(isDirectRunOf(moduleUrl, undefined), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("シンボリックリンク経由で実行した init --update が実際にファイルを更新する", () => {
+  const dir = makeTmpDir();
+  try {
+    mkdirSync(join(dir, ".github"), { recursive: true });
+    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=main\n");
+    const linkPath = join(dir, "tsuzuri-bin");
+    symlinkSync(join(PACKAGE_ROOT, "bin/cli.mjs"), linkPath);
+
+    const result = spawnSync(process.execPath, [linkPath, "init", "--update"], { cwd: dir, encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    assert.ok(existsSync(join(dir, ".github/workflows/docs-pages.yml")));
+    assert.ok(existsSync(join(dir, VENDOR_DIR, "build-docs.mjs")));
+  } finally {
     rmSync(dir, { recursive: true, force: true });
   }
 });

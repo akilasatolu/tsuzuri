@@ -49,6 +49,7 @@ npm run lint
 - `styles/*.css` — テーマCSSの原本。
 - `test/**` — テスト。`README.md`・本ファイル・`CHANGELOG.md` — 開発者向けドキュメント。
 - `.github/workflows/ci.yml` — このリポジトリ自身の開発用CI(後述)。
+- `.github/workflows/sync-docs.yml` — CI成功後に`docs`ブランチへ`init --update`を反映するワークフロー(後述)。
 
 利用者向けドキュメント(`docs/**`)は`docs`ブランチにあります。
 
@@ -69,6 +70,7 @@ npm run lint
 | イベント | 起動するワークフロー | 内容 |
 |---|---|---|
 | `main`へのpush・PR | `ci.yml` | `npm run lint`と`npm test`のみ。権限は`contents: read`だけで、GitHub Pagesには一切触れない |
+| `main`へのpushでCIが成功 | `sync-docs.yml` | `docs`ブランチで`init --update`を実行し、変更があれば`docs`へpush(デプロイキーを使用) |
 | `docs`へのpush | `docs-pages.yml`(`docs`にのみ存在) | `docs`の利用者向けサイトをビルドし、本リポジトリのGitHub Pagesにデプロイ(自己ドッグフーディング) |
 
 開発中のブランチにpushしても、GitHub Pagesへのデプロイや外部リポジトリへの影響は
