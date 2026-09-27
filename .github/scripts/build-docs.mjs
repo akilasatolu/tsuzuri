@@ -99,12 +99,9 @@ function localBuildEnv(env, repoRoot) {
     merged = withConfigFileDefaults(env, parseConfigText(fs.readFileSync(configAbs, "utf-8")));
     console.log("Config file loaded: .github/docs-pages.config (環境変数で指定したキーは環境変数を優先)");
   }
+  // リポジトリ直下の styles/ は利用者のアプリの CSS の可能性があるため、init でコピーした方を優先する
   const vendoredStyles = ".github/tsuzuri/styles";
-  if (
-    merged.STYLE_DIR === undefined &&
-    !fs.existsSync(path.join(repoRoot, "styles", "base.css")) &&
-    fs.existsSync(path.join(repoRoot, vendoredStyles, "base.css"))
-  ) {
+  if (merged.STYLE_DIR === undefined && fs.existsSync(path.join(repoRoot, vendoredStyles, "base.css"))) {
     merged = { ...merged, STYLE_DIR: vendoredStyles };
   }
   return merged;
@@ -279,10 +276,18 @@ async function main() {
   // ---------- 6. 出力ディレクトリ準備 ----------
   // 出力先のパス(OUT_DIR からの相対パス)ごとに、何を書いたかを記録する。リンクされたファイルの
   // コピーが、生成したページやビルドが作るファイルを上書きしないようにするため。
-  //   ビルドが作るファイルは、書く前から予約しておく(コピーより後に書くものもあるため。
+  //   この設定でビルドが作るファイルは、書く前から予約しておく(コピーより後に書くものもあるため。
   //   404.html はコピーより前に必ず書くので、ここには含めない)
-  const GENERATED_FILES = [".nojekyll", "CNAME", "sitemap.xml", "robots.txt", "search-index.json", "tsuzuri-search.js", "sitemap.json"];
-  const writtenBy = new Map(GENERATED_FILES.map((f) => [f, "(Tsuzuri が生成するファイル)"]));
+  const generatedFiles = [
+    ".nojekyll",
+    config.customDomain && "CNAME",
+    config.navEnabled && "search-index.json",
+    config.navEnabled && "tsuzuri-search.js",
+    config.siteOrigin && "sitemap.xml",
+    config.siteOrigin && !config.basePath && "robots.txt",
+    config.sitemapJson && "sitemap.json",
+  ].filter(Boolean);
+  const writtenBy = new Map(generatedFiles.map((f) => [f, "(Tsuzuri が生成するファイル)"]));
   const collisions = [];
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(path.join(OUT_DIR, ".nojekyll"), "");

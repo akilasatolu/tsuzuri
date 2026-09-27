@@ -1373,4 +1373,42 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  test("手元のビルドでは、リポジトリ直下の styles/ より init でコピーしたテーマCSSを優先する", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "styles", "base.css"), "/* MY APP BASE */");
+      const vendored = path.join(dir, ".github", "tsuzuri", "styles");
+      fs.mkdirSync(vendored, { recursive: true });
+      fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(vendored, "base.css"));
+      fs.copyFileSync(path.join(REAL_STYLES_DIR, "wa.css"), path.join(vendored, "wa.css"));
+      const result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.doesNotMatch(readOut(dir, "index.html"), /MY APP BASE/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("この設定で作らないファイル名(robots.txt・search-index.json)へのリンクはコピーする", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "robots.txt"), "x");
+      fs.writeFileSync(path.join(dir, "search-index.json"), "{}");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[r](robots.txt) [s](search-index.json)\n");
+      let result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(readOut(dir, "robots.txt"), "x");
+      assert.equal(readOut(dir, "search-index.json"), "{}");
+      result = runBuild(dir, { STRICT_LINKS: "true", NAV_ENABLED: "true" });
+      assert.equal(result.status, 1, "ナビ有効なら search-index.json は生成するので重複");
+      assert.match(result.stderr, /出力先の重複: search-index\.json/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

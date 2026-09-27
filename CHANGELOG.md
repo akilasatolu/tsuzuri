@@ -20,7 +20,7 @@
 
 - 手元でビルドするとき(GitHub Actionsの外)は、`.github/docs-pages.config`の値を使うようにした。
   環境変数で指定したキーは環境変数が優先で、OSの`LANG`(`ja_JP.UTF-8`など)は無視する。
-  `STYLE_DIR`を省略すると、`init`でコピーした`.github/tsuzuri/styles`を使う。
+  `STYLE_DIR`を省略すると、`init`でコピーした`.github/tsuzuri/styles`があればそれを使う。
 - 生のHTMLの`<video src>`・`<audio src>`・`<source src>`のファイルもサイトにコピーするようにした。
 
 ### Fixed
