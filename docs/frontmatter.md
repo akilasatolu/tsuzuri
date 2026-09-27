@@ -36,11 +36,10 @@ noindex: false
 | 使われる場所 | `title`あり | `title`なし |
 |---|---|---|
 | `<title>`タグ・`og:title` | `title`の値 | 本文先頭の`# 見出し`(h1)。それも無ければファイルパス |
-| ナビゲーション(`NAV_ENABLED=true`時) | `title`の値 | ファイル名(例: `cli.md`) |
+| ナビゲーション・前後のページへのリンク(`NAV_ENABLED=true`時) | `title`の値 | 本文先頭の`# 見出し`(h1)。それも無ければファイル名(例: `cli.md`)。起点のページだけは、h1も無ければサイト名 |
 | `sitemap.json`のページ一覧(`SITEMAP_JSON=true`時) | `title`の値 | ファイルパス(例: `docs/cli.md`) |
 
-ナビゲーションと`sitemap.json`では本文の`# 見出し`は使われません。ナビに分かりやすい
-名前を表示したいページには、`title`を書いてください。
+`<title>`とナビで違う名前にしたい場合(ナビには短い名前を出したい等)は、`title`を書いてください。
 
 ### description
 ページの説明文です。`<meta name="description">`と`<meta property="og:description">`の

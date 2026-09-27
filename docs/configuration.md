@@ -41,8 +41,8 @@ push(マージ含む)があったときだけ、GitHub Pagesへのデプロイ�
 ### STYLE_FILE
 独自CSSファイルへのパスです。`npx github:akilasatolu/tsuzuri#v1 init`が生成する
 `.github/docs-pages.config`では`.github/tsuzuri/styles/custom.css`(組み込みテーマCSSと
-同じディレクトリ)が指定されます。このキー自体を省略した場合のビルド側の既定値は
-`.github/docs-pages.style.css`です。
+同じディレクトリ)が指定されます。このキーを省略した場合も同じ`.github/tsuzuri/styles/custom.css`に
+なります。ファイルが無ければ使わない(警告も出さない)ので、独自CSSが不要なら作らなくて構いません。
 3層カスケード(基礎CSS→THEME→STYLE_FILE)のうち最も優先度が高い、いわば
 「最後に読み込まれて最優先で反映される」層に当たります。ファイルが存在しない場合は
 黙って無視され(警告のみ)、既定のスタイルのままビルドされます。
@@ -90,9 +90,9 @@ docs                  … ディレクトリ(見出し)
     install.md
 ```
 
-- **ページの表示名**: frontmatterの`title`を使います。`title`が無いページは、
-  ファイル名(例: `getting-started.md`)がそのまま表示されます。本文の`# 見出し`は
-  使われないため、ナビに分かりやすい名前を出したいページには`title`を書いてください
+- **ページの表示名**: frontmatterの`title`を使います。`title`が無いページは本文の最初の`# 見出し`(h1)、
+  それも無ければファイル名(例: `getting-started.md`)が表示されます。ナビだけ別の名前にしたいページには
+  `title`を書いてください
   ([frontmatter.md](./frontmatter.md#title)参照)。
 - **並び順**: 起点のMarkdownからリンクをたどってページが見つかった順です。
   READMEなどでリンクを書いた順に並びます。ディレクトリは、その中で最初に

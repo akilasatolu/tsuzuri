@@ -119,8 +119,8 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 ```
 
 特定のバージョンに固定したい場合は、タグを指定します。`#v1`はv1系の最新版(互換性を保ったまま更新される)、
-`#v1.0.0`のように完全なバージョンを指定すると、そのリリースに固定されます。
+`#v1.2.0`のように完全なバージョンを指定すると、そのリリースに固定されます。
 
 ```sh
-npx github:akilasatolu/tsuzuri#v1 init --update
+npx github:akilasatolu/tsuzuri#v1.2.0 init --update
 ```

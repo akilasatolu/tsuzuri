@@ -68,6 +68,40 @@ OSS本体リポジトリ(tsuzuri)を参照することなく、このリポジ�
 `Settings > Pages`のページに表示されるURLから、生成されたサイトを確認できます
 (反映まで数分かかる場合があります)。
 
+## pushする前に手元で確認する(任意)
+
+pushしてGitHub Actionsを待たなくても、手元で同じビルドを実行して見た目やリンク切れを確認できます
+(Node.js 20以上が必要です)。リポジトリの直下で、次の順に実行します。
+
+1. ビルドに使う依存を`.github/tsuzuri/`にインストールします。コマンドは、生成された
+   `.github/workflows/docs-pages.yml`の「Install build dependency」にある`npm install ...`の行を
+   そのまま使ってください(`__VENDOR_DIR__`などは置き換え済みです)。例:
+
+   ```sh
+   npm install --prefix .github/tsuzuri marked@18.0.14 highlight.js@11.12.0 marked-footnote@1.4.0 --no-save
+   ```
+
+   インストール先の`.github/tsuzuri/node_modules/`は、`init`が生成する`.github/tsuzuri/.gitignore`に
+   よってコミットの対象外になっています。
+
+2. ビルドします。設定ファイルの値は自動では読まれないので、試したい値を環境変数で渡します。
+
+   ```sh
+   STYLE_DIR=.github/tsuzuri/styles LANG=ja NAV_ENABLED=true STRICT_LINKS=true node .github/tsuzuri/build-docs.mjs
+   ```
+
+   `LANG=ja`は必ず指定してください(指定しないと、パソコンの言語設定(`ja_JP.UTF-8`など)が使われ、
+   言語タグとして不正なので警告が出ます)。
+
+3. できあがった`_site/`を簡易サーバーで開きます(ファイルを直接開くとリンクが切れます)。
+
+   ```sh
+   npx serve _site
+   ```
+
+   `http://localhost:3000/`などで確認できます。確認が終わったら`_site/`は削除して構いません
+   (コミットしないでください)。
+
 ## 次のステップ
 
 - サイトがどのように組み立てられているかを知りたい場合は[仕組み(concepts.md)](./concepts.md)

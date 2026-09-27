@@ -51,12 +51,21 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --theme sumi
 
 知らないオプションを指定した場合はエラーになり、何も生成しません。
 
+## 実行する場所の確認
+
+`init`は、ワークフローを`.github/workflows/`に生成します。GitHubはリポジトリの直下にある
+`.github/workflows/`のワークフローしか動かさないため、リポジトリの直下以外(サブディレクトリなど)や
+gitリポジトリではない場所で実行すると、警告を表示します。対話形式では続けるかどうかを確認します。
+また、起点のMarkdown(`ROOT_MD`)がまだ無い場合も、作成を促す警告を表示します。
+
 ## 対話フロー
 
 実行すると、次の4つの質問に順番に答えます(すべてEnterキーだけで既定値を選べます)。
 
 1. **トリガーブランチ(`TRIGGER_BRANCH`)** `[main]`
-   - デプロイを実行するブランチ名を聞かれます。空欄のまま(未入力で)Enterを押すと`main`になります。
+   - デプロイを実行するブランチ名を聞かれます。空欄のまま(未入力で)Enterを押すと、かっこ内の既定値に
+     なります。既定値は、リポジトリの既定ブランチ(`origin`の`HEAD`)、分からなければ今のブランチ、
+     それも分からなければ`main`です。
 2. **起点となるMarkdownファイル(`ROOT_MD`)** `[README.md]`
    - サイトの入り口となるMarkdownファイルのパスです。未入力なら`README.md`になります。
 3. **テーマ(`THEME`)の選択**
@@ -79,6 +88,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --theme sumi
 | `.github/tsuzuri/build-docs.mjs` | 常に生成 | ビルド本体のスクリプト(OSS本体リポジトリの`.github/scripts/build-docs.mjs`と同一内容) |
 | `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/crawler/frontmatter/html-renderer/link-extractor/path-utils/site-tree/slugger/search/sitemap) |
 | `.github/tsuzuri/styles/*.css` | 常に生成 | 組み込み6テーマ(`base.css`+`wa`/`muji`/`sumi`/`ai`/`shu`)のCSS一式。frontmatterの`theme`キー([参照](./frontmatter.md#theme))で選択中以外のテーマを使う場合に備え、常に全テーマ分コピーされる |
+| `.github/tsuzuri/.gitignore` | 常に生成 | 手元でプレビューするときにインストールする依存(`node_modules/`)をコミットしないための設定 |
 | `.github/tsuzuri/styles/custom.css` | 質問4で「y」と答えた場合のみ | コメントのみの空の独自CSSひな形。組み込みテーマCSSと同じディレクトリに置かれる |
 
 `.github/tsuzuri/`配下のファイルは、`build-docs.mjs`実行時に読み込まれる「ビルドスクリプト本体
