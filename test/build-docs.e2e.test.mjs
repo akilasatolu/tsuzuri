@@ -904,7 +904,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
       const html = readOut(dir, "index.html");
-      assert.match(html, /<div class="markdown-alert markdown-alert-warning"><p class="markdown-alert-title">警告<\/p>\n<p>気をつけてください<\/p>/);
+      assert.match(html, /<div class="markdown-alert markdown-alert-warning"><p class="markdown-alert-title">警告<\/p>\n?<p>気をつけてください<\/p>/);
       assert.match(html, /<blockquote>\n<p>普通の引用<\/p>\n<\/blockquote>/);
       assert.match(html, /<sup><a id="fn-ref-1" href="#fn-1"[^>]*>1<\/a><\/sup>/);
       assert.match(html, /<li id="fn-1">\n<p>脚注の<em>内容<\/em>/);
@@ -1142,9 +1142,20 @@ describe("build-docs.mjs :: main (E2E)", () => {
       result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
       assert.equal(result.status, 1, "存在しないリンク先はSTRICT_LINKSで失敗する");
 
+      // GitHub Actions の外(手元)では git の origin と HEAD から GitHub の URL を作る
       fs.writeFileSync(path.join(dir, "README.md"), "# Root Page\n\n[MIT](LICENSE)\n");
       result = runBuild(dir, { STRICT_LINKS: "true" });
-      assert.equal(result.status, 1, "GitHub上のURLが分からない(Actions外)ときはリンク切れとして扱う");
+      assert.equal(result.status, 0, "GitHub上のURLが分からなくても、実在するファイルなのでリンク切れにはしない");
+      assert.match(result.stderr, /README\.md から LICENSE へのリンク/, "警告に参照元のページを出す");
+      const git = (...args) => spawnSync("git", args, { cwd: dir, encoding: "utf-8" });
+      git("init", "-q");
+      git("remote", "add", "origin", "git@github.com:owner/repo.git");
+      git("add", "-A");
+      git("-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "-m", "init");
+      const sha = git("rev-parse", "HEAD").stdout.trim();
+      result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.ok(readOut(dir, "index.html").includes(`<a href="https://github.com/owner/repo/blob/${sha}/LICENSE">MIT</a>`));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1191,11 +1202,14 @@ describe("build-docs.mjs :: main (E2E)", () => {
       copyRealBaseAndThemeStyles(dir);
       fs.writeFileSync(
         path.join(dir, "README.md"),
-        "# Root Page\n\n日本語の文を\n途中で改行します。\n続きの文です。\nThis is\nEnglish.\n"
+        "# Root Page\n\n日本語の文を\n途中で改行します。\n続きの文です。\nThis is\nEnglish.\n\nサーバー\nを起動します。ユーザー・\nグループと**強調**\nです。\n\n```\nコード\n内の改行\n```\n"
       );
       const result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
-      assert.match(readOut(dir, "index.html"), /<p>日本語の文を途中で改行します。続きの文です。\nThis is\nEnglish\.<\/p>/);
+      const html = readOut(dir, "index.html");
+      assert.match(html, /<p>日本語の文を途中で改行します。続きの文です。\nThis is\nEnglish\.<\/p>/);
+      assert.match(html, /<p>サーバーを起動します。ユーザー・グループと<strong>強調<\/strong>です。<\/p>/, "長音・中黒・強調の直後も");
+      assert.match(html, /<pre><code>コード\n内の改行\n<\/code><\/pre>/, "コードブロックの中は変えない");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1209,13 +1223,40 @@ describe("build-docs.mjs :: main (E2E)", () => {
       let result = runBuild(dir, { NAV_ENABLED: "true" });
       assert.equal(result.status, 0, result.stderr);
       let html = readOut(dir, "index.html");
-      assert.match(html, /<a class="tsuzuri-skip" href="#main">本文へスキップ<\/a>/);
-      assert.match(html, /<main id="main">/);
+      assert.match(html, /<a class="tsuzuri-skip" href="#tsuzuri-main">本文へスキップ<\/a>/);
+      assert.match(html, /<main id="tsuzuri-main">/);
       assert.match(html, /<nav aria-label="サイト内ページ">/);
       result = runBuild(dir, { NAV_ENABLED: "true", LANG: "en" });
       html = readOut(dir, "index.html");
       assert.match(html, /<nav aria-label="Site pages">/);
       assert.match(html, />Skip to content<\/a>/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("HTMLの<h1>で始まるREADMEもh1をタイトル・表示名にし、h1が無い起点ページはサイト名。見出しMainとスキップ先のidは重ならない", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        '<h1 align="center">\n  <img src="docs/img.png" width="48"><br>\n  MyProj\n</h1>\n\n## Main\n\n[A](docs/a.md)\n'
+      );
+      let result = runBuild(dir, { NAV_ENABLED: "true", SITE_NAME: "Site" });
+      assert.equal(result.status, 0, result.stderr);
+      let html = readOut(dir, "index.html");
+      assert.match(html, /<title>MyProj<\/title>/);
+      assert.match(html, /aria-current="page">MyProj<\/a>/);
+      assert.equal(html.match(/id="main"/g).length, 1, "見出しMainのidだけ");
+      assert.match(html, /<main id="tsuzuri-main">/);
+
+      fs.writeFileSync(path.join(dir, "README.md"), "本文だけ\n\n[A](docs/a.md)\n");
+      result = runBuild(dir, { NAV_ENABLED: "true", SITE_NAME: "Site" });
+      html = readOut(dir, "index.html");
+      assert.match(html, /<title>Site<\/title>/, "h1が無い起点ページはサイト名");
+      assert.match(readOut(dir, "docs", "a.html"), /<title>Page A<\/title>/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

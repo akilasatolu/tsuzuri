@@ -11,6 +11,7 @@ import {
   toSiteAbsHref,
   resolveInsideRepo,
   isLinkedFilePath,
+  webUrlFromGitRemote,
 } from "../.github/scripts/lib/path-utils.mjs";
 
 describe("normalizeBasePath", () => {
@@ -229,5 +230,16 @@ describe("toSiteAbsHref(ディレクトリへのリンク)", () => {
   test("末尾が / のディレクトリへのリンクは / を保つ", () => {
     assert.equal(toSiteAbsHref("README.md", "docs/", "/repo"), "/repo/docs/");
     assert.equal(toSiteAbsHref("README.md", "docs/#top", "/repo"), "/repo/docs/#top");
+  });
+});
+
+describe("webUrlFromGitRemote", () => {
+  test("ssh・https のリモートURLから、ブラウザで開くリポジトリのURLを作る", () => {
+    assert.equal(webUrlFromGitRemote("git@github.com:owner/repo.git"), "https://github.com/owner/repo");
+    assert.equal(webUrlFromGitRemote("ssh://git@github.com/owner/repo.git"), "https://github.com/owner/repo");
+    assert.equal(webUrlFromGitRemote("https://github.com/owner/repo.git"), "https://github.com/owner/repo");
+    assert.equal(webUrlFromGitRemote("https://token@github.com/owner/repo"), "https://github.com/owner/repo");
+    assert.equal(webUrlFromGitRemote(""), "");
+    assert.equal(webUrlFromGitRemote("/local/path/repo"), "");
   });
 });

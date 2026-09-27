@@ -165,3 +165,24 @@ export function resolveInsideRepo(repoRoot, relPath, realpath = fs.realpathSync)
   }
   return isInsideDir(realRoot, realAbs) ? abs : null;
 }
+
+/**
+ * git のリモートURL(https・ssh のどちらの形式でも)から、ブラウザで開くリポジトリのURLを作る。
+ * 例: "git@github.com:owner/repo.git" → "https://github.com/owner/repo"
+ * 解釈できなければ "" を返す。
+ * @param {string} remote
+ * @returns {string}
+ */
+export function webUrlFromGitRemote(remote) {
+  const url = (remote || "").trim();
+  const patterns = [
+    /^git@([^:/]+):(.+?)(?:\.git)?\/?$/,
+    /^ssh:\/\/(?:[^@/]+@)?([^/:]+)(?::\d+)?\/(.+?)(?:\.git)?\/?$/,
+    /^https?:\/\/(?:[^@/]+@)?([^/]+)\/(.+?)(?:\.git)?\/?$/,
+  ];
+  for (const re of patterns) {
+    const m = url.match(re);
+    if (m) return `https://${m[1]}/${m[2]}`;
+  }
+  return "";
+}

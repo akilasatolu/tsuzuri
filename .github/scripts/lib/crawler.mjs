@@ -77,9 +77,10 @@ export function crawlSite({
   const missing = [];
   const rejected = [];
   // サイトのページ・ファイルにはならないが、実在するリンク先(パスの末尾の "/" は除いた形がキー)
-  //   { kind: "dir" }            … README.md / index.md のあるディレクトリ(サイトの "dir/" を指す)
-  //   { kind: "repo", isDir }    … サイトに出さないファイル(LICENSE・ドットファイル等)や、
-  //                                README の無いディレクトリ。描画では GitHub 上の URL に置き換える
+  //   { kind: "dir", referencedFrom }         … README.md / index.md のあるディレクトリ(サイトの "dir/")
+  //   { kind: "repo", isDir, referencedFrom } … サイトに出さないファイル(LICENSE・ドットファイル等)や、
+  //                                             README の無いディレクトリ。描画では GitHub 上の URL にする
+  // referencedFrom は最初にリンクしていたページ(メッセージ用)
   const linkTargets = new Map();
   const existsInRepo = (repoRel) => {
     const abs = resolveInsideRepo(repoRoot, repoRel, realpath);
@@ -160,13 +161,13 @@ export function crawlSite({
         const indexRel = DIR_INDEX_NAMES.map((name) => `${bare}/${name}`).find((c) => existsInRepo(c));
         if (indexRel) {
           queue.push({ rel: indexRel, parent: rel });
-          linkTargets.set(bare, { kind: "dir" });
-        } else {
-          linkTargets.set(bare, { kind: "repo", isDir: true });
+          if (!linkTargets.has(bare)) linkTargets.set(bare, { kind: "dir", referencedFrom: rel });
+        } else if (!linkTargets.has(bare)) {
+          linkTargets.set(bare, { kind: "repo", isDir: true, referencedFrom: rel });
         }
-      } else {
+      } else if (!linkTargets.has(bare)) {
         // サイトには出さないファイル(LICENSE・ドットファイル等)は、GitHub 上のファイルへのリンクにする
-        linkTargets.set(bare, { kind: "repo", isDir: false });
+        linkTargets.set(bare, { kind: "repo", isDir: false, referencedFrom: rel });
       }
     }
   }

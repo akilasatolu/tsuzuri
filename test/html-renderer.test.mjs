@@ -226,7 +226,7 @@ describe("pageTemplate", () => {
       body: "b",
       navHtml: "<nav>NAV</nav>",
     });
-    assert.match(html, /<body>\n<a class="tsuzuri-skip" href="#main">本文へスキップ<\/a>\n<nav>NAV<\/nav>\n<main id="main">/);
+    assert.match(html, /<body>\n<a class="tsuzuri-skip" href="#tsuzuri-main">本文へスキップ<\/a>\n<nav>NAV<\/nav>\n<main id="tsuzuri-main">/);
   });
 
   test("3層カスケードの追記順序: base→theme→customの順で出現する", () => {

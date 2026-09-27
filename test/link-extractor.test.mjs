@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   extractRawHtmlLinks,
   extractLinks,
+  firstHeadingText,
 } from "../.github/scripts/lib/link-extractor.mjs";
 
 describe("extractRawHtmlLinks", () => {
@@ -75,4 +76,11 @@ describe("extractLinks(描画と同じ marked の解釈)", () => {
 test("extractLinks: 脚注のある本文を続けて処理しても例外にならない", () => {
   assert.deepEqual(extractLinks("x[^1]\n\n[^1]: [a](a.md)\n"), ["a.md"]);
   assert.deepEqual(extractLinks("y[^1]\n\n[^1]: [b](b.md)\n"), ["b.md"]);
+});
+
+test("firstHeadingText: # 見出し・setext・生のHTMLの<h1>から表示テキストを取り、コード内の#は無視する", () => {
+  assert.equal(firstHeadingText("```sh\n# comment\n```\n\n# Title **bold** `code`\n"), "Title bold code");
+  assert.equal(firstHeadingText("Setext\n===\n"), "Setext");
+  assert.equal(firstHeadingText('<h1 align="center">\n  <img src="a.png"> My &amp; Proj\n</h1>\n'), "My & Proj");
+  assert.equal(firstHeadingText("## h2 only\n"), "");
 });

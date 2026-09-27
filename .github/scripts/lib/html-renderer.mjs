@@ -336,8 +336,9 @@ export function pageTemplate({
 }) {
   // ナビがあるページだけ、先頭に「本文へスキップ」リンクを置き、<main> にその飛び先の id を付ける
   // (ナビが無いページの出力は従来と同じ)
-  const skipLink = navHtml ? `<a class="tsuzuri-skip" href="#main">${escapeHtml(skipLabel)}</a>\n` : "";
-  const mainTag = navHtml ? `<main id="main">` : "<main>";
+  // (id は本文の見出しの id(例: "## Main" → "main")と重ならない名前にする)
+  const skipLink = navHtml ? `<a class="tsuzuri-skip" href="#tsuzuri-main">${escapeHtml(skipLabel)}</a>\n` : "";
+  const mainTag = navHtml ? `<main id="tsuzuri-main">` : "<main>";
   return `<!DOCTYPE html>
 <html lang="${escapeHtml(lang)}">
 <head>

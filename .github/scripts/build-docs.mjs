@@ -51,6 +51,7 @@ import {
   isExternal,
   isImagePath,
   isLinkedFilePath,
+  webUrlFromGitRemote,
 } from "./lib/path-utils.mjs";
 import { extractLinks } from "./lib/link-extractor.mjs";
 import {
@@ -70,6 +71,19 @@ import { buildSiteTree, flattenPages } from "./lib/site-tree.mjs";
 import { createSlugger, htmlToText } from "./lib/slugger.mjs";
 import { buildSearchIndex, SEARCH_SCRIPT } from "./lib/search.mjs";
 import { parseFrontmatter } from "./lib/frontmatter.mjs";
+
+// 日本語の文を途中で改行したとき、表示に余計な空白が入らないよう、前後がどちらも全角文字
+// (漢字・かな・長音「ー」や中黒「・」を含む記号・全角文字)の改行を取り除く
+// (markdown-it-cjk-breaks と同じ考え方)。描画後のHTMLにかけるので、**強調**やリンクの直後の
+// 改行(改行の前後にタグがはさまる)も取り除ける。<pre>(コードブロック)の中は変えない。
+const CJK_CHARS = "\\p{scx=Han}\\p{scx=Hiragana}\\p{scx=Katakana}\\u3000-\\u303f\\uff00-\\uffef";
+const CJK_BREAK = new RegExp(`([${CJK_CHARS}])((?:<[^>]+>)*)\\n((?:<[^>]+>)*)(?=[${CJK_CHARS}])`, "gu");
+export function removeCjkLineBreaks(html) {
+  return html
+    .split(/(<pre[\s\S]*?<\/pre>)/)
+    .map((part) => (part.startsWith("<pre") ? part : part.replace(CJK_BREAK, "$1$2$3")))
+    .join("");
+}
 
 async function main() {
   const REPO_ROOT = process.cwd();
@@ -255,17 +269,6 @@ async function main() {
   // marked はこのビルド専用のインスタンスを使う(脚注の拡張機能を組み込むため)。
   const isJaLang = config.lang.toLowerCase().startsWith("ja");
   const md = new Marked({ gfm: true, breaks: false });
-  // 日本語の文を途中で改行したとき、表示に余計な空白が入らないよう、前後がどちらも
-  // 全角文字(漢字・かな・全角の記号)の改行を取り除く(markdown-it-cjk-breaks と同じ考え方)
-  const CJK = "\\p{sc=Han}\\p{sc=Hiragana}\\p{sc=Katakana}\\u3000-\\u303f\\uff00-\\uffef";
-  const cjkBreak = new RegExp(`([${CJK}])\\n([${CJK}])`, "gu");
-  md.use({
-    walkTokens(token) {
-      if (token.type === "text" && !token.tokens && token.text.includes("\n")) {
-        token.text = token.text.replace(cjkBreak, "$1$2");
-      }
-    },
-  });
   md.use(
     markedFootnote({
       prefixId: "fn-",
@@ -368,21 +371,37 @@ async function main() {
   const encodePath = (p) => p.split("/").map(encodeURIComponent).join("/");
 
   // サイトに出さないが実在するリンク先(LICENSE・ドットファイル・README の無いディレクトリ)は、
-  // GitHub 上のファイル・一覧へのリンクにする。GitHub Actions が自動で設定する環境変数を使い、
-  // 分からない(手元でのビルド等)ときは null(リンク切れとして扱う)。
-  const repoBaseUrl =
-    process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_SHA
-      ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}`
-      : "";
+  // GitHub 上のファイル・一覧へのリンクにする。リポジトリのURLとコミットは、
+  //   1. GitHub Actions が自動で設定する環境変数(GITHUB_SERVER_URL・GITHUB_REPOSITORY・GITHUB_SHA)
+  //   2. 手元のビルドでは、git の origin のURLと HEAD のコミット
+  // の順に求める。どちらも分からなければリンクは書き換えず、警告だけ出す(リンク先は実在するので
+  // リンク切れ・STRICT_LINKS の対象にはしない)。
+  const gitOut = (args) => {
+    try {
+      return execFileSync("git", args, { cwd: REPO_ROOT, encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    } catch {
+      return "";
+    }
+  };
+  const hasRepoLinks = [...linkTargets.values()].some((t) => t.kind === "repo");
+  let repoBaseUrl = "";
+  let repoRef = "";
+  if (process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_SHA) {
+    repoBaseUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}`;
+    repoRef = process.env.GITHUB_SHA;
+  } else if (hasRepoLinks) {
+    repoBaseUrl = webUrlFromGitRemote(gitOut(["remote", "get-url", "origin"]));
+    repoRef = repoBaseUrl ? gitOut(["rev-parse", "HEAD"]) : "";
+  }
   function repoUrlOf(repoRel, isDir) {
-    if (!repoBaseUrl) return null;
-    return `${repoBaseUrl}/${isDir ? "tree" : "blob"}/${process.env.GITHUB_SHA}/${encodePath(repoRel)}`;
+    if (!repoBaseUrl || !repoRef) return null;
+    return `${repoBaseUrl}/${isDir ? "tree" : "blob"}/${repoRef}/${encodePath(repoRel)}`;
   }
   for (const [repoRel, target] of linkTargets) {
     if (target.kind === "repo" && !repoUrlOf(repoRel, target.isDir)) {
-      missing.push({ rel: repoRel, referencedFrom: null });
       console.warn(
-        `[build-docs] ${repoRel} はサイトに含めないファイル・ディレクトリです。GitHub上のURLが分からない(GitHub Actions 以外でのビルド)ため、リンク切れとして扱います。`
+        `[build-docs] ${target.referencedFrom} から ${repoRel} へのリンクは、サイトに含めないファイル・ディレクトリを指しています。` +
+          `GitHub上のURLが分からない(git の origin が無い等)ため、リンクを書き換えずに出力します。`
       );
     }
   }
@@ -479,10 +498,16 @@ async function main() {
       return `<h${depth} id="${escapeHtml(id)}">${inner}${anchor}</h${depth}>\n`;
     };
 
-    let bodyHtml = md.parse(content, { renderer });
-    // タイトル: frontmatter の title > 最初の h1 の表示テキスト > ファイルパス。
-    // (h1 は描画時の見出しから取るので、コードブロック内の "# コメント" を誤って拾わない)
-    const title = (typeof meta.title === "string" && meta.title) || firstH1 || rel;
+    let bodyHtml = removeCjkLineBreaks(md.parse(content, { renderer }));
+    // タイトル: frontmatter の title > 最初の h1 の表示テキスト > (起点のページなら)サイト名 > ファイルパス。
+    // ナビの表示名と同じ優先順。h1 は描画した見出し、無ければ crawler が集めた h1(生のHTMLの <h1> を含む)。
+    // (コードブロック内の "# コメント" は見出しにならないので、誤って拾わない)
+    const title =
+      (typeof meta.title === "string" && meta.title) ||
+      firstH1 ||
+      visitedMd.get(rel)?.h1 ||
+      (rel === config.rootMd && config.siteName) ||
+      rel;
     if (search && visitedMd.has(rel)) {
       searchPages.push({ title, url: `${config.basePath}/${encodePath(urlPathOf(rel))}`, html: bodyHtml });
     }
