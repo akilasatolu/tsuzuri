@@ -16,6 +16,12 @@
 
 ## [Unreleased]
 
+### Security
+
+- 開発用の依存の更新(Dependabot)を、公開から30日たった安定版だけにした(`cooldown`)。
+- 依存のインストールスクリプトを実行しないようにし(`.npmrc`・CIの`npm ci --ignore-scripts`)、
+  CIで`npm audit signatures`による署名の確認を行うようにした。
+
 ## [1.6.0] - 2026-09-28
 
 ### Added

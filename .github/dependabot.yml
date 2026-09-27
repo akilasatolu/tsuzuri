@@ -1,10 +1,23 @@
 version: 2
+
+# 依存の更新PRは、公開から30日たった版だけを対象にする(cooldown)。
+# npm では、乗っ取られたアカウントから不正なコードを仕込んだ版が公開され、数時間〜数日後に
+# 取り下げられる事件が起きている。公開直後の版をすぐに取り込まないことで、その危険を避ける。
+# (脆弱性を直すセキュリティ更新は cooldown の対象外で、すぐにPRが作られる)
+#
+# 安定版だけを対象にする: Dependabot は、今使っている版が安定版なら、alpha・beta・rc などの
+# プレリリース版へは更新しない。このリポジトリの依存はすべて安定版に固定しているので、
+# プレリリース版のPRは作られない(プレリリース版を依存に書かないこと)。
+#
+# PRは自動マージしない。マージの前に、変更内容とリリースノートを確認する(開発者向け README 参照)。
 updates:
   # OSS開発用の package.json(リポジトリルート、配布対象外)の依存関係を監視する。
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 30
 
   # 生成ページが CDN から読み込む mermaid のバージョン(.github/scripts/lib/html-renderer.mjs の
   # MERMAID_VERSION)。deps/mermaid/package.json に同じバージョンを書いて監視させる。
@@ -13,6 +26,8 @@ updates:
     directory: "/deps/mermaid"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 30
 
   # .github/workflows/*.yml 内の actions/* をコミットSHA固定にしているため、
   # SHAの更新(タグへの追従)はDependabotに任せる運用とする。
@@ -24,3 +39,5 @@ updates:
       - "/templates"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 30

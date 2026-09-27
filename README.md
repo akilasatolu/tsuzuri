@@ -189,6 +189,25 @@ test/                       単体テスト・E2Eテスト(test/fixtures/ にフ
 
 Dependabotが週1回、`package.json`の依存パッケージと`ci.yml`のGitHub Actionsの更新PRを作ります。
 
+### 汚染されたパッケージへの対策
+
+npmでは、乗っ取られたアカウントから不正なコードを仕込んだ版が公開され、インストールしただけで
+感染する事件が起きています。ここで入れた版は、`init`を通して利用者のワークフローにも配られるため、
+次のようにしています。
+
+- **公開から30日たった安定版だけを取り込む**: `.github/dependabot.yml`の`cooldown`で、公開から30日
+  たっていない版の更新PRは作りません(不正な版は、たいてい数日以内に見つかって取り下げられます)。
+  alpha・beta・rcなどのプレリリース版の更新PRも作られません(依存にプレリリース版を書かないでください)。
+  脆弱性を直すセキュリティ更新だけは、30日を待たずにPRが作られます。
+- **インストールスクリプトを実行しない**: `.npmrc`の`ignore-scripts=true`と、CIの`npm ci --ignore-scripts`で、
+  依存のpreinstall・postinstallなどを動かしません。利用者側のワークフローと`preview`も
+  `--ignore-scripts`でインストールします。
+- **署名を確認する**: CIの`npm audit signatures`で、依存がnpmの正規の署名付きで配布されたものかを確認します。
+- **自動マージしない**: DependabotのPRは自動マージを有効にしないでください。マージの前に次を確認します。
+  - 変更された版と、その版のリリースノート・変更履歴(GitHubのリリースページなど)
+  - `package-lock.json`の差分に、見覚えのない新しい依存が増えていないか
+  - CI(署名の確認を含む)がすべて通っているか
+
 `marked`・`highlight.js`・`marked-footnote`は、利用者側のワークフローでも使うビルド用の依存です
 (`bin/cli.mjs`の`BUILD_DEPENDENCIES`)。`init`が生成する
 ワークフローは`package.json`の`devDependencies`にあるこれらの版をそのまま埋め込むため、更新PRを

@@ -33,7 +33,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-      - run: npm ci
+      # 依存のインストールスクリプトは実行しない(.npmrc でも同じ設定にしている)
+      - run: npm ci --ignore-scripts
+      # 依存がすべて npm の正規の署名付きで配布されたものか確認する(改ざん・なりすましの検出)
+      - name: Verify registry signatures
+        if: matrix.node-version == 24
+        run: npm audit signatures
       - run: npm run lint
       - run: npm test
 
