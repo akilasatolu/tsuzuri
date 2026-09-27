@@ -10,10 +10,9 @@ on:
     branches: ["**"]
   workflow_dispatch:
 
+# 既定は読み取りのみ。Pagesへの公開に必要な権限は deploy ジョブにだけ付与する。
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: "pages"
@@ -35,15 +34,24 @@ jobs:
             exit 1
           fi
 
-          while IFS='=' read -r key value; do
+          # 前後の空白(CRLFのCRを含む)を除去する(xargsは値に ' や " が含まれると失敗するため使わない)
+          trim() { printf '%s' "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'; }
+
+          while IFS='=' read -r key value || [ -n "$key" ]; do
+            key="$(trim "$key")"
+            value="$(trim "$value")"
             # コメント行・空行をスキップ
             case "$key" in
               ''|'#'*) continue ;;
             esac
-            key="$(echo "$key" | xargs)"
-            value="$(echo "$value" | xargs)"
-            [ -z "$key" ] && continue
-            echo "${key}=${value}" >> "$GITHUB_ENV"
+            # 既知の設定キーだけを環境変数として取り込む。それ以外(NODE_OPTIONS等)を
+            # 設定ファイル経由で注入できないようにする。
+            case "$key" in
+              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANG|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME)
+                echo "${key}=${value}" >> "$GITHUB_ENV" ;;
+              *)
+                echo "::warning::未知の設定キー ${key} を無視します" ;;
+            esac
           done < "$CONFIG_FILE"
 
       - name: Check trigger branch
@@ -94,7 +102,7 @@ jobs:
 
       - name: Install build dependency
         if: steps.trigger.outputs.should_deploy != 'false'
-        run: npm install marked@12.0.2 --no-save --no-audit --no-fund
+        run: npm install marked@12.0.2 --no-save --no-audit --no-fund --ignore-scripts
 
       - name: Build
         if: steps.trigger.outputs.should_deploy != 'false'
@@ -124,6 +132,9 @@ jobs:
     needs: build
     if: needs.build.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

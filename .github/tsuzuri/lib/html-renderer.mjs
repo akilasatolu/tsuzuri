@@ -9,7 +9,8 @@
  * 仕様変更・新規追加したもの:
  *   renderTitle       — metaTitle(frontmatterの title)を最優先する第3引数を追加。
  *   renderNav         — 新規。navEnabled=true のときのみ呼び出し側が呼ぶ。
- *   renderMetaTags    — 新規。SEO用メタタグ(description/OGP/canonical/robots/favicon)を生成する。
+ *                        site-tree.mjs のサイトツリー(ディレクトリ階層)をそのまま <ul> の入れ子にする。
+ *   renderMetaTags    — 新規。SEO用メタタグ(description/OGP/canonical/robots/favicon/og:site_name)を生成する。
  *   pageTemplate      — シグネチャを `{ ..., customCss }` から
  *                        `{ ..., baseCss, themeCss, customCss, navHtml, metaTagsHtml }` に変更。
  *                        v1でハードコードされていた配色ブロックは削除し、
@@ -51,38 +52,34 @@ export function renderTitle(content, fallback, metaTitle) {
 
 /**
  * サイト内ナビゲーション(<nav>)のHTMLを構築する。
- * `hierarchy` をルートから深さ優先で辿り、各ページを <li><a> として出力する。
+ * site-tree.mjs の `buildSiteTree` が返すディレクトリ階層をそのまま <ul> の入れ子にする。
+ * ページは <li><a>(表示名は frontmatter の title、無ければファイル名)、
+ * ディレクトリは <li><span>ディレクトリ名</span><ul>…</ul></li> として出力する。
  * `navEnabled=false` の場合は呼び出し側がそもそもこの関数を呼ばず navHtml="" とする
  * (=既存出力と完全一致を保証する)ため、本関数自体はnavEnabledを意識しない。
  *
- * @param {Record<string, { parent: string|null, children: string[] }>} hierarchy
- * @param {Iterable<string>} visitedMdKeys - 実際にレンダリング対象となったページのrel一覧
+ * @param {import("./site-tree.mjs").DirNode} tree - buildSiteTree の戻り値(ルートディレクトリ)
  * @param {string} currentRel - 現在描画中のページのrel(aria-current付与判定用)
  * @param {string} basePath
  * @param {string} [siteName]
  * @returns {string}
  */
-export function renderNav(hierarchy, visitedMdKeys, currentRel, basePath, siteName) {
-  const visited = new Set(visitedMdKeys);
-
-  const roots = Object.keys(hierarchy).filter(
-    (rel) => visited.has(rel) && (hierarchy[rel]?.parent === null || hierarchy[rel]?.parent === undefined)
-  );
-
-  function renderItem(rel) {
-    const href = toSiteAbsHref("", rel, basePath);
-    const currentAttr = rel === currentRel ? ' aria-current="page"' : "";
-    const children = (hierarchy[rel]?.children || []).filter((c) => visited.has(c));
-    const childList = children.length ? renderList(children) : "";
-    return `<li><a href="${href}"${currentAttr}>${escapeHtml(rel)}</a>${childList}</li>`;
+export function renderNav(tree, currentRel, basePath, siteName) {
+  function renderNode(node) {
+    if (node.type === "dir") {
+      return `<li><span>${escapeHtml(node.name)}</span>${renderList(node.children)}</li>`;
+    }
+    const href = toSiteAbsHref("", node.rel, basePath);
+    const currentAttr = node.rel === currentRel ? ' aria-current="page"' : "";
+    return `<li><a href="${href}"${currentAttr}>${escapeHtml(node.title)}</a></li>`;
   }
 
-  function renderList(rels) {
-    return `<ul>${rels.map(renderItem).join("")}</ul>`;
+  function renderList(nodes) {
+    return `<ul>${nodes.map(renderNode).join("")}</ul>`;
   }
 
   const heading = siteName ? `<p>${escapeHtml(siteName)}</p>` : "";
-  return `<nav aria-label="サイト内ページ">${heading}${renderList(roots)}</nav>`;
+  return `<nav aria-label="サイト内ページ">${heading}${renderList(tree.children)}</nav>`;
 }
 
 /**
@@ -96,6 +93,7 @@ export function renderNav(hierarchy, visitedMdKeys, currentRel, basePath, siteNa
  *   canonicalUrl?: string,
  *   noindex?: boolean,
  *   faviconHref?: string,
+ *   siteName?: string,
  * }} opts
  * @returns {string}
  */
@@ -107,6 +105,7 @@ export function renderMetaTags({
   canonicalUrl,
   noindex,
   faviconHref,
+  siteName,
 } = {}) {
   const tags = [];
 
@@ -117,6 +116,10 @@ export function renderMetaTags({
 
   tags.push(`<meta property="og:title" content="${escapeHtml(ogTitle)}">`);
   tags.push(`<meta property="og:type" content="${escapeHtml(ogType)}">`);
+
+  if (siteName) {
+    tags.push(`<meta property="og:site_name" content="${escapeHtml(siteName)}">`);
+  }
 
   if (ogImage) {
     tags.push(`<meta property="og:image" content="${escapeHtml(ogImage)}">`);
@@ -180,7 +183,7 @@ export function pageTemplate({
   metaTagsHtml = "",
 }) {
   return `<!DOCTYPE html>
-<html lang="${lang}">
+<html lang="${escapeHtml(lang)}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">

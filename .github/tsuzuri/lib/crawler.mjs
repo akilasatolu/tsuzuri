@@ -24,15 +24,14 @@
  */
 
 import fs from "node:fs";
-import path from "node:path";
-import { resolveRepoRel, isMarkdownPath, isImagePath } from "./path-utils.mjs";
+import { resolveRepoRel, resolveInsideRepo, isMarkdownPath, isImagePath } from "./path-utils.mjs";
 import { stripCodeSpans, extractMarkdownSyntaxLinks, extractRawHtmlLinks } from "./link-extractor.mjs";
 import { parseFrontmatter } from "./frontmatter.mjs";
 
 /**
  * @typedef {{ content: string, meta: object }} VisitedMdEntry
  * @typedef {{ rel: string, referencedFrom: string|null }} MissingEntry
- * @typedef {{ rel: string, referencedFrom: string, reason: "path-traversal"|"decode-error" }} RejectedEntry
+ * @typedef {{ rel: string, referencedFrom: string|null, reason: "path-traversal"|"decode-error"|"outside-repo" }} RejectedEntry
  */
 
 /**
@@ -41,6 +40,7 @@ import { parseFrontmatter } from "./frontmatter.mjs";
  * @param {string} options.rootRel - 起点となる md ファイルのリポジトリルートからの相対パス(posix)
  * @param {(path: string, encoding: string) => string} [options.readFile] - DI: ファイル読み込み(既定 fs.readFileSync)
  * @param {(path: string) => boolean} [options.exists] - DI: ファイル存在確認(既定 fs.existsSync)
+ * @param {(path: string) => string} [options.realpath] - DI: シンボリックリンク解決(既定 fs.realpathSync)
  * @returns {{
  *   visitedMd: Map<string, VisitedMdEntry>,
  *   imageSet: Set<string>,
@@ -54,6 +54,7 @@ export function crawlSite({
   rootRel,
   readFile = fs.readFileSync,
   exists = fs.existsSync,
+  realpath = fs.realpathSync,
 }) {
   const visitedMd = new Map(); // relPath(posix) -> { content, meta }
   const imageSet = new Set(); // relPath(posix)
@@ -66,7 +67,13 @@ export function crawlSite({
     const { rel, parent } = queue.shift();
     if (visitedMd.has(rel)) continue;
 
-    const abs = path.join(repoRoot, rel);
+    // シンボリックリンク経由でリポジトリ外のファイルを読み込んで公開してしまわないよう、
+    // 実体がリポジトリ内にあるものだけを対象にする。
+    const abs = resolveInsideRepo(repoRoot, rel, realpath);
+    if (!abs) {
+      rejected.push({ rel, referencedFrom: parent, reason: "outside-repo" });
+      continue;
+    }
     if (!exists(abs)) {
       missing.push({ rel, referencedFrom: parent });
       continue;

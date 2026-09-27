@@ -40,7 +40,13 @@ const LINE_PATTERN = /^(\w+):\s*(.*)$/;
  * @returns {{ meta: object, body: string }}
  */
 export function parseFrontmatter(rawContent) {
-  if (typeof rawContent !== "string" || !rawContent.startsWith(`${FRONTMATTER_DELIMITER}\n`)) {
+  if (typeof rawContent !== "string") {
+    return { meta: {}, body: rawContent };
+  }
+  // Windowsで作成・編集されたファイル(改行コードCRLF、先頭BOM付き)でも
+  // frontmatterを認識できるよう、先頭のBOMを除去し改行コードをLFに正規化する。
+  rawContent = rawContent.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+  if (!rawContent.startsWith(`${FRONTMATTER_DELIMITER}\n`)) {
     return { meta: {}, body: rawContent };
   }
 

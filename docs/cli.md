@@ -45,7 +45,7 @@ npx github:akilasatolu/tsuzuri init
 | `.github/workflows/docs-pages.yml` | 常に生成 | ビルド・デプロイの手順を直接持つ、自己完結型のワークフロー(以前のように`build.yml`を`uses:`で呼び出すことはしない) |
 | `.github/docs-pages.config` | 常に生成 | `TRIGGER_BRANCH`/`ROOT_MD`/`THEME`は回答内容を反映し、それ以外のキーは既定値で出力される設定ファイル |
 | `.github/tsuzuri/build-docs.mjs` | 常に生成 | ビルド本体のスクリプト(OSS本体リポジトリの`.github/scripts/build-docs.mjs`と同一内容) |
-| `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/crawler/frontmatter/html-renderer/link-extractor/path-utils/sitemap) |
+| `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/crawler/frontmatter/html-renderer/link-extractor/path-utils/site-tree/sitemap) |
 | `.github/tsuzuri/styles/*.css` | 常に生成 | 組み込み6テーマ(`base.css`+`wa`/`muji`/`sumi`/`ai`/`shu`)のCSS一式。frontmatterの`theme`キー([参照](./frontmatter.md#theme))で選択中以外のテーマを使う場合に備え、常に全テーマ分コピーされる |
 | `.github/tsuzuri/styles/custom.css` | 質問4で「y」と答えた場合のみ | コメントのみの空の独自CSSひな形。組み込みテーマCSSと同じディレクトリに置かれる |
 
