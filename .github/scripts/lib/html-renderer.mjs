@@ -18,7 +18,7 @@
  *   preprocessRawHtmlPaths — basePath をモジュール内グローバル定数ではなく明示引数化。
  */
 
-import { isExternal, toSiteAbsHref } from "./path-utils.mjs";
+import { isExternal, toSiteAbsHref, pageHref } from "./path-utils.mjs";
 
 /**
  * @param {string} s
@@ -67,7 +67,7 @@ export function renderNav(
     if (node.type === "dir") {
       return `<li><span>${escapeHtml(node.name)}</span>${renderList(node.children)}</li>`;
     }
-    const href = toSiteAbsHref("", node.rel, basePath);
+    const href = pageHref(node.rel, basePath);
     const currentAttr = node.rel === currentRel ? ' aria-current="page"' : "";
     return `<li><a href="${escapeHtml(href)}"${currentAttr}>${escapeHtml(node.title)}</a></li>`;
   }
@@ -107,7 +107,7 @@ export function renderPager(
 ) {
   if (!prev && !next) return "";
   const link = (page, rel, label) =>
-    `<a class="tsuzuri-pager-${rel}" rel="${rel}" href="${escapeHtml(toSiteAbsHref("", page.rel, basePath))}">` +
+    `<a class="tsuzuri-pager-${rel}" rel="${rel}" href="${escapeHtml(pageHref(page.rel, basePath))}">` +
     `<span>${escapeHtml(label)}</span>${escapeHtml(page.title)}</a>`;
   return (
     `<nav class="tsuzuri-pager" aria-label="${escapeHtml(labels.nav)}">` +
@@ -282,7 +282,7 @@ export function defaultNotFoundMarkdown(lang = "ja") {
   ].join("\n");
 }
 
-// Markdown 記法ではなく生の HTML で書かれた <img src="..">/<a href=".."> は
+// Markdown 記法ではなく生の HTML で書かれた <a href>・<img src>・<video src> などは
 // marked のレンダラーを経由しないため、Markdown ソースの時点で
 // 絶対パスに書き換えておく
 //
@@ -296,7 +296,7 @@ export function preprocessRawHtmlPaths(
   hrefFor = (from, href) => toSiteAbsHref(from, href, basePath),
 ) {
   return content.replace(
-    /(<(?:img|a)\b[^>]*?\s(?:src|href)=["'])([^"']+)(["'])/gi,
+    /(<(?:a|img|video|audio|source)\b[^>]*?\s(?:src|href)=["'])([^"']+)(["'])/gi,
     (whole, pre, href, post) => {
       if (isExternal(href) || href.startsWith("#")) return whole;
       return pre + hrefFor(fromRel, href) + post;

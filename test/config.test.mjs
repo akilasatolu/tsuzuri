@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { loadConfig } from "../.github/scripts/lib/config.mjs";
+import fs from "node:fs";
+import { loadConfig, CONFIG_FILE_KEYS, parseConfigText, withConfigFileDefaults } from "../.github/scripts/lib/config.mjs";
 
 // console.warn を一時的に黙らせつつ呼び出し回数/内容を検査するヘルパー
 function withCapturedWarn(fn) {
@@ -252,4 +253,27 @@ test("ROOT_MD: ./ や \\ を含む書き方も、リンクから解決したパ�
   assert.equal(loadConfig({ ROOT_MD: "docs\\index.md" }).rootMd, "docs/index.md");
   assert.equal(loadConfig({ ROOT_MD: "./docs/../README.md" }).rootMd, "README.md");
   assert.equal(loadConfig({ ROOT_MD: "/README.md" }).rootMd, "README.md");
+});
+
+test("parseConfigText: コメント・空行・未知のキーを読み飛ばし、値の前後の空白を取る", () => {
+  const values = parseConfigText("\uFEFF# comment\r\nTHEME = sumi \r\n\nUNKNOWN=x\nSITE_NAME=A=B\nNAV_ENABLED=true");
+  assert.deepEqual(values, { THEME: "sumi", SITE_NAME: "A=B", NAV_ENABLED: "true" });
+});
+
+test("withConfigFileDefaults: 環境変数を優先し、OSのLANG(言語タグでない)は設定ファイルの値にする", () => {
+  const file = { THEME: "sumi", LANG: "en", NAV_ENABLED: "true" };
+  const env = withConfigFileDefaults({ THEME: "ai", LANG: "ja_JP.UTF-8" }, file);
+  assert.equal(env.THEME, "ai");
+  assert.equal(env.LANG, "en");
+  assert.equal(env.NAV_ENABLED, "true");
+  assert.equal(withConfigFileDefaults({ LANG: "ja" }, file).LANG, "ja", "言語タグなら環境変数を優先");
+  const actions = { GITHUB_ACTIONS: "true" };
+  assert.equal(withConfigFileDefaults(actions, file), actions, "GitHub Actions では何もしない");
+});
+
+test("CONFIG_FILE_KEYS はワークフローの Load config が受け付けるキーと同じ", () => {
+  const yml = fs.readFileSync(new URL("../templates/.github/workflows/docs-pages.yml", import.meta.url), "utf-8");
+  const m = yml.match(/^\s*((?:[A-Z_]+\|)+[A-Z_]+)\)\s*$/m);
+  assert.ok(m, "Load config の case 文");
+  assert.deepEqual(m[1].split("|").sort(), [...CONFIG_FILE_KEYS].sort());
 });

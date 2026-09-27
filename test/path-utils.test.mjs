@@ -12,6 +12,9 @@ import {
   resolveInsideRepo,
   isLinkedFilePath,
   webUrlFromGitRemote,
+  outputRelOf,
+  encodeUrlPath,
+  pageHref,
 } from "../.github/scripts/lib/path-utils.mjs";
 
 describe("normalizeBasePath", () => {
@@ -243,5 +246,31 @@ describe("webUrlFromGitRemote", () => {
     assert.equal(webUrlFromGitRemote("/local/path/repo"), "");
     assert.equal(webUrlFromGitRemote("git@gitlab.com:owner/repo.git"), "", "GitHub以外は対象外");
     assert.equal(webUrlFromGitRemote("https://github.example.co.jp/o/r.git"), "https://github.example.co.jp/o/r");
+  });
+});
+
+describe("outputRelOf / encodeUrlPath / pageHref", () => {
+  test("\".\" で始まる要素は先頭に _ を付ける(Pages の成果物から除外されないように)", () => {
+    assert.equal(outputRelOf(".github/logo.png"), "_.github/logo.png");
+    assert.equal(outputRelOf("docs/.hidden/a.html"), "docs/_.hidden/a.html");
+    assert.equal(outputRelOf("docs/a.html"), "docs/a.html");
+  });
+
+  test("ファイル名の #・%・空白・日本語をエンコードし、/ はそのまま", () => {
+    assert.equal(encodeUrlPath("docs/c#.html"), "docs/c%23.html");
+    assert.equal(encodeUrlPath("docs/100%.html"), "docs/100%25.html");
+    assert.equal(encodeUrlPath("a b/手順.html"), "a%20b/%E6%89%8B%E9%A0%86.html");
+  });
+
+  test("pageHref: ページのパスから、サイト上のURLを作る(# を区切りと誤解しない)", () => {
+    assert.equal(pageHref("docs/c#.md", "/repo"), "/repo/docs/c%23.html");
+    assert.equal(pageHref("docs/100%.md", ""), "/docs/100%25.html");
+    assert.equal(pageHref(".github/CONTRIBUTING.md", "/repo"), "/repo/_.github/CONTRIBUTING.html");
+  });
+
+  test("toSiteAbsHref: デコードしたパスをエンコードし直し、アンカーは残す", () => {
+    assert.equal(toSiteAbsHref("README.md", "docs/c%23.md#x", "/repo"), "/repo/docs/c%23.html#x");
+    assert.equal(toSiteAbsHref("README.md", "docs/a%20b.png", ""), "/docs/a%20b.png");
+    assert.equal(toSiteAbsHref("README.md", ".github/logo.png", ""), "/_.github/logo.png");
   });
 });

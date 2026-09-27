@@ -41,6 +41,59 @@ const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @property {string} styleDir
  */
 
+// 設定ファイル(.github/docs-pages.config)に書けるキー。ワークフローの Load config と同じ一覧
+export const CONFIG_FILE_KEYS = [
+  "TRIGGER_BRANCH",
+  "ROOT_MD",
+  "OUT_DIR",
+  "STYLE_FILE",
+  "LANG",
+  "NAV_ENABLED",
+  "FAVICON_FILE",
+  "SITE_NAME",
+  "CUSTOM_DOMAIN",
+  "OGP_DEFAULT_IMAGE",
+  "THEME",
+  "STRICT_LINKS",
+  "SITEMAP_JSON",
+  "LAST_UPDATED",
+];
+
+// 設定ファイルの本文を { KEY: 値 } にする(ワークフローの Load config と同じ読み方)。
+//   - "#" で始まる行と空行は読み飛ばす。値の前後の空白は取り除く
+//   - 一覧にないキーは無視する
+export function parseConfigText(text) {
+  const values = {};
+  for (const rawLine of text.replace(/^\uFEFF/, "").split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    const eq = line.indexOf("=");
+    if (eq < 0) continue;
+    const key = line.slice(0, eq).trim();
+    if (CONFIG_FILE_KEYS.includes(key)) values[key] = line.slice(eq + 1).trim();
+  }
+  return values;
+}
+
+// 手元でビルドするときに、設定ファイルの値を環境変数の既定値として使う。
+// GitHub Actions では、ワークフローが設定ファイルの値を環境変数で渡すので何もしない。
+//   - 環境変数で指定したキーは、環境変数の値を優先する(試しに値を変えてビルドできるように)
+//   - ただし LANG は、OS が設定する値("ja_JP.UTF-8" など言語タグでないもの)なら設定ファイルを使う
+//
+// @param {NodeJS.ProcessEnv} env
+// @param {Record<string, string>} fileValues - parseConfigText の結果
+// @returns {NodeJS.ProcessEnv}
+export function withConfigFileDefaults(env, fileValues) {
+  if (env.GITHUB_ACTIONS === "true") return env;
+  const merged = { ...env };
+  for (const [key, value] of Object.entries(fileValues)) {
+    const envValue = env[key];
+    const useFile = envValue === undefined || (key === "LANG" && !LANG_TAG_RE.test(envValue.trim()));
+    if (useFile) merged[key] = value;
+  }
+  return merged;
+}
+
 // 環境変数オブジェクトから設定値を読み込み、検証・デフォルト適用を行う。
 // 例外を投げず、ファイルI/O も行わない純粋関数。
 //

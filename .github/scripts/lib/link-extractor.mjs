@@ -60,10 +60,11 @@ export function firstHeadingText(mdContent) {
   return "";
 }
 
-// 生の HTML <img src="..."> / <a href="..."> も拾う(タグ名・属性名の大文字小文字は区別しない)
+// 生の HTML <a href>・<img src>・<video src>・<audio src>・<source src> も拾う
+// (タグ名・属性名の大文字小文字は区別しない。対象のタグは html-renderer の書き換えと同じ)
 export function extractRawHtmlLinks(mdContent) {
   const results = [];
-  const re = /<(?:img|a)[^>]+(?:src|href)=["']([^"']+)["'][^>]*>/gi;
+  const re = /<(?:a|img|video|audio|source)\b[^>]*?\s(?:src|href)=["']([^"']+)["'][^>]*>/gi;
   let m;
   while ((m = re.exec(mdContent)) !== null) {
     results.push(m[1].trim());

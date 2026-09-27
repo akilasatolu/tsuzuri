@@ -536,7 +536,8 @@ export const HELP_TEXT = `使い方: npx github:${OSS_REPO}[#v1] init [オプシ
   --update           対話なしで最新版に更新する(ワークフローとビルドスクリプトだけを上書きし、
                      設定ファイル・独自CSSは変更しない)
   -y, --yes          対話なしで、すべて既定値(または下のオプションで指定した値)で生成する
-      --branch <名前> トリガーブランチ(TRIGGER_BRANCH)。既定: main
+      --branch <名前> トリガーブランチ(TRIGGER_BRANCH)。既定: リポジトリの既定ブランチ
+                     (origin/HEAD。分からなければ main)
       --root <パス>   起点となるMarkdownファイル(ROOT_MD)。既定: README.md
       --theme <名前>  テーマ(THEME)。${THEME_CHOICES.map((c) => c.key).join(" / ")}。既定: wa
       --style        独自CSSの空ひな形(${VENDOR_DIR}/styles/custom.css)も作る
@@ -668,14 +669,20 @@ export function checkSetupLocation(cwd, exists = existsSync) {
 /**
  * トリガーブランチの既定値を、リポジトリの既定ブランチ(origin/HEAD)か、今のブランチから推測する。
  * 分からなければ "main"。
+ * 今のブランチを使うのは対話形式のときだけ(既定値として表示され、利用者が確かめられるため)。
+ * 対話なし(--yes)では、作業ブランチがそのまま公開ブランチにならないよう origin/HEAD だけを見る。
  * @param {string} cwd
  * @param {(args: string[]) => string} [git] - テスト用差し替え
+ * @param {{ useCurrentBranch?: boolean }} [options]
  */
 export function guessDefaultBranch(
   cwd,
   git = (args) => execFileSync("git", args, { cwd, encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"] }),
+  { useCurrentBranch = true } = {},
 ) {
-  for (const args of [["symbolic-ref", "--short", "refs/remotes/origin/HEAD"], ["branch", "--show-current"]]) {
+  const candidates = [["symbolic-ref", "--short", "refs/remotes/origin/HEAD"]];
+  if (useCurrentBranch) candidates.push(["branch", "--show-current"]);
+  for (const args of candidates) {
     try {
       const out = git(args).trim().replace(/^origin\//, "");
       if (out) return out;
@@ -719,7 +726,10 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
 
   const locationWarnings = checkSetupLocation(cwd);
   for (const warning of locationWarnings) console.warn(`⚠ ${warning}`);
-  const defaults = { ...DEFAULT_ANSWERS, triggerBranch: guessDefaultBranch(cwd) };
+  const defaults = {
+    ...DEFAULT_ANSWERS,
+    triggerBranch: guessDefaultBranch(cwd, undefined, { useCurrentBranch: !args.nonInteractive }),
+  };
   const warnMissingRoot = (rootMd) => {
     if (!existsSync(join(cwd, rootMd))) {
       console.warn(`⚠ 起点の ${rootMd} がまだありません。push する前に作成してください(無いとビルドが失敗します)。`);

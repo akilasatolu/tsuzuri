@@ -127,6 +127,7 @@ test("buildDocsPagesYml: build/deployの2ジョブを持ち、ベンダリング
   assert.match(yml, /^\s*deploy:\s*$/m);
   assert.ok(yml.includes(`run: node ${VENDOR_DIR}/build-docs.mjs`));
   assert.ok(yml.includes(`STYLE_DIR: ${VENDOR_DIR}/styles`));
+  assert.ok(yml.includes("path: ${{ env.OUT_DIR || '_site' }}"), "OUT_DIR が空でも _site を上げる");
 });
 
 test("buildDocsPagesYml: TRIGGER_BRANCH判定・BASE_PATH算出・デプロイの各ステップを持つ", () => {
@@ -854,6 +855,9 @@ test("guessDefaultBranch: origin/HEAD → 今のブランチ → main の順に�
   };
   assert.equal(guessDefaultBranch("/r", noRemote), "docs");
   assert.equal(guessDefaultBranch("/r", () => { throw new Error("no git"); }), "main");
+  // 対話なし(useCurrentBranch: false)では今のブランチを使わない
+  assert.equal(guessDefaultBranch("/r", noRemote, { useCurrentBranch: false }), "main");
+  assert.equal(guessDefaultBranch("/r", () => "origin/develop\n", { useCurrentBranch: false }), "develop");
 });
 
 test("init は .github/tsuzuri/.gitignore(node_modules/)も生成し、--update でも更新対象になる", () => {
@@ -863,7 +867,7 @@ test("init は .github/tsuzuri/.gitignore(node_modules/)も生成し、--update 
   assert.equal(isBundledPath(`${VENDOR_DIR}/.gitignore`), true);
 });
 
-test("CLI: リポジトリ直下以外・ROOT_MDが無いときは警告し、既定ブランチは今のブランチから推測する", () => {
+test("CLI: リポジトリ直下以外・ROOT_MDが無いときは警告し、--yes の既定ブランチは今のブランチを使わない", () => {
   const dir = makeTmpDir();
   try {
     const git = (...args) => spawnSync("git", args, { cwd: dir, encoding: "utf8" });
@@ -879,7 +883,8 @@ test("CLI: リポジトリ直下以外・ROOT_MDが無いときは警告し、�
     result = spawnSync(process.execPath, [cli, "-y"], { cwd: dir, encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr);
     assert.doesNotMatch(result.stderr, /直下ではありません|まだありません/);
-    assert.match(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), /^TRIGGER_BRANCH=pages$/m);
+    // origin が無いので、作業中のブランチ(pages)ではなく main になる
+    assert.match(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), /^TRIGGER_BRANCH=main$/m);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

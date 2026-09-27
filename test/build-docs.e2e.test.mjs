@@ -43,6 +43,7 @@ const CONFIG_ENV_KEYS = [
   "LAST_UPDATED",
   "GITHUB_SERVER_URL",
   "GITHUB_SHA",
+  "GITHUB_ACTIONS",
 ];
 
 function makeTmpDir() {
@@ -1260,6 +1261,114 @@ describe("build-docs.mjs :: main (E2E)", () => {
       html = readOut(dir, "index.html");
       assert.match(html, /<title>Site<\/title>/, "h1が無い起点ページはサイト名");
       assert.match(readOut(dir, "docs", "a.html"), /<title>Page A<\/title>/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test(".で始まるディレクトリのページ・画像は _. で始まるパスに出力する(Pages の成果物に含まれるように)", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.mkdirSync(path.join(dir, ".github"));
+      fs.writeFileSync(path.join(dir, ".github", "CONTRIBUTING.md"), "# Contributing\n\n![logo](logo.png)\n");
+      fs.copyFileSync(path.join(dir, "docs", "img.png"), path.join(dir, ".github", "logo.png"));
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[c](.github/CONTRIBUTING.md) ![l](.github/logo.png)\n");
+      const result = runBuild(dir, { STRICT_LINKS: "true", NAV_ENABLED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "index.html");
+      assert.match(html, /href="\/_\.github\/CONTRIBUTING\.html"/);
+      assert.match(html, /src="\/_\.github\/logo\.png"/);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "_.github", "logo.png")));
+      assert.match(readOut(dir, "_.github", "CONTRIBUTING.html"), /src="\/_\.github\/logo\.png"/);
+      assert.ok(!fs.existsSync(path.join(dir, "_site", ".github")), ". で始まるディレクトリは作らない");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("リンクしたファイルが生成したページと同じ出力先なら上書きせず、STRICT_LINKSで失敗させる", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "index.html"), "<p>hand-written</p>");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[demo](index.html) [A](docs/a.md)\n");
+      let result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stderr, /出力先が README\.md と重なるためコピーしません/);
+      assert.match(readOut(dir, "index.html"), /<h1 id="root">Root<\/h1>/, "生成したページのまま");
+      result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /出力先の重複: index\.html/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("ファイル名に # や % を含むページへのリンク(本文・ナビ・前後ページ)をエンコードする", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "docs", "c#.md"), "# CSharp\n");
+      fs.writeFileSync(path.join(dir, "docs", "100%.md"), "# Percent\n");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[c](docs/c%23.md) [p](docs/100%25.md)\n");
+      const result = runBuild(dir, { NAV_ENABLED: "true", STRICT_LINKS: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "index.html");
+      assert.equal(html.match(/href="\/docs\/c%23\.html"/g).length, 3, "本文・ナビ・次のページ");
+      assert.match(html, /<li><a href="\/docs\/100%25\.html">Percent<\/a><\/li>/);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "docs", "c#.html")));
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("手元のビルドでは .github/docs-pages.config を読み、init でコピーしたテーマCSSを使う", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      const vendored = path.join(dir, ".github", "tsuzuri", "styles");
+      fs.mkdirSync(vendored, { recursive: true });
+      fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(vendored, "base.css"));
+      fs.copyFileSync(path.join(REAL_STYLES_DIR, "sumi.css"), path.join(vendored, "sumi.css"));
+      fs.writeFileSync(
+        path.join(dir, ".github", "docs-pages.config"),
+        "# c\nTHEME=sumi\nSITE_NAME=FromFile\nLANG=en\nNAV_ENABLED=true\n"
+      );
+      let result = runBuild(dir, { LANG: "ja_JP.UTF-8" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.doesNotMatch(result.stderr, /LANG の値が言語タグとして不正/);
+      let html = readOut(dir, "index.html");
+      assert.match(html, /<html lang="en">/);
+      assert.match(html, /FromFile/);
+      assert.ok(html.includes(fs.readFileSync(path.join(REAL_STYLES_DIR, "sumi.css"), "utf-8").slice(0, 200)));
+      result = runBuild(dir, { SITE_NAME: "FromEnv" });
+      html = readOut(dir, "index.html");
+      assert.match(html, /FromEnv/, "環境変数を優先する");
+      result = runBuild(dir, { GITHUB_ACTIONS: "true", STYLE_DIR: ".github/tsuzuri/styles" });
+      assert.match(readOut(dir, "index.html"), /<html lang="ja">/, "Actions では設定ファイルを読まない");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("生のHTMLの <video src> の動画もコピーし、<audio> 以外の a で始まるタグは拾わない", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "demo.mp4"), "x");
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        '# Root\n\n<video src="demo.mp4" controls></video>\n\n<abbr title="x" href="nope.md">a</abbr>\n'
+      );
+      const result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "demo.mp4")));
+      assert.match(readOut(dir, "index.html"), /<video src="\/demo\.mp4" controls>/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

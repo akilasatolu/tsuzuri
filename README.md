@@ -114,16 +114,18 @@ cd ../tsuzuri-docs
 ```
 
 ビルド対象のディレクトリ(任意のMarkdownのフォルダでも可)で、次のように実行します。
-設定ファイルの値は環境変数で渡します(ワークフローが行っている処理と同じです)。
 
 ```sh
-STYLE_DIR=~/dev/tsuzuri/styles NAV_ENABLED=true SITE_NAME=Tsuzuri \
-  node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
+STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
 ```
 
-- `STYLE_DIR`は必須です(テーマCSSの置き場所。`init`後の構成では`.github/tsuzuri/styles`)。
-- それ以外のキー(`ROOT_MD`・`THEME`・`LANG`など)は省略すると既定値になります。
-- 出力先は`_site/`です(`OUT_DIR`で変更可)。
+- `STYLE_DIR`は、作業ツリーのテーマCSSを使うために指定します(省略すると、ビルド対象の
+  `.github/tsuzuri/styles`を使います)。
+- GitHub Actionsの外では、`.github/docs-pages.config`があればその値を使います。環境変数で
+  指定したキー(例: `THEME=sumi`)は環境変数の値が優先されます。OSが設定する`LANG`
+  (`ja_JP.UTF-8`など)は無視され、設定ファイルの値になります。
+- 出力先は`_site/`です(`OUT_DIR`で変更可)。前回の出力は消さないので、ページを消した・
+  名前を変えたときは`_site/`を消してからビルドしてください。
 
 ### 2. ブラウザで確認する
 
@@ -149,10 +151,10 @@ node ~/dev/tsuzuri/bin/cli.mjs
 既存の構成を最新化する更新モード(`node ~/dev/tsuzuri/bin/cli.mjs init --update`)も
 同じ要領で試せます。
 
-生成された`.github/tsuzuri/`を使ってビルドする場合は、1と同じ要領で
-`STYLE_DIR=.github/tsuzuri/styles node .github/tsuzuri/build-docs.mjs`を実行します。
-このときは`marked`がこのディレクトリから読み込まれるため、先に
-`npm install --no-save marked@<package.jsonのmarkedと同じバージョン>`を実行してください。
+生成された`.github/tsuzuri/`を使ってビルドする場合は、`node .github/tsuzuri/build-docs.mjs`を
+実行します(設定ファイルと`.github/tsuzuri/styles`が自動で使われます)。このときは依存が
+`.github/tsuzuri/node_modules`から読み込まれるため、先に生成されたワークフローの
+「Install build dependency」と同じ`npm install --prefix .github/tsuzuri ...`を実行してください。
 
 ### 4. GitHub上で本番と同じ流れを試す
 

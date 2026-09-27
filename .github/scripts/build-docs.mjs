@@ -42,7 +42,7 @@ import { Marked } from "marked";
 import markedFootnote from "marked-footnote";
 import hljs from "highlight.js/lib/common";
 
-import { loadConfig, ALLOWED_THEMES } from "./lib/config.mjs";
+import { loadConfig, ALLOWED_THEMES, parseConfigText, withConfigFileDefaults } from "./lib/config.mjs";
 import { crawlSite } from "./lib/crawler.mjs";
 import {
   toSiteAbsHref,
@@ -52,6 +52,8 @@ import {
   isImagePath,
   isLinkedFilePath,
   webUrlFromGitRemote,
+  outputRelOf,
+  encodeUrlPath,
 } from "./lib/path-utils.mjs";
 import { extractLinks } from "./lib/link-extractor.mjs";
 import {
@@ -85,9 +87,32 @@ export function removeCjkLineBreaks(html) {
     .join("");
 }
 
+// 手元でビルドするときの環境変数。GitHub Actions の外では、
+//   - .github/docs-pages.config の値を、環境変数で指定していないキーの既定値にする
+//   - STYLE_DIR を指定せず、init でコピーしたテーマCSS(.github/tsuzuri/styles)があればそれを使う
+// ことで、公開サイトと同じ設定でプレビューできるようにする。
+function localBuildEnv(env, repoRoot) {
+  if (env.GITHUB_ACTIONS === "true") return env;
+  let merged = env;
+  const configAbs = path.join(repoRoot, ".github", "docs-pages.config");
+  if (fs.existsSync(configAbs)) {
+    merged = withConfigFileDefaults(env, parseConfigText(fs.readFileSync(configAbs, "utf-8")));
+    console.log("Config file loaded: .github/docs-pages.config (環境変数で指定したキーは環境変数を優先)");
+  }
+  const vendoredStyles = ".github/tsuzuri/styles";
+  if (
+    merged.STYLE_DIR === undefined &&
+    !fs.existsSync(path.join(repoRoot, "styles", "base.css")) &&
+    fs.existsSync(path.join(repoRoot, vendoredStyles, "base.css"))
+  ) {
+    merged = { ...merged, STYLE_DIR: vendoredStyles };
+  }
+  return merged;
+}
+
 async function main() {
   const REPO_ROOT = process.cwd();
-  const config = loadConfig(process.env);
+  const config = loadConfig(localBuildEnv(process.env, REPO_ROOT));
   const OUT_DIR = resolveInsideRepo(REPO_ROOT, config.outDir);
 
   // ---------- 0. OUT_DIR チェック(致命的) ----------
@@ -244,14 +269,21 @@ async function main() {
       // コピー先も OUT_DIR の外になってしまうため、リポジトリ外を指す指定は受け付けない
       console.warn(`FAVICON_FILE (${config.faviconFile}) はリポジトリの外を指しているため無視します。`);
     } else if (fs.existsSync(faviconAbs)) {
-      faviconOutRel = path.relative(REPO_ROOT, faviconAbs).split(path.sep).join("/");
-      faviconHref = `${config.basePath}/${faviconOutRel}`;
+      faviconOutRel = outputRelOf(path.relative(REPO_ROOT, faviconAbs).split(path.sep).join("/"));
+      faviconHref = `${config.basePath}/${encodeUrlPath(faviconOutRel)}`;
     } else {
       console.warn(`Favicon file not found (${config.faviconFile}); skipping <link rel="icon">.`);
     }
   }
 
   // ---------- 6. 出力ディレクトリ準備 ----------
+  // 出力先のパス(OUT_DIR からの相対パス)ごとに、何を書いたかを記録する。リンクされたファイルの
+  // コピーが、生成したページやビルドが作るファイルを上書きしないようにするため。
+  //   ビルドが作るファイルは、書く前から予約しておく(コピーより後に書くものもあるため。
+  //   404.html はコピーより前に必ず書くので、ここには含めない)
+  const GENERATED_FILES = [".nojekyll", "CNAME", "sitemap.xml", "robots.txt", "search-index.json", "tsuzuri-search.js", "sitemap.json"];
+  const writtenBy = new Map(GENERATED_FILES.map((f) => [f, "(Tsuzuri が生成するファイル)"]));
+  const collisions = [];
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(path.join(OUT_DIR, ".nojekyll"), "");
 
@@ -260,6 +292,7 @@ async function main() {
   }
 
   if (faviconHref) {
+    writtenBy.set(faviconOutRel, config.faviconFile);
     const faviconDestAbs = path.join(OUT_DIR, faviconOutRel);
     fs.mkdirSync(path.dirname(faviconDestAbs), { recursive: true });
     fs.copyFileSync(faviconAbs, faviconDestAbs);
@@ -318,17 +351,24 @@ async function main() {
       lastUpdatedEnabled = false;
     }
   }
+  // ページと sitemap.xml の両方で使うので、ファイルごとに1回だけ git を実行する
+  const lastUpdatedCache = new Map();
   function lastUpdatedOf(rel) {
     if (!lastUpdatedEnabled) return "";
-    try {
-      return execFileSync("git", ["log", "-1", "--format=%cs", "--", rel], {
-        cwd: REPO_ROOT,
-        encoding: "utf-8",
-        stdio: ["ignore", "pipe", "ignore"],
-      }).trim();
-    } catch {
-      return "";
+    if (!lastUpdatedCache.has(rel)) {
+      let date = "";
+      try {
+        date = execFileSync("git", ["log", "-1", "--format=%cs", "--", rel], {
+          cwd: REPO_ROOT,
+          encoding: "utf-8",
+          stdio: ["ignore", "pipe", "ignore"],
+        }).trim();
+      } catch {
+        // 日付は表示しない
+      }
+      lastUpdatedCache.set(rel, date);
     }
+    return lastUpdatedCache.get(rel);
   }
 
   const pagerLabels = isJa
@@ -350,7 +390,7 @@ async function main() {
       return "";
     }
     ogImageSet.add(resolved.repoRel);
-    return `${config.siteOrigin}${config.basePath}/${resolved.repoRel}${resolved.rest}`;
+    return `${config.siteOrigin}${config.basePath}/${encodeUrlPath(outputRelOf(resolved.repoRel))}${resolved.rest}`;
   }
 
   // サブディレクトリの README.md は、そのディレクトリの index.html としても出力する
@@ -365,17 +405,13 @@ async function main() {
     }
   }
 
-  // ページの公開URLのうち basePath より後ろの部分。canonical・og:url・sitemap.xml で使う。
-  //   ROOT_MD → ""(トップURL)、ディレクトリの README.md → "dir/"、それ以外 → "dir/page.html"
-  // URLのパス部分をパーセントエンコードする("/" はそのまま)。canonical・og:url・sitemap.xml 用。
-  const encodePath = (p) => p.split("/").map(encodeURIComponent).join("/");
 
   // サイトに出さないが実在するリンク先(LICENSE・ドットファイル・README の無いディレクトリ)は、
   // GitHub 上のファイル・一覧へのリンクにする。リポジトリのURLとコミットは、
   //   1. GitHub Actions が自動で設定する環境変数(GITHUB_SERVER_URL・GITHUB_REPOSITORY・GITHUB_SHA)
   //   2. 手元のビルドでは、git の origin のURLと今のブランチ名(push していないコミットを指して
   //      404 にならないように。ブランチが分からなければ HEAD のコミット)
-  // の順に求める。どちらも分からなければリンクは書き換えず、警告だけ出す(リンク先は実在するので
+  // の順に求める。どちらも分からなければ警告だけ出して、サイト内のパスのままにする(リンク先は実在するので
   // リンク切れ・STRICT_LINKS の対象にはしない)。
   const gitOut = (args) => {
     try {
@@ -396,13 +432,13 @@ async function main() {
   }
   function repoUrlOf(repoRel, isDir) {
     if (!repoBaseUrl || !repoRef) return null;
-    return `${repoBaseUrl}/${isDir ? "tree" : "blob"}/${repoRef}/${encodePath(repoRel)}`;
+    return `${repoBaseUrl}/${isDir ? "tree" : "blob"}/${repoRef}/${encodeUrlPath(repoRel)}`;
   }
   for (const [repoRel, target] of linkTargets) {
     if (target.kind === "repo" && !repoUrlOf(repoRel, target.isDir)) {
       console.warn(
         `[build-docs] ${target.referencedFrom} から ${repoRel} へのリンクは、サイトに含めないファイル・ディレクトリを指しています。` +
-          `GitHub上のURLが分からない(git の origin が無い等)ため、リンクを書き換えずに出力します。`
+          `GitHub上のURLが分からない(git の origin が無い等)ため、サイト内のパスのままリンクします(サイトには無いので開けません)。`
       );
     }
   }
@@ -416,7 +452,7 @@ async function main() {
     if (!resolved.rejected) {
       const bare = resolved.repoRel.replace(/\/+$/, "");
       const target = linkTargets.get(bare);
-      if (target?.kind === "dir") return `${config.basePath}/${bare}/${resolved.rest}`;
+      if (target?.kind === "dir") return `${config.basePath}/${encodeUrlPath(outputRelOf(bare))}/${resolved.rest}`;
       if (target?.kind === "repo") {
         const url = repoUrlOf(bare, target.isDir);
         if (url) return `${url}${resolved.rest}`;
@@ -425,11 +461,14 @@ async function main() {
     return toSiteAbsHref(fromRel, href, config.basePath);
   }
 
+  // ページの公開URLのうち basePath より後ろの部分(パーセントエンコード済み)。
+  // canonical・og:url・sitemap.xml・検索結果で使う。
+  //   ROOT_MD → ""(トップURL)、ディレクトリの README.md → "dir/"、それ以外 → "dir/page.html"
   function urlPathOf(rel) {
     if (rel === config.rootMd) return "";
     const dir = path.posix.dirname(rel);
-    if (dirIndexRels.get(dir) === rel) return `${dir}/`;
-    return rel.replace(/\.md$/i, ".html");
+    if (dirIndexRels.get(dir) === rel) return `${encodeUrlPath(outputRelOf(dir))}/`;
+    return encodeUrlPath(outputRelOf(rel.replace(/\.md$/i, ".html")));
   }
 
   // 1ページ分のHTMLを組み立てる。
@@ -510,7 +549,7 @@ async function main() {
       (rel === config.rootMd && config.siteName) ||
       rel;
     if (search && visitedMd.has(rel)) {
-      searchPages.push({ title, url: `${config.basePath}/${encodePath(urlPathOf(rel))}`, html: bodyHtml });
+      searchPages.push({ title, url: `${config.basePath}/${urlPathOf(rel)}`, html: bodyHtml });
     }
     // ページ内の目次(NAV_ENABLED=true で、h2・h3 が3つ以上あるページ。frontmatter の toc: false で消せる)
     if (config.navEnabled && String(meta.toc).trim() !== "false" && headings.length >= 3) {
@@ -545,7 +584,7 @@ async function main() {
     const ogType = meta.ogType || "website";
     const canonicalUrl =
       canonical && config.siteOrigin
-        ? `${config.siteOrigin}${config.basePath}/${encodePath(urlPathOf(rel))}`
+        ? `${config.siteOrigin}${config.basePath}/${urlPathOf(rel)}`
         : "";
     const noindex = meta.noindex === true;
 
@@ -580,7 +619,15 @@ async function main() {
     });
   }
 
-  function writeOut(outRel, html) {
+  // repoRel はリポジトリ内でのパス(outputRelOf で出力先のパスにする)。source は重複の報告用
+  function writeOut(repoRel, html, source) {
+    const outRel = outputRelOf(repoRel);
+    const prev = writtenBy.get(outRel);
+    if (prev && prev !== source) {
+      console.warn(`[build-docs] 出力先 ${outRel} が重複しています(${prev} と ${source})。後の ${source} で上書きします。`);
+      collisions.push(`${outRel} (${prev} と ${source})`);
+    }
+    writtenBy.set(outRel, source);
     const outAbs = path.join(OUT_DIR, outRel);
     fs.mkdirSync(path.dirname(outAbs), { recursive: true });
     fs.writeFileSync(outAbs, html);
@@ -588,10 +635,10 @@ async function main() {
 
   for (const [rel, { content, meta }] of visitedMd.entries()) {
     const html = renderPage(rel, content, meta);
-    writeOut(rel.replace(/\.md$/i, ".html"), html);
-    if (rel === config.rootMd) writeOut("index.html", html);
+    writeOut(rel.replace(/\.md$/i, ".html"), html, rel);
+    if (rel === config.rootMd) writeOut("index.html", html, rel);
     const dir = path.posix.dirname(rel);
-    if (dirIndexRels.get(dir) === rel) writeOut(`${dir}/index.html`, html);
+    if (dirIndexRels.get(dir) === rel) writeOut(`${dir}/index.html`, html, rel);
   }
 
   // ---------- 7.5 404ページ ----------
@@ -612,7 +659,7 @@ async function main() {
       if (isImagePath(resolved.repoRel)) imageSet.add(resolved.repoRel);
       else if (isLinkedFilePath(resolved.repoRel)) fileSet.add(resolved.repoRel);
     }
-    writeOut("404.html", renderPage("404.md", body, { ...meta, noindex: true }, { canonical: false }));
+    writeOut("404.html", renderPage("404.md", body, { ...meta, noindex: true }, { canonical: false }), "404.md");
   }
 
   // ---------- 7.6 サイト内検索の索引・スクリプト(NAV_ENABLED=true のとき) ----------
@@ -635,7 +682,17 @@ async function main() {
       missingAssets.push(assetRel);
       continue;
     }
-    const dest = path.join(OUT_DIR, assetRel);
+    const outRel = outputRelOf(assetRel);
+    const prev = writtenBy.get(outRel);
+    if (prev && prev !== assetRel && !(outRel === faviconOutRel && src === faviconAbs)) {
+      console.warn(
+        `[build-docs] リンクされた ${assetRel} は、出力先が ${prev} と重なるためコピーしません(生成したファイルを上書きしないため)。`
+      );
+      collisions.push(`${outRel} (${prev} と ${assetRel})`);
+      continue;
+    }
+    writtenBy.set(outRel, assetRel);
+    const dest = path.join(OUT_DIR, outRel);
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.copyFileSync(src, dest);
   }
@@ -646,7 +703,7 @@ async function main() {
     const urls = [...visitedMd.entries()]
       .filter(([, { meta }]) => meta.noindex !== true)
       .map(([rel]) => ({
-        loc: `${config.siteOrigin}${config.basePath}/${encodePath(urlPathOf(rel))}`,
+        loc: `${config.siteOrigin}${config.basePath}/${urlPathOf(rel)}`,
         lastmod: lastUpdatedOf(rel) || undefined,
       }));
     fs.writeFileSync(path.join(OUT_DIR, "sitemap.xml"), buildSitemapXml(urls));
@@ -691,6 +748,7 @@ async function main() {
       ...missing.map((m) => `リンク先が見つかりません: ${m.rel} (referenced from ${m.referencedFrom})`),
       ...rejected.map((r) => `拒否したリンク: ${r.rel} (referenced from ${r.referencedFrom}, reason: ${r.reason})`),
       ...missingAssets.map((a) => `コピーできなかったファイル: ${a}`),
+      ...collisions.map((c) => `出力先の重複: ${c}`),
     ];
     if (problems.length) {
       console.error(`STRICT_LINKS=true のため、リンクの問題 ${problems.length} 件でビルドを失敗させます。`);
