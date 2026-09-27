@@ -1,4 +1,5 @@
 ---
+nav: false
 title: 藍(ai)
 theme: ai
 styleFile: .github/tsuzuri/styles/plain.css

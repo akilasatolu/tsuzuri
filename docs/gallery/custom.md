@@ -1,4 +1,5 @@
 ---
+nav: false
 title: 独自CSSの例(このサイト)
 description: THEME=noneと独自CSS(STYLE_FILE)だけで作った、このサイト自身の見た目の見本ページ
 ---

@@ -399,6 +399,8 @@ body > nav ul ul { border-left: 2px solid var(--border); }
   color: var(--accent-2);
 }
 .tsuzuri-hero-sub { margin: 0 auto 24px; max-width: 34em; color: var(--fg-soft); }
+/* GitHub 上で読みやすくするための区切り(「・」「【】」)。サイトでは表示しない */
+.tsuzuri-sep { display: none; }
 .tsuzuri-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 0 0 20px; }
 main a.tsuzuri-button {
   display: inline-block;
@@ -445,7 +447,7 @@ main a.tsuzuri-button-primary:hover {
   transition: transform 0.15s, box-shadow 0.15s;
 }
 .tsuzuri-feature:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-/* 落款(はんこ)風の一文字 */
+/* 落款(はんこ)風の一文字(見出しの先頭に置き、見出しの上に表示する) */
 .tsuzuri-feature-mark {
   display: grid;
   place-items: center;
@@ -454,6 +456,7 @@ main a.tsuzuri-button-primary:hover {
   margin: 0 0 12px;
   color: #fff;
   font-size: 1.3rem;
+  line-height: 1;
   font-weight: 800;
   background: var(--gradient-shu);
   border-radius: 12px;
@@ -463,3 +466,19 @@ main a.tsuzuri-button-primary:hover {
 main .tsuzuri-feature h3 { margin: 0 0 6px; font-size: 1.05rem; }
 main .tsuzuri-feature h3::before { content: none; }
 .tsuzuri-feature p:last-child { margin: 0; color: var(--fg-soft); font-size: 0.93em; line-height: 1.7; }
+
+/* ---------- コードのコピーボタン ---------- */
+.tsuzuri-copy {
+  top: 10px;
+  right: 12px;
+  padding: 3px 12px;
+  color: var(--pre-fg);
+  font-weight: 700;
+  background: color-mix(in srgb, var(--pre-fg) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pre-fg) 25%, transparent);
+  border-radius: 999px;
+}
+.tsuzuri-copy:hover { background: color-mix(in srgb, var(--accent-2) 70%, transparent); border-color: transparent; }
+
+/* ---------- 404 ページのボタン(トップページの入口と同じ見た目) ---------- */
+main > .tsuzuri-hero-actions { justify-content: flex-start; }

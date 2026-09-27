@@ -1,4 +1,5 @@
 ---
+nav: false
 title: 装飾なし(none)
 theme: none
 styleFile: .github/tsuzuri/styles/plain.css
