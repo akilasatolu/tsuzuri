@@ -33,7 +33,7 @@ npx github:akilasatolu/tsuzuri#v1 init
 | (なし) | 対話形式で質問に答えながら生成する(次の「対話フロー」) |
 | `--update` | 対話なしで最新版に更新する([後述](#最新版に更新する--update)) |
 | `-y`, `--yes` | 対話なしで、すべて既定値で生成する |
-| `--branch <名前>` | トリガーブランチ(`TRIGGER_BRANCH`)。既定: リポジトリの既定ブランチ(`origin`の既定ブランチ。分からなければ`main`) |
+| `--branch <名前>` | トリガーブランチ(`TRIGGER_BRANCH`)。既定: リポジトリの既定ブランチ(`origin`の既定ブランチ。分からなければ`main`。v1.3.0以前は今のブランチになることがある) |
 | `--root <パス>` | 起点となるMarkdownファイル(`ROOT_MD`)。既定: `README.md` |
 | `--theme <名前>` | テーマ(`THEME`)。`wa` / `muji` / `sumi` / `ai` / `shu` / `none`。既定: `wa` |
 | `--style` | 独自CSSの空ひな形(`.github/tsuzuri/styles/custom.css`)も作る |
