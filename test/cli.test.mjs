@@ -35,6 +35,7 @@ import {
   HELP_TEXT,
   BUILD_DEPENDENCIES,
   buildDependencySpecs,
+  buildBuildLockfiles,
   majorTagOf,
   isBundledPath,
   createBundledConfirm,
@@ -176,9 +177,29 @@ test("package.jsonのmarkedとpackage-lock.jsonで実際に入る版が一致し
   assert.equal(lock.packages["node_modules/marked"].version, readMarkedVersion());
 });
 
-test("buildDocsPagesYml: 利用者側でインストールするmarkedはpackage.jsonの版", () => {
-  assert.ok(buildDocsPagesYml().includes(`npm install --prefix ${VENDOR_DIR} marked@${readMarkedVersion()} `));
-  assert.ok(buildDocsPagesYml("99.1.0").includes(`npm install --prefix ${VENDOR_DIR} marked@99.1.0 `));
+test("buildDocsPagesYml: ワークフローのコメントに、利用者側でインストールするmarkedの版を書く", () => {
+  assert.ok(buildDocsPagesYml().includes(`ビルド用の依存(marked@${readMarkedVersion()} `));
+  assert.ok(buildDocsPagesYml("99.1.0").includes(`ビルド用の依存(marked@99.1.0 `));
+});
+
+test("ビルド用の依存の package.json・package-lock.json を、本体の lockfile の版とハッシュで作る", () => {
+  const files = buildBuildLockfiles();
+  const pkg = JSON.parse(files.packageJson);
+  const lock = JSON.parse(files.packageLock);
+  const rootLock = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package-lock.json"), "utf8"));
+  assert.equal(pkg.private, true);
+  assert.deepEqual(Object.keys(pkg.dependencies), BUILD_DEPENDENCIES);
+  assert.deepEqual(lock.packages[""].dependencies, pkg.dependencies);
+  for (const name of BUILD_DEPENDENCIES) {
+    const entry = lock.packages[`node_modules/${name}`];
+    assert.equal(entry.version, pkg.dependencies[name]);
+    assert.equal(entry.integrity, rootLock.packages[`node_modules/${name}`].integrity);
+    assert.equal(entry.dev, undefined, "dev の印は外す");
+  }
+  const vendor = buildVendorTargets().map((t) => t.relPath);
+  assert.ok(vendor.includes(`${VENDOR_DIR}/package.json`));
+  assert.ok(vendor.includes(`${VENDOR_DIR}/package-lock.json`));
+  assert.equal(buildBuildLockfiles("/nonexistent", { existsSync: () => false, readFileSync }), null);
 });
 
 test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=README.md/THEME=wa", () => {
@@ -765,7 +786,7 @@ test("ビルド用の依存(BUILD_DEPENDENCIES)はすべて package.json の版(
   }
   assert.deepEqual(BUILD_DEPENDENCIES, ["marked", "highlight.js", "marked-footnote"]);
   assert.equal(buildDependencySpecs(), specs.join(" "));
-  assert.ok(buildDocsPagesYml().includes(`npm install --prefix ${VENDOR_DIR} ${specs.join(" ")} --no-save`));
+  assert.ok(buildDocsPagesYml().includes(`ビルド用の依存(${specs.join(" ")})`));
 });
 
 test("LAST_UPDATED=true のときだけ git の全履歴を取得するステップがある", () => {
@@ -780,8 +801,11 @@ test("LAST_UPDATED=true のときだけ git の全履歴を取得するステッ
   assert.ok(buildDocsPagesConfig({}).includes("\nLAST_UPDATED=false\n"));
 });
 
-test("生成ワークフロー: 依存は利用者の package.json と切り離して VENDOR_DIR に入れる", () => {
-  assert.match(buildDocsPagesYml(), new RegExp(`npm install --prefix ${VENDOR_DIR.replace(/[.]/g, "\\.")} marked@`));
+test("生成ワークフロー: 依存は利用者の package.json と切り離して VENDOR_DIR に lockfile どおり入れ、署名を確かめる", () => {
+  const yml = buildDocsPagesYml();
+  assert.ok(yml.includes(`npm ci --prefix ${VENDOR_DIR} --ignore-scripts --no-audit --no-fund\n`));
+  assert.ok(yml.includes(`npm audit signatures --prefix ${VENDOR_DIR}\n`));
+  assert.doesNotMatch(yml, /npm install/);
 });
 
 test("生成ワークフロー: 実行はブランチごとに順番に進め(他ブランチは別グループ)、公開は全体で1つずつ", () => {

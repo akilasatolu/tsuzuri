@@ -84,14 +84,18 @@ function runBuild(cwd, overrides = {}) {
   return spawnSync(process.execPath, [SCRIPT_PATH], { cwd, env, encoding: "utf-8" });
 }
 
+// 最後に readOut したビルドの出力先(extractStyleBlock が CSS ファイルを読むため)
+let lastOutDir = "";
 function readOut(dir, ...segs) {
+  lastOutDir = path.join(dir, "_site");
   return fs.readFileSync(path.join(dir, "_site", ...segs), "utf-8");
 }
 
+// ページが読み込んでいる共通のCSSファイル(<link rel="stylesheet">)の中身を返す
 function extractStyleBlock(html) {
-  const m = html.match(/<style>([\s\S]*?)<\/style>/);
-  assert.ok(m, "<style> ブロックが見つかること");
-  return m[1];
+  const m = html.match(/<link rel="stylesheet" href="\/(tsuzuri-[0-9a-f]{10}\.css)">/);
+  assert.ok(m, "共通のCSSファイルを読み込んでいること");
+  return fs.readFileSync(path.join(lastOutDir, m[1]), "utf-8");
 }
 
 describe("build-docs.mjs :: main (E2E)", () => {
@@ -1345,7 +1349,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       let html = readOut(dir, "index.html");
       assert.match(html, /<html lang="en">/);
       assert.match(html, /FromFile/);
-      assert.ok(html.includes(fs.readFileSync(path.join(REAL_STYLES_DIR, "sumi.css"), "utf-8").slice(0, 200)));
+      assert.ok(extractStyleBlock(html).includes(fs.readFileSync(path.join(REAL_STYLES_DIR, "sumi.css"), "utf-8").slice(0, 200)));
       result = runBuild(dir, { SITE_NAME: "FromEnv" });
       html = readOut(dir, "index.html");
       assert.match(html, /FromEnv/, "環境変数を優先する");
@@ -1387,7 +1391,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.copyFileSync(path.join(REAL_STYLES_DIR, "wa.css"), path.join(vendored, "wa.css"));
       const result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
-      assert.doesNotMatch(readOut(dir, "index.html"), /MY APP BASE/);
+      assert.doesNotMatch(extractStyleBlock(readOut(dir, "index.html")), /MY APP BASE/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1425,9 +1429,9 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.writeFileSync(path.join(dir, "docs", "b.md"), "---\nstyleFile: nope.css\n---\n# B\n");
       const result = runBuild(dir, { STYLE_FILE: "site.css" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(readOut(dir, "index.html"), /SITE CUSTOM/);
-      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /SITE CUSTOM/, "空のファイルを指定したページには当てない");
-      assert.match(readOut(dir, "docs", "b.html"), /SITE CUSTOM/, "見つからなければサイト全体のもの");
+      assert.match(extractStyleBlock(readOut(dir, "index.html")), /SITE CUSTOM/);
+      assert.doesNotMatch(extractStyleBlock(readOut(dir, "docs", "a.html")), /SITE CUSTOM/, "空のファイルを指定したページには当てない");
+      assert.match(extractStyleBlock(readOut(dir, "docs", "b.html")), /SITE CUSTOM/, "見つからなければサイト全体のもの");
       assert.match(result.stderr, /styleFile "nope\.css" が見つかりません/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -1528,6 +1532,29 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const auto = readOut(dir, "index.html").match(/<meta name="description" content="([^"]*)">/)[1];
       assert.equal(auto, "注意の本文", "注意書きの見出し(補足)は飛ばす");
       assert.ok(!fs.existsSync(path.join(dir, "_site", "tsuzuri-copy.js")), "コードが無くなれば出力しない");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("CSS は内容ごとに1つのファイルに出し、同じ内容のページは同じファイルを読み込む", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\ntheme: none\n---\n# A\n");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[A](docs/a.md) [B](docs/b.md)\n");
+      fs.writeFileSync(path.join(dir, "docs", "b.md"), "# B\n");
+      const result = runBuild(dir, { BASE_PATH: "/repo" });
+      assert.equal(result.status, 0, result.stderr);
+      const hrefOf = (html) => html.match(/<link rel="stylesheet" href="([^"]+)">/)[1];
+      const root = hrefOf(readOut(dir, "index.html"));
+      assert.match(root, /^\/repo\/tsuzuri-[0-9a-f]{10}\.css$/);
+      assert.equal(hrefOf(readOut(dir, "docs", "b.html")), root, "同じCSSなら同じファイル");
+      assert.notEqual(hrefOf(readOut(dir, "docs", "a.html")), root, "theme を変えたページは別のファイル");
+      assert.doesNotMatch(readOut(dir, "index.html"), /<style>/);
+      const cssFiles = fs.readdirSync(path.join(dir, "_site")).filter((f) => f.endsWith(".css"));
+      assert.equal(cssFiles.length, 2);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

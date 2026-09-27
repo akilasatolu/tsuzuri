@@ -70,7 +70,9 @@ test("createPreviewServer: ページを返し、無いURLは 404.html、末尾�
 
 test("生成ワークフローから、ビルド用の依存とコピー済みのバージョンを読める", () => {
   const yml = buildDocsPagesYml();
-  assert.deepEqual(dependencySpecsFromWorkflow(yml), buildDependencySpecs().split(" "));
+  // v1.6.0 以前のワークフロー(npm install の行に版を並べていた)から読む
+  const legacy = `        run: npm install --prefix .github/tsuzuri ${buildDependencySpecs()} --no-save --no-audit --no-fund --ignore-scripts\n`;
+  assert.deepEqual(dependencySpecsFromWorkflow(legacy), buildDependencySpecs().split(" "));
   assert.equal(vendoredVersionOf(yml), readPackageVersion());
   assert.deepEqual(dependencySpecsFromWorkflow("no install"), []);
 });

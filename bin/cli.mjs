@@ -99,6 +99,50 @@ export function buildDependencySpecs({ packageRoot = PACKAGE_ROOT, fsImpl = { re
   }).join(" ");
 }
 
+// ビルド用の依存を入れる package.json の名前(${VENDOR_DIR}/package.json)
+const BUILD_PACKAGE_NAME = "tsuzuri-build";
+
+/**
+ * ビルド用の依存(BUILD_DEPENDENCIES)だけを入れる package.json と package-lock.json を、このパッケージの
+ * package-lock.json から組み立てる。利用者のワークフローはこれを `npm ci` でインストールするので、
+ * ダウンロードした中身のハッシュ(integrity)が lockfile と違えばインストールが止まる。
+ * 依存がさらに依存しているパッケージも含める。package-lock.json が無ければ null。
+ * @param {string} [packageRoot]
+ * @param {{ existsSync, readFileSync }} [fsImpl]
+ * @returns {{ packageJson: string, packageLock: string } | null}
+ */
+export function buildBuildLockfiles(packageRoot = PACKAGE_ROOT, fsImpl = { existsSync, readFileSync }) {
+  const lockAbs = join(packageRoot, "package-lock.json");
+  if (!fsImpl.existsSync(lockAbs)) return null;
+  const rootLock = JSON.parse(fsImpl.readFileSync(lockAbs, "utf-8"));
+  const dependencies = Object.fromEntries(
+    BUILD_DEPENDENCIES.map((name) => [name, readDependencyVersion(name, packageRoot, fsImpl)])
+  );
+  const packages = { "": { name: BUILD_PACKAGE_NAME, dependencies } };
+  const queue = Object.keys(dependencies);
+  while (queue.length) {
+    const name = queue.shift();
+    const key = `node_modules/${name}`;
+    if (packages[key]) continue;
+    const entry = rootLock.packages?.[key];
+    if (!entry?.integrity) throw new Error(`package-lock.json に ${name} の integrity がありません`);
+    const { dev: _dev, devOptional: _devOptional, ...rest } = entry;
+    packages[key] = rest;
+    queue.push(...Object.keys(entry.dependencies ?? {}));
+  }
+  const packageJson = {
+    name: BUILD_PACKAGE_NAME,
+    private: true,
+    description: "Tsuzuri のビルド用の依存(init が生成します。編集しないでください)",
+    dependencies,
+  };
+  const packageLock = { name: BUILD_PACKAGE_NAME, lockfileVersion: 3, requires: true, packages };
+  return {
+    packageJson: `${JSON.stringify(packageJson, null, 2)}\n`,
+    packageLock: `${JSON.stringify(packageLock, null, 2)}\n`,
+  };
+}
+
 /** marked のバージョン(readDependencyVersion("marked") の短縮形) */
 export function readMarkedVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFileSync }) {
   return readDependencyVersion("marked", packageRoot, fsImpl);
@@ -282,6 +326,15 @@ export function buildVendorTargets(packageRoot = PACKAGE_ROOT, fsImpl = { exists
         content: fsImpl.readFileSync(join(stylesDir, entry.name), "utf-8"),
       });
     }
+  }
+
+  // ビルド用の依存の package.json・package-lock.json(ワークフローと preview が npm ci でインストールする)
+  const lockfiles = buildBuildLockfiles(packageRoot, fsImpl);
+  if (lockfiles) {
+    targets.push(
+      { name: "package.json", relPath: `${VENDOR_DIR}/package.json`, content: lockfiles.packageJson },
+      { name: "package-lock.json", relPath: `${VENDOR_DIR}/package-lock.json`, content: lockfiles.packageLock }
+    );
   }
 
   // 手元でプレビューするときに入れる依存(.github/tsuzuri/node_modules)を誤ってコミットしないように

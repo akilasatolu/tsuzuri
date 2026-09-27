@@ -176,12 +176,23 @@ export function renderAlert(innerHtml, ja = true) {
 // mermaid の図を描画するスクリプト。```mermaid のコードブロックがあるページにだけ入れる。
 // 閲覧時に CDN(jsDelivr)から mermaid を読み込み、<pre class="mermaid"> を図に変換する。
 // ページの背景が暗い(テーマ墨・ダークモード)ときは、図も暗い配色にする。
+//
+// 読み込むファイルは integrity(SRI)でハッシュを確かめる。CDN で中身が差し替えられていたら、
+// ブラウザが読み込みを止める(図はコードのまま表示される)。ハッシュを確かめられるよう、分割されていない
+// 1ファイルの版(dist/mermaid.min.js)を使う。
+// MERMAID_VERSION を変えたら、`node scripts/mermaid-integrity.mjs` で MERMAID_INTEGRITY も更新する
+// (CI の verify-cdn ジョブが、実際のファイルのハッシュと一致するか確認する)。
 export const MERMAID_VERSION = "12.0.0";
-export const MERMAID_SCRIPT = `<script type="module">
-import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@${MERMAID_VERSION}/dist/mermaid.esm.min.mjs";
-const bg = getComputedStyle(document.body).backgroundColor.match(/\\d+/g) || [255, 255, 255];
-const dark = (0.299 * bg[0] + 0.587 * bg[1] + 0.114 * bg[2]) < 128;
-mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+export const MERMAID_INTEGRITY = "sha384-xzghz1GQ5u9HCpVskeDPqMsdogD1yvuMQbEK53+wi+G70+6J1AG0L2cfi9PHjDWI";
+export const MERMAID_URL = `https://cdn.jsdelivr.net/npm/mermaid@${MERMAID_VERSION}/dist/mermaid.min.js`;
+export const MERMAID_SCRIPT = `<script src="${MERMAID_URL}" integrity="${MERMAID_INTEGRITY}" crossorigin="anonymous"></script>
+<script>
+if (window.mermaid) {
+  const bg = getComputedStyle(document.body).backgroundColor.match(/\\d+/g) || [255, 255, 255];
+  const dark = (0.299 * bg[0] + 0.587 * bg[1] + 0.114 * bg[2]) < 128;
+  mermaid.initialize({ startOnLoad: false, theme: dark ? "dark" : "default" });
+  mermaid.run();
+}
 </script>
 `;
 
@@ -322,6 +333,15 @@ export function preprocessRawHtmlPaths(
  * }} opts
  * @returns {string}
  */
+// ページに適用するCSS(基礎CSS → テーマ → 独自CSS の順につなげたもの)。
+// pageTemplate の <style> と、build-docs.mjs が書き出す共通のCSSファイルで同じ内容にする。
+export function composeCss({ baseCss = "", themeCss = "", customCss = "", styleFileRel }) {
+  return `${baseCss}${themeCss}${customCss ? `/* ---- Custom style: ${styleFileRel} ---- */\n${customCss}` : ""}`;
+}
+
+// stylesheetHref を渡すと、CSS を <style> で埋め込む代わりに、そのCSSファイルを <link> で読み込む
+// (全ページで同じファイルを使うので、2ページ目以降はブラウザのキャッシュが効く)。
+// headHtml は <head> の最後に入れるHTML(ライト/ダークの切り替えを表示前に反映するスクリプトなど)。
 export function pageTemplate({
   title,
   body,
@@ -329,6 +349,8 @@ export function pageTemplate({
   themeCss = "",
   customCss = "",
   styleFileRel,
+  stylesheetHref = "",
+  headHtml = "",
   lang = "ja",
   navHtml = "",
   metaTagsHtml = "",
@@ -345,10 +367,12 @@ export function pageTemplate({
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escapeHtml(title)}</title>
-${metaTagsHtml ? metaTagsHtml + "\n" : ""}<style>
-${baseCss}${themeCss}${customCss ? `/* ---- Custom style: ${styleFileRel} ---- */\n${customCss}` : ""}
-</style>
-</head>
+${metaTagsHtml ? metaTagsHtml + "\n" : ""}${
+    stylesheetHref
+      ? `<link rel="stylesheet" href="${escapeHtml(stylesheetHref)}">`
+      : `<style>\n${composeCss({ baseCss, themeCss, customCss, styleFileRel })}\n</style>`
+  }
+${headHtml ? headHtml + "\n" : ""}</head>
 <body>
 ${skipLink}${navHtml ? navHtml + "\n" : ""}${mainTag}
 ${body}

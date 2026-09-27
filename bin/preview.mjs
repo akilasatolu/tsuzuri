@@ -1,7 +1,8 @@
 // `npx github:akilasatolu/tsuzuri#v1 preview` の本体。
 // 利用者のリポジトリにコピー済みのビルドスクリプト(.github/tsuzuri/)で、公開時と同じ設定のサイトを
 // 手元にビルドし、簡易サーバーで表示する。
-//   1. ビルド用の依存が .github/tsuzuri/node_modules に無ければ、ワークフローと同じ版をインストールする
+//   1. ビルド用の依存が .github/tsuzuri/node_modules に無ければ、ワークフローと同じ方法でインストールする
+//      (.github/tsuzuri/package-lock.json があれば npm ci。無い古い版はワークフローに書かれた版を npm install)
 //   2. .github/tsuzuri/build-docs.mjs を実行する(設定ファイルの値が使われる。BASE_PATH は付けない)
 //   3. 出力先(OUT_DIR)を http://localhost:<port>/ で配信する
 //   4. リポジトリのファイルが変わったら自動でビルドし直し、開いているページを再読み込みさせる
@@ -159,7 +160,7 @@ export function shouldRebuildFor(relPath, outDirRel) {
 }
 
 /**
- * 生成済みワークフローの「Install build dependency」の行から、ビルド用の依存("marked@x.y.z ...")を読む。
+ * v1.6.0 以前の生成済みワークフローの「Install build dependency」の行から、ビルド用の依存("marked@x.y.z ...")を読む。
  * コピー済みのビルドスクリプトと同じ版を入れるため、CLI 自身の版ではなくワークフローの記載を使う。
  * @param {string} workflowText
  * @returns {string[]}
@@ -202,19 +203,23 @@ export async function runPreview({ cwd, port, version, watch: watchFiles = true,
     );
   }
 
-  // 1. ビルド用の依存
+  // 1. ビルド用の依存(ワークフローと同じ方法で入れる)
   if (!existsSync(join(cwd, VENDOR_DIR, "node_modules", "marked"))) {
-    const specs = dependencySpecsFromWorkflow(workflowText);
-    if (!specs.length) {
-      warn(`${WORKFLOW_PATH} からビルド用の依存を読み取れませんでした。init --update で作り直してください。`);
-      return null;
+    let npmArgs;
+    if (existsSync(join(cwd, VENDOR_DIR, "package-lock.json"))) {
+      // v1.7.0 以降: package-lock.json のとおりに入れる(中身のハッシュが違えば止まる)
+      npmArgs = ["ci", "--prefix", VENDOR_DIR, "--ignore-scripts", "--no-audit", "--no-fund"];
+      log(`ビルド用の依存をインストールします(${VENDOR_DIR}/package-lock.json のとおり)`);
+    } else {
+      const specs = dependencySpecsFromWorkflow(workflowText);
+      if (!specs.length) {
+        warn(`${WORKFLOW_PATH} からビルド用の依存を読み取れませんでした。init --update で作り直してください。`);
+        return null;
+      }
+      npmArgs = ["install", "--prefix", VENDOR_DIR, ...specs, "--no-save", "--no-audit", "--no-fund", "--ignore-scripts"];
+      log(`ビルド用の依存をインストールします(${VENDOR_DIR}/node_modules): ${specs.join(" ")}`);
     }
-    log(`ビルド用の依存をインストールします(${VENDOR_DIR}/node_modules): ${specs.join(" ")}`);
-    const npm = spawnSync(
-      "npm",
-      ["install", "--prefix", VENDOR_DIR, ...specs, "--no-save", "--no-audit", "--no-fund", "--ignore-scripts"],
-      { cwd, stdio: "inherit", shell: process.platform === "win32" }
-    );
+    const npm = spawnSync("npm", npmArgs, { cwd, stdio: "inherit", shell: process.platform === "win32" });
     if (npm.status !== 0) {
       warn("依存のインストールに失敗しました。");
       return null;

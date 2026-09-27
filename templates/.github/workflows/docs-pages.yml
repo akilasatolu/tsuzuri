@@ -118,10 +118,15 @@ jobs:
         with:
           node-version: 24
 
-      # ビルド用の依存は .github/tsuzuri/node_modules に入れる(利用者の package.json とは切り離す)
+      # ビルド用の依存(__BUILD_DEPENDENCIES__)は .github/tsuzuri/node_modules に入れる
+      # (利用者の package.json とは切り離す)。.github/tsuzuri/package-lock.json のとおりに npm ci で入れるので、
+      # ダウンロードした中身のハッシュが違えば止まる。インストールスクリプトは実行しない。
+      # 続けて、依存が npm の正規の署名付きで配布されたものかも確認する。
       - name: Install build dependency
         if: steps.trigger.outputs.should_deploy != 'false'
-        run: npm install --prefix __VENDOR_DIR__ __BUILD_DEPENDENCIES__ --no-save --no-audit --no-fund --ignore-scripts
+        run: |
+          npm ci --prefix __VENDOR_DIR__ --ignore-scripts --no-audit --no-fund
+          npm audit signatures --prefix __VENDOR_DIR__
 
       - name: Build
         if: steps.trigger.outputs.should_deploy != 'false'
