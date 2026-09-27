@@ -1,0 +1,32 @@
+name: CI
+
+# OSS本体自身の開発用CI(配布対象外)。
+# lint・testのみを行う。GitHub Pagesへのデプロイは一切行わないため、
+# pages/id-token権限は不要(contents: readのみで完結する)。
+# このワークフローはdevelopブランチ(tsuzuri本体の開発ブランチ)にのみ存在する。
+# このリポジトリ自身のPagesデプロイは、mainブランチ(tsuzuriで作ったユーザー向けサイト)
+# 側の docs-pages.yml が単独で担当しており、このワークフローとは競合しない。
+#
+# 開発者が任意のブランチにpushしても、ここで実行されるのはlint・testだけであり、
+# GitHub Pagesや外部リポジトリに影響する処理は一切走らない。
+
+on:
+  pull_request:
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test

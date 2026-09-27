@@ -1,0 +1,290 @@
+import { test, describe } from "node:test";
+import assert from "node:assert/strict";
+
+import {
+  escapeHtml,
+  renderTitle,
+  renderNav,
+  renderMetaTags,
+  pageTemplate,
+  preprocessRawHtmlPaths,
+} from "../.github/scripts/lib/html-renderer.mjs";
+
+describe("escapeHtml", () => {
+  test("& < > \" のみをエスケープする", () => {
+    assert.equal(escapeHtml(`& < > "`), "&amp; &lt; &gt; &quot;");
+  });
+  test("エスケープ対象外の文字はそのまま", () => {
+    assert.equal(escapeHtml("こんにちは'world"), "こんにちは'world");
+  });
+});
+
+describe("renderTitle", () => {
+  const content = "# 見出し\n\n本文";
+
+  test("metaTitleが非空文字列なら最優先で返す", () => {
+    assert.equal(renderTitle(content, "fallback", "meta title"), "meta title");
+  });
+  test("metaTitleが未指定ならh1見出しを返す", () => {
+    assert.equal(renderTitle(content, "fallback"), "見出し");
+  });
+  test("metaTitleが空文字ならh1見出しを返す(空文字は非空条件を満たさない)", () => {
+    assert.equal(renderTitle(content, "fallback", ""), "見出し");
+  });
+  test("h1見出しもmetaTitleもなければfallbackを返す", () => {
+    assert.equal(renderTitle("本文のみ", "fallback"), "fallback");
+  });
+});
+
+describe("renderNav", () => {
+  // ルート(root.md) - child1.md - grandchild.md
+  //                 - child2.md
+  const hierarchy = {
+    "root.md": { parent: null, children: ["child1.md", "child2.md"] },
+    "child1.md": { parent: "root.md", children: ["grandchild.md"] },
+    "child2.md": { parent: "root.md", children: [] },
+    "grandchild.md": { parent: "child1.md", children: [] },
+  };
+  const visitedMdKeys = ["root.md", "child1.md", "child2.md", "grandchild.md"];
+
+  test("全ページがリンクとして出現する", () => {
+    const html = renderNav(hierarchy, visitedMdKeys, "root.md", "", "");
+    for (const rel of visitedMdKeys) {
+      assert.match(html, new RegExp(`<a href="/${rel.replace(".md", ".html")}"`));
+    }
+  });
+
+  test("currentRelに一致する項目にのみaria-currentが付与される", () => {
+    const html = renderNav(hierarchy, visitedMdKeys, "child2.md", "", "");
+    assert.match(html, /<a href="\/child2\.html" aria-current="page">/);
+    assert.doesNotMatch(html, /<a href="\/root\.html" aria-current="page">/);
+    assert.doesNotMatch(html, /<a href="\/child1\.html" aria-current="page">/);
+  });
+
+  test("basePathがhrefに反映される", () => {
+    const html = renderNav(hierarchy, visitedMdKeys, "root.md", "/my-repo", "");
+    assert.match(html, /<a href="\/my-repo\/root\.html"/);
+  });
+
+  test("siteNameが設定されていればnav先頭に見出しとして表示する", () => {
+    const html = renderNav(hierarchy, visitedMdKeys, "root.md", "", "My Site");
+    assert.match(html, /<nav aria-label="サイト内ページ"><p>My Site<\/p>/);
+  });
+
+  test("siteName未設定なら見出しは出力されない", () => {
+    const html = renderNav(hierarchy, visitedMdKeys, "root.md", "", "");
+    assert.match(html, /<nav aria-label="サイト内ページ"><ul>/);
+  });
+
+  test("visitedMdKeysに含まれないページはリンクとして出現しない", () => {
+    const partiallyVisited = ["root.md", "child1.md"]; // grandchild.md, child2.md は除外
+    const html = renderNav(hierarchy, partiallyVisited, "root.md", "", "");
+    assert.doesNotMatch(html, /grandchild\.html/);
+    assert.doesNotMatch(html, /child2\.html/);
+  });
+});
+
+describe("renderMetaTags", () => {
+  test("descriptionありならdescription/og:descriptionの両方を出力する", () => {
+    const html = renderMetaTags({ description: "説明文", ogTitle: "タイトル" });
+    assert.match(html, /<meta name="description" content="説明文">/);
+    assert.match(html, /<meta property="og:description" content="説明文">/);
+  });
+
+  test("descriptionなしならdescription/og:descriptionのいずれも出力しない", () => {
+    const html = renderMetaTags({ ogTitle: "タイトル" });
+    assert.doesNotMatch(html, /name="description"/);
+    assert.doesNotMatch(html, /og:description/);
+  });
+
+  test("og:titleは常に出力される", () => {
+    const html = renderMetaTags({ ogTitle: "タイトル" });
+    assert.match(html, /<meta property="og:title" content="タイトル">/);
+  });
+
+  test("ogImageが非空なら出力する", () => {
+    const html = renderMetaTags({ ogTitle: "t", ogImage: "/img.png" });
+    assert.match(html, /<meta property="og:image" content="\/img\.png">/);
+  });
+
+  test("ogImage未設定なら出力しない", () => {
+    const html = renderMetaTags({ ogTitle: "t" });
+    assert.doesNotMatch(html, /og:image/);
+  });
+
+  test("noindex===trueの場合のみrobotsタグを出力する", () => {
+    const htmlTrue = renderMetaTags({ ogTitle: "t", noindex: true });
+    assert.match(htmlTrue, /<meta name="robots" content="noindex">/);
+
+    const htmlFalse = renderMetaTags({ ogTitle: "t", noindex: false });
+    assert.doesNotMatch(htmlFalse, /robots/);
+
+    const htmlUndefined = renderMetaTags({ ogTitle: "t" });
+    assert.doesNotMatch(htmlUndefined, /robots/);
+  });
+
+  test("canonicalUrl未設定時は<link rel=canonical>が出力されない", () => {
+    const html = renderMetaTags({ ogTitle: "t" });
+    assert.doesNotMatch(html, /rel="canonical"/);
+  });
+
+  test("canonicalUrlが非空なら<link rel=canonical>を出力する", () => {
+    const html = renderMetaTags({ ogTitle: "t", canonicalUrl: "https://example.com/" });
+    assert.match(html, /<link rel="canonical" href="https:\/\/example\.com\/">/);
+  });
+
+  test("faviconHrefが非空なら<link rel=icon>を出力する", () => {
+    const html = renderMetaTags({ ogTitle: "t", faviconHref: "/favicon.ico" });
+    assert.match(html, /<link rel="icon" href="\/favicon\.ico">/);
+  });
+
+  test("faviconHref未設定なら<link rel=icon>を出力しない", () => {
+    const html = renderMetaTags({ ogTitle: "t" });
+    assert.doesNotMatch(html, /rel="icon"/);
+  });
+});
+
+describe("pageTemplate", () => {
+  test("navHtml=''・metaTagsHtml=''・lang='ja'時、リファクタリング前と互換の構造を保つ(回帰テスト)", () => {
+    // リファクタリング前の pageTemplate が出力していた <style> ブロックの中身
+    // (v1でハードコードされていた配色+構造CSS)を baseCss として渡すことで、
+    // 出力構造(タグの並び・空行の有無)がリファクタリング前と一致することを確認する。
+    // ※ styles/base.css・styles/wa.css を用いたバイト単位の最終確認は T-011 のE2Eで行う。
+    const legacyStyleBlock = `  :root {
+    color-scheme: light dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  main { max-width: 860px; margin: 0 auto; }
+`;
+    const html = pageTemplate({
+      title: "タイトル",
+      body: "<p>本文</p>",
+      baseCss: legacyStyleBlock,
+      themeCss: "",
+      customCss: "",
+      styleFileRel: undefined,
+      lang: "ja",
+      navHtml: "",
+      metaTagsHtml: "",
+    });
+
+    // metaTagsHtml="" のとき <title> の直後に余計な空行を挟まず <style> が続く
+    assert.match(html, /<title>タイトル<\/title>\n<style>/);
+    // navHtml="" のとき <body> の直後に余計な空行を挟まず <main> が続く
+    assert.match(html, /<body>\n<main>/);
+    assert.match(html, /^<!DOCTYPE html>\n<html lang="ja">/);
+    assert.match(html, /<p>本文<\/p>/);
+    assert.match(html, new RegExp(legacyStyleBlock.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  });
+
+  test("metaTagsHtmlが非空なら<title>直後に挿入される", () => {
+    const html = pageTemplate({
+      title: "t",
+      body: "b",
+      metaTagsHtml: '<meta name="description" content="d">',
+    });
+    assert.match(
+      html,
+      /<title>t<\/title>\n<meta name="description" content="d">\n<style>/
+    );
+  });
+
+  test("navHtmlが非空なら<body>直後(<main>直前)に挿入される", () => {
+    const html = pageTemplate({
+      title: "t",
+      body: "b",
+      navHtml: "<nav>NAV</nav>",
+    });
+    assert.match(html, /<body>\n<nav>NAV<\/nav>\n<main>/);
+  });
+
+  test("3層カスケードの追記順序: base→theme→customの順で出現する", () => {
+    const html = pageTemplate({
+      title: "t",
+      body: "b",
+      baseCss: "/*base*/",
+      themeCss: "/*theme*/",
+      customCss: "/*custom*/",
+    });
+    const baseIdx = html.indexOf("/*base*/");
+    const themeIdx = html.indexOf("/*theme*/");
+    const customIdx = html.indexOf("/*custom*/");
+    assert.ok(baseIdx >= 0 && themeIdx >= 0 && customIdx >= 0, "3つ全てが出現する");
+    assert.ok(baseIdx < themeIdx, "baseはthemeより前");
+    assert.ok(themeIdx < customIdx, "themeはcustomより前");
+  });
+
+  test("themeCss=''(THEME=none相当)のとき/*theme*/相当の内容は一切出現しない", () => {
+    const html = pageTemplate({
+      title: "t",
+      body: "b",
+      baseCss: "/*base*/",
+      themeCss: "",
+      customCss: "/*custom*/",
+    });
+    assert.doesNotMatch(html, /\/\*theme\*\//);
+    assert.match(html, /\/\*base\*\//);
+    assert.match(html, /\/\*custom\*\//);
+  });
+
+  test("lang引数が<html lang>に反映される", () => {
+    const html = pageTemplate({ title: "t", body: "b", lang: "en" });
+    assert.match(html, /<html lang="en">/);
+  });
+
+  test("customCssが非空ならstyleFileRelを使ったコメントがcustomCssの直前に挿入される", () => {
+    const html = pageTemplate({
+      title: "t",
+      body: "b",
+      customCss: "/*custom*/",
+      styleFileRel: "styles/my-style.css",
+    });
+    assert.match(
+      html,
+      /\/\* ---- Custom style: styles\/my-style\.css ---- \*\/\n\/\*custom\*\//
+    );
+  });
+
+  test("customCssが空文字ならstyleFileRelのコメントも出力されない", () => {
+    const html = pageTemplate({
+      title: "t",
+      body: "b",
+      customCss: "",
+      styleFileRel: "styles/my-style.css",
+    });
+    assert.doesNotMatch(html, /Custom style/);
+  });
+});
+
+describe("preprocessRawHtmlPaths", () => {
+  test("生HTMLのimg src相対パスをbasePath付きの絶対パスに書き換える", () => {
+    const content = `<img src="images/pic.png" alt="x">`;
+    const result = preprocessRawHtmlPaths(content, "docs/index.md", "/my-repo");
+    assert.equal(result, `<img src="/my-repo/docs/images/pic.png" alt="x">`);
+  });
+
+  test("生HTMLのa href相対md参照を.htmlに変換して絶対パス化する", () => {
+    const content = `<a href="other.md">link</a>`;
+    const result = preprocessRawHtmlPaths(content, "docs/index.md", "/my-repo");
+    assert.equal(result, `<a href="/my-repo/docs/other.html">link</a>`);
+  });
+
+  test("外部リンクは書き換えない", () => {
+    const content = `<a href="https://example.com">link</a>`;
+    const result = preprocessRawHtmlPaths(content, "docs/index.md", "/my-repo");
+    assert.equal(result, content);
+  });
+
+  test("アンカーのみのリンクは書き換えない", () => {
+    const content = `<a href="#section">link</a>`;
+    const result = preprocessRawHtmlPaths(content, "docs/index.md", "/my-repo");
+    assert.equal(result, content);
+  });
+
+  test("basePathが空文字の場合もそのまま反映される", () => {
+    const content = `<img src="pic.png" alt="x">`;
+    const result = preprocessRawHtmlPaths(content, "index.md", "");
+    assert.equal(result, `<img src="/pic.png" alt="x">`);
+  });
+});
