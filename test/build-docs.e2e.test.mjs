@@ -1152,10 +1152,13 @@ describe("build-docs.mjs :: main (E2E)", () => {
       git("remote", "add", "origin", "git@github.com:owner/repo.git");
       git("add", "-A");
       git("-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "-m", "init");
-      const sha = git("rev-parse", "HEAD").stdout.trim();
+      const branch = git("branch", "--show-current").stdout.trim();
       result = runBuild(dir, { STRICT_LINKS: "true" });
       assert.equal(result.status, 0, result.stderr);
-      assert.ok(readOut(dir, "index.html").includes(`<a href="https://github.com/owner/repo/blob/${sha}/LICENSE">MIT</a>`));
+      assert.ok(
+        readOut(dir, "index.html").includes(`<a href="https://github.com/owner/repo/blob/${branch}/LICENSE">MIT</a>`),
+        "手元のビルドでは今のブランチ名で(pushしていないコミットを指さないように)"
+      );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

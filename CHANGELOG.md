@@ -36,7 +36,8 @@
   `README.md`・`index.md`のあるディレクトリ(`[guide](guide)`)はサイトのページへ、サイトに出さない
   ファイル・ディレクトリ(`LICENSE`・`.env.example`・READMEの無い`src/`)はGitHub上のファイル・一覧へのリンクにする。
   存在しないものはリンク切れとして扱う(`STRICT_LINKS`の対象)。GitHub上のURLは、GitHub Actionsでは
-  自動で設定される環境変数から、手元のビルドではgitの`origin`と`HEAD`から作り、分からなければ警告だけ出す。
+  自動で設定される環境変数から、手元のビルドではgitの`origin`(GitHubの場合のみ)と今のブランチ名から作り、
+  分からなければ警告だけ出す。
 - `STYLE_FILE`を省略したときの既定値を、`init`が生成する設定と同じ`.github/tsuzuri/styles/custom.css`にし、
   ファイルが無いときに警告を出さないようにした。
 - ナビの`aria-label`・「本文へスキップ」の文言を`LANG`に合わせて英語にもするようにした。

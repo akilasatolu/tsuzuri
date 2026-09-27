@@ -373,7 +373,8 @@ async function main() {
   // サイトに出さないが実在するリンク先(LICENSE・ドットファイル・README の無いディレクトリ)は、
   // GitHub 上のファイル・一覧へのリンクにする。リポジトリのURLとコミットは、
   //   1. GitHub Actions が自動で設定する環境変数(GITHUB_SERVER_URL・GITHUB_REPOSITORY・GITHUB_SHA)
-  //   2. 手元のビルドでは、git の origin のURLと HEAD のコミット
+  //   2. 手元のビルドでは、git の origin のURLと今のブランチ名(push していないコミットを指して
+  //      404 にならないように。ブランチが分からなければ HEAD のコミット)
   // の順に求める。どちらも分からなければリンクは書き換えず、警告だけ出す(リンク先は実在するので
   // リンク切れ・STRICT_LINKS の対象にはしない)。
   const gitOut = (args) => {
@@ -391,7 +392,7 @@ async function main() {
     repoRef = process.env.GITHUB_SHA;
   } else if (hasRepoLinks) {
     repoBaseUrl = webUrlFromGitRemote(gitOut(["remote", "get-url", "origin"]));
-    repoRef = repoBaseUrl ? gitOut(["rev-parse", "HEAD"]) : "";
+    repoRef = repoBaseUrl ? gitOut(["branch", "--show-current"]) || gitOut(["rev-parse", "HEAD"]) : "";
   }
   function repoUrlOf(repoRel, isDir) {
     if (!repoBaseUrl || !repoRef) return null;

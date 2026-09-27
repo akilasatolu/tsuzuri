@@ -241,5 +241,7 @@ describe("webUrlFromGitRemote", () => {
     assert.equal(webUrlFromGitRemote("https://token@github.com/owner/repo"), "https://github.com/owner/repo");
     assert.equal(webUrlFromGitRemote(""), "");
     assert.equal(webUrlFromGitRemote("/local/path/repo"), "");
+    assert.equal(webUrlFromGitRemote("git@gitlab.com:owner/repo.git"), "", "GitHub以外は対象外");
+    assert.equal(webUrlFromGitRemote("https://github.example.co.jp/o/r.git"), "https://github.example.co.jp/o/r");
   });
 });

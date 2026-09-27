@@ -167,9 +167,10 @@ export function resolveInsideRepo(repoRoot, relPath, realpath = fs.realpathSync)
 }
 
 /**
- * git のリモートURL(https・ssh のどちらの形式でも)から、ブラウザで開くリポジトリのURLを作る。
+ * git のリモートURL(https・ssh のどちらの形式でも)から、ブラウザで開く GitHub のリポジトリのURLを作る。
  * 例: "git@github.com:owner/repo.git" → "https://github.com/owner/repo"
- * 解釈できなければ "" を返す。
+ * GitHub 以外(ホスト名に "github" を含まない。GitLab 等)や、解釈できない場合は "" を返す
+ * (作るURLが GitHub の /blob/・/tree/ 形式のため)。GitHub Enterprise のホストは対象に含める。
  * @param {string} remote
  * @returns {string}
  */
@@ -182,7 +183,7 @@ export function webUrlFromGitRemote(remote) {
   ];
   for (const re of patterns) {
     const m = url.match(re);
-    if (m) return `https://${m[1]}/${m[2]}`;
+    if (m) return /github/i.test(m[1]) ? `https://${m[1]}/${m[2]}` : "";
   }
   return "";
 }
