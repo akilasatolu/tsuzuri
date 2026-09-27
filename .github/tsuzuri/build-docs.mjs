@@ -38,6 +38,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { Marked } from "marked";
 import markedFootnote from "marked-footnote";
 import hljs from "highlight.js/lib/common";
@@ -67,6 +68,7 @@ import {
   MERMAID_SCRIPT,
   preprocessRawHtmlPaths,
   pageTemplate,
+  composeCss,
   defaultNotFoundMarkdown,
 } from "./lib/html-renderer.mjs";
 import { buildSitemap, buildSitemapXml } from "./lib/sitemap.mjs";
@@ -76,6 +78,7 @@ import { buildSearchIndex, SEARCH_SCRIPT } from "./lib/search.mjs";
 import { parseFrontmatter } from "./lib/frontmatter.mjs";
 import { imageSizeOf } from "./lib/image-size.mjs";
 import { COPY_SCRIPT, COPY_SCRIPT_NAME } from "./lib/copy-button.mjs";
+import { THEME_SCRIPT, THEME_SCRIPT_NAME, THEME_HEAD_SCRIPT } from "./lib/theme-toggle.mjs";
 
 // 出力先の目印のファイル名。これがあるディレクトリは Tsuzuri が前回出力したものなので、ビルドの前に
 // 空にしてよい(消したページ・画像が残らないように)。"." で始まるので公開サイトには含まれない。
@@ -312,6 +315,7 @@ async function main() {
     config.customDomain && "CNAME",
     config.navEnabled && "search-index.json",
     config.navEnabled && "tsuzuri-search.js",
+    config.navEnabled && THEME_SCRIPT_NAME,
     config.siteOrigin && "sitemap.xml",
     config.siteOrigin && !config.basePath && "robots.txt",
     config.sitemapJson && "sitemap.json",
@@ -566,6 +570,20 @@ async function main() {
     return size ? ` width="${size.width}" height="${size.height}"` : "";
   }
 
+  // ページのCSSは、内容ごとに1つのファイル(tsuzuri-<内容のハッシュ>.css)に書き出して <link> で読み込む。
+  // 全ページで同じファイルを使うのでブラウザのキャッシュが効き、内容が変わればファイル名も変わる。
+  // (ページごとに theme・styleFile を変えたページは、その組み合わせのファイルを使う)
+  const stylesheets = new Map(); // css -> href
+  function stylesheetFor(css) {
+    if (!stylesheets.has(css)) {
+      const name = `tsuzuri-${createHash("sha256").update(css).digest("hex").slice(0, 10)}.css`;
+      fs.writeFileSync(path.join(OUT_DIR, name), css);
+      writtenBy.set(name, "(Tsuzuri が生成するファイル)");
+      stylesheets.set(css, `${config.basePath}/${name}`);
+    }
+    return stylesheets.get(css);
+  }
+
   // 本文の最初の(文字のある)段落を、説明文(meta description)用に短くする。
   // 注意書きの見出し(「補足」など)や、バッジ・画像だけの段落は使わない。
   let copyScriptUsed = false;
@@ -728,13 +746,20 @@ async function main() {
       : "";
 
     const pageStyle = resolveCustomStyleForPage(rel, meta.styleFile);
-    return pageTemplate({
-      title,
-      body: bodyHtml,
+    const css = composeCss({
       baseCss,
       themeCss: resolveThemeCssForPage(rel, meta.theme),
       customCss: pageStyle.css,
       styleFileRel: pageStyle.rel,
+    });
+    return pageTemplate({
+      title,
+      body: bodyHtml,
+      stylesheetHref: stylesheetFor(css),
+      // ナビがあるページは、ライト/ダークの切り替えを使う(前に選んだ表示を、表示される前に反映する)
+      headHtml: config.navEnabled
+        ? `${THEME_HEAD_SCRIPT}\n<script src="${escapeHtml(`${config.basePath}/${THEME_SCRIPT_NAME}`)}" defer></script>`
+        : "",
       lang: config.lang,
       navHtml,
       metaTagsHtml,
@@ -795,6 +820,7 @@ async function main() {
   if (search) {
     fs.writeFileSync(path.join(OUT_DIR, "search-index.json"), JSON.stringify(buildSearchIndex(searchPages)));
     fs.writeFileSync(path.join(OUT_DIR, "tsuzuri-search.js"), SEARCH_SCRIPT);
+    fs.writeFileSync(path.join(OUT_DIR, THEME_SCRIPT_NAME), THEME_SCRIPT);
   }
 
   // ---------- 7.7 見出しへのリンクの確認 ----------

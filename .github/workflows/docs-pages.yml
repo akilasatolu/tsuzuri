@@ -1,6 +1,6 @@
 name: Deploy Docs to GitHub Pages
 
-# tsuzuri v1.6.0 の npx github:akilasatolu/tsuzuri#v1 init によって生成された、自己完結型のワークフローです。
+# tsuzuri v1.7.0 の npx github:akilasatolu/tsuzuri#v1 init によって生成された、自己完結型のワークフローです。
 # ビルドスクリプト本体(.github/tsuzuri/ 配下)もこのリポジトリにコピー済みのため、
 # 実行のたびにOSS本体リポジトリ(akilasatolu/tsuzuri)を参照することはありません。
 # スクリプトを最新版に更新したい場合は、npx github:akilasatolu/tsuzuri#v1 init --update を実行してください。
@@ -111,10 +111,15 @@ jobs:
         with:
           node-version: 24
 
-      # ビルド用の依存は .github/tsuzuri/node_modules に入れる(利用者の package.json とは切り離す)
+      # ビルド用の依存(marked@18.0.14 highlight.js@11.12.0 marked-footnote@1.4.0)は .github/tsuzuri/node_modules に入れる
+      # (利用者の package.json とは切り離す)。.github/tsuzuri/package-lock.json のとおりに npm ci で入れるので、
+      # ダウンロードした中身のハッシュが違えば止まる。インストールスクリプトは実行しない。
+      # 続けて、依存が npm の正規の署名付きで配布されたものかも確認する。
       - name: Install build dependency
         if: steps.trigger.outputs.should_deploy != 'false'
-        run: npm install --prefix .github/tsuzuri marked@18.0.14 highlight.js@11.12.0 marked-footnote@1.4.0 --no-save --no-audit --no-fund --ignore-scripts
+        run: |
+          npm ci --prefix .github/tsuzuri --ignore-scripts --no-audit --no-fund
+          npm audit signatures --prefix .github/tsuzuri
 
       - name: Build
         if: steps.trigger.outputs.should_deploy != 'false'

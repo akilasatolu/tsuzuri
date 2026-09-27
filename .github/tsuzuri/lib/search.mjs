@@ -99,10 +99,33 @@ export const SEARCH_SCRIPT = `(() => {
   };
 
   input.addEventListener("focus", load, { once: true });
+  // キーボード操作: ↓で検索結果へ、結果の中は↑↓で移動し Enter で開く。Esc で検索欄に戻って消す。
+  const links = () => [...list.querySelectorAll("a")];
+  const clear = () => {
+    input.value = "";
+    list.replaceChildren();
+    input.focus();
+  };
   input.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      input.value = "";
-      list.replaceChildren();
+      clear();
+    } else if (event.key === "ArrowDown" && links().length) {
+      event.preventDefault();
+      links()[0].focus();
+    }
+  });
+  list.addEventListener("keydown", (event) => {
+    const items = links();
+    const i = items.indexOf(document.activeElement);
+    if (i < 0) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      items[Math.min(i + 1, items.length - 1)].focus();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      (i === 0 ? input : items[i - 1]).focus();
+    } else if (event.key === "Escape") {
+      clear();
     }
   });
   input.addEventListener("input", () => (index ? render() : load().then(render)));

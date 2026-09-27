@@ -8,6 +8,8 @@
     --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     --content-width: 860px;
   }
+  /* ダーク表示: OS がダークモードのとき(ライト表示に切り替えたときを除く)と、ダーク表示に切り替えたとき */
   @media (prefers-color-scheme: dark) {
-    :root { --fg: #e5e5e5; --bg: #14161a; --border: #2a2d33; --code-bg: #1e2126; }
+    :root:not([data-theme="light"]) { --fg: #e5e5e5; --bg: #14161a; --border: #2a2d33; --code-bg: #1e2126; }
   }
+  :root[data-theme="dark"] { --fg: #e5e5e5; --bg: #14161a; --border: #2a2d33; --code-bg: #1e2126; }
