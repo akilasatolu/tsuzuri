@@ -95,7 +95,7 @@ test("liveReload: HTML に再読み込みのスクリプトを入れ、notifyRel
   const base = `http://127.0.0.1:${server.address().port}`;
   try {
     const html = await (await fetch(`${base}/`)).text();
-    assert.match(html, new RegExp(`EventSource\\("${RELOAD_EVENTS_PATH}"\\)`));
+    assert.ok(html.includes(`new EventSource("${RELOAD_EVENTS_PATH}")`));
     const controller = new AbortController();
     const res = await fetch(`${base}${RELOAD_EVENTS_PATH}`, { signal: controller.signal });
     assert.equal(res.headers.get("content-type"), "text/event-stream");

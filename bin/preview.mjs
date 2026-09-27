@@ -75,7 +75,8 @@ export function resolveServePath(rootDir, urlPath) {
 
 // 自動再読み込み用の URL と、HTML に差し込むスクリプト(ビルドし直したら通知を受けて再読み込みする)
 export const RELOAD_EVENTS_PATH = "/__tsuzuri/events";
-export const RELOAD_SCRIPT = `<script>new EventSource("${RELOAD_EVENTS_PATH}").onmessage = () => location.reload();</script>`;
+// preview を止めたあとに、開いたままのページが再接続を繰り返さないよう、接続が切れたら閉じる
+export const RELOAD_SCRIPT = `<script>{const es = new EventSource("${RELOAD_EVENTS_PATH}"); es.onmessage = () => location.reload(); es.onerror = () => es.close();}</script>`;
 
 /**
  * 出力先ディレクトリを配信するサーバーを作る(listen は呼び出し側で行う)。
