@@ -197,7 +197,7 @@ Dependabotの更新対象に含めています。本体のCI(`ci.yml`・`sync-do
 
 `v1`などのタグは`main`ブランチのコミットに付けます。利用者は
 `npx github:akilasatolu/tsuzuri#v1 init`のようにタグを指定して実行できます。
-リリース前の確認項目は[CONTRIBUTING.md](CONTRIBUTING.md)の「リリース前チェックリスト」を、
+リリースの手順は[CONTRIBUTING.md](CONTRIBUTING.md)の「リリース手順」を、
 変更履歴は[CHANGELOG.md](CHANGELOG.md)を参照してください。
 
 ## コントリビュート

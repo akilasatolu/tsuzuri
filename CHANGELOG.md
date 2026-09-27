@@ -16,7 +16,9 @@
 
 ## [Unreleased]
 
-初回リリース(`v1`)に向けて準備中です。
+## [1.0.0] - 2026-09-27
+
+初回リリース。
 
 ### Added
 
@@ -116,3 +118,6 @@
   `ci.yml`全体の権限を`contents: read`のみに縮小した(lint・test以外何もしないため、
   GitHub Pagesへは一切触れなくなった)。ビルドロジック自体の検証は、既存の
   `test/build-docs.e2e.test.mjs`・`test/cli.test.mjs`で引き続きカバーされる。
+
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/akilasatolu/tsuzuri/releases/tag/v1.0.0

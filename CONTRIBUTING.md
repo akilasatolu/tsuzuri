@@ -61,7 +61,7 @@ npm run lint
 コミットしないでください(`docs`ブランチには、利用者と同じ手順で生成したものが置かれています)。生成内容の正しさは `test/cli.test.mjs`(生成ロジックの
 テスト)と `test/build-docs.e2e.test.mjs`(ビルド本体のE2Eテスト)で検証します。
 実機で動作確認したい場合は、別のテスト用リポジトリ(本プロジェクト外)で`init`を
-実行してください(詳しくは後述の「リリース前チェックリスト」)。
+実行してください(詳しくは後述の「リリース手順」)。
 (過去にはこのリポジトリのルート直下に生成物の古い例を置いていましたが、実際の
 生成テンプレートと乖離して混乱の元になっていたため削除しました。)
 
@@ -88,30 +88,40 @@ npm run lint
 本プロジェクトはMITライセンスで公開されています。
 **PRを送ることで、その変更内容をMITライセンスの下で提供することに同意したものとみなします。**
 
-## リリース前チェックリスト(`v1`タグ初回発行前に必須)
+## リリース手順
 
-v3で、利用者側`docs-pages.yml`がOSS本体リポジトリの再利用可能ワークフロー(`build.yml`)を
-`uses:`で呼び出す方式から、`init`実行時にビルドスクリプト本体(`build-docs.mjs`/`lib/`/
-`styles/`一式)を利用者リポジトリの`.github/tsuzuri/`配下へコピー(ベンダリング)する
-自己完結型の方式に変更した。設計段階では「実際に動くはず」として仮定しているが、
-実機でしか確認できない項目がある。`v1`タグを初めて発行する前に、必ず以下を実施すること。
+バージョン番号は[Semantic Versioning](https://semver.org/lang/ja/)に従います。タグは次の2種類を
+`main`ブランチのコミットに付けます。
 
-- [ ] **実利用リポジトリからの`npx github:akilasatolu/tsuzuri#v1 init`〜`git push`確認**
-  テスト用の別リポジトリ(本プロジェクト外)を1つ用意し、そのリポジトリで実際に
-  `npx github:akilasatolu/tsuzuri#v1 init`を実行して生成されたファイル一式
-  (`docs-pages.yml`/`docs-pages.config`/`.github/tsuzuri/`配下)をコミットし、
-  `git push`する。その利用者リポジトリのSettings→Pagesに、公開URLとデプロイ履歴が表示される
-  ことを目視で確認する。あわせて、ワークフロー実行ログにOSS本体リポジトリへの
-  `checkout`が一切現れないこと(利用者リポジトリの`checkout`のみであること)も確認する。
+- `vX.Y.Z`(例: `v1.0.0`): そのリリースを指す固定のタグ。以後は動かさない
+- `vX`(例: `v1`): 同じメジャーバージョンの最新リリースを指すタグ。リリースのたびに付け替える
+  (利用者は`npx github:akilasatolu/tsuzuri#v1 init`で、互換性を保ったまま最新版を使える)。
+  破壊的変更を含むリリースでは新しいメジャー(`v2`)を作る
 
-- [ ] **`npx github:akilasatolu/tsuzuri#v1 init`の再実行によるアップデート確認**
-  上記のリポジトリで、tsuzuri側に何らかの変更を加えた状態を想定し、再度セットアップ
-  コマンドを実行する。`.github/tsuzuri/`配下の各ファイルについて個別に上書き確認
-  プロンプトが出ること、「y」で応答したファイルだけが更新され、`.github/docs-pages.config`や
-  独自CSS(`STYLE_FILE`)はそのまま保持できることを確認する。
+1. `main`で`npm test`・`npm run lint`が通り、CIが成功していることを確認する
+2. 手元の検証用ディレクトリで、実際の利用と同じ流れを確認する(`npx`はパッケージをインストールして
+   シンボリックリンク経由でCLIを起動するため、`node bin/cli.mjs`の直接実行とは経路が異なる)
+   - `npx --yes <tsuzuriの作業ツリー> init`でファイルが生成されること
+   - 生成されたワークフローの手順(設定の読み込み → `BASE_PATH`/`SITE_ORIGIN`の決定 →
+     `marked`のインストール → `.github/tsuzuri/build-docs.mjs`の実行)でビルドできること
+   - 設定ファイルを書き換えてから`npx --yes <tsuzuriの作業ツリー> init --update`を実行し、
+     設定ファイルが保持されること
+3. `CHANGELOG.md`の`[Unreleased]`を`[X.Y.Z] - YYYY-MM-DD`に改め、空の`[Unreleased]`を追加する
+4. `package.json`・`package-lock.json`の`version`を`X.Y.Z`にする
+5. コミットしてタグを付け、pushする
 
-**注意**: 上記2点は、テスト用の別リポジトリを実際に用意してpushする必要があるため、このドキュメント
-の追記作業自体では実施していません。実施はリリース担当者が別途手動で行ってください。
+   ```sh
+   git tag vX.Y.Z
+   git tag -f vX
+   git push origin main vX.Y.Z
+   git push -f origin vX
+   ```
+
+6. GitHubの`Releases`で`vX.Y.Z`のリリースを作成し、`CHANGELOG.md`の該当部分を本文に貼る
+
+実際のGitHub Pagesへの公開と`init --update`による更新は、このリポジトリの`docs`ブランチ
+(`main`のCI成功時に`sync-docs.yml`が`init --update`を実行し、Pagesへ公開する)で
+継続的に確認されます。リリース後、`docs`のサイトが正しく公開されていることも確認してください。
 
 ## 既知の限界
 

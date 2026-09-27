@@ -1,6 +1,6 @@
 {
   "name": "tsuzuri",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "README起点でリンクを辿った複数のMarkdownファイルをGitHub Pagesサイトとして自動デプロイするツール",
   "type": "module",
   "license": "MIT",
