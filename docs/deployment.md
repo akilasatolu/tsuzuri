@@ -118,7 +118,8 @@ CUSTOM_DOMAIN=docs.example.com
 npx github:akilasatolu/tsuzuri init --update
 ```
 
-特定のバージョンに固定したい場合は、`#v1`のようなタグを指定します(タグ発行後に利用できます)。
+特定のバージョンに固定したい場合は、タグを指定します。`#v1`はv1系の最新版(互換性を保ったまま更新される)、
+`#v1.0.0`のように完全なバージョンを指定すると、そのリリースに固定されます。
 
 ```sh
 npx github:akilasatolu/tsuzuri#v1 init --update

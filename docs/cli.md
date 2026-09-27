@@ -88,7 +88,7 @@ npx github:akilasatolu/tsuzuri init --update
 | ファイル | `--update`での扱い |
 |---|---|
 | `.github/workflows/docs-pages.yml` | 最新版で上書き |
-| `.github/tsuzuri/`配下のビルドスクリプト・組み込みテーマCSS | 最新版で上書き(新しく増えたファイルは追加) |
+| `.github/tsuzuri/`配下のビルドスクリプト・組み込みテーマCSS | 最新版で上書き(新しく増えたファイルは追加。最新版で使われなくなった`lib/`配下のスクリプトは削除) |
 | `.github/docs-pages.config` | **変更しない** |
 | 独自CSS(`.github/tsuzuri/styles/custom.css`) | **変更しない** |
 
@@ -101,7 +101,7 @@ npx github:akilasatolu/tsuzuri init --update
 `npx github:akilasatolu/tsuzuri init`のように`ref`(バージョンやブランチ・タグ)を省略すると、
 既定ブランチ(`main`)の最新版が実行されます。ローカルのキャッシュや`npx`自体の実装によっては
 古いバージョンが実行されてしまう場合もあるため、リリース済みのバージョンに固定したい場合は、
-次のように`#v1`のようなタグを明示して実行してください(タグ発行後に利用できます)。
+次のように`#v1`のようなタグを明示して実行してください。
 
 ```
 npx github:akilasatolu/tsuzuri#v1 init
