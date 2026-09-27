@@ -21,6 +21,19 @@ Tsuzuriの使い方(利用者向けの説明)は、`docs`ブランチの
 - `docs`の`.github/tsuzuri/`配下は、利用者と同じ手順(`init`の再実行)で更新します。直接編集しないでください。
 - 利用者向けドキュメント(`docs`ブランチの`docs/`)の修正は、`docs`へのPRで行います。
 
+### `docs`ブランチの公開設定(リポジトリ作成時に1回だけ)
+
+`docs`ブランチは`TRIGGER_BRANCH=docs`で公開しています。既定ブランチ(`main`)以外からの
+デプロイになるため、GitHub側で次の設定が必要です。
+
+1. `Settings > Pages`の`Source`を`GitHub Actions`にする(`github-pages`環境が作成される)
+2. `Settings > Environments > github-pages`の`Deployment branches and tags`に`docs`を追加する
+
+2を忘れると、デプロイジョブが`Branch "docs" is not allowed to deploy to github-pages due to
+environment protection rules.`で失敗します。また、`docs-pages.yml`は`docs`ブランチにしか
+ないため、Actionsタブの手動実行(Run workflow)ボタンは表示されません。`docs`への
+pushでデプロイしてください。
+
 ## 開発環境のセットアップ
 
 Node.js 20以上が必要です。

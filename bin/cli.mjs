@@ -211,6 +211,9 @@ export function buildDocsPagesConfig(answers) {
 # ビルド・デプロイをトリガーするブランチ名
 # このブランチへの push (マージ含む) があったときだけ Pages への
 # デプロイが実行されます。
+# リポジトリの既定ブランチ(通常は main)以外を指定する場合は、GitHub の
+# Settings > Environments > github-pages > Deployment branches and tags に
+# このブランチを追加してください(追加しないとデプロイが失敗します)。
 TRIGGER_BRANCH=${triggerBranch}
 
 # 起点となる Markdown ファイル（リポジトリルートからの相対パス）
