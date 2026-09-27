@@ -1,0 +1,88 @@
+# デプロイ設定(Deployment)
+
+## 自己完結型のワークフロー
+
+`npx github:akilasatolu/tsuzuri#develop init`を実行すると、次のファイルが利用者リポジトリに
+生成されます。
+
+```
+利用者リポジトリ
+.github/workflows/docs-pages.yml   … ビルド・デプロイの手順一式(自己完結)
+.github/docs-pages.config          … 動作をカスタマイズする設定ファイル
+.github/tsuzuri/build-docs.mjs     … ビルド本体のスクリプト(コピー済み)
+.github/tsuzuri/lib/*.mjs          … ビルド本体が依存するモジュール一式(コピー済み)
+.github/tsuzuri/styles/*.css       … 組み込みテーマのCSS一式(コピー済み)
+```
+
+以前のバージョンでは、利用者側`docs-pages.yml`はOSS本体リポジトリ(tsuzuri)の
+再利用可能ワークフロー(`build.yml`)を`uses:`で呼び出すだけの薄いラッパーで、
+実際のビルドスクリプトはワークフロー実行のたびにOSS本体リポジトリから取得していました。
+現在は`init`実行時にビルドスクリプト本体を`.github/tsuzuri/`配下へコピー(ベンダリング)
+するようになったため、**生成後のワークフローはOSS本体リポジトリに一切依存せず、
+利用者リポジトリの中だけでビルド・デプロイが完結します**。ネットワーク越しにOSS本体
+リポジトリを参照する処理(第2の`checkout`など)は行われません。
+
+- **`docs-pages.yml`**: 設定ファイルの読み込み、`TRIGGER_BRANCH`との比較、
+  `BASE_PATH`/`SITE_ORIGIN`の算出、実際のビルド(`.github/tsuzuri/build-docs.mjs`実行)、
+  GitHub Pagesへのデプロイまで、すべての処理はこのファイル自身に書かれています。
+  利用者はこのファイルを直接編集することはなく、`.github/docs-pages.config`の値を
+  変更することで動作をカスタマイズします。
+- **`.github/tsuzuri/`配下**: ビルドスクリプト本体そのものです。利用者が直接編集する
+  必要はありません。削除・改変するとビルドが失敗します。
+
+## トリガーブランチの変更
+
+デプロイを実行するブランチを変えたい場合は、ワークフローファイルではなく
+`.github/docs-pages.config`の`TRIGGER_BRANCH`キーを書き換えるだけで完結します。
+
+```
+TRIGGER_BRANCH=release
+```
+
+このように書き換えて、そのブランチへpushすれば、以後はそのブランチへのpushだけが
+デプロイのトリガーになります(`main`以外へのpushはビルドジョブ自体は動きますが、
+`should_deploy=false`と判定されデプロイジョブはスキップされます。詳細は
+[faq.md](./faq.md)の「デプロイが実行されない」を参照)。
+
+## カスタムドメインの設定
+
+独自ドメインでサイトを公開したい場合は、`.github/docs-pages.config`の`CUSTOM_DOMAIN`に
+ドメイン名(スキームなし。例: `docs.example.com`)を設定します。
+
+```
+CUSTOM_DOMAIN=docs.example.com
+```
+
+これを設定すると、ビルド時に出力ディレクトリ直下へ`CNAME`ファイルが自動生成されます。
+また、内部的な`SITE_ORIGIN`(OGPの絶対URL等に使われるサイトの基点URL)の算出方法も
+変わり、`BASE_PATH`は空文字(ドメイン直下に配置)、`SITE_ORIGIN`は
+`https://<CUSTOM_DOMAIN>`になります。カスタムドメイン設定後にGitHub側のDNS設定
+(CNAMEレコードの登録など)が別途必要になる点は、GitHub Pages自体の標準的な手順に
+従ってください。
+
+## 手動実行(workflow_dispatch)
+
+リポジトリのActionsタブから、`Deploy Docs to GitHub Pages`ワークフローを選び、
+「Run workflow」ボタンで手動実行することもできます(`workflow_dispatch`トリガー)。
+手動実行の場合は、現在のブランチが`TRIGGER_BRANCH`と一致しているかどうかの判定
+そのものがスキップされ、常にデプロイが実行されます。「一時的に別ブランチの内容を
+確認のためデプロイしたい」といった場合に利用できます。
+
+## バージョンの固定・更新
+
+ビルドスクリプト本体は`init`実行時に`.github/tsuzuri/`配下へコピーされるため、
+**一度生成した後は、利用者側で何もしない限りバージョンが自動的に変わることはありません**
+(以前のバージョンの`uses: ...@v1`のように、ワークフロー実行のたびに自動で最新化される
+仕組みではなくなりました)。
+
+最新版のtsuzuriに更新したい場合は、`#v1`のようなタグを指定してセットアップコマンドを
+再実行してください。
+
+```sh
+npx github:akilasatolu/tsuzuri#v1 init
+```
+
+`.github/tsuzuri/`配下の各ファイルは、既存ファイルとして個別に上書き確認されます
+(詳しくは[CLIリファレンス](./cli.md)の「既存プロジェクトへの導入」を参照)。
+`.github/docs-pages.config`や独自CSS(`STYLE_FILE`)はそのままに、ビルドスクリプト
+本体だけを最新化したい場合は、`.github/tsuzuri/`配下のファイルにだけ「y」で応答してください。

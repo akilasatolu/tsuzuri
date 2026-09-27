@@ -1,0 +1,15 @@
+# Build output (OUT_DIR in .github/docs-pages.config)
+_site/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# developブランチ側の開発で使うもの(このブランチでは使わない)
+node_modules/
+ai-dev-force/

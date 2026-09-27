@@ -1,0 +1,45 @@
+/*
+ * shu.css (朱)
+ * 朱色を効かせた、力強い配色のスタイル。
+ * ロゴの朱色(#B33823系統)と親和性のある色調で、旧 warm-sepia.css の構成を参考に新規調整したもの。
+ */
+:root {
+  color-scheme: light dark;
+  --fg: #2a1a15;
+  --bg: #fffaf7;
+  --border: #eccabf;
+  --accent: #b33823;
+  --code-bg: #fbeee8;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", Helvetica, Arial, sans-serif;
+  --content-width: 780px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #f2ded8;
+    --bg: #1a1210;
+    --border: #4a2c22;
+    --accent: #e8794f;
+    --code-bg: #241815;
+  }
+}
+
+main h1,
+main h2,
+main h3 {
+  font-weight: 800;
+  color: var(--accent);
+}
+
+main h1,
+main h2 {
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.3em;
+}
+
+main a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
