@@ -38,6 +38,7 @@ import {
   majorTagOf,
   isBundledPath,
   createBundledConfirm,
+  missingConfigKeys,
 } from "../bin/cli.mjs";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
@@ -806,4 +807,28 @@ test("生成する設定ファイル・CSSひな形に、開発側の内部的�
   }
   assert.ok(buildStyleCssTemplate().includes("https://akilasatolu.github.io/tsuzuri/docs/theming.html"));
   assert.ok(!buildStyleCssTemplate().includes("README.md"));
+});
+
+test("missingConfigKeys: 最新のひな形にあって設定ファイルに無いキーを返す(コメント内のキーは数えない)", () => {
+  const old = ["TRIGGER_BRANCH=main", "# LAST_UPDATED=true", "THEME=wa", "NAV_ENABLED=true"].join("\n");
+  const missing = missingConfigKeys(old);
+  assert.ok(missing.includes("LAST_UPDATED"));
+  assert.ok(missing.includes("STRICT_LINKS"));
+  assert.ok(!missing.includes("THEME"));
+  assert.deepEqual(missingConfigKeys(buildDocsPagesConfig({})), []);
+});
+
+test("runUpdate: 設定ファイルに無い新しい項目を案内する(設定ファイルは書き換えない)", async () => {
+  const dir = makeTmpDir();
+  try {
+    mkdirSync(join(dir, ".github"), { recursive: true });
+    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=main\nTHEME=wa\n");
+    const logs = [];
+    await runUpdate({ cwd: dir, log: (m) => logs.push(m) });
+    const notice = logs.find((m) => m.includes("設定ファイルに無い項目"));
+    assert.ok(notice && notice.includes("LAST_UPDATED") && notice.includes("configuration.html"));
+    assert.equal(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), "TRIGGER_BRANCH=main\nTHEME=wa\n");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

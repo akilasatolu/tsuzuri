@@ -43,6 +43,7 @@
 - 生成するワークフローの`concurrency`を、ブランチごとのグループ(`docs-pages-<ref>`)にした。同じブランチへの
   pushは順番に処理され、ほかのブランチへのpushが待機中の公開を取り消すことはない。
 - 使われなくなった関数(`renderTitle`・`extractMarkdownSyntaxLinks`・`stripCodeSpans`)を削除した。
+- `init --update`の最後に、設定ファイルに無い新しい設定項目(既定値で動くもの)を案内するようにした。
 
 ### Fixed
 

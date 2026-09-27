@@ -472,7 +472,7 @@ export function isUpdateMode(argv = []) {
 export async function runUpdate({
   cwd,
   log = () => {},
-  fsImpl = { existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync },
+  fsImpl = { existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync, readFileSync },
   targets,
 }) {
   const configRel = ".github/docs-pages.config";
@@ -485,6 +485,18 @@ export async function runUpdate({
     { name: "docs-pages.yml", relPath: ".github/workflows/docs-pages.yml", content: buildDocsPagesYml() },
     ...buildVendorTargets(),
   ];
+  // 新しいバージョンで増えた設定項目のうち、利用者の設定ファイルに無いものを案内する
+  // (設定ファイルは書き換えないので、無い項目は既定値で動く)
+  if (fsImpl.readFileSync) {
+    const missingKeys = missingConfigKeys(fsImpl.readFileSync(join(cwd, configRel), "utf-8"));
+    if (missingKeys.length) {
+      log(
+        `ℹ 設定ファイルに無い項目があります(既定値で動きます): ${missingKeys.join(", ")}\n` +
+          `  使う場合は ${configRel} に追記してください。説明: ${DOCS_URL}docs/configuration.html`,
+      );
+    }
+  }
+
   const results = await writeGeneratedFiles(updateTargets, {
     cwd,
     confirmOverwrite: () => true,
@@ -595,6 +607,18 @@ export function answersFromArgs(args) {
     theme: args.theme ?? DEFAULT_ANSWERS.theme,
     createStyleFile: args.style,
   };
+}
+
+/**
+ * 設定ファイルの内容と比べて、最新の設定ファイルのひな形にあるのに書かれていないキーを返す。
+ * @param {string} configText
+ * @returns {string[]}
+ */
+export function missingConfigKeys(configText) {
+  const keysOf = (text) =>
+    [...text.matchAll(/^\s*([A-Z_]+)\s*=/gm)].map((m) => m[1]);
+  const present = new Set(keysOf(configText));
+  return keysOf(buildDocsPagesConfig({})).filter((key) => !present.has(key));
 }
 
 /**
