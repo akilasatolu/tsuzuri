@@ -60,3 +60,15 @@ jobs:
         run: |
           bash <(curl -sSfL "https://raw.githubusercontent.com/rhysd/actionlint/v${ACTIONLINT_VERSION}/scripts/download-actionlint.bash") "$ACTIONLINT_VERSION" "$RUNNER_TEMP"
           "$RUNNER_TEMP/actionlint" -color .github/workflows/*.yml "$RUNNER_TEMP/docs-pages.yml"
+
+  # 生成ページが CDN から読み込む mermaid のファイルのハッシュが、MERMAID_INTEGRITY(SRI)と
+  # 一致しているか確かめる(mermaid の版を上げたときの更新漏れを見つける)。
+  verify-cdn:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Verify mermaid integrity
+        run: node scripts/mermaid-integrity.mjs --check

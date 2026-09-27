@@ -175,6 +175,29 @@ export function vendoredVersionOf(workflowText) {
   return workflowText.match(/^# tsuzuri v(\d+\.\d+\.\d+) /m)?.[1] ?? "";
 }
 
+/**
+ * ブラウザでURLを開くコマンド(OSごと)。
+ * @param {string} url
+ * @param {string} [platform]
+ * @returns {[string, string[]]}
+ */
+export function browserCommand(url, platform = process.platform) {
+  if (platform === "darwin") return ["open", [url]];
+  if (platform === "win32") return ["cmd", ["/c", "start", "", url]];
+  return ["xdg-open", [url]];
+}
+
+function openBrowser(url, warn) {
+  const [cmd, args] = browserCommand(url);
+  try {
+    const child = spawn(cmd, args, { stdio: "ignore", detached: true });
+    child.on("error", () => warn(`ブラウザを開けませんでした。${url} を開いてください。`));
+    child.unref();
+  } catch {
+    warn(`ブラウザを開けませんでした。${url} を開いてください。`);
+  }
+}
+
 function buildEnv() {
   // 公開時と同じ設定。手元では BASE_PATH を付けず、サイトのURLも使わない
   const env = { ...process.env, BASE_PATH: "", SITE_ORIGIN: "" };
@@ -184,10 +207,18 @@ function buildEnv() {
 
 /**
  * preview コマンド本体。
- * @param {{ cwd: string, port: number, version: string, watch?: boolean, log?: Function, warn?: Function }} opts
+ * @param {{ cwd: string, port: number, version: string, watch?: boolean, open?: boolean, log?: Function, warn?: Function }} opts
  * @returns {Promise<import("node:http").Server | null>} 配信を始めたサーバー(失敗したときは null)
  */
-export async function runPreview({ cwd, port, version, watch: watchFiles = true, log = console.log, warn = console.warn }) {
+export async function runPreview({
+  cwd,
+  port,
+  version,
+  watch: watchFiles = true,
+  open = false,
+  log = console.log,
+  warn = console.warn,
+}) {
   const script = join(cwd, VENDOR_DIR, "build-docs.mjs");
   if (!existsSync(script)) {
     warn(`${VENDOR_DIR}/build-docs.mjs がありません。先に init を実行してください(リポジトリの直下で実行します)。`);
@@ -247,7 +278,9 @@ export async function runPreview({ cwd, port, version, watch: watchFiles = true,
     }
     throw err;
   });
-  log(`\nプレビュー: http://localhost:${server.address().port}/`);
+  const url = `http://localhost:${server.address().port}/`;
+  log(`\nプレビュー: ${url}`);
+  if (open) openBrowser(url, warn);
 
   // 4. 変更を見張って、ビルドし直す(続けて変更されたときは、まとめて1回にする)
   if (watchFiles) {

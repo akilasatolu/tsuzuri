@@ -78,6 +78,7 @@ import { buildSearchIndex, SEARCH_SCRIPT } from "./lib/search.mjs";
 import { parseFrontmatter } from "./lib/frontmatter.mjs";
 import { imageSizeOf } from "./lib/image-size.mjs";
 import { COPY_SCRIPT, COPY_SCRIPT_NAME } from "./lib/copy-button.mjs";
+import { THEME_SCRIPT, THEME_SCRIPT_NAME, THEME_HEAD_SCRIPT } from "./lib/theme-toggle.mjs";
 
 // 出力先の目印のファイル名。これがあるディレクトリは Tsuzuri が前回出力したものなので、ビルドの前に
 // 空にしてよい(消したページ・画像が残らないように)。"." で始まるので公開サイトには含まれない。
@@ -314,6 +315,7 @@ async function main() {
     config.customDomain && "CNAME",
     config.navEnabled && "search-index.json",
     config.navEnabled && "tsuzuri-search.js",
+    config.navEnabled && THEME_SCRIPT_NAME,
     config.siteOrigin && "sitemap.xml",
     config.siteOrigin && !config.basePath && "robots.txt",
     config.sitemapJson && "sitemap.json",
@@ -754,6 +756,10 @@ async function main() {
       title,
       body: bodyHtml,
       stylesheetHref: stylesheetFor(css),
+      // ナビがあるページは、ライト/ダークの切り替えを使う(前に選んだ表示を、表示される前に反映する)
+      headHtml: config.navEnabled
+        ? `${THEME_HEAD_SCRIPT}\n<script src="${escapeHtml(`${config.basePath}/${THEME_SCRIPT_NAME}`)}" defer></script>`
+        : "",
       lang: config.lang,
       navHtml,
       metaTagsHtml,
@@ -814,6 +820,7 @@ async function main() {
   if (search) {
     fs.writeFileSync(path.join(OUT_DIR, "search-index.json"), JSON.stringify(buildSearchIndex(searchPages)));
     fs.writeFileSync(path.join(OUT_DIR, "tsuzuri-search.js"), SEARCH_SCRIPT);
+    fs.writeFileSync(path.join(OUT_DIR, THEME_SCRIPT_NAME), THEME_SCRIPT);
   }
 
   // ---------- 7.7 見出しへのリンクの確認 ----------

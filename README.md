@@ -221,8 +221,12 @@ Dependabotの更新対象に含めています。本体のCI(`ci.yml`・`sync-do
 
 生成ページが図の表示に使うmermaid(CDNから読み込む)の版は、`.github/scripts/lib/html-renderer.mjs`の
 `MERMAID_VERSION`です。Dependabotに監視させるため、`deps/mermaid/package.json`にも同じ版を書いています
-(インストールはしません)。このファイルの更新PRが来たら、同じPRで`MERMAID_VERSION`も同じ版に直してください
-(直さないとテストが失敗します)。
+(インストールはしません)。このファイルの更新PRが来たら、同じPRで次の2つを直してください
+(直さないとテスト・CIが失敗します)。
+
+1. `MERMAID_VERSION`を同じ版にする
+2. `node scripts/mermaid-integrity.mjs`で表示されるハッシュを`MERMAID_INTEGRITY`に書く
+   (生成ページは、読み込んだファイルがこのハッシュと一致しないと実行しません。CIの`verify-cdn`が一致を確認します)
 
 ## リリース
 

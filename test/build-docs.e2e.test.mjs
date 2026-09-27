@@ -534,7 +534,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       const indexHtml = readOut(dir, "index.html");
       assert.match(indexHtml, /<li><a href="\/README\.html" aria-current="page">Root Page<\/a><\/li>/);
-      assert.match(indexHtml, /<li><span>docs<\/span><ul><li><a href="\/docs\/a\.html">ページA<\/a><\/li><\/ul><\/li>/);
+      assert.match(indexHtml, /<li><details open><summary>docs<\/summary><ul><li><a href="\/docs\/a\.html">ページA<\/a><\/li><\/ul><\/details><\/li>/);
 
       const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
       assert.equal(sitemap.tree.children[1].name, "docs");
@@ -1555,6 +1555,26 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.doesNotMatch(readOut(dir, "index.html"), /<style>/);
       const cssFiles = fs.readdirSync(path.join(dir, "_site")).filter((f) => f.endsWith(".css"));
       assert.equal(cssFiles.length, 2);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("ナビがあるページはライト/ダーク切り替えのスクリプトを読み込み、無ければ読み込まない", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      let result = runBuild(dir, { NAV_ENABLED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      let html = readOut(dir, "index.html");
+      assert.match(html, /<script>try\{const t=localStorage\.getItem\("tsuzuri-theme"\)/);
+      assert.match(html, /<script src="\/tsuzuri-theme\.js" defer><\/script>\n<\/head>/);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "tsuzuri-theme.js")));
+      assert.match(extractStyleBlock(html), /:root\[data-theme="dark"\]/);
+      result = runBuild(dir);
+      html = readOut(dir, "index.html");
+      assert.doesNotMatch(html, /tsuzuri-theme/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

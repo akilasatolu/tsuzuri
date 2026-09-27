@@ -67,34 +67,55 @@ function fakeRl(answers) {
 // 標準入力を直接モックする代わりに、question()を差し替えたrlオブジェクトを注入する。
 
 test("promptAnswers: 全てデフォルト値で応答すると既定値が返る", async () => {
-  const rl = fakeRl(["", "", "", ""]);
+  const rl = fakeRl(["", "", "", "", "", ""]);
   const answers = await promptAnswers(rl);
   assert.deepEqual(answers, {
     triggerBranch: "main",
     rootMd: "README.md",
     theme: "wa",
+    navEnabled: true,
+    siteName: "",
     createStyleFile: false,
   });
 });
 
 test("promptAnswers: THEME番号入力(3)でsumiが選ばれる", async () => {
-  const rl = fakeRl(["", "", "3", ""]);
+  const rl = fakeRl(["", "", "3", "", "", ""]);
   const answers = await promptAnswers(rl);
   assert.equal(answers.theme, "sumi");
   assert.equal(THEME_CHOICES[2].key, "sumi");
 });
 
 test("promptAnswers: STYLE_FILEひな形作成をyで応答するとtrueになる", async () => {
-  const rl = fakeRl(["", "", "", "y"]);
+  const rl = fakeRl(["", "", "", "", "", "y"]);
   const answers = await promptAnswers(rl);
   assert.equal(answers.createStyleFile, true);
 });
 
 test("promptAnswers: STYLE_FILEひな形作成をNまたは無入力で応答するとfalseになる", async () => {
-  const rl1 = fakeRl(["", "", "", "N"]);
+  const rl1 = fakeRl(["", "", "", "", "", "N"]);
   assert.equal((await promptAnswers(rl1)).createStyleFile, false);
-  const rl2 = fakeRl(["", "", "", ""]);
+  const rl2 = fakeRl(["", "", "", "", "", ""]);
   assert.equal((await promptAnswers(rl2)).createStyleFile, false);
+});
+
+test("promptAnswers: ナビ(n で無効)とサイト名を聞き、設定ファイルに書く", async () => {
+  const answers = await promptAnswers(fakeRl(["", "", "", "n", "  My Docs  ", ""]));
+  assert.equal(answers.navEnabled, false);
+  assert.equal(answers.siteName, "My Docs");
+  const config = buildDocsPagesConfig(answers);
+  assert.ok(config.includes("\nNAV_ENABLED=false\n"));
+  assert.ok(config.includes("\nSITE_NAME=My Docs\n"));
+  assert.ok(buildDocsPagesConfig({}).includes("\nNAV_ENABLED=true\n"), "既定ではナビを表示する");
+});
+
+test("--site-name / --no-nav で対話なしに指定できる", () => {
+  const args = parseCliArgs(["--site-name", "Docs", "--no-nav"]);
+  assert.equal(args.nonInteractive, true);
+  const answers = answersFromArgs(args);
+  assert.equal(answers.siteName, "Docs");
+  assert.equal(answers.navEnabled, false);
+  assert.equal(answersFromArgs(parseCliArgs(["-y"])).navEnabled, true);
 });
 
 test("resolveThemeChoice: 不正値・範囲外は既定(wa)にフォールバックする", () => {
@@ -677,12 +698,16 @@ test("parseCliArgs: --yes や値の指定があれば対話なし。値は answe
     triggerBranch: "docs",
     rootMd: "index.md",
     theme: "sumi",
+    navEnabled: true,
+    siteName: "",
     createStyleFile: true,
   });
   assert.deepEqual(answersFromArgs(parseCliArgs(["--yes"])), {
     triggerBranch: "main",
     rootMd: "README.md",
     theme: "wa",
+    navEnabled: true,
+    siteName: "",
     createStyleFile: false,
   });
 });
@@ -702,6 +727,8 @@ test("parseCliArgs: preview サブコマンドと --port", () => {
   assert.equal(parseCliArgs(["preview", "--port", "4001"]).port, 4001);
   assert.equal(parseCliArgs(["preview"])["no-watch"], false);
   assert.equal(parseCliArgs(["preview", "--no-watch"])["no-watch"], true);
+  assert.equal(parseCliArgs(["preview", "--open"]).open, true);
+  assert.equal(parseCliArgs(["preview"]).open, false);
   assert.throws(() => parseCliArgs(["preview", "--port", "abc"]), /--port には/);
   assert.throws(() => parseCliArgs(["preview", "--port", "70000"]), /--port には/);
   assert.throws(() => parseCliArgs(["init", "preview"]), /不明なサブコマンド/);

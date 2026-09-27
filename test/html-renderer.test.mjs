@@ -37,12 +37,14 @@ describe("renderNav", () => {
     }
   });
 
-  test("ディレクトリは<span>見出し+入れ子の<ul>として出力される", () => {
-    const html = renderNav(tree, "README.md", "", "");
+  test("ディレクトリは折りたためる<details>+入れ子の<ul>。上の階層と今のページがあるディレクトリだけ開く", () => {
+    let html = renderNav(tree, "README.md", "", "");
     assert.match(
       html,
-      /<li><span>docs<\/span><ul><li><a href="\/docs\/a\.html">ページA<\/a><\/li><li><span>deep<\/span><ul><li><a href="\/docs\/deep\/b\.html">b\.md<\/a><\/li><\/ul><\/li><\/ul><\/li>/
+      /<li><details open><summary>docs<\/summary><ul><li><a href="\/docs\/a\.html">ページA<\/a><\/li><li><details><summary>deep<\/summary><ul><li><a href="\/docs\/deep\/b\.html">b\.md<\/a><\/li><\/ul><\/details><\/li><\/ul><\/details><\/li>/
     );
+    html = renderNav(tree, "docs/deep/b.md", "", "");
+    assert.match(html, /<details open><summary>deep<\/summary>/, "今のページがあるディレクトリは開く");
   });
 
   test("表示名はfrontmatterのtitle、無ければファイル名", () => {

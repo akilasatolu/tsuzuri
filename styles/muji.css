@@ -14,14 +14,22 @@
   --content-width: 700px;
 }
 
+/* ダーク表示: OS がダークモードのとき(ライト表示に切り替えたときを除く)と、ダーク表示に切り替えたとき */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --fg: #eeeeee;
     --bg: #0d0d0d;
     --border: #333333;
     --accent: #eeeeee;
     --code-bg: #1a1a1a;
   }
+}
+:root[data-theme="dark"] {
+  --fg: #eeeeee;
+  --bg: #0d0d0d;
+  --border: #333333;
+  --accent: #eeeeee;
+  --code-bg: #1a1a1a;
 }
 
 main a {

@@ -11,6 +11,7 @@ import {
   vendoredVersionOf,
   shouldRebuildFor,
   RELOAD_EVENTS_PATH,
+  browserCommand,
 } from "../bin/preview.mjs";
 import { buildDocsPagesYml, buildDependencySpecs, readPackageVersion } from "../bin/cli.mjs";
 
@@ -108,4 +109,11 @@ test("liveReload: HTML に再読み込みのスクリプトを入れ、notifyRel
     server.close();
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("browserCommand: OS ごとにブラウザを開くコマンドを選ぶ", () => {
+  const url = "http://localhost:4000/";
+  assert.deepEqual(browserCommand(url, "darwin"), ["open", [url]]);
+  assert.deepEqual(browserCommand(url, "win32"), ["cmd", ["/c", "start", "", url]]);
+  assert.deepEqual(browserCommand(url, "linux"), ["xdg-open", [url]]);
 });

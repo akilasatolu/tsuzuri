@@ -63,17 +63,22 @@ export function renderNav(
   search = null,
   navLabel = "サイト内ページ",
 ) {
-  function renderNode(node) {
+  // ディレクトリは <details> で折りたためるようにする(JavaScript は不要)。最初から開いておくのは、
+  // いちばん上の階層のディレクトリと、今のページがあるディレクトリだけ(ページが多いときにナビが長くならないように)。
+  const containsCurrent = (node) =>
+    node.children.some((c) => (c.type === "page" ? c.rel === currentRel : containsCurrent(c)));
+  function renderNode(node, depth) {
     if (node.type === "dir") {
-      return `<li><span>${escapeHtml(node.name)}</span>${renderList(node.children)}</li>`;
+      const open = depth === 0 || containsCurrent(node) ? " open" : "";
+      return `<li><details${open}><summary>${escapeHtml(node.name)}</summary>${renderList(node.children, depth + 1)}</details></li>`;
     }
     const href = pageHref(node.rel, basePath);
     const currentAttr = node.rel === currentRel ? ' aria-current="page"' : "";
     return `<li><a href="${escapeHtml(href)}"${currentAttr}>${escapeHtml(node.title)}</a></li>`;
   }
 
-  function renderList(nodes) {
-    return `<ul>${nodes.map(renderNode).join("")}</ul>`;
+  function renderList(nodes, depth = 0) {
+    return `<ul>${nodes.map((n) => renderNode(n, depth)).join("")}</ul>`;
   }
 
   const heading = siteName ? `<p>${escapeHtml(siteName)}</p>` : "";

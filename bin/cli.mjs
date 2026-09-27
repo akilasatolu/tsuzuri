@@ -55,6 +55,10 @@ const DEFAULT_ANSWERS = {
   triggerBranch: "main",
   rootMd: "README.md",
   theme: "wa",
+  // ナビ(サイドバー・検索・目次・前後のページ)は、新しく作るときは表示する
+  navEnabled: true,
+  // 空ならビルド時にリポジトリ名になる
+  siteName: "",
   createStyleFile: false,
 };
 
@@ -213,7 +217,7 @@ export function buildDocsPagesYml(
  * それ以外のキーはデフォルト値のまま出力する。
  */
 export function buildDocsPagesConfig(answers) {
-  const { triggerBranch, rootMd, theme } = { ...DEFAULT_ANSWERS, ...answers };
+  const { triggerBranch, rootMd, theme, navEnabled, siteName } = { ...DEFAULT_ANSWERS, ...answers };
   return `# Tsuzuri の設定ファイル
 #
 # 「KEY=VALUE」の形で1行に1項目を書きます。# で始まる行と空行は無視されます。
@@ -242,13 +246,13 @@ STYLE_FILE=${VENDOR_DIR}/styles/custom.css
 LANG=ja
 
 # サイドバーのナビゲーション・サイト内検索・ページ内の目次・前後のページへのリンクを表示するか(true/false)
-NAV_ENABLED=false
+NAV_ENABLED=${navEnabled ? "true" : "false"}
 
 # サイトの favicon にする画像(リポジトリの直下からのパス。例: assets/favicon.svg)。空なら使いません。
 FAVICON_FILE=
 
 # サイト名(ナビの見出しと og:site_name に使います)。空ならリポジトリ名になります。
-SITE_NAME=
+SITE_NAME=${siteName}
 
 # 独自ドメインで公開する場合のドメイン名(例: docs.example.com)。空なら github.io で公開します。
 CUSTOM_DOMAIN=
@@ -499,12 +503,20 @@ export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
   );
   const theme = resolveThemeChoice(themeInput);
 
+  const navInput = await rl.question(
+    "? サイドバーのナビ・サイト内検索・ページ内の目次を表示しますか? (NAV_ENABLED) (Y/n): ",
+  );
+  const navEnabled = parseYesNo(navInput, DEFAULT_ANSWERS.navEnabled);
+
+  const siteNameInput = await rl.question("? サイト名 (SITE_NAME。空ならリポジトリ名) []: ");
+  const siteName = siteNameInput.trim();
+
   const createStyleFileInput = await rl.question(
     `? 独自CSS用の空ひな形ファイル(${VENDOR_DIR}/styles/custom.css)を作成しますか? (y/N): `,
   );
   const createStyleFile = parseYesNo(createStyleFileInput, false);
 
-  return { triggerBranch, rootMd, theme, createStyleFile };
+  return { triggerBranch, rootMd, theme, navEnabled, siteName, createStyleFile };
 }
 
 /**
@@ -587,7 +599,7 @@ export async function runUpdate({
 }
 
 export const HELP_TEXT = `使い方: npx github:${OSS_REPO}[#v1] init [オプション]
-        npx github:${OSS_REPO}[#v1] preview [--port <番号>] [--no-watch]
+        npx github:${OSS_REPO}[#v1] preview [--port <番号>] [--no-watch] [--open]
 
 init: オプションを付けずに実行すると、対話形式で設定を聞きながらファイルを生成します。
 preview: 公開時と同じ設定でサイトを手元にビルドし、ブラウザで確認できるように配信します
@@ -600,14 +612,18 @@ preview: 公開時と同じ設定でサイトを手元にビルドし、ブラ�
                      (origin/HEAD。分からなければ main)
       --root <パス>   起点となるMarkdownファイル(ROOT_MD)。既定: README.md
       --theme <名前>  テーマ(THEME)。${THEME_CHOICES.map((c) => c.key).join(" / ")}。既定: wa
+      --site-name <名前>
+                     サイト名(SITE_NAME)。既定: 空(ビルド時にリポジトリ名になる)
+      --no-nav       ナビ・サイト内検索・目次を表示しない(NAV_ENABLED=false)。既定: 表示する
       --style        独自CSSの空ひな形(${VENDOR_DIR}/styles/custom.css)も作る
       --force        対話なしのとき、既存ファイルも上書きする(既定では既存ファイルはスキップ)
       --port <番号>   preview で使うポート番号。既定: 4000
       --no-watch     preview で、ファイルの変更を見張らない(自動でビルドし直さない)
+      --open         preview で、起動したらブラウザでサイトを開く
   -v, --version      バージョンを表示する
   -h, --help         この説明を表示する
 
---branch / --root / --theme / --style のいずれかを指定した場合も、対話なしで実行します。`;
+--branch / --root / --theme / --site-name / --no-nav / --style のいずれかを指定した場合も、対話なしで実行します。`;
 
 /**
  * コマンドライン引数を解析する。不明なオプション・サブコマンドや不正なテーマ名はエラーにする。
@@ -644,9 +660,12 @@ function parseCliArgsRaw(argv) {
       branch: { type: "string" },
       root: { type: "string" },
       theme: { type: "string" },
+      "site-name": { type: "string" },
+      "no-nav": { type: "boolean", default: false },
       style: { type: "boolean", default: false },
       port: { type: "string" },
       "no-watch": { type: "boolean", default: false },
+      open: { type: "boolean", default: false },
       version: { type: "boolean", short: "v", default: false },
       help: { type: "boolean", short: "h", default: false },
     },
@@ -674,7 +693,10 @@ function parseCliArgsRaw(argv) {
     }
   }
   const nonInteractive =
-    values.yes || values.style || ["branch", "root", "theme"].some((k) => values[k] !== undefined);
+    values.yes ||
+    values.style ||
+    values["no-nav"] ||
+    ["branch", "root", "theme", "site-name"].some((k) => values[k] !== undefined);
   return { ...values, command, port, nonInteractive };
 }
 
@@ -687,6 +709,8 @@ export function answersFromArgs(args, defaults = DEFAULT_ANSWERS) {
     triggerBranch: args.branch?.trim() ?? defaults.triggerBranch,
     rootMd: args.root?.trim() ?? DEFAULT_ANSWERS.rootMd,
     theme: args.theme ?? DEFAULT_ANSWERS.theme,
+    navEnabled: !args["no-nav"],
+    siteName: args["site-name"]?.trim() ?? DEFAULT_ANSWERS.siteName,
     createStyleFile: args.style,
   };
 }
@@ -791,7 +815,7 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
   console.log(`tsuzuri v${version}\n`);
 
   if (args.command === "preview") {
-    const server = await runPreview({ cwd, port: args.port, version, watch: !args["no-watch"] });
+    const server = await runPreview({ cwd, port: args.port, version, watch: !args["no-watch"], open: args.open });
     if (!server) process.exitCode = 1;
     return;
   }

@@ -35,3 +35,11 @@ test("SEARCH_SCRIPT: 結果の一覧は aria-live で読み上げられ、Escで
   assert.match(SEARCH_SCRIPT, /aria-live", "polite"/);
   assert.match(SEARCH_SCRIPT, /event\.key === "Escape"/);
 });
+
+test("コピーボタン・ライト/ダーク切り替えのスクリプトも構文エラーが無い", async () => {
+  const { COPY_SCRIPT } = await import("../.github/scripts/lib/copy-button.mjs");
+  const { THEME_SCRIPT, THEME_HEAD_SCRIPT } = await import("../.github/scripts/lib/theme-toggle.mjs");
+  assert.doesNotThrow(() => new Function(COPY_SCRIPT));
+  assert.doesNotThrow(() => new Function(THEME_SCRIPT));
+  assert.doesNotThrow(() => new Function(THEME_HEAD_SCRIPT.replace(/^<script>|<\/script>$/g, "")));
+});

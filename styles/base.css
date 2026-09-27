@@ -71,12 +71,33 @@
   }
   body > nav ul { list-style: none; margin: 0; padding: 0; }
   body > nav ul ul { margin: 2px 0 4px 0.4em; padding-left: 0.8em; border-left: 1px solid var(--border); }
-  body > nav li > span { display: block; margin-top: 6px; font-weight: 600; opacity: 0.7; }
+  /* ディレクトリ(<details> で折りたためる見出し) */
+  body > nav summary { display: block; margin-top: 6px; font-weight: 600; opacity: 0.7; cursor: pointer; list-style: none; }
+  body > nav summary::-webkit-details-marker { display: none; }
+  body > nav summary::before { content: "▸"; display: inline-block; width: 1em; transition: transform 0.15s; }
+  body > nav details[open] > summary::before { transform: rotate(90deg); }
+  body > nav summary:focus-visible { outline: 2px solid var(--accent); }
   body > nav a { display: block; padding: 3px 0; color: var(--accent); text-decoration: none; }
   body > nav a:hover { text-decoration: underline; }
   body > nav a[aria-current="page"] { color: var(--fg); font-weight: 700; }
 
   .tsuzuri-nav-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+  /* ライト/ダークの切り替え(tsuzuri-theme.js がナビの見出しの横に置く。<html data-theme> で切り替える) */
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
+  .tsuzuri-theme-toggle {
+    margin-left: auto;
+    padding: 4px 10px;
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .tsuzuri-theme-toggle:focus-visible { outline: 2px solid var(--accent); }
+  .tsuzuri-theme-toggle + .tsuzuri-nav-label { margin-left: 0; }
   .tsuzuri-nav-head > p { margin: 0; font-weight: 700; }
   .tsuzuri-nav-label {
     margin-left: auto;
@@ -198,6 +219,11 @@
   main .tsuzuri-pager a:hover { border-color: var(--accent); }
   .tsuzuri-pager span { display: block; font-size: 0.8em; color: var(--fg); opacity: 0.7; }
   .tsuzuri-pager-next { margin-left: auto; text-align: right; }
+
+  /* OS で「視差効果を減らす」(動きを減らす)を選んでいる人には、動き(アニメーション・変化の演出)を付けない */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  }
 
   @media (min-width: 960px) {
     body:has(> nav) {
