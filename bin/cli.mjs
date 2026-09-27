@@ -535,7 +535,9 @@ export function parseCliArgs(argv = []) {
     parsed = parseCliArgsRaw(argv);
   } catch (err) {
     if (String(err.code).startsWith("ERR_PARSE_ARGS")) {
-      throw new Error(`引数が正しくありません: ${err.message}(--help で使い方を表示します)`);
+      throw new Error(`引数が正しくありません: ${err.message}(--help で使い方を表示します)`, {
+        cause: err,
+      });
     }
     throw err;
   }
