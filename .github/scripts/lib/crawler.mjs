@@ -112,6 +112,12 @@ export function crawlSite({
       // どちらも無ければリンク切れとして記録する(公開サイトでは 404 になるため)。
       if (repoRel.endsWith("/") || repoRel === ".") {
         const dir = repoRel === "." || repoRel === "./" ? "" : repoRel;
+        // サイトのルート("/" や "../" で直下を指すリンク)は、描画ではトップURL(= ROOT_MD のページ)を
+        // 指すので、リポジトリ直下の README.md ではなく ROOT_MD をたどる
+        if (!dir) {
+          queue.push({ rel: rootRel, parent: rel });
+          continue;
+        }
         const indexRel = DIR_INDEX_NAMES.map((name) => `${dir}${name}`).find((candidate) => {
           const abs = resolveInsideRepo(repoRoot, candidate, realpath);
           return abs && exists(abs);

@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 
 import {
   escapeHtml,
-  renderTitle,
   renderNav,
   renderMetaTags,
   pageTemplate,
@@ -19,23 +18,6 @@ describe("escapeHtml", () => {
   });
   test("エスケープ対象外の文字はそのまま", () => {
     assert.equal(escapeHtml("こんにちは'world"), "こんにちは'world");
-  });
-});
-
-describe("renderTitle", () => {
-  const content = "# 見出し\n\n本文";
-
-  test("metaTitleが非空文字列なら最優先で返す", () => {
-    assert.equal(renderTitle(content, "fallback", "meta title"), "meta title");
-  });
-  test("metaTitleが未指定ならh1見出しを返す", () => {
-    assert.equal(renderTitle(content, "fallback"), "見出し");
-  });
-  test("metaTitleが空文字ならh1見出しを返す(空文字は非空条件を満たさない)", () => {
-    assert.equal(renderTitle(content, "fallback", ""), "見出し");
-  });
-  test("h1見出しもmetaTitleもなければfallbackを返す", () => {
-    assert.equal(renderTitle("本文のみ", "fallback"), "fallback");
   });
 });
 

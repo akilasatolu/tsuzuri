@@ -755,10 +755,10 @@ test("生成ワークフロー: 依存は利用者の package.json と切り離�
   assert.match(buildDocsPagesYml(), new RegExp(`npm install --prefix ${VENDOR_DIR.replace(/[.]/g, "\\.")} marked@`));
 });
 
-test("生成ワークフロー: concurrency は公開(deploy)ジョブだけに付け、ワークフロー全体には付けない", () => {
+test("生成ワークフロー: 実行はブランチごとに順番に進め(他ブランチは別グループ)、公開は全体で1つずつ", () => {
   const yml = buildDocsPagesYml();
   const [top, jobs] = yml.split("\njobs:\n");
-  assert.doesNotMatch(top, /concurrency:/);
+  assert.ok(top.includes("concurrency:\n  group: docs-pages-${{ github.ref }}\n  cancel-in-progress: false\n"));
   const [buildJob, deployJob] = jobs.split("\n  deploy:\n");
   assert.doesNotMatch(buildJob, /concurrency:/);
   assert.ok(deployJob.includes("    concurrency:\n      group: pages\n      cancel-in-progress: false\n"));

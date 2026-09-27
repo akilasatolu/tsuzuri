@@ -7,7 +7,6 @@
  *   escapeHtml
  *
  * 仕様変更・新規追加したもの:
- *   renderTitle       — metaTitle(frontmatterの title)を最優先する第3引数を追加。
  *   renderNav         — 新規。navEnabled=true のときのみ呼び出し側が呼ぶ。
  *                        site-tree.mjs のサイトツリー(ディレクトリ階層)をそのまま <ul> の入れ子にする。
  *   renderMetaTags    — 新規。SEO用メタタグ(description/OGP/canonical/robots/favicon/og:site_name)を生成する。
@@ -31,23 +30,6 @@ export function escapeHtml(s) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-/**
- * ページタイトルを決定する。
- * 優先順位: metaTitle(frontmatterのtitle) > 本文先頭のh1見出し > fallback
- *
- * @param {string} content
- * @param {string} fallback
- * @param {string} [metaTitle]
- * @returns {string}
- */
-export function renderTitle(content, fallback, metaTitle) {
-  if (typeof metaTitle === "string" && metaTitle !== "") {
-    return metaTitle;
-  }
-  const m = content.match(/^#\s+(.+)$/m);
-  return m ? m[1].trim() : fallback;
 }
 
 /**

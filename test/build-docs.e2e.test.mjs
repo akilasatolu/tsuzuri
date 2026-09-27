@@ -1044,4 +1044,38 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  test("脚注のあるページが2つ以上あっても、それぞれのページに脚注が出る", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root Page\n\nx[^1] [A](docs/a.md)\n\n[^1]: note A\n");
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), "# Page A\n\ny[^1]\n\n[^1]: note B\n");
+      const result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(readOut(dir, "index.html"), /<li id="fn-1">\n<p>note A/);
+      assert.match(readOut(dir, "docs", "a.html"), /<li id="fn-1">\n<p>note B/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("ROOT_MDがルート以外のとき、/ へのリンクでリポジトリ直下のREADME.mdを公開しない", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "docs", "index.md"), "# Docs Top\n\n[top](/) [A](a.md)\n");
+      // 既定のフィクスチャの a.md は ../README.md へリンクしているので、ここでは外す
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), "# Page A\n\n[up](../)\n");
+      const result = runBuild(dir, { ROOT_MD: "docs/index.md", NAV_ENABLED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "README.html")), "直下のREADME.mdは公開しない");
+      assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).pageRels.sort(), ["docs/a.md", "docs/index.md"]);
+      assert.match(readOut(dir, "index.html"), /<a href="\/">top<\/a>/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

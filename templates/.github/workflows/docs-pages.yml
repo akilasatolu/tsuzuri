@@ -21,6 +21,13 @@ on:
 permissions:
   contents: read
 
+# 同じブランチの実行は push した順に1つずつ進める(後の push の内容が、先の push の内容で
+# 上書きされないように)。ブランチごとにグループを分けるので、TRIGGER_BRANCH 以外のブランチへの
+# push が、待機中の公開を押しのけて取り消すことはない。
+concurrency:
+  group: docs-pages-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -147,9 +154,7 @@ jobs:
     needs: build
     if: needs.build.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
-    # Pages への公開は同時に1つだけにする(実行中の公開は取り消さず、順番に行う)。
-    # ワークフロー全体ではなくこのジョブだけに付けるのは、TRIGGER_BRANCH 以外のブランチへの
-    # push(ビルドだけで公開しない実行)が、待機中の公開を押しのけて取り消さないようにするため。
+    # Pages への公開は、ブランチに関係なく同時に1つだけにする(実行中の公開は取り消さず、順番に行う)。
     concurrency:
       group: pages
       cancel-in-progress: false
