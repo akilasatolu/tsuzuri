@@ -8,7 +8,7 @@ title: Getting Started
 
 - 対象がGitHubリポジトリであること(GitHub Pagesを使うため)。
 - Node.jsやgit等をローカルに常設インストールしておく必要は基本的にありません。
-  セットアップコマンド(`npx ...`)の実行にはNode.js(npx)が必要ですが、これは
+  セットアップコマンド(`npx ...`)の実行にはNode.js 20以上(npx)が必要ですが、これは
   一時的に実行されるだけで、プロジェクトへの恒久的なインストールは発生しません。
 - ビルド・デプロイ自体はGitHub Actions上で実行されるため、利用者のローカル環境に
   Node.jsをインストールしていなくてもデプロイは可能です(セットアップコマンドの
@@ -19,7 +19,7 @@ title: Getting Started
 リポジトリのルートで、次のコマンドを実行します。
 
 ```
-npx github:akilasatolu/tsuzuri init
+npx github:akilasatolu/tsuzuri#v1 init
 ```
 
 実行すると、トリガーブランチ・起点となるMarkdownファイル・テーマ・独自CSSひな形の

@@ -36,9 +36,12 @@ Branch "docs" is not allowed to deploy to github-pages due to environment protec
 
 Markdown内でリンクした先のファイルが実際には存在しない場合、ビルドはエラーにはならず、
 そのリンクを「見つからなかったリンク」として記録したうえで処理を続けます。
-どのリンクが該当するかは、ビルド出力に含まれる`sitemap.json`の`missing`(リンク切れ)や
-`rejected`(パストラバーサル等、安全のため意図的にたどらなかったリンク)を確認すると
-特定できます。詳細な仕組みは[concepts.md](./concepts.md)を参照してください。
+どのリンクが該当するかは、ActionsタブのワークフローのログのBuildステップに、
+「リンク先が見つからなかったファイル」「セキュリティ上の理由で無視されたリンク」として
+参照元のファイルとともに表示されます。さらに詳しく調べたい場合は、一時的に`SITEMAP_JSON=true`に
+してデバッグ用の`sitemap.json`を出力することもできます([concepts.md](./concepts.md)参照)。
+リンク切れのまま公開したくない場合は、`STRICT_LINKS=true`にするとビルドを失敗させられます
+([configuration.md](./configuration.md#strict_links)参照)。
 
 ## スタイルが反映されない
 
@@ -57,10 +60,12 @@ Markdown内でリンクした先のファイルが実際には存在しない場
 
 `npx github:akilasatolu/tsuzuri init`を実行した際に、最新の変更が反映されていない
 (修正したはずの挙動が変わらない)場合は、`npx`側またはgit側のキャッシュが古いバージョンを
-再利用している可能性があります。次のように`ref`(タグ)を明示して実行してみてください。
+再利用している可能性があります。実行時の最初の行に表示されるバージョン(`tsuzuri v1.0.0`など)で、
+実際に動いているバージョンを確認できます。古い場合は、次のように完全なバージョンを指定して
+実行してみてください。
 
 ```
-npx github:akilasatolu/tsuzuri#v1 init
+npx github:akilasatolu/tsuzuri#v1.0.0 init --update
 ```
 
 これでも解消しない場合は、ローカル環境の`npx`のキャッシュを一度クリアしてから
@@ -74,5 +79,16 @@ npx github:akilasatolu/tsuzuri#v1 init
 画像やCSSが読み込めない・リンクが二重にパスを含んでいるといった崩れが起きた場合は、
 まずビルドが正しい`CUSTOM_DOMAIN`の値を認識しているか(ホスト名として妥当な形式に
 なっているか。スキームやパスを含めると無効な値として空文字にフォールバックします)、
-`sitemap.json`の`customDomain`/`siteOrigin`の値を確認してください。詳細は
+`SITEMAP_JSON=true`で出力した`sitemap.json`の`customDomain`/`siteOrigin`の値を確認してください。詳細は
 [deployment.md](./deployment.md)の「カスタムドメインの設定」を参照してください。
+
+## Markdownに書いたHTMLはそのまま出力される?
+
+はい。Markdownの中に書いたHTML(`<div>`・`<script>`など)や、`javascript:`で始まるリンクは、
+無害化されずにそのまま生成されたページに出力されます。Tsuzuriは「自分のリポジトリの内容を
+自分のサイトとして公開する」ためのツールで、Markdownを書く人をサイトの持ち主と同じく信頼する
+前提だからです。
+
+ほかの人からのプルリクエストでMarkdownを受け取る場合は、マージする前に、意図しない
+`<script>`やリンクが含まれていないか確認してください。
+

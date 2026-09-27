@@ -1,7 +1,3 @@
----
-title: Tsuzuri
----
-
 <img src="assets/favicon.svg" width="48" alt="Tsuzuri logo">
 
 # Tsuzuri
@@ -41,10 +37,12 @@ https://akilasatolu.github.io/tsuzuri/
 
 ## クイックスタート
 
+詳しい手順は[Getting Started](docs/getting-started.md)で説明しています。
+
 1. 自分のリポジトリのルートで次のコマンドを実行する(対話形式でファイルが生成されます)。
 
    ```sh
-   npx github:akilasatolu/tsuzuri init
+   npx github:akilasatolu/tsuzuri#v1 init
    ```
 
    このコマンドは、ワークフロー(`.github/workflows/docs-pages.yml`)・設定ファイル

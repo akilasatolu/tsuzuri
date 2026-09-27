@@ -87,6 +87,7 @@ OS側の設定に関わらず常時ダークテーマで表示されます。リ
 | `--font` | 本文のフォント指定(font-family) |
 | `--content-width` | 本文カラムの最大幅(例: `860px`) |
 | `color-scheme` | `light` / `dark` / `light dark`(OS設定に追従) |
+| `--hl-keyword` / `--hl-string` / `--hl-number` / `--hl-title` / `--hl-attr` / `--hl-comment` | コードの色分けの色(キーワード・文字列・数値・関数名等・属性や変数・コメント)。未指定ならテーマの`--accent`と`--fg`から自動で決まる |
 
 変数の上書きだけでなく、`main h1 { ... }`のような通常のCSSルールを`STYLE_FILE`に
 直接追記して細部を調整することも可能です。`STYLE_FILE`は基礎CSS・THEMEの後に

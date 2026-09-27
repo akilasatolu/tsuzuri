@@ -37,7 +37,7 @@ noindex: false
 |---|---|---|
 | `<title>`タグ・`og:title` | `title`の値 | 本文先頭の`# 見出し`(h1)。それも無ければファイルパス |
 | ナビゲーション(`NAV_ENABLED=true`時) | `title`の値 | ファイル名(例: `cli.md`) |
-| `sitemap.json`のページ一覧 | `title`の値 | ファイルパス(例: `docs/cli.md`) |
+| `sitemap.json`のページ一覧(`SITEMAP_JSON=true`時) | `title`の値 | ファイルパス(例: `docs/cli.md`) |
 
 ナビゲーションと`sitemap.json`では本文の`# 見出し`は使われません。ナビに分かりやすい
 名前を表示したいページには、`title`を書いてください。
