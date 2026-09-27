@@ -16,6 +16,8 @@
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-09-28
+
 ### Added
 
 - `preview`サブコマンド(`npx github:akilasatolu/tsuzuri#v1 preview`)。公開時と同じ設定でサイトを手元に
@@ -194,7 +196,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.1.0...v1.2.0
