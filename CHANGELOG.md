@@ -16,6 +16,8 @@
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-27
+
 ### Added
 
 - `init`が`.github/tsuzuri/.gitignore`(`node_modules/`)も生成するようにした(手元でプレビューするときの依存をコミットしないため)。
@@ -151,7 +153,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/akilasatolu/tsuzuri/releases/tag/v1.0.0
