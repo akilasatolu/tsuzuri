@@ -4,7 +4,7 @@
 
 > READMEを起点に、リンクをたどってGitHub Pagesへ自動デプロイするツール
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/akilasatolu/tsuzuri/blob/main/LICENSE)
 [![Build Status](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml)
 
 ## Tsuzuriとは
@@ -112,4 +112,4 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 
 ## ライセンス
 
-[MIT License](LICENSE)
+[MIT License](https://github.com/akilasatolu/tsuzuri/blob/main/LICENSE)
