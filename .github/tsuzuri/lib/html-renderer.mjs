@@ -7,7 +7,6 @@
  *   escapeHtml
  *
  * 仕様変更・新規追加したもの:
- *   renderTitle       — metaTitle(frontmatterの title)を最優先する第3引数を追加。
  *   renderNav         — 新規。navEnabled=true のときのみ呼び出し側が呼ぶ。
  *                        site-tree.mjs のサイトツリー(ディレクトリ階層)をそのまま <ul> の入れ子にする。
  *   renderMetaTags    — 新規。SEO用メタタグ(description/OGP/canonical/robots/favicon/og:site_name)を生成する。
@@ -31,23 +30,6 @@ export function escapeHtml(s) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-/**
- * ページタイトルを決定する。
- * 優先順位: metaTitle(frontmatterのtitle) > 本文先頭のh1見出し > fallback
- *
- * @param {string} content
- * @param {string} fallback
- * @param {string} [metaTitle]
- * @returns {string}
- */
-export function renderTitle(content, fallback, metaTitle) {
-  if (typeof metaTitle === "string" && metaTitle !== "") {
-    return metaTitle;
-  }
-  const m = content.match(/^#\s+(.+)$/m);
-  return m ? m[1].trim() : fallback;
 }
 
 /**
@@ -79,7 +61,7 @@ export function renderNav(tree, currentRel, basePath, siteName, menuLabel = "メ
     }
     const href = toSiteAbsHref("", node.rel, basePath);
     const currentAttr = node.rel === currentRel ? ' aria-current="page"' : "";
-    return `<li><a href="${href}"${currentAttr}>${escapeHtml(node.title)}</a></li>`;
+    return `<li><a href="${escapeHtml(href)}"${currentAttr}>${escapeHtml(node.title)}</a></li>`;
   }
 
   function renderList(nodes) {
@@ -117,7 +99,7 @@ export function renderPager(
 ) {
   if (!prev && !next) return "";
   const link = (page, rel, label) =>
-    `<a class="tsuzuri-pager-${rel}" rel="${rel}" href="${toSiteAbsHref("", page.rel, basePath)}">` +
+    `<a class="tsuzuri-pager-${rel}" rel="${rel}" href="${escapeHtml(toSiteAbsHref("", page.rel, basePath))}">` +
     `<span>${escapeHtml(label)}</span>${escapeHtml(page.title)}</a>`;
   return (
     `<nav class="tsuzuri-pager" aria-label="${escapeHtml(labels.nav)}">` +
@@ -126,6 +108,74 @@ export function renderPager(
     `</nav>`
   );
 }
+
+/**
+ * ページ内の目次(h2・h3 の見出しへのリンク一覧)のHTMLを構築する。
+ * h3 は直前の h2 の下に入れ子にする(h2 より前にある h3 は1段目に置く)。
+ *
+ * @param {Array<{ depth: number, id: string, text: string }>} headings
+ * @param {string} [label]
+ * @returns {string}
+ */
+export function renderToc(headings, label = "目次") {
+  const items = [];
+  for (const heading of headings) {
+    const link = `<a href="#${escapeHtml(heading.id)}">${escapeHtml(heading.text)}</a>`;
+    const parent = items[items.length - 1];
+    if (heading.depth === 3 && parent && parent.depth === 2) parent.children.push(link);
+    else items.push({ depth: heading.depth, link, children: [] });
+  }
+  const list = items
+    .map(
+      (item) =>
+        `<li>${item.link}${
+          item.children.length ? `<ul>${item.children.map((c) => `<li>${c}</li>`).join("")}</ul>` : ""
+        }</li>`
+    )
+    .join("");
+  return `<nav class="tsuzuri-toc" aria-label="${escapeHtml(label)}"><p>${escapeHtml(label)}</p><ul>${list}</ul></nav>\n`;
+}
+
+// GitHub の注意書き(> [!NOTE] など)の種類と、表示する見出し(日本語/英語)
+const ALERT_TYPES = {
+  note: ["補足", "Note"],
+  tip: ["ヒント", "Tip"],
+  important: ["重要", "Important"],
+  warning: ["警告", "Warning"],
+  caution: ["注意", "Caution"],
+};
+
+/**
+ * 引用ブロックの中身(レンダリング済みHTML)が GitHub の注意書き(先頭が [!NOTE] 等)なら、
+ * 種類ごとの枠のHTMLを返す。注意書きでなければ null を返す(呼び出し側で通常の引用にする)。
+ *
+ * @param {string} innerHtml - 引用ブロックの中身のHTML
+ * @param {boolean} [ja] - 見出しを日本語にするか
+ * @returns {string | null}
+ */
+export function renderAlert(innerHtml, ja = true) {
+  const m = innerHtml.match(/^<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*(?:<br>)?\n?/i);
+  if (!m) return null;
+  const type = m[1].toLowerCase();
+  const title = ALERT_TYPES[type][ja ? 0 : 1];
+  const body = ("<p>" + innerHtml.slice(m[0].length)).replace(/^<p>\s*<\/p>\n?/, "");
+  return (
+    `<div class="markdown-alert markdown-alert-${type}">` +
+    `<p class="markdown-alert-title">${escapeHtml(title)}</p>\n${body}</div>\n`
+  );
+}
+
+// mermaid の図を描画するスクリプト。```mermaid のコードブロックがあるページにだけ入れる。
+// 閲覧時に CDN(jsDelivr)から mermaid を読み込み、<pre class="mermaid"> を図に変換する。
+// ページの背景が暗い(テーマ墨・ダークモード)ときは、図も暗い配色にする。
+export const MERMAID_VERSION = "12.0.0";
+export const MERMAID_SCRIPT = `<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@${MERMAID_VERSION}/dist/mermaid.esm.min.mjs";
+const bg = getComputedStyle(document.body).backgroundColor.match(/\\d+/g) || [255, 255, 255];
+const dark = (0.299 * bg[0] + 0.587 * bg[1] + 0.114 * bg[2]) < 128;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+`;
 
 /**
  * SEO用メタタグ(description/OGP/canonical/robots/favicon)のHTMLを構築する。

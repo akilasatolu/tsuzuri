@@ -12,8 +12,9 @@
  *     `visitedMd` の各エントリを `{ content, meta }` の形にした
  *     (`content` はfrontmatterブロックを除いた本文)。以降のリンク抽出は
  *     この本文に対して行う。
- *   - リンク抽出前に `link-extractor.stripCodeSpans` を適用し、コードブロック内の
- *     見せかけのリンクを探索対象から除外する(セキュリティ回帰対応)。
+ *   - リンクの抽出は link-extractor.extractLinks(描画と同じ marked の解析結果を使う)で行い、
+ *     参照リンク・バッジ等もたどる。コードブロック内の見せかけのリンクは自然に除外される。
+ *   - ディレクトリへのリンク("guide/")は、中の README.md / index.md をたどる。
  *   - `path-utils.resolveRepoRel` が判別可能な戻り値
  *     (`{ repoRel, rest }` または `{ rejected: true, reason }`) を返すようになったため、
  *     `reason` で分岐する:
@@ -25,7 +26,7 @@
 
 import fs from "node:fs";
 import { resolveRepoRel, resolveInsideRepo, isMarkdownPath, isImagePath, isLinkedFilePath } from "./path-utils.mjs";
-import { stripCodeSpans, extractMarkdownSyntaxLinks, extractRawHtmlLinks } from "./link-extractor.mjs";
+import { extractLinks } from "./link-extractor.mjs";
 import { parseFrontmatter } from "./frontmatter.mjs";
 
 /**
@@ -33,6 +34,9 @@ import { parseFrontmatter } from "./frontmatter.mjs";
  * @typedef {{ rel: string, referencedFrom: string|null }} MissingEntry
  * @typedef {{ rel: string, referencedFrom: string|null, reason: "path-traversal"|"decode-error"|"outside-repo" }} RejectedEntry
  */
+
+// ディレクトリへのリンクのとき、たどるページ(優先順)
+const DIR_INDEX_NAMES = ["README.md", "readme.md", "index.md"];
 
 /**
  * @param {object} options
@@ -89,11 +93,7 @@ export function crawlSite({
       hierarchy[parent].children.push(rel);
     }
 
-    const stripped = stripCodeSpans(body);
-    const rawLinks = [
-      ...extractMarkdownSyntaxLinks(stripped),
-      ...extractRawHtmlLinks(stripped),
-    ];
+    const rawLinks = extractLinks(body);
 
     for (const rawLink of rawLinks) {
       const resolved = resolveRepoRel(rel, rawLink);
@@ -107,6 +107,25 @@ export function crawlSite({
       }
 
       const { repoRel } = resolved;
+
+      // ディレクトリへのリンク("guide/" など): 中の README.md か index.md をたどる。
+      // どちらも無ければリンク切れとして記録する(公開サイトでは 404 になるため)。
+      if (repoRel.endsWith("/") || repoRel === ".") {
+        const dir = repoRel === "." || repoRel === "./" ? "" : repoRel;
+        // サイトのルート("/" や "../" で直下を指すリンク)は、描画ではトップURL(= ROOT_MD のページ)を
+        // 指すので、リポジトリ直下の README.md ではなく ROOT_MD をたどる
+        if (!dir) {
+          queue.push({ rel: rootRel, parent: rel });
+          continue;
+        }
+        const indexRel = DIR_INDEX_NAMES.map((name) => `${dir}${name}`).find((candidate) => {
+          const abs = resolveInsideRepo(repoRoot, candidate, realpath);
+          return abs && exists(abs);
+        });
+        if (indexRel) queue.push({ rel: indexRel, parent: rel });
+        else if (dir) missing.push({ rel: repoRel, referencedFrom: rel });
+        continue;
+      }
 
       if (isMarkdownPath(repoRel)) {
         queue.push({ rel: repoRel, parent: rel });

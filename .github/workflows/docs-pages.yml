@@ -1,9 +1,9 @@
 name: Deploy Docs to GitHub Pages
 
-# tsuzuri v1.1.0 の npx github:akilasatolu/tsuzuri init によって生成された、自己完結型のワークフローです。
+# tsuzuri v1.1.0 の npx github:akilasatolu/tsuzuri#v1 init によって生成された、自己完結型のワークフローです。
 # ビルドスクリプト本体(.github/tsuzuri/ 配下)もこのリポジトリにコピー済みのため、
 # 実行のたびにOSS本体リポジトリ(akilasatolu/tsuzuri)を参照することはありません。
-# スクリプトを最新版に更新したい場合は、npx github:akilasatolu/tsuzuri init --update を実行してください。
+# スクリプトを最新版に更新したい場合は、npx github:akilasatolu/tsuzuri#v1 init --update を実行してください。
 
 on:
   push:
@@ -14,8 +14,11 @@ on:
 permissions:
   contents: read
 
+# 同じブランチの実行は push した順に1つずつ進める(後の push の内容が、先の push の内容で
+# 上書きされないように)。ブランチごとにグループを分けるので、TRIGGER_BRANCH 以外のブランチへの
+# push が、待機中の公開を押しのけて取り消すことはない。
 concurrency:
-  group: "pages"
+  group: docs-pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -47,7 +50,7 @@ jobs:
             # 既知の設定キーだけを環境変数として取り込む。それ以外(NODE_OPTIONS等)を
             # 設定ファイル経由で注入できないようにする。
             case "$key" in
-              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANG|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS|SITEMAP_JSON)
+              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANG|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS|SITEMAP_JSON|LAST_UPDATED)
                 echo "${key}=${value}" >> "$GITHUB_ENV" ;;
               *)
                 echo "::warning::未知の設定キー ${key} を無視します" ;;
@@ -97,14 +100,21 @@ jobs:
           echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"
           echo "SITE_ORIGIN=$SITE_ORIGIN" >> "$GITHUB_ENV"
 
+      # 最終更新日(LAST_UPDATED=true)を git の履歴から求めるため、そのときだけ全履歴を取得する
+      # (checkout は既定で直近の1コミットしか取得しないため、そのままでは日付が正しく求まらない)
+      - name: Fetch full history for last-updated dates
+        if: steps.trigger.outputs.should_deploy != 'false' && env.LAST_UPDATED == 'true'
+        run: git fetch --unshallow --quiet || true
+
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         if: steps.trigger.outputs.should_deploy != 'false'
         with:
           node-version: 24
 
+      # ビルド用の依存は .github/tsuzuri/node_modules に入れる(利用者の package.json とは切り離す)
       - name: Install build dependency
         if: steps.trigger.outputs.should_deploy != 'false'
-        run: npm install marked@18.0.14 highlight.js@11.12.0 --no-save --no-audit --no-fund --ignore-scripts
+        run: npm install --prefix .github/tsuzuri marked@18.0.14 highlight.js@11.12.0 marked-footnote@1.4.0 --no-save --no-audit --no-fund --ignore-scripts
 
       - name: Build
         if: steps.trigger.outputs.should_deploy != 'false'
@@ -122,6 +132,7 @@ jobs:
           OGP_DEFAULT_IMAGE: ${{ env.OGP_DEFAULT_IMAGE }}
           STRICT_LINKS: ${{ env.STRICT_LINKS }}
           SITEMAP_JSON: ${{ env.SITEMAP_JSON }}
+          LAST_UPDATED: ${{ env.LAST_UPDATED }}
           THEME: ${{ env.THEME }}
           # THEME解決の基準ディレクトリ。initでコピーしたベンダリング先を指す。
           STYLE_DIR: .github/tsuzuri/styles
@@ -136,6 +147,10 @@ jobs:
     needs: build
     if: needs.build.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
+    # Pages への公開は、ブランチに関係なく同時に1つだけにする(実行中の公開は取り消さず、順番に行う)。
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     permissions:
       pages: write
       id-token: write

@@ -8,9 +8,9 @@
  *   - YAMLパーサライブラリは追加しない(依存量の最小性を維持するため)。
  *     `key: value` 形式のフラットな行のみをサポートする自作パーサとする。
  *   - サポートするキーは `title` / `description` / `ogImage` / `ogType` /
- *     `lang` / `noindex` / `theme` の7つ。`noindex` のみ真偽値化し、それ以外は
- *     文字列としてそのまま保持する。
- *   - 上記7キー以外の未知のキーも文字列のまま `meta` に保持する
+ *     `lang` / `noindex` / `theme` / `toc` の8つ。`noindex` のみ真偽値化し、それ以外は
+ *     文字列として保持する(値全体を囲む引用符 "…" / '…' は外す)。
+ *   - 上記8キー以外の未知のキーも文字列のまま `meta` に保持する
  *     (将来のフォーマット拡張に向けた寛容な扱い)。
  *
  * `theme`キーについて:
@@ -76,9 +76,10 @@ export function parseFrontmatter(rawContent) {
       // コメントや空行など、パターンに一致しない行は無視する。
       continue;
     }
-    const [, key, value] = match;
+    const [, key, rawValue] = match;
+    const value = unquote(rawValue.trim());
     if (key === "noindex") {
-      meta[key] = value.trim().toLowerCase() === "true";
+      meta[key] = value.toLowerCase() === "true";
     } else {
       meta[key] = value;
     }
@@ -87,4 +88,16 @@ export function parseFrontmatter(rawContent) {
   const body = lines.slice(endIndex + 1).join("\n");
 
   return { meta, body };
+}
+
+// 値全体が対応する引用符("…" または '…')で囲まれていれば外す。
+// YAML の書き方(`title: "My Site: Home"`)に慣れた利用者が書いても、引用符ごと出力されないようにする。
+function unquote(value) {
+  if (value.length >= 2) {
+    const first = value[0];
+    if ((first === '"' || first === "'") && value[value.length - 1] === first) {
+      return value.slice(1, -1);
+    }
+  }
+  return value;
 }
