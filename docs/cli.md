@@ -56,7 +56,7 @@ npx github:akilasatolu/tsuzuri init
 `.github/tsuzuri/`配下のファイルは、`build-docs.mjs`実行時に読み込まれる「ビルドスクリプト本体
 そのもの」です。利用者が直接編集する必要はありませんが、削除・改変すると
 ビルドが失敗するため注意してください。スクリプトを最新版に更新したい場合は、
-セットアップコマンドを再実行してください(後述の「既存プロジェクトへの導入」参照)。
+後述の「最新版に更新する(`--update`)」を参照してください。
 
 生成されるキーの一覧・意味は[configuration.md](./configuration.md)を参照してください。
 
@@ -73,10 +73,28 @@ npx github:akilasatolu/tsuzuri init
 既存の内容がそのまま保持されます。あるファイルをスキップしても、他の生成対象ファイルの
 処理は止まらず、1ファイルずつ独立して確認・書き出しが行われます。
 
-`.github/tsuzuri/`配下のビルドスクリプト一式も同じ仕組みで1ファイルずつ確認されるため、
-最新版のtsuzuriに対してこのコマンドを再実行すれば、既存の`docs-pages.config`や
-独自CSSはそのままに、ビルドスクリプト本体だけを最新化する、といった使い方もできます
-(その場合は各ファイルの上書き確認に「y」で応答してください)。
+`.github/tsuzuri/`配下のビルドスクリプト一式も同じ仕組みで1ファイルずつ確認されます。
+
+## 最新版に更新する(`--update`)
+
+一度`init`したリポジトリのtsuzuriを最新版にするには、`--update`を付けて実行します。
+
+```
+npx github:akilasatolu/tsuzuri init --update
+```
+
+質問や上書き確認は一切なく、次のように動きます。
+
+| ファイル | `--update`での扱い |
+|---|---|
+| `.github/workflows/docs-pages.yml` | 最新版で上書き |
+| `.github/tsuzuri/`配下のビルドスクリプト・組み込みテーマCSS | 最新版で上書き(新しく増えたファイルは追加) |
+| `.github/docs-pages.config` | **変更しない** |
+| 独自CSS(`.github/tsuzuri/styles/custom.css`) | **変更しない** |
+
+実行後、`git diff`で変更内容を確認してからコミット・pushしてください。
+`.github/docs-pages.config`が無いリポジトリ(まだ`init`していない)で実行すると、
+何も書き込まずにエラー終了します。初回は`--update`を付けずに実行してください。
 
 ## refを固定して実行する
 

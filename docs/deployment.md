@@ -109,14 +109,17 @@ CUSTOM_DOMAIN=docs.example.com
 (以前のバージョンの`uses: ...@v1`のように、ワークフロー実行のたびに自動で最新化される
 仕組みではなくなりました)。
 
-最新版のtsuzuriに更新したい場合は、`#v1`のようなタグを指定してセットアップコマンドを
-再実行してください。
+最新版のtsuzuriに更新したい場合は、`--update`を付けてセットアップコマンドを実行してください。
+ワークフローとビルドスクリプトだけが最新版に上書きされ、`.github/docs-pages.config`や
+独自CSS(`STYLE_FILE`)はそのまま残ります(詳しくは[CLIリファレンス](./cli.md)の
+「最新版に更新する(`--update`)」を参照)。
 
 ```sh
-npx github:akilasatolu/tsuzuri#v1 init
+npx github:akilasatolu/tsuzuri init --update
 ```
 
-`.github/tsuzuri/`配下の各ファイルは、既存ファイルとして個別に上書き確認されます
-(詳しくは[CLIリファレンス](./cli.md)の「既存プロジェクトへの導入」を参照)。
-`.github/docs-pages.config`や独自CSS(`STYLE_FILE`)はそのままに、ビルドスクリプト
-本体だけを最新化したい場合は、`.github/tsuzuri/`配下のファイルにだけ「y」で応答してください。
+特定のバージョンに固定したい場合は、`#v1`のようなタグを指定します(タグ発行後に利用できます)。
+
+```sh
+npx github:akilasatolu/tsuzuri#v1 init --update
+```
