@@ -1,3 +1,7 @@
+---
+title: 設定リファレンス(Configuration)
+---
+
 # 設定リファレンス(Configuration)
 
 ## `.github/docs-pages.config`の場所と書式

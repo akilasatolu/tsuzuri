@@ -1,3 +1,7 @@
+---
+title: Frontmatterリファレンス
+---
+
 # Frontmatterリファレンス
 
 「frontmatter」とは、Markdownファイルの一番先頭に`---`で囲んで書く、そのページ専用の

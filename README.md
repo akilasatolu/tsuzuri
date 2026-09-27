@@ -1,3 +1,7 @@
+---
+title: Tsuzuri
+---
+
 <img src="assets/favicon.svg" width="48" alt="Tsuzuri logo">
 
 # Tsuzuri

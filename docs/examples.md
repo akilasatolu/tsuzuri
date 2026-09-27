@@ -1,3 +1,7 @@
+---
+title: 使用例(Examples)
+---
+
 # 使用例(Examples)
 
 ## Tsuzuriで作られたサイト

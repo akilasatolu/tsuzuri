@@ -1,3 +1,7 @@
+---
+title: CLIリファレンス
+---
+
 # CLIリファレンス
 
 このページでは、セットアップ用コマンド([`bin/cli.mjs`](https://github.com/akilasatolu/tsuzuri/blob/main/bin/cli.mjs))の使い方をまとめます。
