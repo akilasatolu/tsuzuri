@@ -1,6 +1,6 @@
 # このファイルは tsuzuri の init が利用者リポジトリに生成するワークフローのひな形。
 # bin/cli.mjs の buildDocsPagesYml() が読み込み、次のプレースホルダーを置き換えて出力する。
-#   __OSS_REPO__ / __VENDOR_DIR__ / __MARKED_VERSION__ / __HIGHLIGHT_VERSION__ / __TSUZURI_VERSION__
+#   __OSS_REPO__ / __VENDOR_DIR__ / __BUILD_DEPENDENCIES__ / __TSUZURI_VERSION__
 # (この先頭のコメントブロックは出力に含まれない)
 # templates/ 配下に .github/workflows/ の形で置いているのは、Dependabot に
 # actions のバージョン更新の対象として認識させるため(ここでワークフローとして実行はされない)。
@@ -54,7 +54,7 @@ jobs:
             # 既知の設定キーだけを環境変数として取り込む。それ以外(NODE_OPTIONS等)を
             # 設定ファイル経由で注入できないようにする。
             case "$key" in
-              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANG|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS|SITEMAP_JSON)
+              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANG|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS|SITEMAP_JSON|LAST_UPDATED)
                 echo "${key}=${value}" >> "$GITHUB_ENV" ;;
               *)
                 echo "::warning::未知の設定キー ${key} を無視します" ;;
@@ -104,6 +104,12 @@ jobs:
           echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"
           echo "SITE_ORIGIN=$SITE_ORIGIN" >> "$GITHUB_ENV"
 
+      # 最終更新日(LAST_UPDATED=true)を git の履歴から求めるため、そのときだけ全履歴を取得する
+      # (checkout は既定で直近の1コミットしか取得しないため、そのままでは日付が正しく求まらない)
+      - name: Fetch full history for last-updated dates
+        if: steps.trigger.outputs.should_deploy != 'false' && env.LAST_UPDATED == 'true'
+        run: git fetch --unshallow --quiet || true
+
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         if: steps.trigger.outputs.should_deploy != 'false'
         with:
@@ -111,7 +117,7 @@ jobs:
 
       - name: Install build dependency
         if: steps.trigger.outputs.should_deploy != 'false'
-        run: npm install marked@__MARKED_VERSION__ highlight.js@__HIGHLIGHT_VERSION__ --no-save --no-audit --no-fund --ignore-scripts
+        run: npm install __BUILD_DEPENDENCIES__ --no-save --no-audit --no-fund --ignore-scripts
 
       - name: Build
         if: steps.trigger.outputs.should_deploy != 'false'
@@ -129,6 +135,7 @@ jobs:
           OGP_DEFAULT_IMAGE: ${{ env.OGP_DEFAULT_IMAGE }}
           STRICT_LINKS: ${{ env.STRICT_LINKS }}
           SITEMAP_JSON: ${{ env.SITEMAP_JSON }}
+          LAST_UPDATED: ${{ env.LAST_UPDATED }}
           THEME: ${{ env.THEME }}
           # THEME解決の基準ディレクトリ。initでコピーしたベンダリング先を指す。
           STYLE_DIR: __VENDOR_DIR__/styles

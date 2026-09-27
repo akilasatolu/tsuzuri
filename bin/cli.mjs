@@ -77,6 +77,23 @@ export function readDependencyVersion(name, packageRoot = PACKAGE_ROOT, fsImpl =
   return version;
 }
 
+// 利用者側のワークフローでインストールする、ビルド用のパッケージ。
+// バージョンは package.json の devDependencies(完全一致)から読む。
+export const BUILD_DEPENDENCIES = ["marked", "highlight.js", "marked-footnote"];
+
+/**
+ * 生成ワークフローの `npm install` に渡す "name@version ..." を組み立てる。
+ * @param {{ packageRoot?: string, fsImpl?: {readFileSync}, markedVersion?: string }} [opts]
+ * @returns {string}
+ */
+export function buildDependencySpecs({ packageRoot = PACKAGE_ROOT, fsImpl = { readFileSync }, markedVersion } = {}) {
+  return BUILD_DEPENDENCIES.map((name) => {
+    const version =
+      name === "marked" && markedVersion ? markedVersion : readDependencyVersion(name, packageRoot, fsImpl);
+    return `${name}@${version}`;
+  }).join(" ");
+}
+
 /** marked のバージョン(readDependencyVersion("marked") の短縮形) */
 export function readMarkedVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFileSync }) {
   return readDependencyVersion("marked", packageRoot, fsImpl);
@@ -100,11 +117,12 @@ export function readPackageVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFi
  * 自己完結型のワークフロー。ビルドスクリプト本体(build-docs.mjs等)は `init` 実行時に
  * `${VENDOR_DIR}/` 配下へコピー済みであることが前提。
  * 本体は templates/.github/workflows/docs-pages.yml に置いたひな形で、ここでは
- * プレースホルダー(__OSS_REPO__ / __VENDOR_DIR__ / __MARKED_VERSION__)を置き換えるだけ。
+ * プレースホルダー(__OSS_REPO__ / __VENDOR_DIR__ / __BUILD_DEPENDENCIES__ / __TSUZURI_VERSION__)を
+ * 置き換えるだけ。
  * ひな形を独立したYAMLファイルにしているのは、中で使う actions のバージョンを
  * Dependabot で自動更新できるようにするため。
  *
- * @param {string} [markedVersion]
+ * @param {string} [markedVersion] - marked のバージョン(テスト時の差し替え用。既定は package.json の値)
  * @param {string} [packageRoot] - テスト時に差し替え可能にするため引数化している
  * @param {{readFileSync}} [fsImpl] - テスト用差し替え
  * @returns {string}
@@ -113,10 +131,7 @@ export function buildDocsPagesYml(
   markedVersion = readMarkedVersion(),
   packageRoot = PACKAGE_ROOT,
   fsImpl = { readFileSync },
-  {
-    tsuzuriVersion = readPackageVersion(packageRoot, fsImpl),
-    highlightVersion = readDependencyVersion("highlight.js", packageRoot, fsImpl),
-  } = {},
+  { tsuzuriVersion = readPackageVersion(packageRoot, fsImpl) } = {},
 ) {
   const raw = fsImpl.readFileSync(join(packageRoot, WORKFLOW_TEMPLATE_PATH), "utf-8");
   const marker = "# --- template start ---\n";
@@ -125,9 +140,8 @@ export function buildDocsPagesYml(
   return template
     .replaceAll("__OSS_REPO__", OSS_REPO)
     .replaceAll("__VENDOR_DIR__", VENDOR_DIR)
-    .replaceAll("__MARKED_VERSION__", markedVersion)
-    .replaceAll("__TSUZURI_VERSION__", tsuzuriVersion)
-    .replaceAll("__HIGHLIGHT_VERSION__", highlightVersion);
+    .replaceAll("__BUILD_DEPENDENCIES__", buildDependencySpecs({ packageRoot, fsImpl, markedVersion }))
+    .replaceAll("__TSUZURI_VERSION__", tsuzuriVersion);
 }
 
 /**
@@ -207,6 +221,11 @@ STRICT_LINKS=false
 # 原因を調べるときだけ一時的に true にすることをおすすめします
 # 省略時: false(出力しない。リンクの問題はワークフローのログに表示される)
 SITEMAP_JSON=false
+
+# 各ページの末尾に、git の履歴から求めた最終更新日を表示するか(true/false)
+# true にすると、ワークフローが git の全履歴を取得してからビルドする(履歴が長いと少し時間がかかる)
+# 省略時: false(表示しない)
+LAST_UPDATED=false
 
 # ★v2新規: 組み込みテーマ名(3層カスケードの第2層。詳細は「スタイル3層カスケード詳細設計」節)
 # 選択肢: wa(和) / muji(無地) / sumi(墨) / ai(藍) / shu(朱) / none

@@ -25,6 +25,7 @@ export const MAX_TEXT_LENGTH = 20000;
 export function htmlToSearchText(html) {
   return html
     .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<a class="tsuzuri-anchor"[^>]*>#<\/a>/g, "")
     .replace(/<[^>]*>/g, " ")
     .replace(/&(amp|lt|gt|quot|#39);/g, (m) => ENTITY_MAP[m])
     .replace(/\s+/g, " ")

@@ -40,6 +40,7 @@ const CONFIG_ENV_KEYS = [
   "GITHUB_REPOSITORY",
   "STRICT_LINKS",
   "SITEMAP_JSON",
+  "LAST_UPDATED",
 ];
 
 function makeTmpDir() {
@@ -615,8 +616,8 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       assert.match(readOut(dir, "index.html"), /href="\/docs\/a\.html#テーマ設定"/);
       const aHtml = readOut(dir, "docs", "a.html");
-      assert.match(aHtml, /<h2 id="テーマ設定">テーマ設定<\/h2>/);
-      assert.match(aHtml, /<h2 id="usage-theme">Usage <code>theme<\/code><\/h2>/);
+      assert.match(aHtml, /<h2 id="テーマ設定">テーマ設定<a class="tsuzuri-anchor" href="#テーマ設定"/);
+      assert.match(aHtml, /<h2 id="usage-theme">Usage <code>theme<\/code><a class="tsuzuri-anchor"/);
       assert.match(aHtml, /<h2 id="usage-theme-1">/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -868,6 +869,108 @@ describe("build-docs.mjs :: main (E2E)", () => {
       result = runBuild(dir);
       assert.ok(!fs.existsSync(path.join(dir, "_site", "search-index.json")));
       assert.ok(!fs.existsSync(path.join(dir, "_site", "tsuzuri-search.js")));
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("GitHubの注意書き・脚注・mermaidを表示できる", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        [
+          "# Root Page",
+          "",
+          "> [!WARNING]",
+          "> 気をつけてください",
+          "",
+          "> 普通の引用",
+          "",
+          "本文[^1] [A](docs/a.md)",
+          "",
+          "[^1]: 脚注の*内容*",
+          "",
+          "```mermaid",
+          "graph TD; A-->B;",
+          "```",
+          "",
+        ].join("\n")
+      );
+      const result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "index.html");
+      assert.match(html, /<div class="markdown-alert markdown-alert-warning"><p class="markdown-alert-title">警告<\/p>\n<p>気をつけてください<\/p>/);
+      assert.match(html, /<blockquote>\n<p>普通の引用<\/p>\n<\/blockquote>/);
+      assert.match(html, /<sup><a id="fn-ref-1" href="#fn-1"[^>]*>1<\/a><\/sup>/);
+      assert.match(html, /<li id="fn-1">\n<p>脚注の<em>内容<\/em>/);
+      assert.match(html, /<pre class="mermaid">graph TD; A--&gt;B;<\/pre>/);
+      assert.match(html, /cdn\.jsdelivr\.net\/npm\/mermaid@/);
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /mermaid@/, "mermaidの無いページにはスクリプトを入れない");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("画像は遅延読み込み、h2以下に見出しリンク、NAV_ENABLED時は見出し3つ以上で目次(toc: falseで消せる)", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      const body = ["# Page A", "", "![i](img.png)", "", "## One", "", "### One-1", "", "## Two", ""].join("\n");
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), body);
+
+      let result = runBuild(dir, { NAV_ENABLED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      let html = readOut(dir, "docs", "a.html");
+      assert.match(html, /<img src="\/docs\/img\.png" alt="i" loading="lazy" decoding="async">/);
+      assert.match(html, /<h1 id="page-a">Page A<\/h1>/, "h1にはリンクを付けない");
+      assert.match(html, /<h2 id="one">One<a class="tsuzuri-anchor" href="#one" aria-label="「One」へのリンク">#<\/a><\/h2>/);
+      assert.match(
+        html,
+        /<\/h1>\n<nav class="tsuzuri-toc" aria-label="目次"><p>目次<\/p><ul><li><a href="#one">One<\/a><ul><li><a href="#one-1">One-1<\/a><\/li><\/ul><\/li><li><a href="#two">Two<\/a><\/li><\/ul><\/nav>/
+      );
+      assert.doesNotMatch(JSON.parse(readOut(dir, "search-index.json"))[1].x, /#/, "見出しリンクの#は索引に入れない");
+
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\ntoc: false\n---\n" + body);
+      result = runBuild(dir, { NAV_ENABLED: "true" });
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /class="tsuzuri-toc"/);
+
+      result = runBuild(dir);
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /class="tsuzuri-toc"/, "NAV_ENABLED=falseなら目次は出さない");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("LAST_UPDATED=trueのとき、gitの最終コミット日を表示する(gitでなければ表示しない)", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      let result = runBuild(dir, { LAST_UPDATED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.doesNotMatch(readOut(dir, "index.html"), /class="tsuzuri-updated"/);
+      assert.match(result.stderr, /最終更新日を表示しません/);
+
+      const git = (...args) =>
+        spawnSync("git", args, {
+          cwd: dir,
+          encoding: "utf-8",
+          env: { ...process.env, GIT_COMMITTER_DATE: "2026-01-02T03:04:05Z", GIT_AUTHOR_DATE: "2026-01-02T03:04:05Z" },
+        });
+      git("init", "-q");
+      git("add", "README.md", "docs");
+      git("-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "-m", "init");
+
+      result = runBuild(dir, { LAST_UPDATED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(readOut(dir, "index.html"), /<p class="tsuzuri-updated">最終更新: <time datetime="2026-01-02">2026-01-02<\/time><\/p>/);
+
+      result = runBuild(dir);
+      assert.doesNotMatch(readOut(dir, "index.html"), /class="tsuzuri-updated"/, "LAST_UPDATED未設定なら表示しない");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

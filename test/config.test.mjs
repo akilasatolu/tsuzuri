@@ -241,3 +241,8 @@ test("SITEMAP_JSON: 既定はfalse(省略時は警告なし)、trueで出力", (
     assert.equal(calls.length, 0);
   });
 });
+
+test("LAST_UPDATED: 既定はfalse、trueで有効", () => {
+  assert.equal(loadConfig({}).lastUpdated, false);
+  assert.equal(loadConfig({ LAST_UPDATED: "true" }).lastUpdated, true);
+});

@@ -33,6 +33,8 @@ import {
   readPackageVersion,
   readDependencyVersion,
   HELP_TEXT,
+  BUILD_DEPENDENCIES,
+  buildDependencySpecs,
 } from "../bin/cli.mjs";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
@@ -141,7 +143,7 @@ test("buildDocsPagesYml: 設定ファイルは既知のキーだけを取り込�
   const yml = buildDocsPagesYml();
   assert.match(
     yml,
-    /TRIGGER_BRANCH\|ROOT_MD\|OUT_DIR\|STYLE_FILE\|LANG\|NAV_ENABLED\|FAVICON_FILE\|SITE_NAME\|CUSTOM_DOMAIN\|OGP_DEFAULT_IMAGE\|THEME\|STRICT_LINKS\|SITEMAP_JSON\)/
+    /TRIGGER_BRANCH\|ROOT_MD\|OUT_DIR\|STYLE_FILE\|LANG\|NAV_ENABLED\|FAVICON_FILE\|SITE_NAME\|CUSTOM_DOMAIN\|OGP_DEFAULT_IMAGE\|THEME\|STRICT_LINKS\|SITEMAP_JSON\|LAST_UPDATED\)/
   );
   assert.ok(!yml.includes("| xargs"));
   assert.ok(yml.includes("--ignore-scripts"));
@@ -720,9 +722,27 @@ test("package.json の engines で対応する Node.js の最低バージョン�
   assert.equal(pkg.engines.node, ">=20");
 });
 
-test("highlight.js も package.json の版(完全一致)がワークフローに埋め込まれ、lockfileと一致している", () => {
-  const version = readDependencyVersion("highlight.js");
+test("ビルド用の依存(BUILD_DEPENDENCIES)はすべて package.json の版(完全一致)がワークフローに埋め込まれ、lockfileと一致している", () => {
   const lock = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package-lock.json"), "utf8"));
-  assert.equal(lock.packages["node_modules/highlight.js"].version, version);
-  assert.ok(buildDocsPagesYml().includes(`npm install marked@${readMarkedVersion()} highlight.js@${version} --no-save`));
+  const specs = [];
+  for (const name of BUILD_DEPENDENCIES) {
+    const version = readDependencyVersion(name);
+    assert.equal(lock.packages[`node_modules/${name}`].version, version, name);
+    specs.push(`${name}@${version}`);
+  }
+  assert.deepEqual(BUILD_DEPENDENCIES, ["marked", "highlight.js", "marked-footnote"]);
+  assert.equal(buildDependencySpecs(), specs.join(" "));
+  assert.ok(buildDocsPagesYml().includes(`npm install ${specs.join(" ")} --no-save`));
+});
+
+test("LAST_UPDATED=true のときだけ git の全履歴を取得するステップがある", () => {
+  const yml = buildDocsPagesYml();
+  assert.ok(
+    yml.includes(
+      "if: steps.trigger.outputs.should_deploy != 'false' && env.LAST_UPDATED == 'true'\n" +
+        "        run: git fetch --unshallow --quiet || true"
+    )
+  );
+  assert.ok(yml.includes("          LAST_UPDATED: ${{ env.LAST_UPDATED }}\n"));
+  assert.ok(buildDocsPagesConfig({}).includes("\nLAST_UPDATED=false\n"));
 });

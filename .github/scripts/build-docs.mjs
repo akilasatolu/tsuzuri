@@ -37,7 +37,9 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { marked } from "marked";
+import { execFileSync } from "node:child_process";
+import { Marked } from "marked";
+import markedFootnote from "marked-footnote";
 import hljs from "highlight.js/lib/common";
 
 import { loadConfig, ALLOWED_THEMES } from "./lib/config.mjs";
@@ -49,6 +51,9 @@ import {
   renderNav,
   renderMetaTags,
   renderPager,
+  renderToc,
+  renderAlert,
+  MERMAID_SCRIPT,
   preprocessRawHtmlPaths,
   pageTemplate,
   defaultNotFoundMarkdown,
@@ -239,14 +244,23 @@ async function main() {
   }
 
   // ---------- 7. HTML 変換 ----------
-  marked.setOptions({ gfm: true, breaks: false });
+  // marked はこのビルド専用のインスタンスを使う(脚注の拡張機能を組み込むため)。
+  const isJaLang = config.lang.toLowerCase().startsWith("ja");
+  const md = new Marked({ gfm: true, breaks: false });
+  md.use(
+    markedFootnote({
+      prefixId: "fn-",
+      description: isJaLang ? "脚注" : "Footnotes",
+      backRefLabel: isJaLang ? "本文の参照箇所 {0} に戻る" : "Back to reference {0}",
+    })
+  );
 
   // ナビゲーション・sitemap.json 用のサイトツリー(ディレクトリ階層)
   const siteTree = buildSiteTree(visitedMd.entries(), {
     rootMd: config.rootMd,
     siteName: config.siteName,
   });
-  const isJa = config.lang.toLowerCase().startsWith("ja");
+  const isJa = isJaLang;
   const menuLabel = isJa ? "メニュー" : "Menu";
 
   // 「前のページ/次のページ」リンク(NAV_ENABLED=true のとき)。順番はナビの表示順。
@@ -262,6 +276,38 @@ async function main() {
       }
     : null;
   const searchPages = []; // { title, url, html }(本文のみ。前後ページリンクは含めない)
+
+  // 最終更新日(LAST_UPDATED=true のとき)。git の履歴から各ページの最終コミット日を求める。
+  // 履歴が浅い(shallow clone)と日付が正しく求まらないため、その場合は表示しない。
+  let lastUpdatedEnabled = config.lastUpdated;
+  if (lastUpdatedEnabled) {
+    try {
+      const shallow = execFileSync("git", ["rev-parse", "--is-shallow-repository"], {
+        cwd: REPO_ROOT,
+        encoding: "utf-8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim();
+      if (shallow === "true") {
+        console.warn("[build-docs] git の履歴が浅い(shallow clone)ため、最終更新日を表示しません。");
+        lastUpdatedEnabled = false;
+      }
+    } catch {
+      console.warn("[build-docs] git の履歴を読めないため、最終更新日を表示しません。");
+      lastUpdatedEnabled = false;
+    }
+  }
+  function lastUpdatedOf(rel) {
+    if (!lastUpdatedEnabled) return "";
+    try {
+      return execFileSync("git", ["log", "-1", "--format=%cs", "--", rel], {
+        cwd: REPO_ROOT,
+        encoding: "utf-8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim();
+    } catch {
+      return "";
+    }
+  }
 
   const pagerLabels = isJa
     ? { prev: "前のページ", next: "次のページ", nav: "前後のページ" }
@@ -311,22 +357,34 @@ async function main() {
     // marked v13以降のレンダラーAPI: 各メソッドは引数としてトークン(オブジェクト)を1つ受け取る。
     // リンクの表示テキストや見出しはインライン要素(強調・コード等)を含みうるため、
     // this.parser.parseInline(tokens) でHTMLにする(this を使うためアロー関数にしない)。
-    const renderer = new marked.Renderer();
+    const renderer = new md.Renderer();
     renderer.link = function ({ href, title, tokens }) {
       const newHref = toSiteAbsHref(rel, href, config.basePath);
       const text = this.parser.parseInline(tokens);
       return `<a href="${newHref}"${title ? ` title="${escapeHtml(title)}"` : ""}>${text}</a>`;
     };
+    // 画像は画面に入るまで読み込まない(loading="lazy")。ページの表示を速くするため。
     renderer.image = function ({ href, title, text }) {
       const newHref = toSiteAbsHref(rel, href, config.basePath);
       return `<img src="${newHref}" alt="${escapeHtml(text || "")}"${
         title ? ` title="${escapeHtml(title)}"` : ""
-      }>`;
+      } loading="lazy" decoding="async">`;
+    };
+    // GitHub の注意書き(> [!NOTE] など)を、種類ごとの枠として表示する。
+    renderer.blockquote = function ({ tokens }) {
+      const inner = this.parser.parse(tokens);
+      return renderAlert(inner, isJa) ?? `<blockquote>\n${inner}</blockquote>\n`;
     };
     // コードブロックは、言語名が書かれていて highlight.js が対応している場合だけ、ビルド時に
     // 色分けしたHTMLにする(閲覧時にJavaScriptは不要)。言語の自動判定は誤判定を避けるため行わない。
+    let hasMermaid = false;
     renderer.code = function ({ text, lang }) {
       const language = (lang || "").trim().split(/\s+/)[0];
+      // mermaid の図は、閲覧時に mermaid のスクリプトが <pre class="mermaid"> を図に変換する
+      if (language === "mermaid") {
+        hasMermaid = true;
+        return `<pre class="mermaid">${escapeHtml(text)}</pre>\n`;
+      }
       if (language && hljs.getLanguage(language)) {
         const highlighted = hljs.highlight(text, { language, ignoreIllegals: true }).value;
         return `<pre><code class="hljs language-${escapeHtml(language)}">${highlighted}\n</code></pre>\n`;
@@ -335,19 +393,44 @@ async function main() {
       return `<pre><code${cls}>${escapeHtml(text)}\n</code></pre>\n`;
     };
     // 見出しに GitHub と同じ規則の id を付け、`page.md#見出し` のリンクで飛べるようにする。
+    // h2 以下には、その見出しへのリンク(#)を付ける(カーソルを当てると表示。base.css)。
+    // 目次用に h2・h3 を集めておく。
     const slugger = createSlugger();
+    const headings = [];
     renderer.heading = function ({ tokens, depth }) {
       const inner = this.parser.parseInline(tokens);
-      const id = slugger.slug(htmlToText(inner));
-      return `<h${depth}${id ? ` id="${escapeHtml(id)}"` : ""}>${inner}</h${depth}>\n`;
+      const text = htmlToText(inner);
+      const id = slugger.slug(text);
+      if (!id) return `<h${depth}>${inner}</h${depth}>\n`;
+      if (depth === 2 || depth === 3) headings.push({ depth, id, text });
+      const anchor =
+        depth >= 2
+          ? `<a class="tsuzuri-anchor" href="#${escapeHtml(id)}" aria-label="${escapeHtml(
+              isJa ? `「${text}」へのリンク` : `Link to "${text}"`
+            )}">#</a>`
+          : "";
+      return `<h${depth} id="${escapeHtml(id)}">${inner}${anchor}</h${depth}>\n`;
     };
 
     const preprocessed = preprocessRawHtmlPaths(content, rel, config.basePath);
-    let bodyHtml = marked.parse(preprocessed, { renderer });
+    let bodyHtml = md.parse(preprocessed, { renderer });
     const title = renderTitle(content, rel, meta.title);
     if (search && visitedMd.has(rel)) {
       searchPages.push({ title, url: `${config.basePath}/${urlPathOf(rel)}`, html: bodyHtml });
     }
+    // ページ内の目次(NAV_ENABLED=true で、h2・h3 が3つ以上あるページ。frontmatter の toc: false で消せる)
+    if (config.navEnabled && String(meta.toc).trim() !== "false" && headings.length >= 3) {
+      const toc = renderToc(headings, isJa ? "目次" : "Contents");
+      const h1End = bodyHtml.indexOf("</h1>");
+      bodyHtml = h1End >= 0 ? bodyHtml.slice(0, h1End + 5) + "\n" + toc + bodyHtml.slice(h1End + 5) : toc + bodyHtml;
+    }
+    const updated = visitedMd.has(rel) ? lastUpdatedOf(rel) : "";
+    if (updated) {
+      bodyHtml += `<p class="tsuzuri-updated">${isJa ? "最終更新" : "Last updated"}: <time datetime="${escapeHtml(
+        updated
+      )}">${escapeHtml(updated)}</time></p>\n`;
+    }
+    if (hasMermaid) bodyHtml += MERMAID_SCRIPT;
     if (config.navEnabled && pageIndex.has(rel)) {
       const i = pageIndex.get(rel);
       bodyHtml += renderPager(pageOrder[i - 1] ?? null, pageOrder[i + 1] ?? null, config.basePath, pagerLabels);

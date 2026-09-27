@@ -31,6 +31,7 @@ const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @property {boolean} navEnabled
  * @property {boolean} strictLinks
  * @property {boolean} sitemapJson
+ * @property {boolean} lastUpdated
  * @property {string} faviconFile
  * @property {string} siteName
  * @property {string} customDomain
@@ -65,6 +66,9 @@ export function loadConfig(env = process.env) {
   // リンク切れ・拒否したリンクのパス等も含むため、既定では出力しない。
   const sitemapJson = parseBoolean("SITEMAP_JSON", env.SITEMAP_JSON);
 
+  // true のとき、各ページに git の履歴から求めた最終更新日を表示する
+  const lastUpdated = parseBoolean("LAST_UPDATED", env.LAST_UPDATED);
+
   const siteName = resolveSiteName(env);
 
   const customDomain = resolveCustomDomain(env.CUSTOM_DOMAIN);
@@ -83,6 +87,7 @@ export function loadConfig(env = process.env) {
     navEnabled,
     strictLinks,
     sitemapJson,
+    lastUpdated,
     faviconFile,
     siteName,
     customDomain,
