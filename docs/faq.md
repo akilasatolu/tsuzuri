@@ -40,7 +40,7 @@ Markdown内でリンクした先のファイルが実際には存在しない場
 
 ## npx実行時にキャッシュが古い
 
-`npx github:akilasatolu/tsuzuri#develop init`を実行した際に、最新の変更が反映されていない
+`npx github:akilasatolu/tsuzuri init`を実行した際に、最新の変更が反映されていない
 (修正したはずの挙動が変わらない)場合は、`npx`側またはgit側のキャッシュが古いバージョンを
 再利用している可能性があります。次のように`ref`(タグ)を明示して実行してみてください。
 

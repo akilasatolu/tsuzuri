@@ -2,7 +2,7 @@
 
 ## 自己完結型のワークフロー
 
-`npx github:akilasatolu/tsuzuri#develop init`を実行すると、次のファイルが利用者リポジトリに
+`npx github:akilasatolu/tsuzuri init`を実行すると、次のファイルが利用者リポジトリに
 生成されます。
 
 ```

@@ -28,5 +28,5 @@ Tsuzuriは元々「READMEをそのままGitHub Pagesにする」ことを目的�
 ## コントリビュート歓迎
 
 自分が作ったサイトをこのページの事例集に載せてほしい場合は、ぜひご連絡ください。
-掲載方法や、その他プロジェクトへの貢献方法全般については[CONTRIBUTING.md](https://github.com/akilasatolu/tsuzuri/blob/develop/CONTRIBUTING.md)を
+掲載方法や、その他プロジェクトへの貢献方法全般については[CONTRIBUTING.md](https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.md)を
 参照してください。

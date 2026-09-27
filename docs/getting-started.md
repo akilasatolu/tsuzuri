@@ -15,7 +15,7 @@
 リポジトリのルートで、次のコマンドを実行します。
 
 ```
-npx github:akilasatolu/tsuzuri#develop init
+npx github:akilasatolu/tsuzuri init
 ```
 
 実行すると、トリガーブランチ・起点となるMarkdownファイル・テーマ・独自CSSひな形の

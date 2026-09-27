@@ -1,6 +1,6 @@
 # CLIリファレンス
 
-このページでは、セットアップ用コマンド(`developブランチ`の[`bin/cli.mjs`](https://github.com/akilasatolu/tsuzuri/blob/develop/bin/cli.mjs))の使い方をまとめます。
+このページでは、セットアップ用コマンド([`bin/cli.mjs`](https://github.com/akilasatolu/tsuzuri/blob/main/bin/cli.mjs))の使い方をまとめます。
 コマンド1つで、GitHub Pagesへの自動デプロイに必要なワークフロー・設定ファイルに加えて、
 ビルドスクリプト本体一式(`.github/tsuzuri/`配下)を、対話形式の質問に答えるだけで
 利用者リポジトリにコピーできます。生成後は、実行のたびにOSS本体リポジトリ
@@ -12,7 +12,7 @@
 利用者リポジトリのルートで次のコマンドを実行します(事前に`npm install`等は不要です)。
 
 ```
-npx github:akilasatolu/tsuzuri#develop init
+npx github:akilasatolu/tsuzuri init
 ```
 
 `npx`はNode.jsに付属するコマンドで、パッケージをローカルにインストールせずに一時的に取得して
@@ -76,12 +76,9 @@ npx github:akilasatolu/tsuzuri#develop init
 
 ## refを固定して実行する
 
-`npx github:akilasatolu/tsuzuri#develop init`の`#develop`の部分は`ref`(ブランチ・タグ)の指定です。
-Tsuzuri本体(CLIとビルドスクリプト)は`develop`ブランチにあり、既定ブランチの`main`には
-Tsuzuri自身で作ったこのサイトのファイルしか置かれていないため、**`ref`を省略した
-`npx github:akilasatolu/tsuzuri init`は動作しません**。必ず`ref`を付けて実行してください。
-
-`#develop`は開発中の最新版を指します。リリース済みのバージョンに固定したい場合は、
+`npx github:akilasatolu/tsuzuri init`のように`ref`(バージョンやブランチ・タグ)を省略すると、
+既定ブランチ(`main`)の最新版が実行されます。ローカルのキャッシュや`npx`自体の実装によっては
+古いバージョンが実行されてしまう場合もあるため、リリース済みのバージョンに固定したい場合は、
 次のように`#v1`のようなタグを明示して実行してください(タグ発行後に利用できます)。
 
 ```

@@ -10,6 +10,6 @@ Thumbs.db
 .idea/
 *.swp
 
-# developブランチ側の開発で使うもの(このブランチでは使わない)
+# mainブランチ側の開発で使うもの(このブランチでは使わない)
 node_modules/
 ai-dev-force/

@@ -5,7 +5,7 @@
 > READMEを起点に、リンクをたどってGitHub Pagesへ自動デプロイするツール
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Build Status](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml)
+[![Build Status](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml)
 
 ## Tsuzuriとは
 
@@ -37,7 +37,7 @@ Webサイトとして公開できます。ページ数が増えても、README�
 1. 自分のリポジトリのルートで次のコマンドを実行する(対話形式でファイルが生成されます)。
 
    ```sh
-   npx github:akilasatolu/tsuzuri#develop init
+   npx github:akilasatolu/tsuzuri init
    ```
 
    このコマンドは、ワークフロー(`.github/workflows/docs-pages.yml`)・設定ファイル
@@ -102,10 +102,10 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 ## コントリビュート
 
 コード・ドキュメントいずれの貢献も歓迎します。Tsuzuri本体(CLI・ビルドスクリプト・
-テーマCSS)の開発は[`develop`ブランチ](https://github.com/akilasatolu/tsuzuri/tree/develop)で
-行っています。このサイト(利用者向けドキュメント)は`main`ブランチにあり、Tsuzuri自身を
+テーマCSS)の開発は[`main`ブランチ](https://github.com/akilasatolu/tsuzuri/tree/main)で
+行っています。このサイト(利用者向けドキュメント)は`docs`ブランチにあり、Tsuzuri自身を
 使ってGitHub Pagesに公開しています。開発環境のセットアップ方法やPRの作法は
-[CONTRIBUTING.md](https://github.com/akilasatolu/tsuzuri/blob/develop/CONTRIBUTING.md)を参照してください。
+[CONTRIBUTING.md](https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.md)を参照してください。
 
 **Help Wanted**: ドキュメントは現状すべて日本語のみです。英語版ドキュメント
 の整備に協力していただける方を募集しています。

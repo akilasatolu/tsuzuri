@@ -3,7 +3,7 @@
 ## `.github/docs-pages.config`の場所と書式
 
 設定ファイルは、利用者リポジトリのルートからの相対パスで
-`.github/docs-pages.config`に配置します(`npx github:akilasatolu/tsuzuri#develop init`を実行すると
+`.github/docs-pages.config`に配置します(`npx github:akilasatolu/tsuzuri init`を実行すると
 自動生成されます。詳細は[cli.md](./cli.md))。
 
 書式は「`KEY=VALUE`」形式のシンプルなテキストで、1行につき1項目です。
@@ -26,7 +26,7 @@ push(マージ含む)があったときだけ、GitHub Pagesへのデプロイ�
 ビルドしたHTML一式の出力先ディレクトリです。デフォルトは`_site`です。
 
 ### STYLE_FILE
-独自CSSファイルへのパスです。`npx github:akilasatolu/tsuzuri#develop init`が生成する
+独自CSSファイルへのパスです。`npx github:akilasatolu/tsuzuri init`が生成する
 `.github/docs-pages.config`では`.github/tsuzuri/styles/custom.css`(組み込みテーマCSSと
 同じディレクトリ)が指定されます。このキー自体を省略した場合のビルド側の既定値は
 `.github/docs-pages.style.css`です。
