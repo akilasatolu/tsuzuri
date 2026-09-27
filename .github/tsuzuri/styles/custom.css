@@ -1,8 +1,8 @@
 /*
  * Tsuzuri サイト用の独自スタイル(STYLE_FILE)
  *
- * THEME=none(基礎CSSのみ)の上に、ポップで親しみやすい見た目を作る。
- *   - 丸みのあるカード・やわらかい影・紫〜ピンクのグラデーション
+ * THEME=none(基礎CSSのみ)の上に、ポップで親しみやすい和の見た目を作る。
+ *   - 丸みのあるカード・やわらかい影・藍と朱(Tsuzuri のアイコンの色)・青海波の地紋
  *   - ライト/ダークモードの両方に対応(OSの設定に追従)
  *
  * テーマの見本ページ(docs/gallery/*.md。本文に .tsuzuri-theme-sample の目印を置いている)では、
@@ -11,48 +11,61 @@
  */
 
 :root:not(:has(.tsuzuri-theme-sample)) {
+  /* Tsuzuri のアイコンと同じ藍(#1D4E64)と朱(#B33823)を軸に、生成り・山吹・若竹を添えた和の配色 */
   color-scheme: light;
-  --fg: #232946;
-  --fg-soft: #5b6180;
-  --bg: #f6f5ff;
-  --surface: #ffffff;
-  --surface-2: #f1efff;
-  --border: #e6e3fb;
-  --accent: #6c4cf1;
-  --accent-2: #ff5fa2;
-  --accent-3: #ffb84d;
-  --accent-4: #22c3a6;
-  --gradient: linear-gradient(135deg, #6c4cf1 0%, #b14cf1 50%, #ff5fa2 100%);
-  --code-bg: #f1efff;
-  --code-fg: #b0287a;
-  --pre-bg: #1f1d36;
-  --pre-fg: #ecebff;
-  --shadow: 0 1px 2px rgba(35, 41, 70, 0.06), 0 8px 24px rgba(108, 76, 241, 0.08);
-  --shadow-lg: 0 2px 4px rgba(35, 41, 70, 0.06), 0 16px 40px rgba(108, 76, 241, 0.16);
-  --radius: 20px;
+  --fg: #2a2d34;               /* 墨 */
+  --fg-soft: #5f6670;          /* 鈍色 */
+  --bg: #f4efe3;               /* 生成り */
+  --surface: #fffdf8;          /* 白練 */
+  --surface-2: #ece6d6;        /* 砂色 */
+  --border: #e2d9c4;
+  --accent: #1d4e64;           /* 藍 */
+  --accent-2: #b33823;         /* 朱 */
+  --accent-3: #e0a526;         /* 山吹 */
+  --accent-4: #5b8a5a;         /* 若竹 */
+  --tint: #e3edf0;             /* 藍白(藍の淡い色) */
+  --gradient: linear-gradient(135deg, #16394a 0%, #1d4e64 45%, #2f7a92 100%);   /* 藍 → 浅葱 */
+  --gradient-shu: linear-gradient(135deg, #b33823 0%, #d4572e 100%);            /* 朱 */
+  --wave: color-mix(in srgb, #1d4e64 5%, var(--bg));                            /* 青海波の線 */
+  --code-bg: #f3e6dc;
+  --code-fg: #a2321f;
+  --pre-bg: #172a33;           /* 藍墨 */
+  --pre-fg: #eef3f2;
+  --shadow: 0 1px 2px rgba(42, 45, 52, 0.06), 0 8px 24px rgba(29, 78, 100, 0.08);
+  --shadow-lg: 0 2px 4px rgba(42, 45, 52, 0.06), 0 16px 40px rgba(29, 78, 100, 0.14);
   --font: "Hiragino Maru Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI", "Meiryo", system-ui,
     -apple-system, "Segoe UI", sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   --content-width: 880px;
-  --alert-note: #3b82f6;
-  --alert-tip: #16b88a;
-  --alert-important: #8b5cf6;
-  --alert-warning: #f59e0b;
-  --alert-caution: #ef4466;
+  --alert-note: #2f6f8a;       /* 縹 */
+  --alert-tip: #4f8a55;        /* 若竹 */
+  --alert-important: #7a4f8c;  /* 江戸紫 */
+  --alert-warning: #c98a12;    /* 山吹 */
+  --alert-caution: #b33823;    /* 朱 */
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
-    --fg: #ecebff;
-    --fg-soft: #a9a7c8;
-    --bg: #14132b;
-    --surface: #1d1c3a;
-    --surface-2: #26244a;
-    --border: #34315e;
-    --accent: #a08bff;
-    --accent-2: #ff7eb6;
-    --code-bg: #2b2852;
-    --code-fg: #ff9fcb;
-    --pre-bg: #0f0e22;
+    --fg: #e8e4da;
+    --fg-soft: #a9b0b4;
+    --bg: #111c22;             /* 藍墨 */
+    --surface: #182830;
+    --surface-2: #213640;
+    --border: #2c434e;
+    --accent: #6fa8c2;         /* アイコンのダークモードの藍 */
+    --accent-2: #e8794f;       /* アイコンのダークモードの朱 */
+    --accent-3: #e6b847;
+    --tint: #1f3a46;
+    --gradient: linear-gradient(135deg, #2f7a92 0%, #6fa8c2 100%);
+    --gradient-shu: linear-gradient(135deg, #d4572e 0%, #e8794f 100%);
+    --wave: color-mix(in srgb, #6fa8c2 6%, var(--bg));
+    --code-bg: #2a2a2c;
+    --code-fg: #f0a07e;
+    --pre-bg: #0b1418;
+    --alert-note: #6fa8c2;
+    --alert-tip: #7fb87f;
+    --alert-important: #b48fc7;
+    --alert-warning: #e6b847;
+    --alert-caution: #e8794f;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
     --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.4);
   }
@@ -61,11 +74,15 @@
   body {
     line-height: 1.8;
     letter-spacing: 0.02em;
-    background:
-      radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--accent) 14%, transparent) 0, transparent 38%),
-      radial-gradient(circle at 100% 18%, color-mix(in srgb, var(--accent-2) 12%, transparent) 0, transparent 34%),
-      radial-gradient(circle at 60% 100%, color-mix(in srgb, var(--accent-4) 10%, transparent) 0, transparent 40%),
-      var(--bg);
+    /* 青海波の地紋 */
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(circle at 100% 150%, var(--bg) 24%, var(--wave) 24%, var(--wave) 28%, var(--bg) 28%, var(--bg) 36%, var(--wave) 36%, var(--wave) 40%, transparent 40%, transparent),
+      radial-gradient(circle at 0 150%, var(--bg) 24%, var(--wave) 24%, var(--wave) 28%, var(--bg) 28%, var(--bg) 36%, var(--wave) 36%, var(--wave) 40%, transparent 40%, transparent),
+      radial-gradient(circle at 50% 100%, var(--wave) 10%, var(--bg) 10%, var(--bg) 23%, var(--wave) 23%, var(--wave) 30%, var(--bg) 30%, var(--bg) 43%, var(--wave) 43%, var(--wave) 50%, var(--bg) 50%, var(--bg) 63%, var(--wave) 63%, var(--wave) 71%, transparent 71%, transparent),
+      radial-gradient(circle at 100% 50%, var(--wave) 5%, var(--bg) 5%, var(--bg) 15%, var(--wave) 15%, var(--wave) 20%, var(--bg) 20%, var(--bg) 29%, var(--wave) 29%, var(--wave) 34%, var(--bg) 34%, var(--bg) 44%, var(--wave) 44%, var(--wave) 49%, transparent 49%, transparent),
+      radial-gradient(circle at 0 50%, var(--wave) 5%, var(--bg) 5%, var(--bg) 15%, var(--wave) 15%, var(--wave) 20%, var(--bg) 20%, var(--bg) 29%, var(--wave) 29%, var(--wave) 34%, var(--bg) 34%, var(--bg) 44%, var(--wave) 44%, var(--wave) 49%, transparent 49%, transparent);
+    background-size: 80px 40px;
     -webkit-font-smoothing: antialiased;
   }
   ::selection { background: color-mix(in srgb, var(--accent-2) 30%, transparent); }
@@ -104,7 +121,7 @@
     height: 6px;
     margin-top: 14px;
     border-radius: 999px;
-    background: var(--gradient);
+    background: var(--gradient-shu);
   }
   main h2 {
     display: flex;
@@ -120,7 +137,7 @@
     width: 12px;
     height: 28px;
     border-radius: 999px;
-    background: var(--gradient);
+    background: var(--gradient-shu);
   }
   main h3 { margin: 32px 0 12px; font-size: 1.15rem; font-weight: 700; }
   main h3::before { content: "● "; color: var(--accent-2); font-size: 0.7em; vertical-align: 0.15em; }
@@ -145,7 +162,7 @@
   }
   main a:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 2px; }
   main strong { color: var(--fg); background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent-3) 45%, transparent) 62%); }
-  main hr { height: 4px; margin: 40px 0; border: 0; border-radius: 999px; background: var(--gradient); opacity: 0.35; }
+  main hr { height: 4px; margin: 40px 0; border: 0; border-radius: 999px; background: var(--gradient-shu); opacity: 0.4; }
   main img { border-radius: 16px; }
   main ul, main ol { padding-left: 1.4em; }
   main li { margin: 4px 0; }
@@ -155,7 +172,7 @@
     margin: 20px 0;
     padding: 12px 20px;
     color: var(--fg-soft);
-    background: var(--surface-2);
+    background: var(--tint);
     border-left: 6px solid var(--accent);
     border-radius: 0 16px 16px 0;
   }
@@ -177,12 +194,12 @@
     box-shadow: var(--shadow);
     line-height: 1.6;
     /* コードの色分け(highlight.js)。暗い背景に合わせた明るい色 */
-    --hl-keyword: #ff7eb6;
-    --hl-string: #7ee0c3;
-    --hl-number: #ffc46b;
-    --hl-title: #a8b8ff;
-    --hl-attr: #c9a8ff;
-    --hl-comment: #9491b8;
+    --hl-keyword: #f08a67;   /* 朱 */
+    --hl-string: #9fcf95;    /* 若竹 */
+    --hl-number: #e8c15a;    /* 山吹 */
+    --hl-title: #8cc3dc;     /* 浅葱 */
+    --hl-attr: #d6b3dd;      /* 藤 */
+    --hl-comment: #8a9aa2;
   }
   /* ウィンドウ風の3つの丸 */
   main pre:not(.mermaid)::before {
@@ -193,8 +210,8 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #ff5f7e;
-    box-shadow: 20px 0 0 #ffc24b, 40px 0 0 #3ddc97;
+    background: #d4572e;
+    box-shadow: 20px 0 0 #e0a526, 40px 0 0 #6aa06a;
   }
   main pre code { color: inherit; background: none; padding: 0; border-radius: 0; font-size: 0.88em; }
 
@@ -214,7 +231,7 @@
     text-align: left;
     font-weight: 800;
     color: var(--accent);
-    background: var(--surface-2);
+    background: var(--tint);
   }
   main tr:last-child td { border-bottom: 0; }
   main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 45%, transparent); }
@@ -240,7 +257,7 @@
   /* ---------- 目次 ---------- */
   .tsuzuri-toc {
     padding: 16px 22px;
-    background: var(--surface-2);
+    background: var(--tint);
     border: 0;
     border-radius: 18px;
   }
@@ -298,7 +315,7 @@
     padding: 6px 16px;
     color: #fff;
     font-weight: 700;
-    background: var(--gradient);
+    background: var(--gradient-shu);
     border: 0;
     border-radius: 999px;
     box-shadow: var(--shadow);
@@ -321,7 +338,7 @@
     padding-left: 12px;
     font-size: 0.78em;
     letter-spacing: 0.08em;
-    color: var(--accent);
+    color: var(--accent-2);
     opacity: 1;
   }
   body > nav ul ul { border-left: 2px solid var(--border); }
