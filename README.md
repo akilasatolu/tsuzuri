@@ -169,7 +169,7 @@ npx github:akilasatolu/tsuzuri#<作業ブランチ名> init
 bin/cli.mjs                 セットアップCLI(init)。生成するワークフロー・設定ファイルのテンプレートもここ
 .github/scripts/
   build-docs.mjs            ビルドのエントリーポイント
-  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / sitemap
+  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap
 styles/*.css                テーマCSSの原本(base + wa / muji / sumi / ai / shu)
 templates/.github/workflows/docs-pages.yml  initが生成するワークフローのひな形
 test/                       単体テスト・E2Eテスト(test/fixtures/ にフィクスチャ)
@@ -183,9 +183,9 @@ test/                       単体テスト・E2Eテスト(test/fixtures/ にフ
 
 Dependabotが週1回、`package.json`の依存パッケージと`ci.yml`のGitHub Actionsの更新PRを作ります。
 
-`marked`は、利用者側のワークフローでも使うビルド用の依存です。`init`が生成するワークフローは
-`package.json`の`devDependencies.marked`の版をそのまま埋め込むため、`marked`の更新PRを
-マージすれば、テストで使う版と利用者に配る版が一緒に更新されます。このため`marked`の版は
+`marked`と`highlight.js`は、利用者側のワークフローでも使うビルド用の依存です。`init`が生成する
+ワークフローは`package.json`の`devDependencies`にあるこれらの版をそのまま埋め込むため、更新PRを
+マージすれば、テストで使う版と利用者に配る版が一緒に更新されます。このためこの2つの版は
 `^`などの範囲ではなく`12.0.2`のような完全一致で書いてください(範囲指定だと`init`がエラーになります)。
 
 `init`が生成するワークフローは、`templates/.github/workflows/docs-pages.yml`のひな形から作られます

@@ -16,108 +16,59 @@
 
 ## [Unreleased]
 
+### Added
+
+- CLIの実行時に、最初に実行中のバージョン(`tsuzuri vX.Y.Z`)を表示するようにした。
+  `--version`(`-v`)・`--help`(`-h`)も追加。生成するワークフローの先頭コメントにも生成時のバージョンを記載する。
+- `init`を対話なしで実行できるオプションを追加(`--yes`・`--branch`・`--root`・`--theme`・`--style`)。
+  対話なしのときは既存ファイルをスキップし、`--force`を付けたときだけ上書きする。
+- 言語名付きのコードブロックを、ビルド時にhighlight.jsで色分けするようにした(閲覧時のJavaScriptは不要)。
+  色はテーマに合わせて決まり、独自CSSで`--hl-*`変数を指定すれば変えられる。
+- `NAV_ENABLED=true`のとき、ナビの上部にサイト内検索を表示するようにした。
+- `SITEMAP_JSON`設定を追加。`true`のときだけデバッグ用の`sitemap.json`を出力する。
+
+### Changed
+
+- デバッグ用の`sitemap.json`を既定では出力しないようにした(リンク切れや拒否したリンクのパスが
+  公開サイトから見えてしまうため)。リンクの問題はこれまでどおりワークフローのログに表示される。
+- 起点のページ(`ROOT_MD`)にfrontmatterの`title`が無い場合、ナビの表示名にサイト名(`SITE_NAME`)を使うようにした。
+- 対応するNode.jsのバージョン(20以上)を`package.json`の`engines`に明記し、CIでNode.js 20/22/24を試すようにした。
+- 不明なオプション・サブコマンドを指定したときはエラーにするようにした。
+
 ## [1.0.0] - 2026-09-27
 
 初回リリース。
 
 ### Added
 
-- `STRICT_LINKS`設定を追加。`true`にすると、リンク切れや拒否したリンク、コピーできなかった
-  ファイルがあるときにビルドを失敗させ、リンク切れのまま公開されるのを防ぐ(既定は`false`)。
-- `NAV_ENABLED=true`のとき、本文の末尾にナビの並び順で「前のページ/次のページ」リンクを付けるようにした。
-- `init --update`で、本体側で削除されたビルドスクリプト(`.github/tsuzuri/lib/*.mjs`)を削除するようにした。
-- 見出しにGitHubと同じ規則の`id`を付けるようにした。`page.md#見出し`形式のリンクで
-  ページ内の見出しへ移動できる(日本語の見出しにも対応)。
-- Markdown・画像以外のリンク先ファイル(PDF・zip等)もサイトにコピーするようにした
-  (拡張子の無いパスと、`.`で始まるファイル・ディレクトリは対象外)。
-- サブディレクトリの`README.md`を、そのディレクトリの`index.html`としても出力するようにした
-  (`/docs/`のようなURLで開ける)。`docs/`のようなディレクトリへのリンクも末尾の`/`を保つ。
-- `404.html`を生成するようにした。リポジトリ直下に`404.md`があればその内容、無ければ
-  既定の内容(`LANG`に応じて日本語/英語)で、通常のページと同じナビ・テーマで表示する。
-- `SITE_ORIGIN`がある場合に、検索エンジン向けの`sitemap.xml`(noindexのページは除く)と、
-  サイトがドメイン直下のときは`robots.txt`を出力するようにした。canonicalと同じ値を
-  `og:url`としても出力する。
-- 狭い画面ではナビを「メニュー」ボタンで開閉できるようにした(JavaScript不要)。
-- `init --update`を追加。対話なしで、ワークフローとビルドスクリプトだけを最新版に上書きする
-  (設定ファイル・独自CSSは変更しない)。
-- `SITE_NAME`を`og:site_name`メタタグとして出力するようにした。
-- ナビゲーション(`NAV_ENABLED=true`)を、広い画面(960px以上)では左側に固定したサイドバー、
-  狭い画面では本文の上に高さを抑えて表示するスタイルを基礎CSS(`base.css`)に追加した。
-- ナビゲーションを、リポジトリのディレクトリ構成に沿った階層構造で出力するようにした。
-  ページの表示名はfrontmatterの`title`、無ければファイル名。`sitemap.json`にも
-  同じ構造の`tree`フィールドを追加した。
-- frontmatterが改行コードCRLF・先頭BOM付きのファイルでも認識されるようにした。
+**セットアップ**
+- `npx github:akilasatolu/tsuzuri init`で、対話形式でワークフロー・設定ファイル・ビルドスクリプト一式を
+  生成する。生成後は利用者リポジトリの中だけでビルド・公開が完結し、tsuzuri本体を参照しない。
+- `init --update`で、設定ファイル・独自CSSを残したままワークフローとビルドスクリプトを最新版にする。
+- `#v1`(v1系の最新版)・`#v1.0.0`(固定)のタグでバージョンを指定できる。
 
-- frontmatterに`theme`キーを追加。ページ単位で、サイト全体の`THEME`とは違う
-  組み込みテーマ、またはユーザーが用意した独自CSSファイル(パス指定)に
-  テーマ層(2層目)を差し替えられるようになった([Frontmatterリファレンス](https://github.com/akilasatolu/tsuzuri/blob/docs/docs/frontmatter.md#theme)参照)。
+**サイトの生成**
+- `README.md`(`ROOT_MD`)を起点にリンクをたどり、到達できるMarkdown・画像・その他のファイル(PDF等)
+  だけをサイトにする。Markdownへのリンクは`.html`に書き換える。
+- ディレクトリの`README.md`は`index.html`としても出力する。`404.html`も生成する。
+- 見出しにGitHubと同じ規則の`id`を付け、`page.md#見出し`のリンクが使える。
+- 検索エンジン向けの`sitemap.xml`・`robots.txt`、canonical・OGP(`og:image`は絶対URL)を出力する。
+- `STRICT_LINKS=true`で、リンク切れがあるときにビルドを失敗させて公開を止められる。
 
-### Changed
+**見た目**
+- テーマ5種(和・無地・墨・藍・朱)と装飾なしから選べる。ページ単位でも切り替えられる(frontmatterの`theme`)。
+- 基礎CSS → テーマ → 独自CSS の3層で、CSS変数による配色の調整ができる。
+- `NAV_ENABLED=true`で、ディレクトリ階層のナビ(広い画面はサイドバー、狭い画面は「メニュー」ボタン)と、
+  前後のページへのリンクを表示する。
 
-- `og:image`(frontmatterの`ogImage`・`OGP_DEFAULT_IMAGE`)に相対パスを指定した場合、サイトの
-  絶対URLに変換し、画像もサイトにコピーするようにした(SNSは絶対URLでないと画像を読み込まないため)。
-- `init`の完了メッセージで、選んだトリガーブランチ名と、GitHub側で必要な設定
-  (Pagesの Source、既定ブランチ以外ならEnvironments)を案内するようにした。
-- `init`が生成するワークフローをNode.js 24にし、actionsを最新版に更新
-  (checkout v7.0.1 / setup-node v7.0.0 / upload-pages-artifact v5.0.0 / deploy-pages v5.0.1)。
-  ひな形を`templates/.github/workflows/docs-pages.yml`に分離し、Dependabotの更新対象にした。
-- 本体のCI・sync-docsもNode.js 24に更新。
-- トップページとディレクトリの`README.md`のcanonical URLを、`README.html`ではなく
-  トップURL・ディレクトリのURLにした。
+**設定**
+- `.github/docs-pages.config`(`KEY=VALUE`形式)で、トリガーブランチ・テーマ・言語・favicon・サイト名・
+  カスタムドメイン・OGP画像などを設定する。すべて省略可能。
+- frontmatterでページごとに`title`・`description`・`ogImage`・`ogType`・`noindex`・`theme`を指定できる。
 
-- `NAV_ENABLED`・`THEME`・`LANG`を省略(未設定・空文字)したときは警告を出さずに既定値を
-  使うようにした(不正な値のときだけ警告する)。
-- `LANG`が言語タグとして不正な値(例: ローカル実行時のOSの`en_US.UTF-8`)のときは、
-  警告して`ja`にフォールバックするようにした。
-- `STYLE_DIR`に絶対パスを指定できるようにした(ローカルでの動作確認用)。
-- `init`が生成するワークフローでインストールする`marked`のバージョンを、ハードコードではなく
-  `package.json`の`devDependencies.marked`(完全一致で固定)から埋め込むようにした。
-  テストで使う版と利用者に配る版が常に一致し、Dependabotの更新PR 1つで両方が追従する。
-
-- `npx github:akilasatolu/tsuzuri init`が生成するワークフローを自己完結型に変更。
-  以前は利用者側`docs-pages.yml`がOSS本体リポジトリの再利用可能ワークフロー
-  (`build.yml`)を`uses:`で呼び出し、実行のたびにビルドスクリプト本体を取得していたが、
-  `init`実行時にビルドスクリプト本体(`build-docs.mjs`/`lib/*.mjs`/`styles/*.css`)を
-  `.github/tsuzuri/`配下へコピーするようにした。生成後のワークフローは実行時に
-  OSS本体リポジトリへ一切依存せず、利用者リポジトリの中だけでビルド・デプロイが
-  完結する([デプロイ設定](https://github.com/akilasatolu/tsuzuri/blob/docs/docs/deployment.md)参照)。
-- `init`で(任意で)生成する独自CSSひな形の配置先を`.github/docs-pages.style.css`から
-  `.github/tsuzuri/styles/custom.css`に変更。組み込みテーマCSS一式と同じディレクトリに
-  置かれるようになり、既存テーマのCSSを参考にしながら独自CSSを書けるようにした。
-  `.github/docs-pages.config`の`STYLE_FILE`のデフォルト出力値もこれに合わせて変更した
-  (ビルド側の内部フォールバック値`.github/docs-pages.style.css`自体は変更していない)。
-
-### Fixed
-
-- 生成ワークフローの`SITE_ORIGIN`にサイトのパスが含まれていたため、canonical URLが
-  `https://owner.github.io/repo/repo/...`のようにパスが二重になっていた不具合を修正。
-- `marked`を18系に更新し、v13以降のレンダラーAPI(引数がトークンオブジェクト)に対応。
-  旧APIのままだと`link.startsWith is not a function`でビルドが失敗していた。
-- `npx`経由(`node_modules/.bin/`のシンボリックリンク経由)で起動すると、CLIが何もせずに
-  終了していた不具合を修正。
-
-### Security
-
-- リポジトリ外のファイルを読み書きしないようにした。frontmatterの`theme`、`STYLE_FILE`、
-  `FAVICON_FILE`、`ROOT_MD`、リンク先のMarkdown・画像が、`../`や絶対パス、
-  リポジトリ外を指すシンボリックリンクでリポジトリの外を指す場合は無視する。
-  `OUT_DIR`がリポジトリ外またはリポジトリ直下を指す場合はビルドを中止する。
-- `init`が生成するワークフローを強化した。設定ファイルからは既知のキーだけを環境変数として
-  取り込み(`NODE_OPTIONS`等を注入できないようにする)、Pagesへの書き込み権限は
-  deployジョブだけに付与し、`marked`のインストール時にinstallスクリプトを実行しない。
-  あわせて、値に`'`や`"`を含むとワークフローが失敗する不具合を修正した。
-
-### Removed
-
-- リポジトリ直下に残っていた、旧方式(薄いラッパー+`build.yml`呼び出し)時代の
-  生成物の古い例(`.github/workflows/docs-pages.yml`・`.github/docs-pages.config`・
-  `.github/workflows/build.yml`)を削除。現行の`init`が生成するテンプレートと
-  内容が乖離しており、「本リポジトリ内のどこまでが編集してよいソースで、
-  どこからが利用者向けの生成物か」が分かりにくくなっていたための整理。
-  あわせて`ci.yml`の`build-smoke-test`ジョブ(削除した`build.yml`への依存)を廃止し、
-  `ci.yml`全体の権限を`contents: read`のみに縮小した(lint・test以外何もしないため、
-  GitHub Pagesへは一切触れなくなった)。ビルドロジック自体の検証は、既存の
-  `test/build-docs.e2e.test.mjs`・`test/cli.test.mjs`で引き続きカバーされる。
+**安全性**
+- リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
+- 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
 [Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/akilasatolu/tsuzuri/releases/tag/v1.0.0
