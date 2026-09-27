@@ -58,6 +58,8 @@
 
 ### Fixed
 
+- `marked`を18系に更新し、v13以降のレンダラーAPI(引数がトークンオブジェクト)に対応。
+  旧APIのままだと`link.startsWith is not a function`でビルドが失敗していた。
 - `npx`経由(`node_modules/.bin/`のシンボリックリンク経由)で起動すると、CLIが何もせずに
   終了していた不具合を修正。
 

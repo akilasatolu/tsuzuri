@@ -235,12 +235,16 @@ async function main() {
   const siteTree = buildSiteTree(visitedMd.entries());
 
   for (const [rel, { content, meta }] of visitedMd.entries()) {
+    // marked v13以降のレンダラーAPI: 各メソッドは引数としてトークン(オブジェクト)を1つ受け取る。
+    // リンクの表示テキストはインライン要素(強調・コード等)を含みうるため、
+    // this.parser.parseInline(tokens) でHTMLにする(this を使うためアロー関数にしない)。
     const renderer = new marked.Renderer();
-    renderer.link = (href, title, text) => {
+    renderer.link = function ({ href, title, tokens }) {
       const newHref = toSiteAbsHref(rel, href, config.basePath);
+      const text = this.parser.parseInline(tokens);
       return `<a href="${newHref}"${title ? ` title="${escapeHtml(title)}"` : ""}>${text}</a>`;
     };
-    renderer.image = (href, title, text) => {
+    renderer.image = function ({ href, title, text }) {
       const newHref = toSiteAbsHref(rel, href, config.basePath);
       return `<img src="${newHref}" alt="${escapeHtml(text || "")}"${
         title ? ` title="${escapeHtml(title)}"` : ""
