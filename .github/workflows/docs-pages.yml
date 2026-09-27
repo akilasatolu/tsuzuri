@@ -1,6 +1,6 @@
 name: Deploy Docs to GitHub Pages
 
-# tsuzuri v1.3.0 の npx github:akilasatolu/tsuzuri#v1 init によって生成された、自己完結型のワークフローです。
+# tsuzuri v1.4.0 の npx github:akilasatolu/tsuzuri#v1 init によって生成された、自己完結型のワークフローです。
 # ビルドスクリプト本体(.github/tsuzuri/ 配下)もこのリポジトリにコピー済みのため、
 # 実行のたびにOSS本体リポジトリ(akilasatolu/tsuzuri)を参照することはありません。
 # スクリプトを最新版に更新したい場合は、npx github:akilasatolu/tsuzuri#v1 init --update を実行してください。
@@ -141,7 +141,8 @@ jobs:
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: steps.trigger.outputs.should_deploy != 'false'
         with:
-          path: ${{ env.OUT_DIR }}
+          # 設定ファイルで OUT_DIR を省略・空にした場合も、ビルドと同じ _site を上げる
+          path: ${{ env.OUT_DIR || '_site' }}
 
   deploy:
     needs: build
