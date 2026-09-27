@@ -22,7 +22,7 @@
 
 - frontmatterに`theme`キーを追加。ページ単位で、サイト全体の`THEME`とは違う
   組み込みテーマ、またはユーザーが用意した独自CSSファイル(パス指定)に
-  テーマ層(2層目)を差し替えられるようになった([Frontmatterリファレンス](https://github.com/akilasatolu/tsuzuri/blob/main/docs/frontmatter.md#theme)参照)。
+  テーマ層(2層目)を差し替えられるようになった([Frontmatterリファレンス](https://github.com/akilasatolu/tsuzuri/blob/docs/docs/frontmatter.md#theme)参照)。
 
 ### Changed
 
@@ -32,7 +32,7 @@
   `init`実行時にビルドスクリプト本体(`build-docs.mjs`/`lib/*.mjs`/`styles/*.css`)を
   `.github/tsuzuri/`配下へコピーするようにした。生成後のワークフローは実行時に
   OSS本体リポジトリへ一切依存せず、利用者リポジトリの中だけでビルド・デプロイが
-  完結する([デプロイ設定](https://github.com/akilasatolu/tsuzuri/blob/main/docs/deployment.md)参照)。
+  完結する([デプロイ設定](https://github.com/akilasatolu/tsuzuri/blob/docs/docs/deployment.md)参照)。
 - `init`で(任意で)生成する独自CSSひな形の配置先を`.github/docs-pages.style.css`から
   `.github/tsuzuri/styles/custom.css`に変更。組み込みテーマCSS一式と同じディレクトリに
   置かれるようになり、既存テーマのCSSを参考にしながら独自CSSを書けるようにした。

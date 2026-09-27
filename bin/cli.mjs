@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// npx github:akilasatolu/tsuzuri#develop [init] のエントリーポイント。
+// npx github:akilasatolu/tsuzuri [init] のエントリーポイント。
 // 利用者リポジトリに配布用ファイル(docs-pages.yml / docs-pages.config /
 // 任意でdocs-pages.style.css)に加えて、ビルドスクリプト本体
 // (build-docs.mjs / lib/*.mjs / styles/*.css)一式を `.github/tsuzuri/` 配下に
@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 export const OSS_REPO = "akilasatolu/tsuzuri";
 
 // このファイル(bin/cli.mjs)自身が置かれているパッケージのルートディレクトリ。
-// `npx github:akilasatolu/tsuzuri#develop init` 実行時は、npxが一時的にcloneした
+// `npx github:akilasatolu/tsuzuri init` 実行時は、npxが一時的にcloneした
 // tsuzuriリポジトリ自身がここに当たるため、ここを起点に
 // `.github/scripts/`・`styles/`配下の実ファイルをそのまま利用者側へコピーできる。
 export const PACKAGE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -61,7 +61,7 @@ const DEFAULT_ANSWERS = {
 export function buildDocsPagesYml() {
   return `name: Deploy Docs to GitHub Pages
 
-# npx github:${OSS_REPO}#develop init によって生成された、自己完結型のワークフローです。
+# npx github:${OSS_REPO} init によって生成された、自己完結型のワークフローです。
 # ビルドスクリプト本体(${VENDOR_DIR}/ 配下)もこのリポジトリにコピー済みのため、
 # 実行のたびにOSS本体リポジトリ(${OSS_REPO})を参照することはありません。
 # スクリプトを最新版に更新したい場合は、再度セットアップコマンドを実行してください。

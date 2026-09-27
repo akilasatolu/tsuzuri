@@ -1,25 +1,25 @@
-# Tsuzuri — 開発者向けREADME(developブランチ)
+# Tsuzuri — 開発者向けREADME
 
-[![CI](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml)
+[![CI](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml)
 
-このブランチ(`develop`)は、Tsuzuri本体(セットアップCLI・ビルドスクリプト・テーマCSS)の
+このブランチ(`main`)は、Tsuzuri本体(セットアップCLI・ビルドスクリプト・テーマCSS)の
 開発ブランチです。利用者が実行する`init`コマンドも、このブランチからファイルを取得します。
 
-Tsuzuriの使い方(利用者向けの説明)は、`main`ブランチの
-[README](https://github.com/akilasatolu/tsuzuri/blob/main/README.md)と
-[ドキュメント](https://github.com/akilasatolu/tsuzuri/tree/main/docs)を参照してください。
+Tsuzuriの使い方(利用者向けの説明)は、`docs`ブランチの
+[README](https://github.com/akilasatolu/tsuzuri/blob/docs/README.md)と
+[ドキュメント](https://github.com/akilasatolu/tsuzuri/tree/docs/docs)を参照してください。
 
 ## ブランチ運用
 
 | ブランチ | 役割 | 中身 |
 |---|---|---|
-| `develop` | Tsuzuri本体の開発。`npx github:akilasatolu/tsuzuri#develop init`の取得元 | CLI・ビルドスクリプト・テーマCSS・テスト・開発者向けドキュメント |
-| `main`(既定ブランチ) | Tsuzuri自身を使って作った、利用者向けのサイト(GitHub Pagesで公開) | 利用者向けREADME・`docs/`・`assets/`と、`init`で生成したワークフロー一式 |
+| `main`(既定ブランチ) | Tsuzuri本体の開発。`npx github:akilasatolu/tsuzuri init`の取得元 | CLI・ビルドスクリプト・テーマCSS・テスト・開発者向けドキュメント、GitHub用テンプレート類 |
+| `docs` | Tsuzuri自身を使って作った、利用者向けのサイト(GitHub Pagesで公開) | 利用者向けREADME・`docs/`・`assets/`と、`init`で生成したワークフロー一式 |
 
-- 2つのブランチは履歴を共有しない独立したブランチです。**`develop`を`main`へマージしないでください**(逆も同様)。
-- 本体の変更は`develop`へのPRで行います。
-- `main`の`.github/tsuzuri/`配下は、利用者と同じ手順(`init`の再実行)で更新します。直接編集しないでください。
-- 利用者向けドキュメント(`main`の`docs/`)の修正は、`main`へのPRで行います。
+- 2つのブランチは履歴を共有しない独立したブランチです。**`main`と`docs`を互いにマージしないでください**。
+- 本体の変更は`main`へのPRで行います。
+- `docs`の`.github/tsuzuri/`配下は、利用者と同じ手順(`init`の再実行)で更新します。直接編集しないでください。
+- 利用者向けドキュメント(`docs`ブランチの`docs/`)の修正は、`docs`へのPRで行います。
 
 ## 開発環境のセットアップ
 
@@ -62,7 +62,7 @@ test/                       単体テスト・E2Eテスト(test/fixtures/ にフ
 
 ## リリース
 
-`v1`などのタグは`develop`ブランチのコミットに付けます。利用者は
+`v1`などのタグは`main`ブランチのコミットに付けます。利用者は
 `npx github:akilasatolu/tsuzuri#v1 init`のようにタグを指定して実行できます。
 リリース前の確認項目は[CONTRIBUTING.md](CONTRIBUTING.md)の「リリース前チェックリスト」を、
 変更履歴は[CHANGELOG.md](CHANGELOG.md)を参照してください。

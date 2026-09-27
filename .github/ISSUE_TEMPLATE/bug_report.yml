@@ -1,0 +1,77 @@
+name: バグ報告
+description: 予期しない挙動やエラーを報告する
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        バグ報告ありがとうございます。以下の項目をできるだけ具体的にご記入ください。
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: どのようなバグか簡潔に説明してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 再現手順
+      description: バグを再現する手順を順番に記載してください。
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待する挙動
+      description: 本来どのように動作するべきかを記載してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の挙動
+      description: 実際に発生した挙動やエラーメッセージを記載してください。
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js バージョン
+      placeholder: 例) v20.11.0
+    validations:
+      required: false
+
+  - type: input
+    id: package-version
+    attributes:
+      label: パッケージ バージョン
+      placeholder: 例) 1.2.0
+    validations:
+      required: false
+
+  - type: input
+    id: os
+    attributes:
+      label: OS / 環境
+      placeholder: 例) macOS 14.5, GitHub Actions ubuntu-latest
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 補足情報
+      description: ログ、スクリーンショット、関連するIssue/PRなどがあれば記載してください。
+    validations:
+      required: false

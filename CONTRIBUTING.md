@@ -5,10 +5,10 @@
 
 ## ブランチについて
 
-- **`develop`**: Tsuzuri本体(CLI・ビルドスクリプト・テーマCSS)の開発ブランチです。
-  本体への変更PRは`develop`宛てに送ってください。
-- **`main`**(既定ブランチ): Tsuzuri自身を使って作った利用者向けサイトです。利用者向け
-  ドキュメント(`docs/`)の修正PRは`main`宛てに送ってください。
+- **`main`**(既定ブランチ): Tsuzuri本体(CLI・ビルドスクリプト・テーマCSS)の開発ブランチです。
+  本体への変更PRは`main`宛てに送ってください。
+- **`docs`**: Tsuzuri自身を使って作った利用者向けサイトです。利用者向け
+  ドキュメント(`docs/`)の修正PRは`docs`宛てに送ってください。
 
 2つのブランチは履歴を共有しない独立したブランチです。互いにマージしないでください。
 
@@ -50,14 +50,14 @@ npm run lint
 - `test/**` — テスト。`README.md`・本ファイル・`CHANGELOG.md` — 開発者向けドキュメント。
 - `.github/workflows/ci.yml` — このリポジトリ自身の開発用CI(後述)。
 
-利用者向けドキュメント(`docs/**`)は`main`ブランチにあります。
+利用者向けドキュメント(`docs/**`)は`docs`ブランチにあります。
 
 **「ワークフローの実行物」(利用者リポジトリだけに存在するもの)**
 
-`npx github:akilasatolu/tsuzuri#develop init` を実行すると生成される
+`npx github:akilasatolu/tsuzuri init` を実行すると生成される
 `.github/workflows/docs-pages.yml`・`.github/docs-pages.config`・`.github/tsuzuri/`配下は、
-**利用者リポジトリのためだけの生成物**です。`develop`ブランチにはこれらのファイルを
-コミットしないでください(`main`ブランチには、利用者と同じ手順で生成したものが置かれています)。生成内容の正しさは `test/cli.test.mjs`(生成ロジックの
+**利用者リポジトリのためだけの生成物**です。`main`ブランチにはこれらのファイルを
+コミットしないでください(`docs`ブランチには、利用者と同じ手順で生成したものが置かれています)。生成内容の正しさは `test/cli.test.mjs`(生成ロジックの
 テスト)と `test/build-docs.e2e.test.mjs`(ビルド本体のE2Eテスト)で検証します。
 実機で動作確認したい場合は、別のテスト用リポジトリ(本プロジェクト外)で`init`を
 実行してください(詳しくは後述の「リリース前チェックリスト」)。
@@ -68,8 +68,8 @@ npm run lint
 
 | イベント | 起動するワークフロー | 内容 |
 |---|---|---|
-| `develop`へのpush・PR | `ci.yml` | `npm run lint`と`npm test`のみ。権限は`contents: read`だけで、GitHub Pagesには一切触れない |
-| `main`へのpush | `docs-pages.yml`(`main`にのみ存在) | `main`の利用者向けサイトをビルドし、本リポジトリのGitHub Pagesにデプロイ(自己ドッグフーディング) |
+| `main`へのpush・PR | `ci.yml` | `npm run lint`と`npm test`のみ。権限は`contents: read`だけで、GitHub Pagesには一切触れない |
+| `docs`へのpush | `docs-pages.yml`(`docs`にのみ存在) | `docs`の利用者向けサイトをビルドし、本リポジトリのGitHub Pagesにデプロイ(自己ドッグフーディング) |
 
 開発中のブランチにpushしても、GitHub Pagesへのデプロイや外部リポジトリへの影響は
 発生しません。安心してpush・ワークフロー実行してください。
