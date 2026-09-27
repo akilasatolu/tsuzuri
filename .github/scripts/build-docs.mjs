@@ -242,7 +242,10 @@ async function main() {
   marked.setOptions({ gfm: true, breaks: false });
 
   // ナビゲーション・sitemap.json 用のサイトツリー(ディレクトリ階層)
-  const siteTree = buildSiteTree(visitedMd.entries());
+  const siteTree = buildSiteTree(visitedMd.entries(), {
+    rootMd: config.rootMd,
+    siteName: config.siteName,
+  });
   const isJa = config.lang.toLowerCase().startsWith("ja");
   const menuLabel = isJa ? "メニュー" : "Menu";
 

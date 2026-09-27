@@ -85,3 +85,15 @@ describe("flattenPages", () => {
     );
   });
 });
+
+describe("起点ページ(ROOT_MD)の表示名", () => {
+  test("titleが無ければサイト名、サイト名も無ければファイル名。titleがあればtitle", () => {
+    const entries = [["README.md", { meta: {} }], ["docs/a.md", { meta: {} }]];
+    const named = buildSiteTree(entries, { rootMd: "README.md", siteName: "Tsuzuri" });
+    assert.equal(named.children[0].title, "Tsuzuri");
+    assert.equal(named.children[1].children[0].title, "a.md", "起点以外にはサイト名を使わない");
+    assert.equal(buildSiteTree(entries, { rootMd: "README.md" }).children[0].title, "README.md");
+    const titled = buildSiteTree([["README.md", { meta: { title: "ホーム" } }]], { rootMd: "README.md", siteName: "Tsuzuri" });
+    assert.equal(titled.children[0].title, "ホーム");
+  });
+});
