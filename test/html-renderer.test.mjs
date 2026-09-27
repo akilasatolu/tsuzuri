@@ -100,6 +100,16 @@ describe("renderNav", () => {
     );
   });
 
+  test("searchを指定すると検索欄の置き場所とスクリプトの読み込みを出力する(未指定なら出力しない)", () => {
+    const search = { indexUrl: "/r/search-index.json", scriptUrl: "/r/tsuzuri-search.js", placeholder: "検索", empty: "なし" };
+    const html = renderNav(tree, "README.md", "/r", "", "メニュー", search);
+    assert.match(
+      html,
+      /<div class="tsuzuri-search" data-index="\/r\/search-index\.json" data-placeholder="検索" data-empty="なし"><\/div><script src="\/r\/tsuzuri-search\.js" defer><\/script><ul>/
+    );
+    assert.doesNotMatch(renderNav(tree, "README.md", "/r", ""), /tsuzuri-search/);
+  });
+
   test("開閉ボタンの文言は指定でき、エスケープされる", () => {
     const html = renderNav(tree, "README.md", "", "", "Menu <x>");
     assert.match(html, />Menu &lt;x&gt;<\/label>/);

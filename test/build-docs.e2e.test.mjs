@@ -845,4 +845,31 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  test("NAV_ENABLED=trueのとき、検索用の索引とスクリプトを出力し、ナビに検索欄を置く", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\ntitle: ページA\n---\n# Page A\n\n検索できる本文です。\n");
+
+      let result = runBuild(dir, { NAV_ENABLED: "true", BASE_PATH: "/repo" });
+      assert.equal(result.status, 0, result.stderr);
+      const index = JSON.parse(readOut(dir, "search-index.json"));
+      assert.deepEqual(index.map((p) => p.u).sort(), ["/repo/", "/repo/docs/a.html"]);
+      const a = index.find((p) => p.u === "/repo/docs/a.html");
+      assert.equal(a.t, "ページA");
+      assert.match(a.x, /検索できる本文です。/);
+      assert.doesNotMatch(a.x, /前のページ/, "前後ページリンクは索引に含めない");
+      assert.ok(readOut(dir, "tsuzuri-search.js").includes("tsuzuri-search"));
+      assert.match(readOut(dir, "index.html"), /<div class="tsuzuri-search" data-index="\/repo\/search-index\.json"/);
+
+      fs.rmSync(path.join(dir, "_site"), { recursive: true });
+      result = runBuild(dir);
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "search-index.json")));
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "tsuzuri-search.js")));
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

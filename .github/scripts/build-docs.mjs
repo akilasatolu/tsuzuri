@@ -56,6 +56,7 @@ import {
 import { buildSitemap, buildSitemapXml } from "./lib/sitemap.mjs";
 import { buildSiteTree, flattenPages } from "./lib/site-tree.mjs";
 import { createSlugger, htmlToText } from "./lib/slugger.mjs";
+import { buildSearchIndex, SEARCH_SCRIPT } from "./lib/search.mjs";
 import { parseFrontmatter } from "./lib/frontmatter.mjs";
 
 async function main() {
@@ -248,6 +249,17 @@ async function main() {
   // 「前のページ/次のページ」リンク(NAV_ENABLED=true のとき)。順番はナビの表示順。
   const pageOrder = flattenPages(siteTree);
   const pageIndex = new Map(pageOrder.map((page, i) => [page.rel, i]));
+  // サイト内検索(NAV_ENABLED=true のとき)。索引とスクリプトは出力先の直下に置く。
+  const search = config.navEnabled
+    ? {
+        indexUrl: `${config.basePath}/search-index.json`,
+        scriptUrl: `${config.basePath}/tsuzuri-search.js`,
+        placeholder: isJa ? "サイト内を検索" : "Search this site",
+        empty: isJa ? "見つかりませんでした" : "No results",
+      }
+    : null;
+  const searchPages = []; // { title, url, html }(本文のみ。前後ページリンクは含めない)
+
   const pagerLabels = isJa
     ? { prev: "前のページ", next: "次のページ", nav: "前後のページ" }
     : { prev: "Previous", next: "Next", nav: "Previous and next pages" };
@@ -329,14 +341,17 @@ async function main() {
 
     const preprocessed = preprocessRawHtmlPaths(content, rel, config.basePath);
     let bodyHtml = marked.parse(preprocessed, { renderer });
+    const title = renderTitle(content, rel, meta.title);
+    if (search && visitedMd.has(rel)) {
+      searchPages.push({ title, url: `${config.basePath}/${urlPathOf(rel)}`, html: bodyHtml });
+    }
     if (config.navEnabled && pageIndex.has(rel)) {
       const i = pageIndex.get(rel);
       bodyHtml += renderPager(pageOrder[i - 1] ?? null, pageOrder[i + 1] ?? null, config.basePath, pagerLabels);
     }
-    const title = renderTitle(content, rel, meta.title);
 
     const navHtml = config.navEnabled
-      ? renderNav(siteTree, rel, config.basePath, config.siteName, menuLabel)
+      ? renderNav(siteTree, rel, config.basePath, config.siteName, menuLabel, search)
       : "";
 
     // SEOメタタグは「出力すべき情報が何もない」場合は metaTagsHtml="" のままとし、
@@ -408,6 +423,12 @@ async function main() {
         : defaultNotFoundMarkdown(config.lang);
     const { meta, body } = parseFrontmatter(raw);
     writeOut("404.html", renderPage("404.md", body, { ...meta, noindex: true }, { canonical: false }));
+  }
+
+  // ---------- 7.6 サイト内検索の索引・スクリプト(NAV_ENABLED=true のとき) ----------
+  if (search) {
+    fs.writeFileSync(path.join(OUT_DIR, "search-index.json"), JSON.stringify(buildSearchIndex(searchPages)));
+    fs.writeFileSync(path.join(OUT_DIR, "tsuzuri-search.js"), SEARCH_SCRIPT);
   }
 
   // ---------- 8. 画像・その他のリンク先ファイルのコピー ----------

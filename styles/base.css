@@ -78,6 +78,23 @@
   body > nav > ul { display: none; margin-top: 8px; }
   .tsuzuri-nav-toggle:checked ~ ul { display: block; }
 
+  /* サイト内検索(ナビの上部。検索欄と結果はスクリプトが作る) */
+  .tsuzuri-search { margin: 10px 0 4px; }
+  .tsuzuri-search input {
+    width: 100%;
+    padding: 6px 10px;
+    font: inherit;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+  body > nav .tsuzuri-search-results { margin: 6px 0 0; }
+  .tsuzuri-search-results:empty { display: none; }
+  .tsuzuri-search-results li { padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .tsuzuri-search-results small { display: block; opacity: 0.7; font-size: 0.85em; }
+
   /* 本文末尾の「前のページ/次のページ」リンク(NAV_ENABLED=true のとき) */
   .tsuzuri-pager {
     display: flex;
