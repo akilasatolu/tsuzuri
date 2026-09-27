@@ -66,6 +66,7 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 - [仕組み(Concepts)](docs/concepts.md)
 - [設定リファレンス(Configuration)](docs/configuration.md)
 - [テーマ・スタイル(Theming)](docs/theming.md)
+- [テーマギャラリー(Gallery)](docs/gallery.md)
 - [Frontmatterリファレンス](docs/frontmatter.md)
 - [CLIリファレンス](docs/cli.md)
 - [デプロイ設定(Deployment)](docs/deployment.md)
@@ -100,7 +101,10 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 
 ## テーマプレビュー
 
-和/無地/墨/藍/朱の5テーマを見比べたい場合は、frontmatterの`theme`キーで
+組み込みテーマの見た目は、[テーマギャラリー](docs/gallery.md)で実際のページとして
+見比べられます。
+
+自分のサイトで見比べたい場合は、frontmatterの`theme`キーで
 ページごとに異なるテーマを指定できます(サイト全体の`THEME`設定とは別に、
 1ページだけテーマを差し替える機能。詳しくは[Frontmatterリファレンス](docs/frontmatter.md#theme)を参照)。
 複数のMarkdownファイルにそれぞれ違う`theme`を指定してビルドすれば、
