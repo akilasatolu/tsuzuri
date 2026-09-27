@@ -75,6 +75,7 @@ import { createSlugger, htmlToText } from "./lib/slugger.mjs";
 import { buildSearchIndex, SEARCH_SCRIPT } from "./lib/search.mjs";
 import { parseFrontmatter } from "./lib/frontmatter.mjs";
 import { imageSizeOf } from "./lib/image-size.mjs";
+import { COPY_SCRIPT, COPY_SCRIPT_NAME } from "./lib/copy-button.mjs";
 
 // 出力先の目印のファイル名。これがあるディレクトリは Tsuzuri が前回出力したものなので、ビルドの前に
 // 空にしてよい(消したページ・画像が残らないように)。"." で始まるので公開サイトには含まれない。
@@ -565,6 +566,20 @@ async function main() {
     return size ? ` width="${size.width}" height="${size.height}"` : "";
   }
 
+  // 本文の最初の(文字のある)段落を、説明文(meta description)用に短くする。
+  // 注意書きの見出し(「補足」など)や、バッジ・画像だけの段落は使わない。
+  let copyScriptUsed = false;
+  function descriptionFromHtml(html) {
+    for (const m of html.matchAll(/<p(\s[^>]*)?>([\s\S]*?)<\/p>/gi)) {
+      if (/markdown-alert-title/.test(m[1] ?? "")) continue;
+      // 画像は代わりのテキスト(alt)にする
+      const withAlt = m[2].replace(/<img\b[^>]*?\balt="([^"]*)"[^>]*>/gi, "$1");
+      const text = htmlToText(withAlt).replace(/\s+/g, " ").trim();
+      if (text) return text.length > 120 ? `${text.slice(0, 119)}…` : text;
+    }
+    return "";
+  }
+
   // 1ページ分のHTMLを組み立てる。
   function renderPage(rel, content, meta, { canonical = true } = {}) {
     // marked v13以降のレンダラーAPI: 各メソッドは引数としてトークン(オブジェクト)を1つ受け取る。
@@ -600,6 +615,7 @@ async function main() {
     // コードブロックは、言語名が書かれていて highlight.js が対応している場合だけ、ビルド時に
     // 色分けしたHTMLにする(閲覧時にJavaScriptは不要)。言語の自動判定は誤判定を避けるため行わない。
     let hasMermaid = false;
+    let hasCode = false;
     renderer.code = function ({ text, lang }) {
       const language = (lang || "").trim().split(/\s+/)[0];
       // mermaid の図は、閲覧時に mermaid のスクリプトが <pre class="mermaid"> を図に変換する
@@ -607,6 +623,7 @@ async function main() {
         hasMermaid = true;
         return `<pre class="mermaid">${escapeHtml(text)}</pre>\n`;
       }
+      hasCode = true;
       if (language && hljs.getLanguage(language)) {
         const highlighted = hljs.highlight(text, { language, ignoreIllegals: true }).value;
         return `<pre><code class="hljs language-${escapeHtml(language)}">${highlighted}\n</code></pre>\n`;
@@ -638,6 +655,7 @@ async function main() {
 
     let bodyHtml = removeCjkLineBreaks(md.parse(content, { renderer }));
     collectIds(rel, bodyHtml);
+    const autoDescription = descriptionFromHtml(bodyHtml);
     // タイトル: frontmatter の title > 最初の h1 の表示テキスト > (起点のページなら)サイト名 > ファイルパス。
     // ナビの表示名と同じ優先順。h1 は描画した見出し、無ければ crawler が集めた h1(生のHTMLの <h1> を含む)。
     // (コードブロック内の "# コメント" は見出しにならないので、誤って拾わない)
@@ -663,6 +681,10 @@ async function main() {
       )}">${escapeHtml(updated)}</time></p>\n`;
     }
     if (hasMermaid) bodyHtml += MERMAID_SCRIPT;
+    if (hasCode) {
+      copyScriptUsed = true;
+      bodyHtml += `<script src="${escapeHtml(`${config.basePath}/${COPY_SCRIPT_NAME}`)}" defer></script>\n`;
+    }
     if (config.navEnabled && pageIndex.has(rel)) {
       const i = pageIndex.get(rel);
       bodyHtml += renderPager(pageOrder[i - 1] ?? null, pageOrder[i + 1] ?? null, config.basePath, pagerLabels);
@@ -676,7 +698,8 @@ async function main() {
     // pageTemplate の回帰テスト(navHtml=""・metaTagsHtml=""での完全一致)と
     // 整合させる(renderMetaTags は呼べば常に og:title/og:type を出力するため、
     // 何も設定されていないベースライン構成では意図的に呼び出し自体をスキップする)。
-    const description = meta.description || "";
+    // description が無いページは、本文の最初の段落から作る(検索結果・SNSでの説明文に使われる)
+    const description = (typeof meta.description === "string" && meta.description) || autoDescription;
     const ogImage = meta.ogImage
       ? resolveOgImage(meta.ogImage, rel)
       : resolveOgImage(config.ogDefaultImage, config.rootMd);
@@ -760,6 +783,12 @@ async function main() {
       else if (isLinkedFilePath(resolved.repoRel)) fileSet.add(resolved.repoRel);
     }
     writeOut("404.html", renderPage("404.md", body, { ...meta, noindex: true }, { canonical: false }), "404.md");
+  }
+
+  // ---------- 7.55 コードブロックのコピーボタンのスクリプト(コードブロックがあるページが読み込む) ----------
+  if (copyScriptUsed) {
+    fs.writeFileSync(path.join(OUT_DIR, COPY_SCRIPT_NAME), COPY_SCRIPT);
+    writtenBy.set(COPY_SCRIPT_NAME, "(Tsuzuri が生成するファイル)");
   }
 
   // ---------- 7.6 サイト内検索の索引・スクリプト(NAV_ENABLED=true のとき) ----------
