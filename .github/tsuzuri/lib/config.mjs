@@ -29,6 +29,7 @@ const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @property {string} siteOrigin
  * @property {string} lang
  * @property {boolean} navEnabled
+ * @property {boolean} strictLinks
  * @property {string} faviconFile
  * @property {string} siteName
  * @property {string} customDomain
@@ -54,7 +55,10 @@ export function loadConfig(env = process.env) {
 
   const lang = resolveLang(env.LANG);
 
-  const navEnabled = parseNavEnabled(env.NAV_ENABLED);
+  const navEnabled = parseBoolean("NAV_ENABLED", env.NAV_ENABLED);
+
+  // true のとき、リンク切れ・拒否したリンクがあればビルドを失敗させる(公開を止める)
+  const strictLinks = parseBoolean("STRICT_LINKS", env.STRICT_LINKS);
 
   const siteName = resolveSiteName(env);
 
@@ -72,6 +76,7 @@ export function loadConfig(env = process.env) {
     siteOrigin,
     lang,
     navEnabled,
+    strictLinks,
     faviconFile,
     siteName,
     customDomain,
@@ -87,13 +92,14 @@ function trimOr(raw, fallback) {
   return trimmed || fallback;
 }
 
+// true/false の設定値を読む。大文字小文字は区別しない。
 // 省略(未設定・空文字)は既定値 false として黙って扱い、不正値のときだけ warn する。
-function parseNavEnabled(raw) {
+function parseBoolean(name, raw) {
   const trimmed = (raw ?? "").trim().toLowerCase();
   if (trimmed === "true") return true;
   if (trimmed === "false" || trimmed === "") return false;
   console.warn(
-    `[config] NAV_ENABLED の値が不正です("${raw ?? ""}")。false にフォールバックします。`
+    `[config] ${name} の値が不正です("${raw ?? ""}")。false にフォールバックします。`
   );
   return false;
 }

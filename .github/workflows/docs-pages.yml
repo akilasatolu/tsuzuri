@@ -47,7 +47,7 @@ jobs:
             # 既知の設定キーだけを環境変数として取り込む。それ以外(NODE_OPTIONS等)を
             # 設定ファイル経由で注入できないようにする。
             case "$key" in
-              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANG|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME)
+              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANG|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS)
                 echo "${key}=${value}" >> "$GITHUB_ENV" ;;
               *)
                 echo "::warning::未知の設定キー ${key} を無視します" ;;
@@ -120,6 +120,7 @@ jobs:
           SITE_NAME: ${{ env.SITE_NAME }}
           CUSTOM_DOMAIN: ${{ env.CUSTOM_DOMAIN }}
           OGP_DEFAULT_IMAGE: ${{ env.OGP_DEFAULT_IMAGE }}
+          STRICT_LINKS: ${{ env.STRICT_LINKS }}
           THEME: ${{ env.THEME }}
           # THEME解決の基準ディレクトリ。initでコピーしたベンダリング先を指す。
           STYLE_DIR: .github/tsuzuri/styles
