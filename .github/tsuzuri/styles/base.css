@@ -11,7 +11,7 @@
     padding: 40px 24px;
     overflow-x: auto;
   }
-  main img { max-width: 100%; }
+  main img { max-width: 100%; height: auto; }
 
   /* 「本文へスキップ」リンク(キーボードで選んだときだけ表示) */
   .tsuzuri-skip {

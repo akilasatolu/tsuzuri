@@ -43,12 +43,19 @@ export function isImagePath(p) {
   return /\.(png|jpe?g|gif|svg|webp|bmp|ico)$/i.test(p);
 }
 
+// "." で始まるディレクトリにあってもサイトにコピーする、動画・音声・文書の拡張子
+// (設定ファイルなどを誤って公開しないよう、それ以外は "." で始まるパスならコピーしない)
+const PUBLISHABLE_IN_DOT_DIR = /\.(pdf|mp4|webm|mov|m4v|mp3|m4a|wav|ogg|oga)$/i;
+
 // Markdown・画像以外で、リンクされていればサイトにコピーするファイル(PDF・zip等)か。
 //   - 拡張子の無いパスは対象外(`docs/` のようなディレクトリへのリンクの可能性があるため)
-//   - "." で始まる要素を含むパスは対象外(.env や .github/ 配下などを誤って公開しないため)
+//   - "." で始まるファイル(.env 等)は対象外。"." で始まるディレクトリ(.github/ 等)の中のファイルは、
+//     動画・音声・PDF だけを対象にする(誤って設定ファイルなどを公開しないため)
 export function isLinkedFilePath(p) {
   if (isMarkdownPath(p)) return false;
-  if (p.split("/").some((seg) => seg.startsWith("."))) return false;
+  const segs = p.split("/");
+  if (segs[segs.length - 1].startsWith(".")) return false;
+  if (segs.some((seg) => seg.startsWith(".")) && !PUBLISHABLE_IN_DOT_DIR.test(p)) return false;
   return posix.extname(p) !== "";
 }
 

@@ -45,6 +45,7 @@ import hljs from "highlight.js/lib/common";
 import { loadConfig, ALLOWED_THEMES, parseConfigText, withConfigFileDefaults } from "./lib/config.mjs";
 import { crawlSite } from "./lib/crawler.mjs";
 import {
+  isMarkdownPath,
   toSiteAbsHref,
   resolveInsideRepo,
   resolveRepoRel,
@@ -73,6 +74,11 @@ import { buildSiteTree, flattenPages } from "./lib/site-tree.mjs";
 import { createSlugger, htmlToText } from "./lib/slugger.mjs";
 import { buildSearchIndex, SEARCH_SCRIPT } from "./lib/search.mjs";
 import { parseFrontmatter } from "./lib/frontmatter.mjs";
+import { imageSizeOf } from "./lib/image-size.mjs";
+
+// 出力先の目印のファイル名。これがあるディレクトリは Tsuzuri が前回出力したものなので、ビルドの前に
+// 空にしてよい(消したページ・画像が残らないように)。"." で始まるので公開サイトには含まれない。
+const BUILD_MARKER = ".tsuzuri-build";
 
 // 日本語の文を途中で改行したとき、表示に余計な空白が入らないよう、前後がどちらも全角文字
 // (漢字・かな・長音「ー」や中黒「・」を含む記号・全角文字)の改行を取り除く
@@ -253,6 +259,28 @@ async function main() {
     }
   }
 
+  // ページ単位の独自CSS(frontmatter `styleFile`。リポジトリの直下からのパス)。指定したページでは、
+  // サイト全体の STYLE_FILE の代わりにこのファイルを3層目として使う(中身が空のファイルを指定すれば、
+  // そのページには独自CSSを当てない)。読めない場合は警告して、サイト全体の STYLE_FILE を使う。
+  const pageStyleCache = new Map(); // 指定 -> { css, rel } | null
+  function resolveCustomStyleForPage(rel, rawSpec) {
+    if (typeof rawSpec !== "string" || !rawSpec.trim()) return { css: customCss, rel: config.styleFile };
+    const spec = rawSpec.trim();
+    if (!pageStyleCache.has(spec)) {
+      const abs = resolveInsideRepo(REPO_ROOT, spec);
+      let loaded = null;
+      if (!abs) {
+        console.warn(`[build-docs] ${rel}: frontmatterの styleFile "${spec}" はリポジトリの外を指しているため無視します。`);
+      } else if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
+        console.warn(`[build-docs] ${rel}: frontmatterの styleFile "${spec}" が見つかりません。サイト全体の STYLE_FILE を使います。`);
+      } else {
+        loaded = { css: fs.readFileSync(abs, "utf-8"), rel: spec };
+      }
+      pageStyleCache.set(spec, loaded);
+    }
+    return pageStyleCache.get(spec) ?? { css: customCss, rel: config.styleFile };
+  }
+
   // faviconも画像(imageSet)と同様に、リポジトリルートからの相対パス構造を
   // 維持したまま OUT_DIR 配下にコピーする。ベースネームのみでコピーすると、
   // 別ディレクトリに同名ファイル(例: imageSet 側のリポジトリ直下 favicon.png)が
@@ -287,9 +315,20 @@ async function main() {
     config.siteOrigin && !config.basePath && "robots.txt",
     config.sitemapJson && "sitemap.json",
   ].filter(Boolean);
+  generatedFiles.push(BUILD_MARKER);
   const writtenBy = new Map(generatedFiles.map((f) => [f, "(Tsuzuri が生成するファイル)"]));
   const collisions = [];
+  // 前回 Tsuzuri が出力したディレクトリ(目印のファイルがある)だけを空にする。
+  // 目印が無いディレクトリは利用者のファイルの可能性があるので、消さずに上書きする。
+  if (fs.existsSync(path.join(OUT_DIR, BUILD_MARKER))) {
+    fs.rmSync(OUT_DIR, { recursive: true, force: true });
+    console.log(`Cleaned previous output: ${config.outDir}`);
+  }
   fs.mkdirSync(OUT_DIR, { recursive: true });
+  fs.writeFileSync(
+    path.join(OUT_DIR, BUILD_MARKER),
+    "Tsuzuri のビルドの出力先です。次のビルドの前に、このディレクトリの中身はすべて消されます。\n"
+  );
   fs.writeFileSync(path.join(OUT_DIR, ".nojekyll"), "");
 
   if (config.customDomain) {
@@ -476,14 +515,68 @@ async function main() {
     return encodeUrlPath(outputRelOf(rel.replace(/\.md$/i, ".html")));
   }
 
+  // 見出しへのリンク(page.md#見出し・#見出し)の確認用。描画しながらリンクを集め、
+  // すべてのページを描画した後に、リンク先のページにその id があるかを調べる。
+  const anchorRefs = []; // { from, target, frag }
+  const pageIds = new Map(); // rel -> Set<id>
+  function pageRelOfLink(fromRel, href) {
+    if (href.startsWith("#")) return fromRel;
+    const resolved = resolveRepoRel(fromRel, href);
+    if (resolved.rejected) return null;
+    const bare = resolved.repoRel.replace(/\/+$/, "");
+    if (bare === "" || bare === ".") return config.rootMd;
+    if (isMarkdownPath(bare)) return bare;
+    if (linkTargets.get(bare)?.kind === "dir") {
+      return ["README.md", "readme.md", "index.md"].map((name) => `${bare}/${name}`).find((r) => visitedMd.has(r)) ?? null;
+    }
+    return null;
+  }
+  function noteAnchor(fromRel, href) {
+    const hashIdx = href.indexOf("#");
+    if (hashIdx < 0) return;
+    const frag = href.slice(hashIdx + 1);
+    if (!frag || frag === "top") return;
+    const target = pageRelOfLink(fromRel, href);
+    if (target && (visitedMd.has(target) || target === fromRel)) anchorRefs.push({ from: fromRel, target, frag });
+  }
+  function collectIds(rel, html) {
+    const unescape = (v) =>
+      v.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+    const ids = new Set(["tsuzuri-main"]);
+    for (const m of html.matchAll(/\s(?:id|name)\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)) ids.add(unescape(m[1] ?? m[2]));
+    pageIds.set(rel, ids);
+  }
+
+  // Markdown の画像に付ける width・height(リポジトリ内の画像で、大きさを読み取れたときだけ)
+  const imageSizeCache = new Map();
+  function imageSizeAttrs(fromRel, href) {
+    const resolved = resolveRepoRel(fromRel, href);
+    if (resolved.rejected) return "";
+    const repoRel = resolved.repoRel;
+    if (!imageSizeCache.has(repoRel)) {
+      let size = null;
+      const abs = resolveInsideRepo(REPO_ROOT, repoRel);
+      if (abs && isImagePath(repoRel) && fs.existsSync(abs) && fs.statSync(abs).isFile()) {
+        size = imageSizeOf(fs.readFileSync(abs), path.extname(repoRel).toLowerCase());
+      }
+      imageSizeCache.set(repoRel, size);
+    }
+    const size = imageSizeCache.get(repoRel);
+    return size ? ` width="${size.width}" height="${size.height}"` : "";
+  }
+
   // 1ページ分のHTMLを組み立てる。
   function renderPage(rel, content, meta, { canonical = true } = {}) {
     // marked v13以降のレンダラーAPI: 各メソッドは引数としてトークン(オブジェクト)を1つ受け取る。
     // リンクの表示テキストや見出しはインライン要素(強調・コード等)を含みうるため、
     // this.parser.parseInline(tokens) でHTMLにする(this を使うためアロー関数にしない)。
     const renderer = new md.Renderer();
+    const linkHref = (fromRel, href) => {
+      noteAnchor(fromRel, href);
+      return siteHref(fromRel, href);
+    };
     renderer.link = function ({ href, title, tokens }) {
-      const newHref = siteHref(rel, href);
+      const newHref = linkHref(rel, href);
       const text = this.parser.parseInline(tokens);
       return `<a href="${escapeHtml(newHref)}"${title ? ` title="${escapeHtml(title)}"` : ""}>${text}</a>`;
     };
@@ -492,12 +585,12 @@ async function main() {
       const newHref = siteHref(rel, href);
       return `<img src="${escapeHtml(newHref)}" alt="${escapeHtml(text || "")}"${
         title ? ` title="${escapeHtml(title)}"` : ""
-      } loading="lazy" decoding="async">`;
+      }${imageSizeAttrs(rel, href)} loading="lazy" decoding="async">`;
     };
     // 生のHTML(<a href>・<img src>)のリンク先も書き換える。marked はコードの中身を html トークンに
     // しないので、コードブロック・インラインコードに書いたHTMLの例は書き換わらない。
     renderer.html = function ({ text }) {
-      return preprocessRawHtmlPaths(text, rel, config.basePath, siteHref);
+      return preprocessRawHtmlPaths(text, rel, config.basePath, linkHref);
     };
     // GitHub の注意書き(> [!NOTE] など)を、種類ごとの枠として表示する。
     renderer.blockquote = function ({ tokens }) {
@@ -544,6 +637,7 @@ async function main() {
     };
 
     let bodyHtml = removeCjkLineBreaks(md.parse(content, { renderer }));
+    collectIds(rel, bodyHtml);
     // タイトル: frontmatter の title > 最初の h1 の表示テキスト > (起点のページなら)サイト名 > ファイルパス。
     // ナビの表示名と同じ優先順。h1 は描画した見出し、無ければ crawler が集めた h1(生のHTMLの <h1> を含む)。
     // (コードブロック内の "# コメント" は見出しにならないので、誤って拾わない)
@@ -610,13 +704,14 @@ async function main() {
         })
       : "";
 
+    const pageStyle = resolveCustomStyleForPage(rel, meta.styleFile);
     return pageTemplate({
       title,
       body: bodyHtml,
       baseCss,
       themeCss: resolveThemeCssForPage(rel, meta.theme),
-      customCss,
-      styleFileRel: config.styleFile,
+      customCss: pageStyle.css,
+      styleFileRel: pageStyle.rel,
       lang: config.lang,
       navHtml,
       metaTagsHtml,
@@ -671,6 +766,23 @@ async function main() {
   if (search) {
     fs.writeFileSync(path.join(OUT_DIR, "search-index.json"), JSON.stringify(buildSearchIndex(searchPages)));
     fs.writeFileSync(path.join(OUT_DIR, "tsuzuri-search.js"), SEARCH_SCRIPT);
+  }
+
+  // ---------- 7.7 見出しへのリンクの確認 ----------
+  const missingAnchors = [];
+  for (const { from, target, frag } of anchorRefs) {
+    let id = frag;
+    try {
+      id = decodeURIComponent(frag);
+    } catch {
+      // デコードできなければそのまま比べる
+    }
+    const ids = pageIds.get(target);
+    if (ids && !ids.has(id) && !ids.has(frag)) missingAnchors.push(`${target}#${id} (referenced from ${from})`);
+  }
+  if (missingAnchors.length) {
+    console.warn(`リンク先のページに見出しが見つからないリンク: ${missingAnchors.length} 件`);
+    for (const a of missingAnchors) console.warn(`  - ${a}`);
   }
 
   // ---------- 8. 画像・その他のリンク先ファイルのコピー ----------
@@ -754,6 +866,7 @@ async function main() {
       ...rejected.map((r) => `拒否したリンク: ${r.rel} (referenced from ${r.referencedFrom}, reason: ${r.reason})`),
       ...missingAssets.map((a) => `コピーできなかったファイル: ${a}`),
       ...collisions.map((c) => `出力先の重複: ${c}`),
+      ...missingAnchors.map((a) => `見出しが見つかりません: ${a}`),
     ];
     if (problems.length) {
       console.error(`STRICT_LINKS=true のため、リンクの問題 ${problems.length} 件でビルドを失敗させます。`);
