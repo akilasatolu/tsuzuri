@@ -20,23 +20,39 @@
   main a { color: var(--accent); }
 
   /* サイト内ナビゲーション(NAV_ENABLED=true のときだけ body 直下に出力される)。
-     広い画面では左側に固定したサイドバー、狭い画面では本文の上に高さを抑えて表示する。
+     広い画面では左側に固定したサイドバー、狭い画面では本文の上に「メニュー」ボタンを置き、
+     押すとページ一覧が開く(JavaScriptは使わず、チェックボックスとラベルで開閉する)。
      色はテーマの変数を使うため、どのテーマでもそのまま馴染む。 */
   body > nav {
     font-size: 0.9em;
     line-height: 1.5;
-    padding: 16px 24px;
-    max-height: 40vh;
+    padding: 12px 24px;
+    max-height: 70vh;
     overflow-y: auto;
     border-bottom: 1px solid var(--border);
   }
-  body > nav > p { margin: 0 0 8px; font-weight: 700; }
   body > nav ul { list-style: none; margin: 0; padding: 0; }
   body > nav ul ul { margin: 2px 0 4px 0.4em; padding-left: 0.8em; border-left: 1px solid var(--border); }
   body > nav li > span { display: block; margin-top: 6px; font-weight: 600; opacity: 0.7; }
   body > nav a { display: block; padding: 3px 0; color: var(--accent); text-decoration: none; }
   body > nav a:hover { text-decoration: underline; }
   body > nav a[aria-current="page"] { color: var(--fg); font-weight: 700; }
+
+  .tsuzuri-nav-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .tsuzuri-nav-head > p { margin: 0; font-weight: 700; }
+  .tsuzuri-nav-label {
+    margin-left: auto;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+  /* チェックボックス本体は見えなくするが、キーボードで操作できるよう display:none にはしない */
+  .tsuzuri-nav-toggle { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .tsuzuri-nav-toggle:focus-visible + .tsuzuri-nav-head .tsuzuri-nav-label { outline: 2px solid var(--accent); }
+  body > nav > ul { display: none; margin-top: 8px; }
+  .tsuzuri-nav-toggle:checked ~ ul { display: block; }
 
   @media (min-width: 960px) {
     body:has(> nav) {
@@ -53,5 +69,7 @@
       border-bottom: none;
       border-right: 1px solid var(--border);
     }
+    body > nav > ul { display: block; }
+    .tsuzuri-nav-label { display: none; }
     body:has(> nav) > main { width: 100%; }
   }

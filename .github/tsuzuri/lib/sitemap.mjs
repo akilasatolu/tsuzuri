@@ -33,6 +33,7 @@
  * @param {boolean} opts.customStyleApplied - カスタム CSS が適用されたか
  * @param {Map<string, {content: string, meta?: {title?: string, description?: string}}>} opts.visitedMd
  * @param {Iterable<string>} opts.imageSet - 収集された画像の相対パス集合
+ * @param {Iterable<string>} [opts.fileSet] - 収集された画像以外のリンク先ファイル(PDF等)の相対パス集合
  * @param {object} opts.hierarchy - ページ階層構造(リンクをたどった親子関係)
  * @param {object} [opts.tree] - ディレクトリ階層に沿ったサイトツリー(site-tree.mjs の buildSiteTree の戻り値)
  * @param {Array} opts.missing - 見つからなかったリンクの一覧
@@ -53,6 +54,7 @@ export function buildSitemap(opts) {
     customStyleApplied,
     visitedMd,
     imageSet,
+    fileSet,
     hierarchy,
     tree,
     missing,
@@ -90,6 +92,7 @@ export function buildSitemap(opts) {
     pages,
     pageRels,
     images: [...imageSet],
+    files: fileSet ? [...fileSet] : [],
     hierarchy,
     tree: tree ?? null,
     missing,
@@ -100,4 +103,31 @@ export function buildSitemap(opts) {
     customDomain: customDomain ?? null,
     theme,
   };
+}
+
+function escapeXml(s) {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+/**
+ * 検索エンジン向けの sitemap.xml(sitemaps.org 形式)を組み立てる。
+ * デバッグ用の sitemap.json とは別物。
+ *
+ * @param {Iterable<string>} urls - 公開URL(絶対URL)の一覧
+ * @returns {string}
+ */
+export function buildSitemapXml(urls) {
+  const entries = [...urls].map((url) => `  <url><loc>${escapeXml(url)}</loc></url>`);
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...entries,
+    "</urlset>",
+    "",
+  ].join("\n");
 }
