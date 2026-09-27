@@ -16,6 +16,8 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-27
+
 ### Added
 
 - CLIの実行時に、最初に実行中のバージョン(`tsuzuri vX.Y.Z`)を表示するようにした。
@@ -70,5 +72,6 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/akilasatolu/tsuzuri/releases/tag/v1.0.0
