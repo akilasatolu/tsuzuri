@@ -20,6 +20,10 @@
 
 ### Added
 
+- `STRICT_LINKS`設定を追加。`true`にすると、リンク切れや拒否したリンク、コピーできなかった
+  ファイルがあるときにビルドを失敗させ、リンク切れのまま公開されるのを防ぐ(既定は`false`)。
+- `NAV_ENABLED=true`のとき、本文の末尾にナビの並び順で「前のページ/次のページ」リンクを付けるようにした。
+- `init --update`で、本体側で削除されたビルドスクリプト(`.github/tsuzuri/lib/*.mjs`)を削除するようにした。
 - 見出しにGitHubと同じ規則の`id`を付けるようにした。`page.md#見出し`形式のリンクで
   ページ内の見出しへ移動できる(日本語の見出しにも対応)。
 - Markdown・画像以外のリンク先ファイル(PDF・zip等)もサイトにコピーするようにした
@@ -48,6 +52,10 @@
 
 ### Changed
 
+- `og:image`(frontmatterの`ogImage`・`OGP_DEFAULT_IMAGE`)に相対パスを指定した場合、サイトの
+  絶対URLに変換し、画像もサイトにコピーするようにした(SNSは絶対URLでないと画像を読み込まないため)。
+- `init`の完了メッセージで、選んだトリガーブランチ名と、GitHub側で必要な設定
+  (Pagesの Source、既定ブランチ以外ならEnvironments)を案内するようにした。
 - `init`が生成するワークフローをNode.js 24にし、actionsを最新版に更新
   (checkout v7.0.1 / setup-node v7.0.0 / upload-pages-artifact v5.0.0 / deploy-pages v5.0.1)。
   ひな形を`templates/.github/workflows/docs-pages.yml`に分離し、Dependabotの更新対象にした。

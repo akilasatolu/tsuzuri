@@ -1,7 +1,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 
-import { buildSiteTree, pageLabel } from "../.github/scripts/lib/site-tree.mjs";
+import { buildSiteTree, pageLabel, flattenPages } from "../.github/scripts/lib/site-tree.mjs";
 
 describe("pageLabel", () => {
   test("frontmatterのtitleがあればそれを使う", () => {
@@ -67,5 +67,21 @@ describe("buildSiteTree", () => {
     assert.equal(tree.children[0].name, "a");
     assert.equal(tree.children[0].children[0].name, "b");
     assert.equal(tree.children[0].children[0].children[0].rel, "a/b/c.md");
+  });
+});
+
+describe("flattenPages", () => {
+  test("ナビの表示順(ディレクトリは深さ優先、同じディレクトリ内は発見順)でページを1列に並べる", () => {
+    const tree = buildSiteTree([
+      ["README.md", {}],
+      ["docs/a.md", {}],
+      ["guide.md", {}],
+      ["docs/deep/b.md", {}],
+      ["docs/c.md", {}],
+    ]);
+    assert.deepEqual(
+      flattenPages(tree).map((p) => p.rel),
+      ["README.md", "docs/a.md", "docs/deep/b.md", "docs/c.md", "guide.md"]
+    );
   });
 });

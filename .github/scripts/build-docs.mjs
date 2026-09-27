@@ -41,18 +41,19 @@ import { marked } from "marked";
 
 import { loadConfig, ALLOWED_THEMES } from "./lib/config.mjs";
 import { crawlSite } from "./lib/crawler.mjs";
-import { toSiteAbsHref, resolveInsideRepo } from "./lib/path-utils.mjs";
+import { toSiteAbsHref, resolveInsideRepo, resolveRepoRel, isExternal } from "./lib/path-utils.mjs";
 import {
   escapeHtml,
   renderTitle,
   renderNav,
   renderMetaTags,
+  renderPager,
   preprocessRawHtmlPaths,
   pageTemplate,
   defaultNotFoundMarkdown,
 } from "./lib/html-renderer.mjs";
 import { buildSitemap, buildSitemapXml } from "./lib/sitemap.mjs";
-import { buildSiteTree } from "./lib/site-tree.mjs";
+import { buildSiteTree, flattenPages } from "./lib/site-tree.mjs";
 import { createSlugger, htmlToText } from "./lib/slugger.mjs";
 import { parseFrontmatter } from "./lib/frontmatter.mjs";
 
@@ -240,7 +241,33 @@ async function main() {
 
   // ナビゲーション・sitemap.json 用のサイトツリー(ディレクトリ階層)
   const siteTree = buildSiteTree(visitedMd.entries());
-  const menuLabel = config.lang.toLowerCase().startsWith("ja") ? "メニュー" : "Menu";
+  const isJa = config.lang.toLowerCase().startsWith("ja");
+  const menuLabel = isJa ? "メニュー" : "Menu";
+
+  // 「前のページ/次のページ」リンク(NAV_ENABLED=true のとき)。順番はナビの表示順。
+  const pageOrder = flattenPages(siteTree);
+  const pageIndex = new Map(pageOrder.map((page, i) => [page.rel, i]));
+  const pagerLabels = isJa
+    ? { prev: "前のページ", next: "次のページ", nav: "前後のページ" }
+    : { prev: "Previous", next: "Next", nav: "Previous and next pages" };
+
+  // og:image は絶対URLでないとSNS等が読み込まないため、リポジトリ内の画像を指す相対パスは
+  // サイトの絶対URLに変換し、その画像も出力にコピーする(ogImageSet)。
+  //   - frontmatter の ogImage はそのページのファイルからの相対パス("/"始まりはリポジトリルートから)
+  //   - OGP_DEFAULT_IMAGE はリポジトリルートからの相対パス
+  // http(s):// などの外部URLはそのまま使う。リポジトリ外を指すものは出力しない。
+  const ogImageSet = new Set();
+  function resolveOgImage(rawImage, fromRel) {
+    if (!rawImage) return "";
+    if (isExternal(rawImage)) return rawImage;
+    const resolved = resolveRepoRel(fromRel, rawImage);
+    if (resolved.rejected || !resolveInsideRepo(REPO_ROOT, resolved.repoRel)) {
+      console.warn(`og:image (${rawImage}) がリポジトリの外を指しているため出力しません。`);
+      return "";
+    }
+    ogImageSet.add(resolved.repoRel);
+    return `${config.siteOrigin}${config.basePath}/${resolved.repoRel}${resolved.rest}`;
+  }
 
   // サブディレクトリの README.md は、そのディレクトリの index.html としても出力する
   // (`/docs/` のようなディレクトリのURLで開けるようにするため)。同じディレクトリに
@@ -289,7 +316,11 @@ async function main() {
     };
 
     const preprocessed = preprocessRawHtmlPaths(content, rel, config.basePath);
-    const bodyHtml = marked.parse(preprocessed, { renderer });
+    let bodyHtml = marked.parse(preprocessed, { renderer });
+    if (config.navEnabled && pageIndex.has(rel)) {
+      const i = pageIndex.get(rel);
+      bodyHtml += renderPager(pageOrder[i - 1] ?? null, pageOrder[i + 1] ?? null, config.basePath, pagerLabels);
+    }
     const title = renderTitle(content, rel, meta.title);
 
     const navHtml = config.navEnabled
@@ -301,7 +332,9 @@ async function main() {
     // 整合させる(renderMetaTags は呼べば常に og:title/og:type を出力するため、
     // 何も設定されていないベースライン構成では意図的に呼び出し自体をスキップする)。
     const description = meta.description || "";
-    const ogImage = meta.ogImage || config.ogDefaultImage || "";
+    const ogImage = meta.ogImage
+      ? resolveOgImage(meta.ogImage, rel)
+      : resolveOgImage(config.ogDefaultImage, config.rootMd);
     const ogType = meta.ogType || "website";
     const canonicalUrl =
       canonical && config.siteOrigin ? `${config.siteOrigin}${config.basePath}/${urlPathOf(rel)}` : "";
@@ -366,14 +399,17 @@ async function main() {
   }
 
   // ---------- 8. 画像・その他のリンク先ファイルのコピー ----------
-  for (const assetRel of [...imageSet, ...fileSet]) {
+  const missingAssets = [];
+  for (const assetRel of new Set([...imageSet, ...fileSet, ...ogImageSet])) {
     const src = resolveInsideRepo(REPO_ROOT, assetRel);
     if (!src) {
       console.warn(`リポジトリの外を指しているためコピーしません: ${assetRel}`);
+      missingAssets.push(assetRel);
       continue;
     }
     if (!fs.existsSync(src) || !fs.statSync(src).isFile()) {
       console.warn(`リンク先のファイルが見つかりません: ${assetRel}`);
+      missingAssets.push(assetRel);
       continue;
     }
     const dest = path.join(OUT_DIR, assetRel);
@@ -417,6 +453,21 @@ async function main() {
     theme: config.theme,
   });
   fs.writeFileSync(path.join(OUT_DIR, "sitemap.json"), JSON.stringify(sitemap, null, 2));
+
+  // ---------- STRICT_LINKS ----------
+  // リンク切れ・拒否したリンクがあればビルドを失敗させる(ワークフローはここで止まり公開されない)。
+  if (config.strictLinks) {
+    const problems = [
+      ...missing.map((m) => `リンク先が見つかりません: ${m.rel} (referenced from ${m.referencedFrom})`),
+      ...rejected.map((r) => `拒否したリンク: ${r.rel} (referenced from ${r.referencedFrom}, reason: ${r.reason})`),
+      ...missingAssets.map((a) => `コピーできなかったファイル: ${a}`),
+    ];
+    if (problems.length) {
+      console.error(`STRICT_LINKS=true のため、リンクの問題 ${problems.length} 件でビルドを失敗させます。`);
+      for (const problem of problems) console.error(`  - ${problem}`);
+      process.exit(1);
+    }
+  }
 
   console.log(`Build complete. Output -> ${OUT_DIR}`);
 }

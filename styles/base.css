@@ -54,6 +54,26 @@
   body > nav > ul { display: none; margin-top: 8px; }
   .tsuzuri-nav-toggle:checked ~ ul { display: block; }
 
+  /* 本文末尾の「前のページ/次のページ」リンク(NAV_ENABLED=true のとき) */
+  .tsuzuri-pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  main .tsuzuri-pager a {
+    flex: 1 1 0;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+  }
+  main .tsuzuri-pager a:hover { border-color: var(--accent); }
+  .tsuzuri-pager span { display: block; font-size: 0.8em; color: var(--fg); opacity: 0.7; }
+  .tsuzuri-pager-next { margin-left: auto; text-align: right; }
+
   @media (min-width: 960px) {
     body:has(> nav) {
       display: grid;

@@ -220,3 +220,16 @@ test('LANG="en_US.UTF-8"(OSのロケール値) → warnして"ja"', () => {
     assert.ok(calls.some((c) => c.includes("LANG")));
   });
 });
+
+test("STRICT_LINKS: true/false(大文字小文字区別なし)、省略は警告なしでfalse、不正値はwarnしてfalse", () => {
+  withCapturedWarn((calls) => {
+    assert.equal(loadConfig({ STRICT_LINKS: "true" }).strictLinks, true);
+    assert.equal(loadConfig({ STRICT_LINKS: "TRUE" }).strictLinks, true);
+    assert.equal(loadConfig({ STRICT_LINKS: "false" }).strictLinks, false);
+    assert.equal(loadConfig({}).strictLinks, false);
+    assert.equal(loadConfig({ STRICT_LINKS: "" }).strictLinks, false);
+    assert.equal(calls.length, 0);
+    assert.equal(loadConfig({ STRICT_LINKS: "yes" }).strictLinks, false);
+    assert.ok(calls.some((c) => c.includes("STRICT_LINKS")));
+  });
+});

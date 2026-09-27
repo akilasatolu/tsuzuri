@@ -11,7 +11,7 @@
 // node:fs(existsSync/mkdirSync/writeFileSync/readFileSync/readdirSync)のみを使用する。
 
 import { createInterface } from "node:readline/promises";
-import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, realpathSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, realpathSync, unlinkSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -146,7 +146,7 @@ STYLE_FILE=${VENDOR_DIR}/styles/custom.css
 # 省略時: "ja"(現行のハードコード値と同じ = 後方互換)
 LANG=ja
 
-# ページ間ナビゲーション(自動生成の簡易ページ一覧)を出力するか
+# ページ間ナビゲーション(サイドバーのページ一覧と、本文末尾の前後のページへのリンク)を出力するか
 # true/false のみ有効。それ以外の値が指定された場合は警告を出し false 扱いにする
 # 省略時: false(現行の「ナビなし1カラム」動作と同一 = 後方互換)
 NAV_ENABLED=false
@@ -168,8 +168,14 @@ SITE_NAME=
 CUSTOM_DOMAIN=
 
 # frontmatterでogImageを指定しないページに使うデフォルトのOGP画像パス(相対 or 絶対URL)
+# リポジトリルートからの相対パスは、サイトの絶対URLに変換され、画像もサイトにコピーされる
 # 省略時: og:image タグを出力しない
 OGP_DEFAULT_IMAGE=
+
+# リンク切れ(リンク先のファイルが無い)や、リポジトリ外を指すなどで拒否したリンクがあるときに
+# ビルドを失敗させるか(true/false)。true にするとリンク切れのまま公開されるのを防げる
+# 省略時: false(警告を出すだけで公開する)
+STRICT_LINKS=false
 
 # ★v2新規: 組み込みテーマ名(3層カスケードの第2層。詳細は「スタイル3層カスケード詳細設計」節)
 # 選択肢: wa(和) / muji(無地) / sumi(墨) / ai(藍) / shu(朱) / none
@@ -415,6 +421,8 @@ export function isUpdateMode(argv = []) {
  * - ワークフロー(docs-pages.yml)とビルドスクリプト一式(VENDOR_DIR 配下)は上書きする
  * - 設定ファイル(docs-pages.config)と独自CSS(custom.css)は一切触らない
  * - 新しく増えたビルドスクリプトは追加される
+ * - 本体側で削除されたビルドスクリプト(VENDOR_DIR/lib/*.mjs のうち配布対象に無いもの)は削除する
+ *   (VENDOR_DIR/styles/ は利用者の独自CSSも置かれるため、削除の対象にしない)
  *
  * 設定ファイルが無い(=まだ init していない)リポジトリではエラーにする。
  * CI(mainブランチの更新をdocsブランチへ自動反映するワークフロー等)からも使う。
@@ -422,14 +430,14 @@ export function isUpdateMode(argv = []) {
  * @param {object} opts
  * @param {string} opts.cwd
  * @param {(msg: string) => void} [opts.log]
- * @param {{existsSync, mkdirSync, writeFileSync}} [opts.fsImpl] - テスト用差し替え
+ * @param {{existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync}} [opts.fsImpl] - テスト用差し替え
  * @param {Array<{name:string, relPath:string, content:string}>} [opts.targets] - テスト用差し替え
- * @returns {Promise<Array<{name:string, relPath:string, status: "created"|"overwritten"|"skipped"}>>}
+ * @returns {Promise<Array<{relPath:string, status: "created"|"overwritten"|"skipped"|"deleted"}>>}
  */
 export async function runUpdate({
   cwd,
   log = () => {},
-  fsImpl = { existsSync, mkdirSync, writeFileSync },
+  fsImpl = { existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync },
   targets,
 }) {
   const configRel = ".github/docs-pages.config";
@@ -442,12 +450,28 @@ export async function runUpdate({
     { name: "docs-pages.yml", relPath: ".github/workflows/docs-pages.yml", content: buildDocsPagesYml() },
     ...buildVendorTargets(),
   ];
-  return writeGeneratedFiles(updateTargets, {
+  const results = await writeGeneratedFiles(updateTargets, {
     cwd,
     confirmOverwrite: () => true,
     log,
     fsImpl,
   });
+
+  // 本体側で削除されたビルドスクリプトを、利用者リポジトリからも削除する
+  const libRel = `${VENDOR_DIR}/lib`;
+  const libAbs = join(cwd, libRel);
+  const keep = new Set(updateTargets.map((t) => t.relPath));
+  if (fsImpl.existsSync(libAbs)) {
+    for (const entry of fsImpl.readdirSync(libAbs, { withFileTypes: true })) {
+      if (!entry.isFile() || !entry.name.endsWith(".mjs")) continue;
+      const relPath = `${libRel}/${entry.name}`;
+      if (keep.has(relPath)) continue;
+      fsImpl.unlinkSync(join(cwd, relPath));
+      log(`✖ ${relPath} を削除しました(最新版では使われていないため)`);
+      results.push({ relPath, status: "deleted" });
+    }
+  }
+  return results;
 }
 
 /**
@@ -467,8 +491,9 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   const asker = createAsker(rl);
 
+  let answers;
   try {
-    const answers = await promptAnswers(asker);
+    answers = await promptAnswers(asker);
     const targets = buildTargets(answers);
 
     console.log("\n--- 以下のファイルを生成します ---");
@@ -489,15 +514,35 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
     rl.close();
   }
 
-  console.log(
-    `\nセットアップが完了しました。README.md をリポジトリ直下に配置し、\n` +
-      `mainブランチへpushするとGitHub Pagesへの初回デプロイが始まります。\n` +
-      `ビルドスクリプト本体(${VENDOR_DIR}/ 配下)もこのリポジトリにコピーされているため、\n` +
-      `実行時に外部リポジトリを参照することはありません。\n` +
-      `スクリプトを最新版に更新したい場合は、このコマンドに --update を付けて実行してください\n` +
-      `(設定ファイル・独自CSSはそのままに、ワークフローとスクリプトだけが更新されます)。\n` +
-      `変更内容は 'git diff' で確認できます。`,
-  );
+  console.log(buildCompletionMessage(answers));
+}
+
+/**
+ * init 完了時に表示する「次にやること」の案内を組み立てる。
+ * 対話で選んだトリガーブランチ・起点のMarkdownを使う。
+ *
+ * @param {{ triggerBranch?: string, rootMd?: string }} answers
+ * @returns {string}
+ */
+export function buildCompletionMessage(answers = {}) {
+  const { triggerBranch, rootMd } = { ...DEFAULT_ANSWERS, ...answers };
+  return [
+    "",
+    "セットアップが完了しました。次の手順で GitHub Pages に公開できます。",
+    "",
+    `  1. ${rootMd} がリポジトリにあることを確認する(サイトの起点になります)`,
+    `  2. GitHub の Settings > Pages で、Source を「GitHub Actions」にする(初回のみ)`,
+    `  3. ${triggerBranch} がリポジトリの既定ブランチでない場合は、Settings > Environments >`,
+    `     github-pages の「Deployment branches and tags」に ${triggerBranch} を追加する(初回のみ)`,
+    `  4. 生成されたファイルをコミットし、${triggerBranch} ブランチへ push する`,
+    "",
+    "push すると Actions タブでワークフローが動き、完了すると Settings > Pages に公開URLが表示されます。",
+    `ビルドスクリプト本体(${VENDOR_DIR}/ 配下)もこのリポジトリにコピー済みのため、`,
+    "実行時に外部リポジトリを参照することはありません。",
+    "",
+    `最新版に更新するときは npx github:${OSS_REPO} init --update を実行してください`,
+    "(設定ファイル・独自CSSはそのままに、ワークフローとスクリプトだけが更新されます)。",
+  ].join("\n");
 }
 
 /**

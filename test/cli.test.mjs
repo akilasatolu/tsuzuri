@@ -27,6 +27,7 @@ import {
   runUpdate,
   isDirectRunOf,
   WORKFLOW_TEMPLATE_PATH,
+  buildCompletionMessage,
 } from "../bin/cli.mjs";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
@@ -135,7 +136,7 @@ test("buildDocsPagesYml: 設定ファイルは既知のキーだけを取り込�
   const yml = buildDocsPagesYml();
   assert.match(
     yml,
-    /TRIGGER_BRANCH\|ROOT_MD\|OUT_DIR\|STYLE_FILE\|LANG\|NAV_ENABLED\|FAVICON_FILE\|SITE_NAME\|CUSTOM_DOMAIN\|OGP_DEFAULT_IMAGE\|THEME\)/
+    /TRIGGER_BRANCH\|ROOT_MD\|OUT_DIR\|STYLE_FILE\|LANG\|NAV_ENABLED\|FAVICON_FILE\|SITE_NAME\|CUSTOM_DOMAIN\|OGP_DEFAULT_IMAGE\|THEME\|STRICT_LINKS\)/
   );
   assert.ok(!yml.includes("| xargs"));
   assert.ok(yml.includes("--ignore-scripts"));
@@ -574,4 +575,49 @@ test("ワークフローのactionsはコミットSHAで固定され、本体のC
     }
   }
   assert.ok(tplUses["actions/upload-pages-artifact"] && tplUses["actions/deploy-pages"]);
+});
+
+// --- 完了メッセージ・--update の不要ファイル削除・STRICT_LINKS ---
+
+test("buildCompletionMessage: 選んだトリガーブランチ・起点のMarkdownとGitHub側の設定手順を案内する", () => {
+  const msg = buildCompletionMessage({ triggerBranch: "docs", rootMd: "index.md" });
+  assert.match(msg, /index\.md がリポジトリにあることを確認/);
+  assert.match(msg, /docs ブランチへ push/);
+  assert.match(msg, /github-pages の「Deployment branches and tags」に docs を追加/);
+  assert.match(msg, /Source を「GitHub Actions」/);
+  assert.match(msg, /init --update/);
+  assert.doesNotMatch(msg, /mainブランチへpush/);
+});
+
+test("runUpdate: 配布対象に無くなった lib/*.mjs は削除し、styles/ の独自CSSは残す", async () => {
+  const dir = makeTmpDir();
+  try {
+    mkdirSync(join(dir, ".github"), { recursive: true });
+    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=main\n");
+    mkdirSync(join(dir, VENDOR_DIR, "lib"), { recursive: true });
+    mkdirSync(join(dir, VENDOR_DIR, "styles"), { recursive: true });
+    writeFileSync(join(dir, VENDOR_DIR, "lib/removed-module.mjs"), "// old");
+    writeFileSync(join(dir, VENDOR_DIR, "lib/notes.txt"), "keep");
+    writeFileSync(join(dir, VENDOR_DIR, "styles/custom.css"), "/* mine */");
+    writeFileSync(join(dir, VENDOR_DIR, "styles/old-theme.css"), "/* ? */");
+
+    const results = await runUpdate({ cwd: dir });
+
+    assert.ok(!existsSync(join(dir, VENDOR_DIR, "lib/removed-module.mjs")));
+    assert.ok(existsSync(join(dir, VENDOR_DIR, "lib/notes.txt")), ".mjs 以外は削除しない");
+    assert.ok(existsSync(join(dir, VENDOR_DIR, "lib/config.mjs")));
+    assert.ok(existsSync(join(dir, VENDOR_DIR, "styles/custom.css")));
+    assert.ok(existsSync(join(dir, VENDOR_DIR, "styles/old-theme.css")), "styles/ は削除の対象にしない");
+    assert.deepEqual(
+      results.filter((r) => r.status === "deleted").map((r) => r.relPath),
+      [`${VENDOR_DIR}/lib/removed-module.mjs`]
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("STRICT_LINKS: 設定ファイルのひな形に既定値falseで含まれ、ワークフローからビルドへ渡される", () => {
+  assert.ok(buildDocsPagesConfig({}).includes("\nSTRICT_LINKS=false\n"));
+  assert.ok(buildDocsPagesYml().includes("          STRICT_LINKS: ${{ env.STRICT_LINKS }}\n"));
 });

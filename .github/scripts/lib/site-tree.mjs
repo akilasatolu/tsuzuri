@@ -61,3 +61,21 @@ export function buildSiteTree(visitedMdEntries) {
 
   return root;
 }
+
+/**
+ * サイトツリーのページを、ナビゲーションに表示される順(深さ優先)に1列に並べる。
+ * 「前のページ/次のページ」リンクの順番に使う。
+ *
+ * @param {DirNode} tree
+ * @returns {PageNode[]}
+ */
+export function flattenPages(tree) {
+  const pages = [];
+  (function walk(node) {
+    for (const child of node.children) {
+      if (child.type === "page") pages.push(child);
+      else walk(child);
+    }
+  })(tree);
+  return pages;
+}

@@ -38,6 +38,7 @@ const CONFIG_ENV_KEYS = [
   "THEME",
   "STYLE_DIR",
   "GITHUB_REPOSITORY",
+  "STRICT_LINKS",
 ];
 
 function makeTmpDir() {
@@ -340,7 +341,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
         /<meta property="og:description" content="This is a sample description for SEO\.">/
       );
       assert.match(indexHtml, /<meta property="og:title" content="Root Page">/);
-      assert.match(indexHtml, /<meta property="og:image" content="docs\/img\.png">/);
+      assert.match(indexHtml, /<meta property="og:image" content="https:\/\/example\.com\/docs\/img\.png">/);
       assert.match(
         indexHtml,
         /<link rel="canonical" href="https:\/\/example\.com\/">/
@@ -712,6 +713,80 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.rmSync(path.join(dir, "_site"), { recursive: true });
       result = runBuild(dir);
       assert.ok(!fs.existsSync(path.join(dir, "_site", "sitemap.xml")), "SITE_ORIGIN未設定ならsitemap.xmlは作らない");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("og:imageはサイトの絶対URLに変換され、画像もコピーされる(外部URLはそのまま)", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.mkdirSync(path.join(dir, "assets"));
+      fs.writeFileSync(path.join(dir, "assets", "ogp.png"), "png");
+      fs.writeFileSync(path.join(dir, "docs", "card.png"), "png");
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\nogImage: card.png\n---\n# Page A\n");
+      fs.mkdirSync(path.join(dir, "ext"));
+      fs.writeFileSync(path.join(dir, "ext", "e.md"), "---\nogImage: https://cdn.example.com/x.png\n---\n# E\n");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root Page\n\n[A](docs/a.md) [E](ext/e.md)\n");
+
+      const result = runBuild(dir, {
+        SITE_ORIGIN: "https://owner.github.io",
+        BASE_PATH: "/repo",
+        OGP_DEFAULT_IMAGE: "assets/ogp.png",
+      });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(readOut(dir, "index.html"), /<meta property="og:image" content="https:\/\/owner\.github\.io\/repo\/assets\/ogp\.png">/);
+      assert.match(readOut(dir, "docs", "a.html"), /<meta property="og:image" content="https:\/\/owner\.github\.io\/repo\/docs\/card\.png">/);
+      assert.match(readOut(dir, "ext", "e.html"), /<meta property="og:image" content="https:\/\/cdn\.example\.com\/x\.png">/);
+      assert.equal(readOut(dir, "assets", "ogp.png"), "png");
+      assert.equal(readOut(dir, "docs", "card.png"), "png");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("STRICT_LINKS=trueのとき、リンク切れがあれば終了コード1(無ければ成功)", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+
+      let result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 0, result.stderr);
+
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root Page\n\n[A](docs/a.md) [missing](docs/nope.md) ![x](nope.png)\n");
+      result = runBuild(dir);
+      assert.equal(result.status, 0, "STRICT_LINKS未設定なら警告だけで成功する");
+
+      result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /STRICT_LINKS=true のため、リンクの問題 2 件/);
+      assert.match(result.stderr, /docs\/nope\.md/);
+      assert.match(result.stderr, /nope\.png/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("NAV_ENABLED=trueのとき、本文末尾にナビの順で前後のページへのリンクが付く", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\ntitle: ページA\n---\n# Page A\n");
+
+      let result = runBuild(dir, { NAV_ENABLED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      const indexHtml = readOut(dir, "index.html");
+      assert.match(indexHtml, /<a class="tsuzuri-pager-next" rel="next" href="\/docs\/a\.html"><span>次のページ<\/span>ページA<\/a>/);
+      assert.doesNotMatch(indexHtml, /rel="prev"/);
+      assert.match(readOut(dir, "docs", "a.html"), /rel="prev" href="\/README\.html"/);
+      assert.doesNotMatch(readOut(dir, "404.html"), /class="tsuzuri-pager"/);
+
+      result = runBuild(dir);
+      assert.doesNotMatch(readOut(dir, "index.html"), /class="tsuzuri-pager"/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

@@ -92,6 +92,34 @@ export function renderNav(tree, currentRel, basePath, siteName, menuLabel = "メ
 }
 
 /**
+ * 本文末尾の「前のページ/次のページ」リンク(ページャー)のHTMLを構築する。
+ * 前後どちらも無ければ空文字を返す。
+ *
+ * @param {{ rel: string, title: string } | null} prev
+ * @param {{ rel: string, title: string } | null} next
+ * @param {string} basePath
+ * @param {{ prev: string, next: string, nav: string }} [labels]
+ * @returns {string}
+ */
+export function renderPager(
+  prev,
+  next,
+  basePath,
+  labels = { prev: "前のページ", next: "次のページ", nav: "前後のページ" },
+) {
+  if (!prev && !next) return "";
+  const link = (page, rel, label) =>
+    `<a class="tsuzuri-pager-${rel}" rel="${rel}" href="${toSiteAbsHref("", page.rel, basePath)}">` +
+    `<span>${escapeHtml(label)}</span>${escapeHtml(page.title)}</a>`;
+  return (
+    `<nav class="tsuzuri-pager" aria-label="${escapeHtml(labels.nav)}">` +
+    (prev ? link(prev, "prev", labels.prev) : "") +
+    (next ? link(next, "next", labels.next) : "") +
+    `</nav>`
+  );
+}
+
+/**
  * SEO用メタタグ(description/OGP/canonical/robots/favicon)のHTMLを構築する。
  *
  * @param {{

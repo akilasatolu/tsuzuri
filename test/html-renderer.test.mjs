@@ -9,6 +9,7 @@ import {
   pageTemplate,
   preprocessRawHtmlPaths,
   defaultNotFoundMarkdown,
+  renderPager,
 } from "../.github/scripts/lib/html-renderer.mjs";
 import { buildSiteTree } from "../.github/scripts/lib/site-tree.mjs";
 
@@ -332,5 +333,27 @@ describe("defaultNotFoundMarkdown", () => {
     assert.match(defaultNotFoundMarkdown("ja-JP"), /ページが見つかりません/);
     assert.match(defaultNotFoundMarkdown("en"), /title: Page not found/);
     for (const lang of ["ja", "en"]) assert.match(defaultNotFoundMarkdown(lang), /\]\(\/\)/);
+  });
+});
+
+describe("renderPager", () => {
+  const a = { rel: "docs/a.md", title: "ページA" };
+  const b = { rel: "docs/b.md", title: "<B>" };
+
+  test("前後のページへのリンクを rel=prev/next 付きで出力し、タイトルはエスケープする", () => {
+    const html = renderPager(a, b, "/repo");
+    assert.match(html, /^<nav class="tsuzuri-pager" aria-label="前後のページ">/);
+    assert.match(html, /<a class="tsuzuri-pager-prev" rel="prev" href="\/repo\/docs\/a\.html"><span>前のページ<\/span>ページA<\/a>/);
+    assert.match(html, /<a class="tsuzuri-pager-next" rel="next" href="\/repo\/docs\/b\.html"><span>次のページ<\/span>&lt;B&gt;<\/a>/);
+  });
+  test("片方だけのときはその片方だけ、どちらも無ければ空文字", () => {
+    assert.doesNotMatch(renderPager(null, b, ""), /rel="prev"/);
+    assert.doesNotMatch(renderPager(a, null, ""), /rel="next"/);
+    assert.equal(renderPager(null, null, ""), "");
+  });
+  test("文言は指定できる", () => {
+    const html = renderPager(a, null, "", { prev: "Previous", next: "Next", nav: "Pager" });
+    assert.match(html, /aria-label="Pager"/);
+    assert.match(html, /<span>Previous<\/span>/);
   });
 });
