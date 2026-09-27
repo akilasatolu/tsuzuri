@@ -16,6 +16,30 @@
   main code { background: var(--code-bg); padding: 2px 5px; border-radius: 4px; font-size: 0.9em; }
   main pre code { background: none; padding: 0; }
   main table { border-collapse: collapse; width: 100%; }
+
+  /* コードの色分け(言語名付きのコードブロックを highlight.js でビルド時に色分けしたもの)。
+     色はテーマのアクセント色・文字色から決める。独自CSSで --hl-* 変数を指定すれば個別に変えられる。 */
+  .hljs-comment, .hljs-quote { color: var(--hl-comment, var(--fg)); opacity: 0.6; font-style: italic; }
+  .hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-type, .hljs-meta {
+    color: var(--hl-keyword, var(--accent));
+    font-weight: 600;
+  }
+  .hljs-string, .hljs-regexp, .hljs-symbol, .hljs-template-tag, .hljs-addition {
+    color: var(--hl-string, color-mix(in srgb, var(--accent) 55%, var(--fg)));
+  }
+  .hljs-number, .hljs-literal, .hljs-bullet, .hljs-link {
+    color: var(--hl-number, color-mix(in srgb, var(--accent) 75%, var(--fg)));
+  }
+  .hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class {
+    color: var(--hl-title, var(--fg));
+    font-weight: 700;
+  }
+  .hljs-attr, .hljs-attribute, .hljs-variable, .hljs-property, .hljs-params {
+    color: var(--hl-attr, color-mix(in srgb, var(--accent) 35%, var(--fg)));
+  }
+  .hljs-deletion { color: var(--hl-deletion, var(--accent)); text-decoration: line-through; }
+  .hljs-emphasis { font-style: italic; }
+  .hljs-strong { font-weight: 700; }
   main th, main td { border: 1px solid var(--border); padding: 6px 10px; }
   main a { color: var(--accent); }
 
@@ -53,6 +77,23 @@
   .tsuzuri-nav-toggle:focus-visible + .tsuzuri-nav-head .tsuzuri-nav-label { outline: 2px solid var(--accent); }
   body > nav > ul { display: none; margin-top: 8px; }
   .tsuzuri-nav-toggle:checked ~ ul { display: block; }
+
+  /* サイト内検索(ナビの上部。検索欄と結果はスクリプトが作る) */
+  .tsuzuri-search { margin: 10px 0 4px; }
+  .tsuzuri-search input {
+    width: 100%;
+    padding: 6px 10px;
+    font: inherit;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+  body > nav .tsuzuri-search-results { margin: 6px 0 0; }
+  .tsuzuri-search-results:empty { display: none; }
+  .tsuzuri-search-results li { padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .tsuzuri-search-results small { display: block; opacity: 0.7; font-size: 0.85em; }
 
   /* 本文末尾の「前のページ/次のページ」リンク(NAV_ENABLED=true のとき) */
   .tsuzuri-pager {

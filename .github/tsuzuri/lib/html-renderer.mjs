@@ -67,9 +67,12 @@ export function renderTitle(content, fallback, metaTitle) {
  * @param {string} basePath
  * @param {string} [siteName]
  * @param {string} [menuLabel] - 狭い画面で表示する開閉ボタンの文言
+ * @param {{ indexUrl: string, scriptUrl: string, placeholder: string, empty: string } | null} [search]
+ *   - サイト内検索の設定。指定すると検索欄の置き場所と検索スクリプトの読み込みを出力する
+ *     (検索欄そのものはスクリプトが作るため、JavaScriptが動かない環境では何も表示されない)
  * @returns {string}
  */
-export function renderNav(tree, currentRel, basePath, siteName, menuLabel = "メニュー") {
+export function renderNav(tree, currentRel, basePath, siteName, menuLabel = "メニュー", search = null) {
   function renderNode(node) {
     if (node.type === "dir") {
       return `<li><span>${escapeHtml(node.name)}</span>${renderList(node.children)}</li>`;
@@ -88,7 +91,12 @@ export function renderNav(tree, currentRel, basePath, siteName, menuLabel = "メ
     `<input type="checkbox" id="tsuzuri-nav-toggle" class="tsuzuri-nav-toggle">` +
     `<div class="tsuzuri-nav-head">${heading}` +
     `<label for="tsuzuri-nav-toggle" class="tsuzuri-nav-label">${escapeHtml(menuLabel)}</label></div>`;
-  return `<nav aria-label="サイト内ページ">${toggle}${renderList(tree.children)}</nav>`;
+  const searchHtml = search
+    ? `<div class="tsuzuri-search" data-index="${escapeHtml(search.indexUrl)}"` +
+      ` data-placeholder="${escapeHtml(search.placeholder)}" data-empty="${escapeHtml(search.empty)}"></div>` +
+      `<script src="${escapeHtml(search.scriptUrl)}" defer></script>`
+    : "";
+  return `<nav aria-label="サイト内ページ">${toggle}${searchHtml}${renderList(tree.children)}</nav>`;
 }
 
 /**

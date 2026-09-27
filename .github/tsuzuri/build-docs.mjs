@@ -24,7 +24,7 @@
  *   9. 404.html 生成(リポジトリ直下の 404.md、無ければ既定の内容)
  *   10. 画像・その他のリンク先ファイル(PDF等)のコピー
  *   11. sitemap.xml / robots.txt(SITE_ORIGIN がある場合のみ)
- *   12. sitemap.buildSitemap() 書き込み(デバッグ用 sitemap.json)
+ *   12. sitemap.buildSitemap() 書き込み(デバッグ用 sitemap.json。SITEMAP_JSON=true のときだけ)
  *   13. 完了ログ
  *
  * エラーハンドリング方針:
@@ -38,6 +38,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { marked } from "marked";
+import hljs from "highlight.js/lib/common";
 
 import { loadConfig, ALLOWED_THEMES } from "./lib/config.mjs";
 import { crawlSite } from "./lib/crawler.mjs";
@@ -55,6 +56,7 @@ import {
 import { buildSitemap, buildSitemapXml } from "./lib/sitemap.mjs";
 import { buildSiteTree, flattenPages } from "./lib/site-tree.mjs";
 import { createSlugger, htmlToText } from "./lib/slugger.mjs";
+import { buildSearchIndex, SEARCH_SCRIPT } from "./lib/search.mjs";
 import { parseFrontmatter } from "./lib/frontmatter.mjs";
 
 async function main() {
@@ -240,13 +242,27 @@ async function main() {
   marked.setOptions({ gfm: true, breaks: false });
 
   // ナビゲーション・sitemap.json 用のサイトツリー(ディレクトリ階層)
-  const siteTree = buildSiteTree(visitedMd.entries());
+  const siteTree = buildSiteTree(visitedMd.entries(), {
+    rootMd: config.rootMd,
+    siteName: config.siteName,
+  });
   const isJa = config.lang.toLowerCase().startsWith("ja");
   const menuLabel = isJa ? "メニュー" : "Menu";
 
   // 「前のページ/次のページ」リンク(NAV_ENABLED=true のとき)。順番はナビの表示順。
   const pageOrder = flattenPages(siteTree);
   const pageIndex = new Map(pageOrder.map((page, i) => [page.rel, i]));
+  // サイト内検索(NAV_ENABLED=true のとき)。索引とスクリプトは出力先の直下に置く。
+  const search = config.navEnabled
+    ? {
+        indexUrl: `${config.basePath}/search-index.json`,
+        scriptUrl: `${config.basePath}/tsuzuri-search.js`,
+        placeholder: isJa ? "サイト内を検索" : "Search this site",
+        empty: isJa ? "見つかりませんでした" : "No results",
+      }
+    : null;
+  const searchPages = []; // { title, url, html }(本文のみ。前後ページリンクは含めない)
+
   const pagerLabels = isJa
     ? { prev: "前のページ", next: "次のページ", nav: "前後のページ" }
     : { prev: "Previous", next: "Next", nav: "Previous and next pages" };
@@ -307,6 +323,17 @@ async function main() {
         title ? ` title="${escapeHtml(title)}"` : ""
       }>`;
     };
+    // コードブロックは、言語名が書かれていて highlight.js が対応している場合だけ、ビルド時に
+    // 色分けしたHTMLにする(閲覧時にJavaScriptは不要)。言語の自動判定は誤判定を避けるため行わない。
+    renderer.code = function ({ text, lang }) {
+      const language = (lang || "").trim().split(/\s+/)[0];
+      if (language && hljs.getLanguage(language)) {
+        const highlighted = hljs.highlight(text, { language, ignoreIllegals: true }).value;
+        return `<pre><code class="hljs language-${escapeHtml(language)}">${highlighted}\n</code></pre>\n`;
+      }
+      const cls = language ? ` class="language-${escapeHtml(language)}"` : "";
+      return `<pre><code${cls}>${escapeHtml(text)}\n</code></pre>\n`;
+    };
     // 見出しに GitHub と同じ規則の id を付け、`page.md#見出し` のリンクで飛べるようにする。
     const slugger = createSlugger();
     renderer.heading = function ({ tokens, depth }) {
@@ -317,14 +344,17 @@ async function main() {
 
     const preprocessed = preprocessRawHtmlPaths(content, rel, config.basePath);
     let bodyHtml = marked.parse(preprocessed, { renderer });
+    const title = renderTitle(content, rel, meta.title);
+    if (search && visitedMd.has(rel)) {
+      searchPages.push({ title, url: `${config.basePath}/${urlPathOf(rel)}`, html: bodyHtml });
+    }
     if (config.navEnabled && pageIndex.has(rel)) {
       const i = pageIndex.get(rel);
       bodyHtml += renderPager(pageOrder[i - 1] ?? null, pageOrder[i + 1] ?? null, config.basePath, pagerLabels);
     }
-    const title = renderTitle(content, rel, meta.title);
 
     const navHtml = config.navEnabled
-      ? renderNav(siteTree, rel, config.basePath, config.siteName, menuLabel)
+      ? renderNav(siteTree, rel, config.basePath, config.siteName, menuLabel, search)
       : "";
 
     // SEOメタタグは「出力すべき情報が何もない」場合は metaTagsHtml="" のままとし、
@@ -398,6 +428,12 @@ async function main() {
     writeOut("404.html", renderPage("404.md", body, { ...meta, noindex: true }, { canonical: false }));
   }
 
+  // ---------- 7.6 サイト内検索の索引・スクリプト(NAV_ENABLED=true のとき) ----------
+  if (search) {
+    fs.writeFileSync(path.join(OUT_DIR, "search-index.json"), JSON.stringify(buildSearchIndex(searchPages)));
+    fs.writeFileSync(path.join(OUT_DIR, "tsuzuri-search.js"), SEARCH_SCRIPT);
+  }
+
   // ---------- 8. 画像・その他のリンク先ファイルのコピー ----------
   const missingAssets = [];
   for (const assetRel of new Set([...imageSet, ...fileSet, ...ogImageSet])) {
@@ -433,26 +469,30 @@ async function main() {
     }
   }
 
-  // ---------- 9. sitemap.json 書き込み ----------
-  const sitemap = buildSitemap({
-    root: config.rootMd,
-    basePath: config.basePath,
-    styleFile: config.styleFile,
-    customStyleApplied: Boolean(customCss),
-    visitedMd,
-    imageSet,
-    fileSet,
-    hierarchy,
-    tree: siteTree,
-    missing,
-    rejected,
-    lang: config.lang,
-    siteName: config.siteName,
-    siteOrigin: config.siteOrigin,
-    customDomain: config.customDomain,
-    theme: config.theme,
-  });
-  fs.writeFileSync(path.join(OUT_DIR, "sitemap.json"), JSON.stringify(sitemap, null, 2));
+  // ---------- 9. sitemap.json 書き込み(SITEMAP_JSON=true のときだけ) ----------
+  // 出力先に置くと公開サイトに含まれ、リンク切れ・拒否したリンクのパスまで外から見えてしまうため、
+  // 既定では書き出さない(リンクの問題はビルドログに出力済み)。
+  if (config.sitemapJson) {
+    const sitemap = buildSitemap({
+      root: config.rootMd,
+      basePath: config.basePath,
+      styleFile: config.styleFile,
+      customStyleApplied: Boolean(customCss),
+      visitedMd,
+      imageSet,
+      fileSet,
+      hierarchy,
+      tree: siteTree,
+      missing,
+      rejected,
+      lang: config.lang,
+      siteName: config.siteName,
+      siteOrigin: config.siteOrigin,
+      customDomain: config.customDomain,
+      theme: config.theme,
+    });
+    fs.writeFileSync(path.join(OUT_DIR, "sitemap.json"), JSON.stringify(sitemap, null, 2));
+  }
 
   // ---------- STRICT_LINKS ----------
   // リンク切れ・拒否したリンクがあればビルドを失敗させる(ワークフローはここで止まり公開されない)。

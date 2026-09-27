@@ -30,6 +30,7 @@ const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @property {string} lang
  * @property {boolean} navEnabled
  * @property {boolean} strictLinks
+ * @property {boolean} sitemapJson
  * @property {string} faviconFile
  * @property {string} siteName
  * @property {string} customDomain
@@ -60,6 +61,10 @@ export function loadConfig(env = process.env) {
   // true のとき、リンク切れ・拒否したリンクがあればビルドを失敗させる(公開を止める)
   const strictLinks = parseBoolean("STRICT_LINKS", env.STRICT_LINKS);
 
+  // true のとき、デバッグ用の sitemap.json を出力先に書き出す(公開サイトに含まれる)。
+  // リンク切れ・拒否したリンクのパス等も含むため、既定では出力しない。
+  const sitemapJson = parseBoolean("SITEMAP_JSON", env.SITEMAP_JSON);
+
   const siteName = resolveSiteName(env);
 
   const customDomain = resolveCustomDomain(env.CUSTOM_DOMAIN);
@@ -77,6 +82,7 @@ export function loadConfig(env = process.env) {
     lang,
     navEnabled,
     strictLinks,
+    sitemapJson,
     faviconFile,
     siteName,
     customDomain,
