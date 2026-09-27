@@ -33,6 +33,9 @@ export const PACKAGE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 // tsuzuri専用の名前空間を切っている。
 export const VENDOR_DIR = ".github/tsuzuri";
 
+// 利用者向けドキュメント(tsuzuri 自身で公開しているサイト)のURL。生成するファイルの案内に使う。
+export const DOCS_URL = "https://akilasatolu.github.io/tsuzuri/";
+
 // init が生成するワークフローのひな形(PACKAGE_ROOT からの相対パス)。
 export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.yml";
 
@@ -100,6 +103,16 @@ export function readMarkedVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFil
 }
 
 /**
+ * バージョン("1.2.3")からメジャーバージョンのタグ("v1")を作る。
+ * 利用者に案内する npx コマンドは、未リリースの main ではなくこのタグを指定する。
+ * @param {string} version
+ * @returns {string}
+ */
+export function majorTagOf(version) {
+  return `v${String(version).split(".")[0]}`;
+}
+
+/**
  * tsuzuri 自身のバージョン(package.json の version)を返す。
  * 実行中の CLI がどの版かを表示するのに使う(npx のキャッシュで古い版が動いていないかの確認用)。
  *
@@ -141,7 +154,8 @@ export function buildDocsPagesYml(
     .replaceAll("__OSS_REPO__", OSS_REPO)
     .replaceAll("__VENDOR_DIR__", VENDOR_DIR)
     .replaceAll("__BUILD_DEPENDENCIES__", buildDependencySpecs({ packageRoot, fsImpl, markedVersion }))
-    .replaceAll("__TSUZURI_VERSION__", tsuzuriVersion);
+    .replaceAll("__TSUZURI_VERSION__", tsuzuriVersion)
+    .replaceAll("__MAJOR_TAG__", majorTagOf(tsuzuriVersion));
 }
 
 /**
@@ -151,87 +165,57 @@ export function buildDocsPagesYml(
  */
 export function buildDocsPagesConfig(answers) {
   const { triggerBranch, rootMd, theme } = { ...DEFAULT_ANSWERS, ...answers };
-  return `# docs-pages 設定ファイル
+  return `# Tsuzuri の設定ファイル
 #
-# ここに書いた値を変更するだけで、ワークフロー本体
-# (.github/workflows/docs-pages.yml) を編集せずに動作をカスタマイズできます。
-# 「KEY=VALUE」形式で1行に1項目、空行や # で始まる行は無視されます。
+# 「KEY=VALUE」の形で1行に1項目を書きます。# で始まる行と空行は無視されます。
+# ワークフロー(.github/workflows/docs-pages.yml)を編集しなくても、ここを変えるだけで動作を変えられます。
+# 各項目の詳しい説明: ${DOCS_URL}docs/configuration.html
 
-# ビルド・デプロイをトリガーするブランチ名
-# このブランチへの push (マージ含む) があったときだけ Pages への
-# デプロイが実行されます。
-# リポジトリの既定ブランチ(通常は main)以外を指定する場合は、GitHub の
-# Settings > Environments > github-pages > Deployment branches and tags に
-# このブランチを追加してください(追加しないとデプロイが失敗します)。
+# 公開(デプロイ)するブランチ。このブランチに push したときだけサイトが更新されます。
+# リポジトリの既定ブランチ(通常は main)以外にする場合は、GitHub の
+# Settings > Environments > github-pages > Deployment branches and tags にこのブランチを追加してください。
 TRIGGER_BRANCH=${triggerBranch}
 
-# 起点となる Markdown ファイル（リポジトリルートからの相対パス）
+# サイトの入り口になる Markdown ファイル(リポジトリの直下からのパス)
 ROOT_MD=${rootMd}
 
-# ビルド出力先ディレクトリ
+# ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# カスタムスタイル CSS ファイル（任意）
-# ここに指定したパスに CSS ファイルが存在すれば、その内容がページの
-# スタイルに反映されます。組み込みテーマCSS一式(${VENDOR_DIR}/styles/)と
-# 同じディレクトリに置くのが既定の配置です（テーマCSSを参考にしながら
-# 独自CSSを書けるように、あえて同じ場所にまとめています）。
-# ファイルが存在しない場合は既定のスタイルが使われます。
+# テーマ: wa(和) / muji(無地) / sumi(墨) / ai(藍) / shu(朱) / none(装飾なし)
+# 見た目の比較: ${DOCS_URL}docs/gallery.html
+THEME=${theme}
+
+# 独自のCSSファイル。ファイルがあれば、テーマの後に読み込まれて最優先で反映されます(無ければ使いません)。
 STYLE_FILE=${VENDOR_DIR}/styles/custom.css
 
-# ── 新規キー(すべて省略可。省略時は現行動作と完全に同一になる) ──
-
-# 出力HTMLの <html lang="..."> に設定する言語コード
-# 省略時: "ja"(現行のハードコード値と同じ = 後方互換)
+# ページの言語(<html lang="...">)。ja / en / en-US などの言語タグで書きます。
 LANG=ja
 
-# ページ間ナビゲーション(サイドバーのページ一覧と、本文末尾の前後のページへのリンク)を出力するか
-# true/false のみ有効。それ以外の値が指定された場合は警告を出し false 扱いにする
-# 省略時: false(現行の「ナビなし1カラム」動作と同一 = 後方互換)
+# サイドバーのナビゲーション・サイト内検索・ページ内の目次・前後のページへのリンクを表示するか(true/false)
 NAV_ENABLED=false
 
-# favicon として使う画像ファイル(リポジトリルートからの相対パス)
-# 存在しない/未設定の場合は favicon リンクタグを出力しない(現行動作と同一)
+# サイトの favicon にする画像(リポジトリの直下からのパス。例: assets/favicon.svg)。空なら使いません。
 FAVICON_FILE=
 
-# サイト名(OGPのog:site_name、ナビのタイトル表示に使用)
-# 省略時: build-docs.mjs 実行時の環境変数 GITHUB_REPOSITORY("owner/repo"形式。
-# GitHub Actions実行時は常に自動設定される既定の環境変数で、ワークフローYAML側の
-# 追加対応は不要)からリポジトリ名部分("/"以降)を算出して使う。
-# GITHUB_REPOSITORY 自体が存在しない場合(Actions外でのローカル実行等)は空文字のまま。
+# サイト名(ナビの見出しと og:site_name に使います)。空ならリポジトリ名になります。
 SITE_NAME=
 
-# カスタムドメインを使う場合のドメイン名(スキームなし。例: docs.example.com)
-# 設定すると OUT_DIR 直下に CNAME ファイルを自動生成する
-# 省略時: CNAME を生成しない(現行動作と同一)
+# 独自ドメインで公開する場合のドメイン名(例: docs.example.com)。空なら github.io で公開します。
 CUSTOM_DOMAIN=
 
-# frontmatterでogImageを指定しないページに使うデフォルトのOGP画像パス(相対 or 絶対URL)
-# リポジトリルートからの相対パスは、サイトの絶対URLに変換され、画像もサイトにコピーされる
-# 省略時: og:image タグを出力しない
+# SNSでシェアされたときの画像(OGP画像)の既定値。リポジトリの直下からのパスか、https:// から始まるURL。
+# ページごとに変えたい場合は、そのページの frontmatter に ogImage を書きます。
 OGP_DEFAULT_IMAGE=
 
-# リンク切れ(リンク先のファイルが無い)や、リポジトリ外を指すなどで拒否したリンクがあるときに
-# ビルドを失敗させるか(true/false)。true にするとリンク切れのまま公開されるのを防げる
-# 省略時: false(警告を出すだけで公開する)
+# リンク切れがあるときにビルドを失敗させるか(true/false)。true にするとリンク切れのまま公開されません。
 STRICT_LINKS=false
 
-# デバッグ用の sitemap.json(収集したページ・画像・リンク切れの一覧など)を出力するか(true/false)
-# true にすると公開サイトにも含まれ、リンク切れのファイル名なども外から見えるので、
-# 原因を調べるときだけ一時的に true にすることをおすすめします
-# 省略時: false(出力しない。リンクの問題はワークフローのログに表示される)
-SITEMAP_JSON=false
-
-# 各ページの末尾に、git の履歴から求めた最終更新日を表示するか(true/false)
-# true にすると、ワークフローが git の全履歴を取得してからビルドする(履歴が長いと少し時間がかかる)
-# 省略時: false(表示しない)
+# 各ページの末尾に最終更新日(git の最終コミット日)を表示するか(true/false)
 LAST_UPDATED=false
 
-# ★v2新規: 組み込みテーマ名(3層カスケードの第2層。詳細は「スタイル3層カスケード詳細設計」節)
-# 選択肢: wa(和) / muji(無地) / sumi(墨) / ai(藍) / shu(朱) / none
-#   none を指定すると配色・装飾を含むテーマ層を丸ごと適用しない(基礎CSSのみになる)
-# 省略時・不正値: "wa"(警告を出してフォールバック)
-THEME=${theme}
+# 原因調査用の sitemap.json を出力するか(true/false)。公開サイトにも含まれるため、普段は false にしてください。
+SITEMAP_JSON=false
 `;
 }
 
@@ -239,7 +223,8 @@ THEME=${theme}
  * docs-pages.style.css の空ひな形(コメントのみ)を組み立てる。
  */
 export function buildStyleCssTemplate() {
-  return `/* ここに独自CSSを追記すると、テーマの後に最優先で適用されます。利用可能なCSSカスタムプロパティはREADME.mdの「スタイルのカスタマイズ」セクションを参照してください。 */
+  return `/* 独自のCSSをここに書くと、テーマの後に読み込まれて最優先で反映されます。
+   色や幅を変えるCSS変数(--fg / --bg / --accent など)の一覧: ${DOCS_URL}docs/theming.html */
 `;
 }
 
@@ -671,12 +656,9 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
     }
     console.log("");
 
-    const confirmOverwrite = async (relPath) => {
-      const answer = await asker.question(
-        `${relPath} は既に存在します。上書きしますか? (y/N): `,
-      );
-      return parseYesNo(answer, false);
-    };
+    const confirmOverwrite = createBundledConfirm(async (question) =>
+      parseYesNo(await asker.question(question), false),
+    );
 
     await writeGeneratedFiles(targets, { cwd, confirmOverwrite, log: console.log });
   } finally {
@@ -684,6 +666,40 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
   }
 
   console.log(buildCompletionMessage(answers));
+}
+
+/**
+ * ワークフロー(docs-pages.yml)とビルドスクリプト一式(VENDOR_DIR 配下)の組か。
+ * これらは同じバージョンでそろっていないと動かないため、上書きするかどうかをまとめて決める。
+ * @param {string} relPath
+ */
+export function isBundledPath(relPath) {
+  return relPath === ".github/workflows/docs-pages.yml" ||
+    (relPath.startsWith(`${VENDOR_DIR}/`) && relPath !== `${VENDOR_DIR}/styles/custom.css`);
+}
+
+/**
+ * 対話形式の init で使う上書き確認を作る。
+ *   - ワークフローとビルドスクリプト一式は、最初に既存ファイルが見つかったときに1回だけ聞き、
+ *     その答えを一式すべてに適用する(一部だけ上書きしてバージョンがずれるのを防ぐ)
+ *   - 設定ファイル・独自CSSは、ファイルごとに聞く
+ *
+ * @param {(question: string) => Promise<boolean>} ask
+ * @returns {(relPath: string) => Promise<boolean>}
+ */
+export function createBundledConfirm(ask) {
+  let bundleAnswer = null;
+  return async (relPath) => {
+    if (isBundledPath(relPath)) {
+      if (bundleAnswer === null) {
+        bundleAnswer = await ask(
+          `ワークフローとビルドスクリプト一式(${VENDOR_DIR}/ 配下)は既に存在します。最新版で上書きしますか? (y/N): `,
+        );
+      }
+      return bundleAnswer;
+    }
+    return ask(`${relPath} は既に存在します。上書きしますか? (y/N): `);
+  };
 }
 
 /**
@@ -709,7 +725,7 @@ export function buildCompletionMessage(answers = {}) {
     `ビルドスクリプト本体(${VENDOR_DIR}/ 配下)もこのリポジトリにコピー済みのため、`,
     "実行時に外部リポジトリを参照することはありません。",
     "",
-    `最新版に更新するときは npx github:${OSS_REPO} init --update を実行してください`,
+    `最新版に更新するときは npx github:${OSS_REPO}#${majorTagOf(readPackageVersion())} init --update を実行してください`,
     "(設定ファイル・独自CSSはそのままに、ワークフローとスクリプトだけが更新されます)。",
   ].join("\n");
 }

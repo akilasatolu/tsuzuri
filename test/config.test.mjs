@@ -246,3 +246,10 @@ test("LAST_UPDATED: 既定はfalse、trueで有効", () => {
   assert.equal(loadConfig({}).lastUpdated, false);
   assert.equal(loadConfig({ LAST_UPDATED: "true" }).lastUpdated, true);
 });
+
+test("ROOT_MD: ./ や \\ を含む書き方も、リンクから解決したパスと同じ表記に正規化する", () => {
+  assert.equal(loadConfig({ ROOT_MD: "./README.md" }).rootMd, "README.md");
+  assert.equal(loadConfig({ ROOT_MD: "docs\\index.md" }).rootMd, "docs/index.md");
+  assert.equal(loadConfig({ ROOT_MD: "./docs/../README.md" }).rootMd, "README.md");
+  assert.equal(loadConfig({ ROOT_MD: "/README.md" }).rootMd, "README.md");
+});

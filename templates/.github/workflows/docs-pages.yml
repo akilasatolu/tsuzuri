@@ -1,16 +1,16 @@
 # このファイルは tsuzuri の init が利用者リポジトリに生成するワークフローのひな形。
 # bin/cli.mjs の buildDocsPagesYml() が読み込み、次のプレースホルダーを置き換えて出力する。
-#   __OSS_REPO__ / __VENDOR_DIR__ / __BUILD_DEPENDENCIES__ / __TSUZURI_VERSION__
+#   __OSS_REPO__ / __VENDOR_DIR__ / __BUILD_DEPENDENCIES__ / __TSUZURI_VERSION__ / __MAJOR_TAG__
 # (この先頭のコメントブロックは出力に含まれない)
 # templates/ 配下に .github/workflows/ の形で置いているのは、Dependabot に
 # actions のバージョン更新の対象として認識させるため(ここでワークフローとして実行はされない)。
 # --- template start ---
 name: Deploy Docs to GitHub Pages
 
-# tsuzuri v__TSUZURI_VERSION__ の npx github:__OSS_REPO__ init によって生成された、自己完結型のワークフローです。
+# tsuzuri v__TSUZURI_VERSION__ の npx github:__OSS_REPO__#__MAJOR_TAG__ init によって生成された、自己完結型のワークフローです。
 # ビルドスクリプト本体(__VENDOR_DIR__/ 配下)もこのリポジトリにコピー済みのため、
 # 実行のたびにOSS本体リポジトリ(__OSS_REPO__)を参照することはありません。
-# スクリプトを最新版に更新したい場合は、npx github:__OSS_REPO__ init --update を実行してください。
+# スクリプトを最新版に更新したい場合は、npx github:__OSS_REPO__#__MAJOR_TAG__ init --update を実行してください。
 
 on:
   push:
@@ -20,10 +20,6 @@ on:
 # 既定は読み取りのみ。Pagesへの公開に必要な権限は deploy ジョブにだけ付与する。
 permissions:
   contents: read
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
   build:
@@ -115,9 +111,10 @@ jobs:
         with:
           node-version: 24
 
+      # ビルド用の依存は .github/tsuzuri/node_modules に入れる(利用者の package.json とは切り離す)
       - name: Install build dependency
         if: steps.trigger.outputs.should_deploy != 'false'
-        run: npm install __BUILD_DEPENDENCIES__ --no-save --no-audit --no-fund --ignore-scripts
+        run: npm install --prefix __VENDOR_DIR__ __BUILD_DEPENDENCIES__ --no-save --no-audit --no-fund --ignore-scripts
 
       - name: Build
         if: steps.trigger.outputs.should_deploy != 'false'
@@ -150,6 +147,12 @@ jobs:
     needs: build
     if: needs.build.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
+    # Pages への公開は同時に1つだけにする(実行中の公開は取り消さず、順番に行う)。
+    # ワークフロー全体ではなくこのジョブだけに付けるのは、TRIGGER_BRANCH 以外のブランチへの
+    # push(ビルドだけで公開しない実行)が、待機中の公開を押しのけて取り消さないようにするため。
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     permissions:
       pages: write
       id-token: write

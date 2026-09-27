@@ -35,6 +35,9 @@ import {
   HELP_TEXT,
   BUILD_DEPENDENCIES,
   buildDependencySpecs,
+  majorTagOf,
+  isBundledPath,
+  createBundledConfirm,
 } from "../bin/cli.mjs";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
@@ -169,8 +172,8 @@ test("package.jsonのmarkedとpackage-lock.jsonで実際に入る版が一致し
 });
 
 test("buildDocsPagesYml: 利用者側でインストールするmarkedはpackage.jsonの版", () => {
-  assert.ok(buildDocsPagesYml().includes(`npm install marked@${readMarkedVersion()} `));
-  assert.ok(buildDocsPagesYml("99.1.0").includes("npm install marked@99.1.0 "));
+  assert.ok(buildDocsPagesYml().includes(`npm install --prefix ${VENDOR_DIR} marked@${readMarkedVersion()} `));
+  assert.ok(buildDocsPagesYml("99.1.0").includes(`npm install --prefix ${VENDOR_DIR} marked@99.1.0 `));
 });
 
 test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=README.md/THEME=wa", () => {
@@ -733,7 +736,7 @@ test("ビルド用の依存(BUILD_DEPENDENCIES)はすべて package.json の版(
   }
   assert.deepEqual(BUILD_DEPENDENCIES, ["marked", "highlight.js", "marked-footnote"]);
   assert.equal(buildDependencySpecs(), specs.join(" "));
-  assert.ok(buildDocsPagesYml().includes(`npm install ${specs.join(" ")} --no-save`));
+  assert.ok(buildDocsPagesYml().includes(`npm install --prefix ${VENDOR_DIR} ${specs.join(" ")} --no-save`));
 });
 
 test("LAST_UPDATED=true のときだけ git の全履歴を取得するステップがある", () => {
@@ -746,4 +749,61 @@ test("LAST_UPDATED=true のときだけ git の全履歴を取得するステッ
   );
   assert.ok(yml.includes("          LAST_UPDATED: ${{ env.LAST_UPDATED }}\n"));
   assert.ok(buildDocsPagesConfig({}).includes("\nLAST_UPDATED=false\n"));
+});
+
+test("生成ワークフロー: 依存は利用者の package.json と切り離して VENDOR_DIR に入れる", () => {
+  assert.match(buildDocsPagesYml(), new RegExp(`npm install --prefix ${VENDOR_DIR.replace(/[.]/g, "\\.")} marked@`));
+});
+
+test("生成ワークフロー: concurrency は公開(deploy)ジョブだけに付け、ワークフロー全体には付けない", () => {
+  const yml = buildDocsPagesYml();
+  const [top, jobs] = yml.split("\njobs:\n");
+  assert.doesNotMatch(top, /concurrency:/);
+  const [buildJob, deployJob] = jobs.split("\n  deploy:\n");
+  assert.doesNotMatch(buildJob, /concurrency:/);
+  assert.ok(deployJob.includes("    concurrency:\n      group: pages\n      cancel-in-progress: false\n"));
+});
+
+test("更新の案内はメジャーバージョンのタグ付き(未リリースの main を使わせない)", () => {
+  const tag = majorTagOf(readPackageVersion());
+  assert.equal(majorTagOf("1.2.3"), "v1");
+  assert.ok(buildDocsPagesYml().includes(`npx github:${OSS_REPO}#${tag} init --update`));
+  assert.ok(buildCompletionMessage({}).includes(`npx github:${OSS_REPO}#${tag} init --update`));
+  assert.doesNotMatch(buildDocsPagesYml(), /npx github:[^#\s]+ init/);
+});
+
+test("isBundledPath: ワークフローとビルドスクリプト一式だけが対象(設定ファイル・独自CSSは対象外)", () => {
+  assert.equal(isBundledPath(".github/workflows/docs-pages.yml"), true);
+  assert.equal(isBundledPath(`${VENDOR_DIR}/build-docs.mjs`), true);
+  assert.equal(isBundledPath(`${VENDOR_DIR}/styles/wa.css`), true);
+  assert.equal(isBundledPath(".github/docs-pages.config"), false);
+  assert.equal(isBundledPath(`${VENDOR_DIR}/styles/custom.css`), false);
+});
+
+test("createBundledConfirm: 一式は1回だけ聞いて同じ答えを使い、設定ファイルは個別に聞く", async () => {
+  const questions = [];
+  const answers = [true, false];
+  const confirm = createBundledConfirm(async (q) => {
+    questions.push(q);
+    return answers.shift();
+  });
+  assert.equal(await confirm(".github/workflows/docs-pages.yml"), true);
+  assert.equal(await confirm(`${VENDOR_DIR}/build-docs.mjs`), true);
+  assert.equal(await confirm(`${VENDOR_DIR}/lib/config.mjs`), true);
+  assert.equal(await confirm(".github/docs-pages.config"), false);
+  assert.equal(questions.length, 2);
+  assert.match(questions[0], /ワークフローとビルドスクリプト一式/);
+  assert.match(questions[1], /docs-pages\.config は既に存在します/);
+});
+
+test("生成する設定ファイル・CSSひな形に、開発側の内部的な言い回しを含めない", () => {
+  const config = buildDocsPagesConfig({});
+  for (const word of ["★", "詳細設計", "後方互換", "現行", "build-docs.mjs", "ハードコード"]) {
+    assert.ok(!config.includes(word), `設定ファイルに「${word}」が含まれる`);
+  }
+  for (const key of ["TRIGGER_BRANCH", "ROOT_MD", "OUT_DIR", "THEME", "STYLE_FILE", "LANG", "NAV_ENABLED", "FAVICON_FILE", "SITE_NAME", "CUSTOM_DOMAIN", "OGP_DEFAULT_IMAGE", "STRICT_LINKS", "LAST_UPDATED", "SITEMAP_JSON"]) {
+    assert.match(config, new RegExp(`^${key}=`, "m"), key);
+  }
+  assert.ok(buildStyleCssTemplate().includes("https://akilasatolu.github.io/tsuzuri/docs/theming.html"));
+  assert.ok(!buildStyleCssTemplate().includes("README.md"));
 });

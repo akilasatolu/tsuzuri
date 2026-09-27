@@ -5,6 +5,7 @@ import {
   extractMarkdownSyntaxLinks,
   extractRawHtmlLinks,
   stripCodeSpans,
+  extractLinks,
 } from "../.github/scripts/lib/link-extractor.mjs";
 
 describe("extractMarkdownSyntaxLinks", () => {
@@ -133,5 +134,23 @@ describe("stripCodeSpans", () => {
     const stripped = stripCodeSpans(md);
     // 期待される「完全なコードスパン除去」ではなく、部分的にしか除去されないことを固定する。
     assert.notEqual(stripped.trim(), "");
+  });
+});
+
+describe("extractLinks(描画と同じ marked の解釈)", () => {
+  test("参照リンク・バッジ・生のHTML・脚注の中のリンクを拾い、コードの中は拾わない", () => {
+    const md = [
+      "[a][r] [![b](img.png)](nested.md) <a href=\"raw.md\">raw</a>",
+      "",
+      "```",
+      "[fake](fake.md)",
+      "```",
+      "",
+      "本文[^1]",
+      "",
+      "[r]: ref.md",
+      "[^1]: [脚注内](fn.md)",
+    ].join("\n");
+    assert.deepEqual(extractLinks(md).sort(), ["fn.md", "img.png", "nested.md", "raw.md", "ref.md"].sort());
   });
 });

@@ -975,4 +975,73 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  test("参照リンク・バッジ・単一引用符・山括弧・括弧を含むパス・ディレクトリへのリンクもたどる", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      for (const [rel, body] of [
+        ["docs/ref.md", "# Ref\n"],
+        ["docs/nested.md", "# Nested\n"],
+        ["single.md", "# Single\n"],
+        ["sp ace.md", "# Space\n"],
+        ["p(1).md", "# Paren\n"],
+        ["guide/README.md", "# Guide\n"],
+        ["code.md", "# Code\n"],
+      ]) {
+        fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
+        fs.writeFileSync(path.join(dir, rel), body);
+      }
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        [
+          "# Root Page",
+          "",
+          "[参照][r1] [![badge](docs/img.png)](docs/nested.md) [s](single.md 'T') [sp](<sp ace.md>)",
+          "[paren](p(1).md) [guide](guide/) [none](nodir/)",
+          "",
+          "`[fake](code.md)`",
+          "",
+          "[r1]: docs/ref.md",
+          "",
+        ].join("\n")
+      );
+      const result = runBuild(dir, { STRICT_LINKS: "" });
+      assert.equal(result.status, 0, result.stderr);
+      for (const out of ["docs/ref.html", "docs/nested.html", "single.html", "sp ace.html", "p(1).html", "guide/index.html"]) {
+        assert.ok(fs.existsSync(path.join(dir, "_site", out)), `${out} が生成されること`);
+      }
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "code.html")), "インラインコード内の見せかけのリンクはたどらない");
+      const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
+      assert.deepEqual(sitemap.missing, [{ rel: "nodir/", referencedFrom: "README.md" }]);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("タイトルは最初のh1の表示テキスト(コードブロック内の#は拾わない)。ROOT_MD=./README.mdでも二重にならない。hrefはエスケープ", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(
+        path.join(dir, "docs", "a.md"),
+        ["```sh", "# install deps", "```", "", "# Title with **bold** and `code`", ""].join("\n")
+      );
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        '# Root Page\n\n[A](docs/a.md) [q](https://example.com/?a=1&b="2")\n'
+      );
+      const result = runBuild(dir, { ROOT_MD: "./README.md", NAV_ENABLED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(readOut(dir, "docs", "a.html"), /<title>Title with bold and code<\/title>/);
+      const indexHtml = readOut(dir, "index.html");
+      assert.match(indexHtml, /href="https:\/\/example\.com\/\?a=1&amp;b=&quot;2&quot;"/);
+      assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).pageRels.sort(), ["README.md", "docs/a.md"]);
+      assert.equal(indexHtml.match(/href="\/README\.html"/g).length, 1, "ナビに起点ページが1回だけ");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

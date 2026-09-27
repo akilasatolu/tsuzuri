@@ -79,7 +79,7 @@ export function renderNav(tree, currentRel, basePath, siteName, menuLabel = "メ
     }
     const href = toSiteAbsHref("", node.rel, basePath);
     const currentAttr = node.rel === currentRel ? ' aria-current="page"' : "";
-    return `<li><a href="${href}"${currentAttr}>${escapeHtml(node.title)}</a></li>`;
+    return `<li><a href="${escapeHtml(href)}"${currentAttr}>${escapeHtml(node.title)}</a></li>`;
   }
 
   function renderList(nodes) {
@@ -117,7 +117,7 @@ export function renderPager(
 ) {
   if (!prev && !next) return "";
   const link = (page, rel, label) =>
-    `<a class="tsuzuri-pager-${rel}" rel="${rel}" href="${toSiteAbsHref("", page.rel, basePath)}">` +
+    `<a class="tsuzuri-pager-${rel}" rel="${rel}" href="${escapeHtml(toSiteAbsHref("", page.rel, basePath))}">` +
     `<span>${escapeHtml(label)}</span>${escapeHtml(page.title)}</a>`;
   return (
     `<nav class="tsuzuri-pager" aria-label="${escapeHtml(labels.nav)}">` +

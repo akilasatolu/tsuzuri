@@ -9,6 +9,7 @@
  * config.mjs」節に基づく実装。
  */
 
+import path from "node:path";
 import { normalizeBasePath } from "./path-utils.mjs";
 
 // frontmatterの `theme` キー(ページ単位のテーマ上書き)からも参照するため export する。
@@ -46,7 +47,9 @@ const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
 // @param {NodeJS.ProcessEnv} env
 // @returns {Config}
 export function loadConfig(env = process.env) {
-  const rootMd = trimOr(env.ROOT_MD, "README.md");
+  // "./README.md" や "docs\\index.md" のような書き方でも、リンクから解決したパス("README.md")と
+  // 同じ表記になるよう正規化する(そうしないと起点ページが別のページとして二重に扱われる)。
+  const rootMd = normalizeRootMd(trimOr(env.ROOT_MD, "README.md"));
   const outDir = trimOr(env.OUT_DIR, "_site");
   const styleFile = trimOr(env.STYLE_FILE, ".github/docs-pages.style.css");
   const siteOrigin = trimOr(env.SITE_ORIGIN, "");
@@ -95,6 +98,11 @@ export function loadConfig(env = process.env) {
     theme,
     styleDir,
   };
+}
+
+function normalizeRootMd(raw) {
+  const normalized = path.posix.normalize(raw.replace(/\\/g, "/")).replace(/^(\.\/)+/, "").replace(/^\/+/, "");
+  return normalized || "README.md";
 }
 
 // 値をtrimし、空ならデフォルト値を返す。未設定(undefined/null)も空扱い。

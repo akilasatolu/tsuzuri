@@ -96,3 +96,23 @@ test("先頭にBOMが付いていてもfrontmatterを認識する", () => {
   assert.deepEqual(result.meta, { title: "BOM付き" });
   assert.equal(result.body, "本文\n");
 });
+
+test("値全体が対応する引用符で囲まれていれば外す(片側だけ・途中の引用符はそのまま)", () => {
+  const raw = [
+    "---",
+    'title: "My Site: Home"',
+    "description: 'シングル'",
+    "ogType: \"article",
+    'lang: say "hi"',
+    'noindex: "true"',
+    "---",
+    "本文",
+  ].join("\n");
+  assert.deepEqual(parseFrontmatter(raw).meta, {
+    title: "My Site: Home",
+    description: "シングル",
+    ogType: '"article',
+    lang: 'say "hi"',
+    noindex: true,
+  });
+});

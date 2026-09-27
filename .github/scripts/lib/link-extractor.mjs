@@ -3,6 +3,15 @@
  *
  * Markdown中のリンクを見つける処理を担当するモジュール。
  *
+ * ページ集め(crawler.mjs)は extractLinks を使う。extractLinks は、ページの描画と同じ marked の
+ * 解析結果(トークン)からリンクを集めるため、参照リンク([x][ref])・画像を囲んだリンク(バッジ)・
+ * 単一引用符のタイトル・山括弧(<a b.md>)・括弧を含むパスなど、描画でリンクになるものは
+ * すべてたどる。コードブロック・インラインコードの中の「見せかけのリンク」は、marked が
+ * コードとして扱うので自然に除外される。生のHTML(<a href>・<img src>)は、HTMLのトークンに
+ * extractRawHtmlLinks を適用して拾う。
+ *
+ * extractMarkdownSyntaxLinks / stripCodeSpans は、以前の正規表現による実装で、互換のために残している。
+ *
  * 既存 build-docs.mjs (旧112〜132行目相当) からロジック変更なしで移動したもの:
  *   extractMarkdownSyntaxLinks / extractRawHtmlLinks
  *
@@ -12,7 +21,32 @@
  *     前処理関数。
  */
 
-// Markdown 中の [text](href) / ![alt](href) を抽出する簡易パーサ
+import { Marked } from "marked";
+import markedFootnote from "marked-footnote";
+
+// リンク抽出用の marked(描画側と同じ GFM + 脚注の設定。描画はしない)
+const lexerMarked = new Marked({ gfm: true });
+lexerMarked.use(markedFootnote());
+
+/**
+ * Markdown 本文から、リンク・画像・生のHTMLの href/src を、描画と同じ解釈で集める。
+ * @param {string} mdContent - frontmatter を除いた本文
+ * @returns {string[]}
+ */
+export function extractLinks(mdContent) {
+  const links = [];
+  const tokens = lexerMarked.lexer(mdContent);
+  lexerMarked.walkTokens(tokens, (token) => {
+    if ((token.type === "link" || token.type === "image") && token.href) {
+      links.push(token.href);
+    } else if (token.type === "html") {
+      links.push(...extractRawHtmlLinks(token.raw ?? token.text ?? ""));
+    }
+  });
+  return links;
+}
+
+// (互換用)Markdown 中の [text](href) / ![alt](href) を抽出する簡易パーサ
 export function extractMarkdownSyntaxLinks(mdContent) {
   const results = [];
   const re = /!?\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;

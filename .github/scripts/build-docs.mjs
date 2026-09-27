@@ -47,7 +47,6 @@ import { crawlSite } from "./lib/crawler.mjs";
 import { toSiteAbsHref, resolveInsideRepo, resolveRepoRel, isExternal } from "./lib/path-utils.mjs";
 import {
   escapeHtml,
-  renderTitle,
   renderNav,
   renderMetaTags,
   renderPager,
@@ -361,12 +360,12 @@ async function main() {
     renderer.link = function ({ href, title, tokens }) {
       const newHref = toSiteAbsHref(rel, href, config.basePath);
       const text = this.parser.parseInline(tokens);
-      return `<a href="${newHref}"${title ? ` title="${escapeHtml(title)}"` : ""}>${text}</a>`;
+      return `<a href="${escapeHtml(newHref)}"${title ? ` title="${escapeHtml(title)}"` : ""}>${text}</a>`;
     };
     // 画像は画面に入るまで読み込まない(loading="lazy")。ページの表示を速くするため。
     renderer.image = function ({ href, title, text }) {
       const newHref = toSiteAbsHref(rel, href, config.basePath);
-      return `<img src="${newHref}" alt="${escapeHtml(text || "")}"${
+      return `<img src="${escapeHtml(newHref)}" alt="${escapeHtml(text || "")}"${
         title ? ` title="${escapeHtml(title)}"` : ""
       } loading="lazy" decoding="async">`;
     };
@@ -397,9 +396,11 @@ async function main() {
     // 目次用に h2・h3 を集めておく。
     const slugger = createSlugger();
     const headings = [];
+    let firstH1 = ""; // ページタイトルの候補(最初の h1 の表示テキスト。Markdown の記号は含まない)
     renderer.heading = function ({ tokens, depth }) {
       const inner = this.parser.parseInline(tokens);
       const text = htmlToText(inner);
+      if (depth === 1 && !firstH1) firstH1 = text.trim();
       const id = slugger.slug(text);
       if (!id) return `<h${depth}>${inner}</h${depth}>\n`;
       if (depth === 2 || depth === 3) headings.push({ depth, id, text });
@@ -414,7 +415,9 @@ async function main() {
 
     const preprocessed = preprocessRawHtmlPaths(content, rel, config.basePath);
     let bodyHtml = md.parse(preprocessed, { renderer });
-    const title = renderTitle(content, rel, meta.title);
+    // タイトル: frontmatter の title > 最初の h1 の表示テキスト > ファイルパス。
+    // (h1 は描画時の見出しから取るので、コードブロック内の "# コメント" を誤って拾わない)
+    const title = (typeof meta.title === "string" && meta.title) || firstH1 || rel;
     if (search && visitedMd.has(rel)) {
       searchPages.push({ title, url: `${config.basePath}/${urlPathOf(rel)}`, html: bodyHtml });
     }
