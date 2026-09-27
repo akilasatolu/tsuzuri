@@ -28,6 +28,11 @@ import {
   isDirectRunOf,
   WORKFLOW_TEMPLATE_PATH,
   buildCompletionMessage,
+  parseCliArgs,
+  answersFromArgs,
+  readPackageVersion,
+  readDependencyVersion,
+  HELP_TEXT,
 } from "../bin/cli.mjs";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
@@ -620,4 +625,97 @@ test("runUpdate: 配布対象に無くなった lib/*.mjs は削除し、styles/
 test("STRICT_LINKS: 設定ファイルのひな形に既定値falseで含まれ、ワークフローからビルドへ渡される", () => {
   assert.ok(buildDocsPagesConfig({}).includes("\nSTRICT_LINKS=false\n"));
   assert.ok(buildDocsPagesYml().includes("          STRICT_LINKS: ${{ env.STRICT_LINKS }}\n"));
+});
+
+// --- コマンドライン引数・バージョン表示 ---
+
+test("parseCliArgs: 引数なし・init だけなら対話モード", () => {
+  for (const argv of [[], ["init"]]) {
+    const args = parseCliArgs(argv);
+    assert.equal(args.nonInteractive, false);
+    assert.equal(args.update, false);
+  }
+});
+
+test("parseCliArgs: --yes や値の指定があれば対話なし。値は answersFromArgs で回答になる", () => {
+  assert.equal(parseCliArgs(["-y"]).nonInteractive, true);
+  const args = parseCliArgs(["init", "--branch", "docs", "--root", "index.md", "--theme", "sumi", "--style"]);
+  assert.equal(args.nonInteractive, true);
+  assert.deepEqual(answersFromArgs(args), {
+    triggerBranch: "docs",
+    rootMd: "index.md",
+    theme: "sumi",
+    createStyleFile: true,
+  });
+  assert.deepEqual(answersFromArgs(parseCliArgs(["--yes"])), {
+    triggerBranch: "main",
+    rootMd: "README.md",
+    theme: "wa",
+    createStyleFile: false,
+  });
+});
+
+test("parseCliArgs: 不明なオプション・サブコマンド、不正なテーマ、空の値はエラー", () => {
+  assert.throws(() => parseCliArgs(["--bogus"]), /引数が正しくありません/);
+  assert.throws(() => parseCliArgs(["deploy"]), /不明なサブコマンド/);
+  assert.throws(() => parseCliArgs(["--theme", "sepia"]), /--theme には/);
+  assert.throws(() => parseCliArgs(["--branch", " "]), /--branch に空の値/);
+});
+
+test("parseCliArgs: -v / -h / --update / --force", () => {
+  assert.equal(parseCliArgs(["-v"]).version, true);
+  assert.equal(parseCliArgs(["-h"]).help, true);
+  assert.equal(parseCliArgs(["init", "--update"]).update, true);
+  assert.equal(parseCliArgs(["-y", "--force"]).force, true);
+});
+
+test("HELP_TEXT: 主なオプションとテーマ名を説明している", () => {
+  for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--style", "--force", "--version", "sumi"]) {
+    assert.ok(HELP_TEXT.includes(word), word);
+  }
+});
+
+test("readPackageVersion / readDependencyVersion: package.json の値を返す", () => {
+  const pkg = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package.json"), "utf8"));
+  assert.equal(readPackageVersion(), pkg.version);
+  assert.equal(readDependencyVersion("marked"), pkg.devDependencies.marked);
+  assert.throws(() => readDependencyVersion("not-a-dependency"), /完全一致/);
+});
+
+test("buildDocsPagesYml: 生成に使った tsuzuri のバージョンを先頭のコメントに入れる", () => {
+  assert.ok(buildDocsPagesYml().includes(`# tsuzuri v${readPackageVersion()} の npx github:`));
+});
+
+test("CLIを実行すると最初にバージョンを表示し、--yes で対話なしに生成し、既存ファイルは --force が無ければスキップ", () => {
+  const dir = makeTmpDir();
+  try {
+    const cli = join(PACKAGE_ROOT, "bin/cli.mjs");
+    const version = readPackageVersion();
+    let result = spawnSync(process.execPath, [cli, "--version"], { cwd: dir, encoding: "utf8" });
+    assert.equal(result.stdout.trim(), version);
+
+    result = spawnSync(process.execPath, [cli, "init", "--yes", "--branch", "docs"], { cwd: dir, encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    assert.ok(result.stdout.startsWith(`tsuzuri v${version}\n`));
+    assert.match(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), /^TRIGGER_BRANCH=docs$/m);
+
+    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=keep\n");
+    result = spawnSync(process.execPath, [cli, "-y"], { cwd: dir, encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), "TRIGGER_BRANCH=keep\n");
+
+    result = spawnSync(process.execPath, [cli, "-y", "--force"], { cwd: dir, encoding: "utf8" });
+    assert.match(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), /^TRIGGER_BRANCH=main$/m);
+
+    result = spawnSync(process.execPath, [cli, "--bogus"], { cwd: dir, encoding: "utf8" });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /引数が正しくありません/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("package.json の engines で対応する Node.js の最低バージョンを示している", () => {
+  const pkg = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package.json"), "utf8"));
+  assert.equal(pkg.engines.node, ">=20");
 });

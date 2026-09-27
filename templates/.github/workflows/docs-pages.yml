@@ -1,13 +1,13 @@
 # このファイルは tsuzuri の init が利用者リポジトリに生成するワークフローのひな形。
 # bin/cli.mjs の buildDocsPagesYml() が読み込み、次のプレースホルダーを置き換えて出力する。
-#   __OSS_REPO__ / __VENDOR_DIR__ / __MARKED_VERSION__
+#   __OSS_REPO__ / __VENDOR_DIR__ / __MARKED_VERSION__ / __TSUZURI_VERSION__
 # (この先頭のコメントブロックは出力に含まれない)
 # templates/ 配下に .github/workflows/ の形で置いているのは、Dependabot に
 # actions のバージョン更新の対象として認識させるため(ここでワークフローとして実行はされない)。
 # --- template start ---
 name: Deploy Docs to GitHub Pages
 
-# npx github:__OSS_REPO__ init によって生成された、自己完結型のワークフローです。
+# tsuzuri v__TSUZURI_VERSION__ の npx github:__OSS_REPO__ init によって生成された、自己完結型のワークフローです。
 # ビルドスクリプト本体(__VENDOR_DIR__/ 配下)もこのリポジトリにコピー済みのため、
 # 実行のたびにOSS本体リポジトリ(__OSS_REPO__)を参照することはありません。
 # スクリプトを最新版に更新したい場合は、npx github:__OSS_REPO__ init --update を実行してください。

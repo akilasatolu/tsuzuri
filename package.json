@@ -7,6 +7,9 @@
   "bin": {
     "tsuzuri": "./bin/cli.mjs"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "node --test",
     "lint": "eslint ."

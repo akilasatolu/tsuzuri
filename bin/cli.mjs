@@ -14,6 +14,7 @@ import { createInterface } from "node:readline/promises";
 import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, realpathSync, unlinkSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseArgs } from "node:util";
 
 // 実リポジトリ作成時に確定させる固定値。
 // 「今動いているセットアップコマンド自体がどのバージョンか」を利用者に案内する際や、
@@ -53,26 +54,44 @@ const DEFAULT_ANSWERS = {
 };
 
 /**
- * 生成するワークフローで利用者側にインストールする marked のバージョンを返す。
+ * package.json の devDependencies から、生成するワークフローで利用者側にインストールする
+ * ビルド用パッケージ(marked・highlight.js)のバージョンを返す。
  *
- * package.json の devDependencies.marked(範囲指定ではなく "12.0.2" のような完全一致)を
- * そのまま使うことで、テストで使っている版と利用者に配る版を常に一致させる。
- * dependabot が package.json の marked を更新すると、その PR 1つで生成ワークフローの
- * 版も追従する。
+ * 範囲指定ではなく "12.0.2" のような完全一致で書かれている前提で、その値をそのまま使うことで、
+ * テストで使っている版と利用者に配る版を常に一致させる。Dependabot が package.json を
+ * 更新すると、その PR 1つで生成ワークフローの版も追従する。
  *
+ * @param {string} name - パッケージ名
  * @param {string} [packageRoot] - 既定は`PACKAGE_ROOT`。テスト時に差し替え可能にするため引数化している。
  * @param {{readFileSync}} [fsImpl] - テスト用差し替え
  * @returns {string}
  */
-export function readMarkedVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFileSync }) {
+export function readDependencyVersion(name, packageRoot = PACKAGE_ROOT, fsImpl = { readFileSync }) {
   const pkg = JSON.parse(fsImpl.readFileSync(join(packageRoot, "package.json"), "utf-8"));
-  const version = pkg.devDependencies?.marked;
+  const version = pkg.devDependencies?.[name];
   if (typeof version !== "string" || !/^\d+\.\d+\.\d+$/.test(version)) {
     throw new Error(
-      `package.json の devDependencies.marked は "12.0.2" のような完全一致のバージョンで指定してください(現在: ${version})`,
+      `package.json の devDependencies.${name} は "12.0.2" のような完全一致のバージョンで指定してください(現在: ${version})`,
     );
   }
   return version;
+}
+
+/** marked のバージョン(readDependencyVersion("marked") の短縮形) */
+export function readMarkedVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFileSync }) {
+  return readDependencyVersion("marked", packageRoot, fsImpl);
+}
+
+/**
+ * tsuzuri 自身のバージョン(package.json の version)を返す。
+ * 実行中の CLI がどの版かを表示するのに使う(npx のキャッシュで古い版が動いていないかの確認用)。
+ *
+ * @param {string} [packageRoot]
+ * @param {{readFileSync}} [fsImpl]
+ * @returns {string}
+ */
+export function readPackageVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFileSync }) {
+  return JSON.parse(fsImpl.readFileSync(join(packageRoot, "package.json"), "utf-8")).version;
 }
 
 /**
@@ -94,6 +113,7 @@ export function buildDocsPagesYml(
   markedVersion = readMarkedVersion(),
   packageRoot = PACKAGE_ROOT,
   fsImpl = { readFileSync },
+  { tsuzuriVersion = readPackageVersion(packageRoot, fsImpl) } = {},
 ) {
   const raw = fsImpl.readFileSync(join(packageRoot, WORKFLOW_TEMPLATE_PATH), "utf-8");
   const marker = "# --- template start ---\n";
@@ -102,7 +122,8 @@ export function buildDocsPagesYml(
   return template
     .replaceAll("__OSS_REPO__", OSS_REPO)
     .replaceAll("__VENDOR_DIR__", VENDOR_DIR)
-    .replaceAll("__MARKED_VERSION__", markedVersion);
+    .replaceAll("__MARKED_VERSION__", markedVersion)
+    .replaceAll("__TSUZURI_VERSION__", tsuzuriVersion);
 }
 
 /**
@@ -474,15 +495,132 @@ export async function runUpdate({
   return results;
 }
 
+export const HELP_TEXT = `使い方: npx github:${OSS_REPO}[#v1] init [オプション]
+
+オプションを付けずに実行すると、対話形式で設定を聞きながらファイルを生成します。
+
+  --update           対話なしで最新版に更新する(ワークフローとビルドスクリプトだけを上書きし、
+                     設定ファイル・独自CSSは変更しない)
+  -y, --yes          対話なしで、すべて既定値(または下のオプションで指定した値)で生成する
+      --branch <名前> トリガーブランチ(TRIGGER_BRANCH)。既定: main
+      --root <パス>   起点となるMarkdownファイル(ROOT_MD)。既定: README.md
+      --theme <名前>  テーマ(THEME)。${THEME_CHOICES.map((c) => c.key).join(" / ")}。既定: wa
+      --style        独自CSSの空ひな形(${VENDOR_DIR}/styles/custom.css)も作る
+      --force        対話なしのとき、既存ファイルも上書きする(既定では既存ファイルはスキップ)
+  -v, --version      バージョンを表示する
+  -h, --help         この説明を表示する
+
+--branch / --root / --theme / --style のいずれかを指定した場合も、対話なしで実行します。`;
+
 /**
- * CLI本体。サブコマンドは init のみをサポートし、それ以外(省略含む)は init 相当の
- * デフォルト動作とする。`--update` を付けると対話なしの更新モード(runUpdate)になる。
+ * コマンドライン引数を解析する。不明なオプション・サブコマンドや不正なテーマ名はエラーにする。
+ *
+ * @param {string[]} argv - process.argv.slice(2) 相当
+ * @returns {{ update: boolean, yes: boolean, force: boolean, style: boolean, version: boolean,
+ *   help: boolean, branch?: string, root?: string, theme?: string, nonInteractive: boolean }}
+ */
+export function parseCliArgs(argv = []) {
+  let parsed;
+  try {
+    parsed = parseCliArgsRaw(argv);
+  } catch (err) {
+    if (String(err.code).startsWith("ERR_PARSE_ARGS")) {
+      throw new Error(`引数が正しくありません: ${err.message}(--help で使い方を表示します)`);
+    }
+    throw err;
+  }
+  return parsed;
+}
+
+function parseCliArgsRaw(argv) {
+  const { values, positionals } = parseArgs({
+    args: argv,
+    allowPositionals: true,
+    strict: true,
+    options: {
+      update: { type: "boolean", default: false },
+      yes: { type: "boolean", short: "y", default: false },
+      force: { type: "boolean", default: false },
+      branch: { type: "string" },
+      root: { type: "string" },
+      theme: { type: "string" },
+      style: { type: "boolean", default: false },
+      version: { type: "boolean", short: "v", default: false },
+      help: { type: "boolean", short: "h", default: false },
+    },
+  });
+  const unknown = positionals.filter((p) => p !== "init");
+  if (unknown.length) {
+    throw new Error(`不明なサブコマンドです: ${unknown.join(" ")}(--help で使い方を表示します)`);
+  }
+  if (values.theme !== undefined && !THEME_CHOICES.some((c) => c.key === values.theme)) {
+    throw new Error(
+      `--theme には ${THEME_CHOICES.map((c) => c.key).join(" / ")} のいずれかを指定してください(指定: ${values.theme})`,
+    );
+  }
+  for (const key of ["branch", "root"]) {
+    if (values[key] !== undefined && !values[key].trim()) {
+      throw new Error(`--${key} に空の値は指定できません`);
+    }
+  }
+  const nonInteractive =
+    values.yes || values.style || ["branch", "root", "theme"].some((k) => values[k] !== undefined);
+  return { ...values, nonInteractive };
+}
+
+/**
+ * 対話なし実行のときの回答を、コマンドライン引数(指定が無ければ既定値)から作る。
+ * @param {ReturnType<typeof parseCliArgs>} args
+ */
+export function answersFromArgs(args) {
+  return {
+    triggerBranch: args.branch?.trim() ?? DEFAULT_ANSWERS.triggerBranch,
+    rootMd: args.root?.trim() ?? DEFAULT_ANSWERS.rootMd,
+    theme: args.theme ?? DEFAULT_ANSWERS.theme,
+    createStyleFile: args.style,
+  };
+}
+
+/**
+ * CLI本体。サブコマンドは init のみ(省略しても init 相当)。
+ *   --version / --help … 表示して終了
+ *   --update           … 対話なしの更新モード(runUpdate)
+ *   --yes 等           … 対話なしで生成(既存ファイルは --force が無ければスキップ)
+ *   それ以外           … 対話形式で生成
+ * どのモードでも最初に実行中の tsuzuri のバージョンを表示する
+ * (npx のキャッシュで古い版が動いていないかを利用者が確認できるように)。
  */
 export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) } = {}) {
-  if (isUpdateMode(argv)) {
-    console.log("tsuzuri を最新版に更新します(設定ファイル・独自CSSは変更しません)\n");
+  const args = parseCliArgs(argv);
+  const version = readPackageVersion();
+
+  if (args.version) {
+    console.log(version);
+    return;
+  }
+  if (args.help) {
+    console.log(`tsuzuri v${version}\n\n${HELP_TEXT}`);
+    return;
+  }
+
+  console.log(`tsuzuri v${version}\n`);
+
+  if (args.update) {
+    console.log("最新版に更新します(設定ファイル・独自CSSは変更しません)\n");
     await runUpdate({ cwd, log: console.log });
     console.log("\n更新が完了しました。変更内容は 'git diff' で確認できます。");
+    return;
+  }
+
+  if (args.nonInteractive) {
+    const answers = answersFromArgs(args);
+    const targets = buildTargets(answers);
+    await writeGeneratedFiles(targets, {
+      cwd,
+      confirmOverwrite: () => args.force,
+      log: console.log,
+    });
+    console.log(buildCompletionMessage(answers));
     return;
   }
 
@@ -569,7 +707,7 @@ export function isDirectRunOf(moduleUrl, argv1, realpath = realpathSync) {
 const isDirectRun = isDirectRunOf(import.meta.url, process.argv[1]);
 
 if (isDirectRun) {
-  // サブコマンドはinitのみ。argv[2]の値に関わらずinit相当を実行する(--updateのみ解釈する)。
+  // 引数の解釈は main() 内の parseCliArgs() で行う(不正な引数はエラーとして報告する)。
   main().catch((err) => {
     process.exitCode = reportFatalError(err);
   });
