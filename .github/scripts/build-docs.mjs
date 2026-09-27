@@ -38,6 +38,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { marked } from "marked";
+import hljs from "highlight.js/lib/common";
 
 import { loadConfig, ALLOWED_THEMES } from "./lib/config.mjs";
 import { crawlSite } from "./lib/crawler.mjs";
@@ -306,6 +307,17 @@ async function main() {
       return `<img src="${newHref}" alt="${escapeHtml(text || "")}"${
         title ? ` title="${escapeHtml(title)}"` : ""
       }>`;
+    };
+    // コードブロックは、言語名が書かれていて highlight.js が対応している場合だけ、ビルド時に
+    // 色分けしたHTMLにする(閲覧時にJavaScriptは不要)。言語の自動判定は誤判定を避けるため行わない。
+    renderer.code = function ({ text, lang }) {
+      const language = (lang || "").trim().split(/\s+/)[0];
+      if (language && hljs.getLanguage(language)) {
+        const highlighted = hljs.highlight(text, { language, ignoreIllegals: true }).value;
+        return `<pre><code class="hljs language-${escapeHtml(language)}">${highlighted}\n</code></pre>\n`;
+      }
+      const cls = language ? ` class="language-${escapeHtml(language)}"` : "";
+      return `<pre><code${cls}>${escapeHtml(text)}\n</code></pre>\n`;
     };
     // 見出しに GitHub と同じ規則の id を付け、`page.md#見出し` のリンクで飛べるようにする。
     const slugger = createSlugger();

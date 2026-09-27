@@ -16,6 +16,30 @@
   main code { background: var(--code-bg); padding: 2px 5px; border-radius: 4px; font-size: 0.9em; }
   main pre code { background: none; padding: 0; }
   main table { border-collapse: collapse; width: 100%; }
+
+  /* コードの色分け(言語名付きのコードブロックを highlight.js でビルド時に色分けしたもの)。
+     色はテーマのアクセント色・文字色から決める。独自CSSで --hl-* 変数を指定すれば個別に変えられる。 */
+  .hljs-comment, .hljs-quote { color: var(--hl-comment, var(--fg)); opacity: 0.6; font-style: italic; }
+  .hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-type, .hljs-meta {
+    color: var(--hl-keyword, var(--accent));
+    font-weight: 600;
+  }
+  .hljs-string, .hljs-regexp, .hljs-symbol, .hljs-template-tag, .hljs-addition {
+    color: var(--hl-string, color-mix(in srgb, var(--accent) 55%, var(--fg)));
+  }
+  .hljs-number, .hljs-literal, .hljs-bullet, .hljs-link {
+    color: var(--hl-number, color-mix(in srgb, var(--accent) 75%, var(--fg)));
+  }
+  .hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class {
+    color: var(--hl-title, var(--fg));
+    font-weight: 700;
+  }
+  .hljs-attr, .hljs-attribute, .hljs-variable, .hljs-property, .hljs-params {
+    color: var(--hl-attr, color-mix(in srgb, var(--accent) 35%, var(--fg)));
+  }
+  .hljs-deletion { color: var(--hl-deletion, var(--accent)); text-decoration: line-through; }
+  .hljs-emphasis { font-style: italic; }
+  .hljs-strong { font-weight: 700; }
   main th, main td { border: 1px solid var(--border); padding: 6px 10px; }
   main a { color: var(--accent); }
 

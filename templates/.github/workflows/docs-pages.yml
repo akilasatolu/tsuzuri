@@ -1,6 +1,6 @@
 # このファイルは tsuzuri の init が利用者リポジトリに生成するワークフローのひな形。
 # bin/cli.mjs の buildDocsPagesYml() が読み込み、次のプレースホルダーを置き換えて出力する。
-#   __OSS_REPO__ / __VENDOR_DIR__ / __MARKED_VERSION__ / __TSUZURI_VERSION__
+#   __OSS_REPO__ / __VENDOR_DIR__ / __MARKED_VERSION__ / __HIGHLIGHT_VERSION__ / __TSUZURI_VERSION__
 # (この先頭のコメントブロックは出力に含まれない)
 # templates/ 配下に .github/workflows/ の形で置いているのは、Dependabot に
 # actions のバージョン更新の対象として認識させるため(ここでワークフローとして実行はされない)。
@@ -111,7 +111,7 @@ jobs:
 
       - name: Install build dependency
         if: steps.trigger.outputs.should_deploy != 'false'
-        run: npm install marked@__MARKED_VERSION__ --no-save --no-audit --no-fund --ignore-scripts
+        run: npm install marked@__MARKED_VERSION__ highlight.js@__HIGHLIGHT_VERSION__ --no-save --no-audit --no-fund --ignore-scripts
 
       - name: Build
         if: steps.trigger.outputs.should_deploy != 'false'

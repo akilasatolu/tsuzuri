@@ -809,4 +809,40 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  test("言語名付きのコードブロックはビルド時に色分けされ、言語名なし・未対応の言語はそのまま", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        [
+          "# Root Page",
+          "",
+          "```js",
+          'const a = "<b>";',
+          "```",
+          "",
+          "```",
+          "plain <text>",
+          "```",
+          "",
+          "```not-a-language",
+          "x < y",
+          "```",
+          "",
+        ].join("\n")
+      );
+      const result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "index.html");
+      assert.match(html, /<pre><code class="hljs language-js"><span class="hljs-keyword">const<\/span>/);
+      assert.match(html, /<span class="hljs-string">&quot;&lt;b&gt;&quot;<\/span>/);
+      assert.match(html, /<pre><code>plain &lt;text&gt;\n<\/code><\/pre>/);
+      assert.match(html, /<pre><code class="language-not-a-language">x &lt; y\n<\/code><\/pre>/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

@@ -113,7 +113,10 @@ export function buildDocsPagesYml(
   markedVersion = readMarkedVersion(),
   packageRoot = PACKAGE_ROOT,
   fsImpl = { readFileSync },
-  { tsuzuriVersion = readPackageVersion(packageRoot, fsImpl) } = {},
+  {
+    tsuzuriVersion = readPackageVersion(packageRoot, fsImpl),
+    highlightVersion = readDependencyVersion("highlight.js", packageRoot, fsImpl),
+  } = {},
 ) {
   const raw = fsImpl.readFileSync(join(packageRoot, WORKFLOW_TEMPLATE_PATH), "utf-8");
   const marker = "# --- template start ---\n";
@@ -123,7 +126,8 @@ export function buildDocsPagesYml(
     .replaceAll("__OSS_REPO__", OSS_REPO)
     .replaceAll("__VENDOR_DIR__", VENDOR_DIR)
     .replaceAll("__MARKED_VERSION__", markedVersion)
-    .replaceAll("__TSUZURI_VERSION__", tsuzuriVersion);
+    .replaceAll("__TSUZURI_VERSION__", tsuzuriVersion)
+    .replaceAll("__HIGHLIGHT_VERSION__", highlightVersion);
 }
 
 /**

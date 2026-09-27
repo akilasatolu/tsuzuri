@@ -719,3 +719,10 @@ test("package.json の engines で対応する Node.js の最低バージョン�
   const pkg = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package.json"), "utf8"));
   assert.equal(pkg.engines.node, ">=20");
 });
+
+test("highlight.js も package.json の版(完全一致)がワークフローに埋め込まれ、lockfileと一致している", () => {
+  const version = readDependencyVersion("highlight.js");
+  const lock = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package-lock.json"), "utf8"));
+  assert.equal(lock.packages["node_modules/highlight.js"].version, version);
+  assert.ok(buildDocsPagesYml().includes(`npm install marked@${readMarkedVersion()} highlight.js@${version} --no-save`));
+});
