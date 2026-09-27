@@ -7,7 +7,7 @@ title: 設定リファレンス(Configuration)
 ## `.github/docs-pages.config`の場所と書式
 
 設定ファイルは、利用者リポジトリのルートからの相対パスで
-`.github/docs-pages.config`に配置します(`npx github:akilasatolu/tsuzuri init`を実行すると
+`.github/docs-pages.config`に配置します(`npx github:akilasatolu/tsuzuri#v1 init`を実行すると
 自動生成されます。詳細は[cli.md](./cli.md))。
 
 書式は「`KEY=VALUE`」形式のシンプルなテキストで、1行につき1項目です。
@@ -37,7 +37,7 @@ push(マージ含む)があったときだけ、GitHub Pagesへのデプロイ�
 (`.`)を指定した場合は、既存のファイルを上書きしないようビルドをエラー終了します。
 
 ### STYLE_FILE
-独自CSSファイルへのパスです。`npx github:akilasatolu/tsuzuri init`が生成する
+独自CSSファイルへのパスです。`npx github:akilasatolu/tsuzuri#v1 init`が生成する
 `.github/docs-pages.config`では`.github/tsuzuri/styles/custom.css`(組み込みテーマCSSと
 同じディレクトリ)が指定されます。このキー自体を省略した場合のビルド側の既定値は
 `.github/docs-pages.style.css`です。
@@ -100,8 +100,8 @@ docs                  … ディレクトリ(見出し)
 
 ### FAVICON_FILE
 生成されるサイトで使うfaviconの画像ファイルへの、リポジトリルートからの相対パスです。
-未設定、またはファイルが実際に存在しない場合は、警告を出しつつビルドは継続し、
-`<link rel="icon">`タグ自体を出力しません(faviconなしの状態になります)。
+未設定の場合は`<link rel="icon">`タグを出力しません(faviconなしの状態になります)。
+指定したファイルが存在しない場合は、警告を出したうえで同じくfaviconなしでビルドを続けます。
 リポジトリの外(`../`で始まるパスや絶対パス、リポジトリ外を指すシンボリックリンク)を指定した場合は、警告を出したうえで無視します。
 なお、これは利用者がサイトに設定するfaviconであり、OSS本体自体のロゴ・favicon
 (`assets/`配下)とは無関係です。

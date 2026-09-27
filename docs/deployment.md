@@ -6,7 +6,7 @@ title: デプロイ設定(Deployment)
 
 ## 自己完結型のワークフロー
 
-`npx github:akilasatolu/tsuzuri init`を実行すると、次のファイルが利用者リポジトリに
+`npx github:akilasatolu/tsuzuri#v1 init`を実行すると、次のファイルが利用者リポジトリに
 生成されます。
 
 ```
@@ -115,7 +115,7 @@ CUSTOM_DOMAIN=docs.example.com
 「最新版に更新する(`--update`)」を参照)。
 
 ```sh
-npx github:akilasatolu/tsuzuri init --update
+npx github:akilasatolu/tsuzuri#v1 init --update
 ```
 
 特定のバージョンに固定したい場合は、タグを指定します。`#v1`はv1系の最新版(互換性を保ったまま更新される)、

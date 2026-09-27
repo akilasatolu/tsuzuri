@@ -16,7 +16,7 @@ title: CLIリファレンス
 利用者リポジトリのルートで次のコマンドを実行します(事前に`npm install`等は不要です)。
 
 ```
-npx github:akilasatolu/tsuzuri init
+npx github:akilasatolu/tsuzuri#v1 init
 ```
 
 `npx`はNode.jsに付属するコマンドで、パッケージをローカルにインストールせずに一時的に取得して
@@ -77,7 +77,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --theme sumi
 | `.github/workflows/docs-pages.yml` | 常に生成 | ビルド・デプロイの手順を直接持つ、自己完結型のワークフロー(以前のように`build.yml`を`uses:`で呼び出すことはしない) |
 | `.github/docs-pages.config` | 常に生成 | `TRIGGER_BRANCH`/`ROOT_MD`/`THEME`は回答内容を反映し、それ以外のキーは既定値で出力される設定ファイル |
 | `.github/tsuzuri/build-docs.mjs` | 常に生成 | ビルド本体のスクリプト(OSS本体リポジトリの`.github/scripts/build-docs.mjs`と同一内容) |
-| `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/crawler/frontmatter/html-renderer/link-extractor/path-utils/site-tree/sitemap) |
+| `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/crawler/frontmatter/html-renderer/link-extractor/path-utils/site-tree/slugger/search/sitemap) |
 | `.github/tsuzuri/styles/*.css` | 常に生成 | 組み込み6テーマ(`base.css`+`wa`/`muji`/`sumi`/`ai`/`shu`)のCSS一式。frontmatterの`theme`キー([参照](./frontmatter.md#theme))で選択中以外のテーマを使う場合に備え、常に全テーマ分コピーされる |
 | `.github/tsuzuri/styles/custom.css` | 質問4で「y」と答えた場合のみ | コメントのみの空の独自CSSひな形。組み込みテーマCSSと同じディレクトリに置かれる |
 
@@ -90,25 +90,31 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --theme sumi
 
 ## 既存プロジェクトへの導入
 
-既にこれらのファイルが存在するリポジトリで実行しても安全なように、ファイル単位で
-上書き確認を行います。生成対象の1ファイルごとに、既存ファイルが見つかった場合だけ
+既にこれらのファイルが存在するリポジトリで実行しても安全なように、既存のファイルが見つかった
+場合は上書きするかどうかを確認します。
 
-```
-.github/docs-pages.config は既に存在します。上書きしますか? (y/N):
-```
+- **ワークフローとビルドスクリプト一式**(`docs-pages.yml`と`.github/tsuzuri/`配下)は、
+  同じバージョンでそろっていないと動かないため、最初に1回だけまとめて確認します。
 
-のように尋ねられます。ここで「n」(または未入力)を選んだファイルはスキップされ、
-既存の内容がそのまま保持されます。あるファイルをスキップしても、他の生成対象ファイルの
-処理は止まらず、1ファイルずつ独立して確認・書き出しが行われます。
+  ```
+  ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下)は既に存在します。最新版で上書きしますか? (y/N):
+  ```
 
-`.github/tsuzuri/`配下のビルドスクリプト一式も同じ仕組みで1ファイルずつ確認されます。
+- **設定ファイル・独自CSS**(`.github/docs-pages.config`・`custom.css`)は、ファイルごとに確認します。
+
+  ```
+  .github/docs-pages.config は既に存在します。上書きしますか? (y/N):
+  ```
+
+「n」(または未入力)を選んだファイルはスキップされ、既存の内容がそのまま保持されます。
+ワークフローとスクリプトだけを最新版にしたい場合は、次の`--update`を使うと確認なしで行えます。
 
 ## 最新版に更新する(`--update`)
 
 一度`init`したリポジトリのtsuzuriを最新版にするには、`--update`を付けて実行します。
 
 ```
-npx github:akilasatolu/tsuzuri init --update
+npx github:akilasatolu/tsuzuri#v1 init --update
 ```
 
 質問や上書き確認は一切なく、次のように動きます。
@@ -127,7 +133,8 @@ npx github:akilasatolu/tsuzuri init --update
 ## refを固定して実行する
 
 `npx github:akilasatolu/tsuzuri init`のように`ref`(バージョンやブランチ・タグ)を省略すると、
-既定ブランチ(`main`)の最新版が実行されます。ローカルのキャッシュや`npx`自体の実装によっては
+既定ブランチ(`main`)の最新版(まだリリースしていない変更を含むことがあります)が実行されます。
+普段は`#v1`を付けて実行してください。ローカルのキャッシュや`npx`自体の実装によっては
 古いバージョンが実行されてしまう場合もあるため、リリース済みのバージョンに固定したい場合は、
 次のように`#v1`のようなタグを明示して実行してください。
 
