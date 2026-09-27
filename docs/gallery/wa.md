@@ -4,6 +4,9 @@ theme: wa
 description: Tsuzuriの組み込みテーマ「和(wa)」の見本ページ
 ---
 
+<!-- テーマの見本ページの目印(このページにはサイトの独自スタイルを当てない。custom.css 参照) -->
+<div class="tsuzuri-theme-sample" hidden></div>
+
 # 和(wa)
 
 生成り地に墨色の文字、朱色の控えめなリンク。ライト/ダークモードを自動で切り替える標準スタイル(既定)。

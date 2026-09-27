@@ -4,6 +4,9 @@ theme: none
 description: Tsuzuriの組み込みテーマ「装飾なし(none)」の見本ページ
 ---
 
+<!-- テーマの見本ページの目印(このページにはサイトの独自スタイルを当てない。custom.css 参照) -->
+<div class="tsuzuri-theme-sample" hidden></div>
+
 # 装飾なし(none)
 
 テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。

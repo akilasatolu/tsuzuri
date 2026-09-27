@@ -4,6 +4,9 @@ theme: shu
 description: Tsuzuriの組み込みテーマ「朱(shu)」の見本ページ
 ---
 
+<!-- テーマの見本ページの目印(このページにはサイトの独自スタイルを当てない。custom.css 参照) -->
+<div class="tsuzuri-theme-sample" hidden></div>
+
 # 朱(shu)
 
 朱色を効かせた力強い配色。太字の見出しと太めの下線のリンク。

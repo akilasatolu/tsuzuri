@@ -1,0 +1,353 @@
+/*
+ * Tsuzuri サイト用の独自スタイル(STYLE_FILE)
+ *
+ * THEME=none(基礎CSSのみ)の上に、ポップで親しみやすい見た目を作る。
+ *   - 丸みのあるカード・やわらかい影・紫〜ピンクのグラデーション
+ *   - ライト/ダークモードの両方に対応(OSの設定に追従)
+ *
+ * テーマの見本ページ(docs/gallery/*.md。本文に .tsuzuri-theme-sample の目印を置いている)では、
+ * それぞれのテーマの見た目をそのまま見せるため、このスタイルを当てない。
+ * そのため、すべてのルールを :root:not(:has(.tsuzuri-theme-sample)) の中に入れ子で書く(CSS Nesting)。
+ */
+
+:root:not(:has(.tsuzuri-theme-sample)) {
+  color-scheme: light;
+  --fg: #232946;
+  --fg-soft: #5b6180;
+  --bg: #f6f5ff;
+  --surface: #ffffff;
+  --surface-2: #f1efff;
+  --border: #e6e3fb;
+  --accent: #6c4cf1;
+  --accent-2: #ff5fa2;
+  --accent-3: #ffb84d;
+  --accent-4: #22c3a6;
+  --gradient: linear-gradient(135deg, #6c4cf1 0%, #b14cf1 50%, #ff5fa2 100%);
+  --code-bg: #f1efff;
+  --code-fg: #b0287a;
+  --pre-bg: #1f1d36;
+  --pre-fg: #ecebff;
+  --shadow: 0 1px 2px rgba(35, 41, 70, 0.06), 0 8px 24px rgba(108, 76, 241, 0.08);
+  --shadow-lg: 0 2px 4px rgba(35, 41, 70, 0.06), 0 16px 40px rgba(108, 76, 241, 0.16);
+  --radius: 20px;
+  --font: "Hiragino Maru Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI", "Meiryo", system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --content-width: 880px;
+  --alert-note: #3b82f6;
+  --alert-tip: #16b88a;
+  --alert-important: #8b5cf6;
+  --alert-warning: #f59e0b;
+  --alert-caution: #ef4466;
+
+  @media (prefers-color-scheme: dark) {
+    color-scheme: dark;
+    --fg: #ecebff;
+    --fg-soft: #a9a7c8;
+    --bg: #14132b;
+    --surface: #1d1c3a;
+    --surface-2: #26244a;
+    --border: #34315e;
+    --accent: #a08bff;
+    --accent-2: #ff7eb6;
+    --code-bg: #2b2852;
+    --code-fg: #ff9fcb;
+    --pre-bg: #0f0e22;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  /* ---------- 全体 ---------- */
+  body {
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+    background:
+      radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--accent) 14%, transparent) 0, transparent 38%),
+      radial-gradient(circle at 100% 18%, color-mix(in srgb, var(--accent-2) 12%, transparent) 0, transparent 34%),
+      radial-gradient(circle at 60% 100%, color-mix(in srgb, var(--accent-4) 10%, transparent) 0, transparent 40%),
+      var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: color-mix(in srgb, var(--accent-2) 30%, transparent); }
+
+  /* 本文はカードにのせる */
+  main {
+    margin: 24px auto 48px;
+    padding: 40px 48px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    box-shadow: var(--shadow-lg);
+  }
+  body:has(> nav) > main { width: auto; margin: 24px 16px 48px; }
+  @media (max-width: 640px) {
+    main { padding: 28px 20px; border-radius: 22px; }
+  }
+
+  /* ---------- 見出し ---------- */
+  main h1 {
+    width: fit-content;
+    margin: 0 0 24px;
+    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    line-height: 1.3;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  main h1::after {
+    content: "";
+    display: block;
+    width: 64px;
+    height: 6px;
+    margin-top: 14px;
+    border-radius: 999px;
+    background: var(--gradient);
+  }
+  main h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 48px 0 16px;
+    font-size: 1.45rem;
+    font-weight: 800;
+  }
+  main h2::before {
+    content: "";
+    flex: none;
+    width: 12px;
+    height: 28px;
+    border-radius: 999px;
+    background: var(--gradient);
+  }
+  main h3 { margin: 32px 0 12px; font-size: 1.15rem; font-weight: 700; }
+  main h3::before { content: "● "; color: var(--accent-2); font-size: 0.7em; vertical-align: 0.15em; }
+  main h4 { margin: 24px 0 8px; font-weight: 700; color: var(--fg-soft); }
+  .tsuzuri-anchor { color: var(--accent-2); }
+
+  /* ---------- 本文 ---------- */
+  main a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    border-radius: 4px;
+    transition: color 0.15s, background-color 0.15s, text-decoration-color 0.15s;
+  }
+  main a:hover {
+    color: var(--accent-2);
+    text-decoration-color: var(--accent-2);
+    background: color-mix(in srgb, var(--accent-2) 10%, transparent);
+  }
+  main a:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 2px; }
+  main strong { color: var(--fg); background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent-3) 45%, transparent) 62%); }
+  main hr { height: 4px; margin: 40px 0; border: 0; border-radius: 999px; background: var(--gradient); opacity: 0.35; }
+  main img { border-radius: 16px; }
+  main ul, main ol { padding-left: 1.4em; }
+  main li { margin: 4px 0; }
+  main li::marker { color: var(--accent); font-weight: 700; }
+
+  main blockquote {
+    margin: 20px 0;
+    padding: 12px 20px;
+    color: var(--fg-soft);
+    background: var(--surface-2);
+    border-left: 6px solid var(--accent);
+    border-radius: 0 16px 16px 0;
+  }
+
+  /* ---------- コード ---------- */
+  main code {
+    font-family: var(--mono);
+    color: var(--code-fg);
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 8px;
+  }
+  main pre:not(.mermaid) {
+    position: relative;
+    padding: 40px 20px 18px;
+    color: var(--pre-fg);
+    background: var(--pre-bg);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    line-height: 1.6;
+    /* コードの色分け(highlight.js)。暗い背景に合わせた明るい色 */
+    --hl-keyword: #ff7eb6;
+    --hl-string: #7ee0c3;
+    --hl-number: #ffc46b;
+    --hl-title: #a8b8ff;
+    --hl-attr: #c9a8ff;
+    --hl-comment: #9491b8;
+  }
+  /* ウィンドウ風の3つの丸 */
+  main pre:not(.mermaid)::before {
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: 18px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ff5f7e;
+    box-shadow: 20px 0 0 #ffc24b, 40px 0 0 #3ddc97;
+  }
+  main pre code { color: inherit; background: none; padding: 0; border-radius: 0; font-size: 0.88em; }
+
+  /* ---------- 表 ---------- */
+  main table {
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+  }
+  main th, main td { border: 0; border-bottom: 1px solid var(--border); padding: 10px 14px; }
+  /* 見出し行と、1列目のコード(オプション名・キー名など)は途中で折り返さない */
+  main th, main td:first-child code { white-space: nowrap; }
+  main th {
+    text-align: left;
+    font-weight: 800;
+    color: var(--accent);
+    background: var(--surface-2);
+  }
+  main tr:last-child td { border-bottom: 0; }
+  main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 45%, transparent); }
+  main tbody tr:hover td { background: color-mix(in srgb, var(--accent-3) 12%, transparent); }
+
+  /* ---------- 注意書き(> [!NOTE] など) ---------- */
+  .markdown-alert {
+    padding: 14px 20px;
+    border: 0;
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--alert-color) 11%, var(--surface));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--alert-color) 25%, transparent);
+  }
+  .markdown-alert-title {
+    display: inline-block;
+    padding: 2px 12px;
+    font-size: 0.85em;
+    color: #fff;
+    background: var(--alert-color);
+    border-radius: 999px;
+  }
+
+  /* ---------- 目次 ---------- */
+  .tsuzuri-toc {
+    padding: 16px 22px;
+    background: var(--surface-2);
+    border: 0;
+    border-radius: 18px;
+  }
+  .tsuzuri-toc > p { color: var(--accent); }
+  .tsuzuri-toc a { font-weight: 500; text-decoration: none; }
+
+  /* ---------- 前後のページ ---------- */
+  .tsuzuri-pager { border-top: 0; }
+  main .tsuzuri-pager a {
+    padding: 14px 20px;
+    color: var(--fg);
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  main .tsuzuri-pager a:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-lg);
+    background: var(--surface);
+    color: var(--accent);
+  }
+  .tsuzuri-pager span { color: var(--accent-2); opacity: 1; font-weight: 700; }
+
+  .tsuzuri-updated {
+    display: inline-block;
+    padding: 4px 14px;
+    color: var(--fg-soft);
+    background: var(--surface-2);
+    border-radius: 999px;
+    opacity: 1;
+  }
+  .footnotes { border-top: 2px dashed var(--border); }
+
+  /* ---------- ナビ(サイドバー・メニュー) ---------- */
+  body > nav {
+    margin: 16px 16px 0;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+  }
+  .tsuzuri-nav-head > p {
+    font-size: 1.25rem;
+    font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .tsuzuri-nav-label {
+    padding: 6px 16px;
+    color: #fff;
+    font-weight: 700;
+    background: var(--gradient);
+    border: 0;
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+  }
+  body > nav a {
+    margin: 2px 0;
+    padding: 6px 12px;
+    color: var(--fg);
+    border-radius: 12px;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  body > nav a:hover { color: var(--accent); background: var(--surface-2); text-decoration: none; }
+  body > nav a[aria-current="page"] {
+    color: #fff;
+    background: var(--gradient);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  body > nav li > span {
+    margin: 14px 0 4px;
+    padding-left: 12px;
+    font-size: 0.78em;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    opacity: 1;
+  }
+  body > nav ul ul { border-left: 2px solid var(--border); }
+
+  /* 検索 */
+  .tsuzuri-search input {
+    padding: 9px 16px;
+    background: var(--surface-2);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  .tsuzuri-search input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+  .tsuzuri-search-results li { padding: 6px 4px; border-bottom: 1px dashed var(--border); }
+
+  .tsuzuri-skip { color: #fff; background: var(--accent); border: 0; border-radius: 999px; }
+
+  @media (min-width: 960px) {
+    body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }
+    body > nav {
+      top: 16px;
+      height: calc(100vh - 32px);
+      margin: 16px 0 16px 16px;
+      padding: 28px 20px;
+      border-right: 1px solid var(--border);
+    }
+    body:has(> nav) > main { margin: 16px 24px 48px; max-width: var(--content-width); justify-self: center; }
+  }
+}

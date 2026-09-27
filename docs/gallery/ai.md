@@ -4,6 +4,9 @@ theme: ai
 description: Tsuzuriの組み込みテーマ「藍(ai)」の見本ページ
 ---
 
+<!-- テーマの見本ページの目印(このページにはサイトの独自スタイルを当てない。custom.css 参照) -->
+<div class="tsuzuri-theme-sample" hidden></div>
+
 # 藍(ai)
 
 深い藍色を基調にした落ち着いた配色。見出しに下線的な強調。

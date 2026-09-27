@@ -91,6 +91,11 @@ OS側の設定に関わらず常時ダークテーマで表示されます。リ
 | `--hl-keyword` / `--hl-string` / `--hl-number` / `--hl-title` / `--hl-attr` / `--hl-comment` | コードの色分けの色(キーワード・文字列・数値・関数名等・属性や変数・コメント)。未指定ならテーマの`--accent`と`--fg`から自動で決まる |
 | `--alert-note` / `--alert-tip` / `--alert-important` / `--alert-warning` / `--alert-caution` | 注意書き(`> [!NOTE]`など)の枠と見出しの色 |
 
+> [!TIP]
+> このサイト自体も、`THEME=none`にして`STYLE_FILE`の独自CSSだけで見た目を作っています。
+> 書き方の例として[custom.css](https://github.com/akilasatolu/tsuzuri/blob/docs/.github/tsuzuri/styles/custom.css)を
+> 参考にしてください(テーマの見本ページには当てないよう、目印のあるページを除外する書き方もしています)。
+
 変数の上書きだけでなく、`main h1 { ... }`のような通常のCSSルールを`STYLE_FILE`に
 直接追記して細部を調整することも可能です。`STYLE_FILE`は基礎CSS・THEMEの後に
 読み込まれるため、同じ詳細度であれば追記した内容が優先されます。
