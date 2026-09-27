@@ -5,9 +5,10 @@
 このブランチ(`main`)は、Tsuzuri本体(セットアップCLI・ビルドスクリプト・テーマCSS)の
 開発ブランチです。利用者が実行する`init`コマンドも、このブランチからファイルを取得します。
 
-Tsuzuriの使い方(利用者向けの説明)は、`docs`ブランチの
-[README](https://github.com/akilasatolu/tsuzuri/blob/docs/README.md)と
-[ドキュメント](https://github.com/akilasatolu/tsuzuri/tree/docs/docs)を参照してください。
+**Tsuzuriの使い方(利用者向けドキュメント)は、こちらのサイトを参照してください:
+https://akilasatolu.github.io/tsuzuri/**
+
+このサイトは`docs`ブランチの内容をTsuzuri自身でビルドして公開しています。
 
 ## ブランチ運用
 
