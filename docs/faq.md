@@ -17,6 +17,17 @@ TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップしま�
 `TRIGGER_BRANCH`の値自体を変更してください(手動実行(`workflow_dispatch`)の場合は
 この判定自体が行われず常にデプロイされます。詳細は[deployment.md](./deployment.md))。
 
+デプロイジョブ自体は起動したのに、次のエラーで失敗している場合は原因が異なります。
+
+```
+Branch "docs" is not allowed to deploy to github-pages due to environment protection rules.
+```
+
+これは、既定ブランチ以外を`TRIGGER_BRANCH`にしたときに、`github-pages`環境で
+そのブランチからのデプロイが許可されていないことが原因です。
+[デプロイ設定](./deployment.md)の「既定ブランチ以外をトリガーブランチにする場合」の
+手順で許可してください。
+
 ## リンク切れの警告が出る
 
 Markdown内でリンクした先のファイルが実際には存在しない場合、ビルドはエラーにはならず、

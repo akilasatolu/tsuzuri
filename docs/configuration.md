@@ -17,6 +17,8 @@ YAMLのような入れ子構造やクォート、複数行の値には対応し�
 push(マージ含む)があったときだけ、GitHub Pagesへのデプロイが実行されます
 (手動実行(`workflow_dispatch`)の場合はこの判定自体がスキップされ、常にデプロイされます。
 詳細は[deployment.md](./deployment.md))。
+既定ブランチ(通常は`main`)以外を指定する場合は、GitHub側で追加の設定が必要です
+([deployment.md](./deployment.md)の「既定ブランチ以外をトリガーブランチにする場合」を参照)。
 
 ### ROOT_MD
 サイトの起点となるMarkdownファイルの、リポジトリルートからの相対パスです。

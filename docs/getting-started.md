@@ -48,6 +48,11 @@ OSS本体リポジトリ(tsuzuri)を参照することなく、このリポジ�
 この設定をしていないと、ワークフロー自体は正常に実行されても、実際のPagesへの公開が
 行われません。
 
+`TRIGGER_BRANCH`に既定ブランチ(通常は`main`)以外のブランチを指定した場合は、
+さらに`Settings > Environments > github-pages`でそのブランチからのデプロイを許可する
+必要があります。手順は[デプロイ設定](./deployment.md)の「既定ブランチ以外を
+トリガーブランチにする場合」を参照してください。
+
 ## 初回デプロイ
 
 生成されたファイル一式をコミットし、`.github/docs-pages.config`の`TRIGGER_BRANCH`

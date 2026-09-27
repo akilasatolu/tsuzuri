@@ -40,9 +40,39 @@ TRIGGER_BRANCH=release
 ```
 
 このように書き換えて、そのブランチへpushすれば、以後はそのブランチへのpushだけが
-デプロイのトリガーになります(`main`以外へのpushはビルドジョブ自体は動きますが、
+デプロイのトリガーになります(`TRIGGER_BRANCH`以外へのpushはビルドジョブ自体は動きますが、
 `should_deploy=false`と判定されデプロイジョブはスキップされます。詳細は
 [faq.md](./faq.md)の「デプロイが実行されない」を参照)。
+
+### 既定ブランチ以外をトリガーブランチにする場合(追加設定が必要)
+
+`TRIGGER_BRANCH`にリポジトリの**既定ブランチ(通常は`main`)以外**を指定した場合は、
+`TRIGGER_BRANCH`の書き換えだけでは足りません。GitHub Pagesの公開先である
+`github-pages`環境は、初期状態では既定ブランチからのデプロイしか許可していないためです。
+このままpushすると、デプロイジョブが次のようなエラーで失敗します。
+
+```
+Branch "docs" is not allowed to deploy to github-pages due to environment protection rules.
+```
+
+次の手順で、トリガーブランチからのデプロイを許可してください(最初の1回だけ)。
+
+1. リポジトリの `Settings` タブを開く
+2. 左メニューの `Environments` を選び、`github-pages` を開く
+3. `Deployment branches and tags` の一覧で `Add deployment branch or tag rule` を押す
+4. `Ref type` は `Branch` のまま、`Name pattern` にトリガーブランチ名(例: `docs`)を入力して追加する
+
+`github-pages`環境は、`Settings > Pages`の`Source`を`GitHub Actions`にした時点で
+自動的に作成されます。一覧に見当たらない場合は、先にPagesの設定を済ませてください。
+
+あわせて、次の点にも注意してください。
+
+- **ワークフローファイルもトリガーブランチに置く**: GitHub Actionsはpushされたブランチにある
+  ワークフローファイルを実行します。`.github/workflows/docs-pages.yml`・
+  `.github/docs-pages.config`・`.github/tsuzuri/`は、トリガーブランチにコミットしてください。
+- **手動実行ボタンは表示されない**: Actionsタブの「Run workflow」ボタンは、ワークフローファイルが
+  既定ブランチにある場合にしか表示されません。トリガーブランチにだけ置いた場合は、
+  そのブランチへのpushでデプロイしてください。
 
 ## カスタムドメインの設定
 
