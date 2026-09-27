@@ -126,8 +126,11 @@ export function buildBuildLockfiles(packageRoot = PACKAGE_ROOT, fsImpl = { exist
     if (packages[key]) continue;
     const entry = rootLock.packages?.[key];
     if (!entry?.integrity) throw new Error(`package-lock.json に ${name} の integrity がありません`);
-    const { dev: _dev, devOptional: _devOptional, ...rest } = entry;
-    packages[key] = rest;
+    // 本体では開発用の依存なので付いている dev の印は外す(利用者側では通常の依存)
+    const copied = { ...entry };
+    delete copied.dev;
+    delete copied.devOptional;
+    packages[key] = copied;
     queue.push(...Object.keys(entry.dependencies ?? {}));
   }
   const packageJson = {
