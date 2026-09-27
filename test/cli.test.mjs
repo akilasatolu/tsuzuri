@@ -574,9 +574,10 @@ test("ワークフローのactionsはコミットSHAで固定され、本体のC
   const template = readFileSync(join(PACKAGE_ROOT, WORKFLOW_TEMPLATE_PATH), "utf8");
   const ci = readFileSync(join(PACKAGE_ROOT, ".github/workflows/ci.yml"), "utf8");
   const sync = readFileSync(join(PACKAGE_ROOT, ".github/workflows/sync-docs.yml"), "utf8");
+  const release = readFileSync(join(PACKAGE_ROOT, ".github/workflows/release.yml"), "utf8");
   const tplUses = usesOf(template);
   for (const sha of Object.values(tplUses)) assert.match(sha, /^[0-9a-f]{40}$/);
-  for (const other of [usesOf(ci), usesOf(sync)]) {
+  for (const other of [usesOf(ci), usesOf(sync), usesOf(release)]) {
     for (const [action, sha] of Object.entries(other)) {
       if (tplUses[action]) assert.equal(tplUses[action], sha, `${action} の版が本体のワークフローとひな形で異なる`);
     }

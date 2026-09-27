@@ -1,0 +1,69 @@
+name: Release
+
+# vX.Y.Z のタグが push されたら、GitHub の Release を作成し、メジャーバージョンのタグ
+# (v1 など)をそのコミットに付け替える。手順は CONTRIBUTING.md の「リリース手順」を参照。
+#
+#   1. タグと package.json の version が一致し、タグのコミットが main に含まれることを確認
+#   2. CHANGELOG.md の該当する節から Release の本文を作り(scripts/release-notes.mjs)、Release を作成
+#   3. メジャーバージョンのタグ(vX)を付け替えて push
+#
+# メジャーバージョンのタグ(v1 等)の push ではこのワークフローは動かない(パターンが v*.*.* のため)。
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Check version and branch
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          VERSION="${TAG#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::タグ($TAG)と package.json の version($PKG_VERSION)が一致しません"
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::タグ($TAG)のコミットが main ブランチに含まれていません"
+            exit 1
+          fi
+
+      - name: Build release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: node scripts/release-notes.mjs "$TAG" > "$RUNNER_TEMP/release-notes.md"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" --title "$TAG" --notes-file "$RUNNER_TEMP/release-notes.md" --verify-tag
+
+      - name: Move major version tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          MAJOR="${TAG%%.*}"
+          git tag -f "$MAJOR" "$GITHUB_SHA"
+          git push -f origin "refs/tags/$MAJOR"

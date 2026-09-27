@@ -95,6 +95,7 @@ npm run lint
 
 - `vX.Y.Z`(例: `v1.0.0`): そのリリースを指す固定のタグ。以後は動かさない
 - `vX`(例: `v1`): 同じメジャーバージョンの最新リリースを指すタグ。リリースのたびに付け替える
+  (`vX.Y.Z`のタグをpushすると`release.yml`が自動で付け替える)
   (利用者は`npx github:akilasatolu/tsuzuri#v1 init`で、互換性を保ったまま最新版を使える)。
   破壊的変更を含むリリースでは新しいメジャー(`v2`)を作る
 
@@ -107,17 +108,20 @@ npm run lint
    - 設定ファイルを書き換えてから`npx --yes <tsuzuriの作業ツリー> init --update`を実行し、
      設定ファイルが保持されること
 3. `CHANGELOG.md`の`[Unreleased]`を`[X.Y.Z] - YYYY-MM-DD`に改め、空の`[Unreleased]`を追加する
-4. `package.json`・`package-lock.json`の`version`を`X.Y.Z`にする
-5. コミットしてタグを付け、pushする
+4. `package.json`・`package-lock.json`の`version`を`X.Y.Z`にする(依存パッケージの`version`は変えない)
+5. コミットして`main`にpushし、`vX.Y.Z`のタグを付けてpushする
 
    ```sh
    git tag vX.Y.Z
-   git tag -f vX
    git push origin main vX.Y.Z
-   git push -f origin vX
    ```
 
-6. GitHubの`Releases`で`vX.Y.Z`のリリースを作成し、`CHANGELOG.md`の該当部分を本文に貼る
+6. タグのpushで`.github/workflows/release.yml`が動き、次を自動で行う(Actionsタブで結果を確認する)
+   - タグと`package.json`の`version`が一致し、タグのコミットが`main`にあることの確認
+   - `CHANGELOG.md`の該当する節からGitHubのReleaseを作成(本文は`scripts/release-notes.mjs`で作る)
+   - メジャーバージョンのタグ(`vX`)をこのリリースのコミットに付け替える
+
+   手元の`vX`タグは古いままになるので、必要なら`git fetch --tags --force`で取り込む。
 
 実際のGitHub Pagesへの公開と`init --update`による更新は、このリポジトリの`docs`ブランチ
 (`main`のCI成功時に`sync-docs.yml`が`init --update`を実行し、Pagesへ公開する)で

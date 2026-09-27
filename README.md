@@ -172,6 +172,7 @@ bin/cli.mjs                 セットアップCLI(init)。生成するワーク�
   lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap
 styles/*.css                テーマCSSの原本(base + wa / muji / sumi / ai / shu)
 templates/.github/workflows/docs-pages.yml  initが生成するワークフローのひな形
+scripts/release-notes.mjs   CHANGELOGからGitHubのReleaseの本文を作る(release.ymlが使う。配布対象外)
 test/                       単体テスト・E2Eテスト(test/fixtures/ にフィクスチャ)
 .github/workflows/ci.yml    lint・testのみを行う開発用CI(Pagesへのデプロイはしない)
 ```
@@ -183,9 +184,10 @@ test/                       単体テスト・E2Eテスト(test/fixtures/ にフ
 
 Dependabotが週1回、`package.json`の依存パッケージと`ci.yml`のGitHub Actionsの更新PRを作ります。
 
-`marked`と`highlight.js`は、利用者側のワークフローでも使うビルド用の依存です。`init`が生成する
+`marked`・`highlight.js`・`marked-footnote`は、利用者側のワークフローでも使うビルド用の依存です
+(`bin/cli.mjs`の`BUILD_DEPENDENCIES`)。`init`が生成する
 ワークフローは`package.json`の`devDependencies`にあるこれらの版をそのまま埋め込むため、更新PRを
-マージすれば、テストで使う版と利用者に配る版が一緒に更新されます。このためこの2つの版は
+マージすれば、テストで使う版と利用者に配る版が一緒に更新されます。このためこれらの版は
 `^`などの範囲ではなく`12.0.2`のような完全一致で書いてください(範囲指定だと`init`がエラーになります)。
 
 `init`が生成するワークフローは、`templates/.github/workflows/docs-pages.yml`のひな形から作られます
