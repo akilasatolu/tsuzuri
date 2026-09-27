@@ -13,6 +13,7 @@
 
 import { Marked } from "marked";
 import markedFootnote from "marked-footnote";
+import { htmlToText } from "./slugger.mjs";
 
 /**
  * Markdown 本文から、リンク・画像・生のHTMLの href/src を、描画と同じ解釈で集める。
@@ -37,10 +38,32 @@ export function extractLinks(mdContent) {
   return links;
 }
 
-// 生の HTML <img src="..."> / <a href="..."> も拾う
+/**
+ * 本文の最初の h1 見出しの表示テキストを返す(Markdown の記号・HTMLタグは除く)。無ければ ""。
+ * `# 見出し`・`見出し\n===` のほか、README でよく使われる生のHTMLの `<h1 align="center">…</h1>` も
+ * 見出しとして扱う。ナビ・前後ページリンクの表示名と <title> に使う。
+ * コードブロック内の "# …" は見出しとして扱われない。
+ * @param {string} mdContent
+ * @returns {string}
+ */
+export function firstHeadingText(mdContent) {
+  const marked = new Marked({ gfm: true });
+  for (const token of marked.lexer(mdContent)) {
+    if (token.type === "heading" && token.depth === 1) {
+      return htmlToText(marked.parseInline(token.text)).trim();
+    }
+    if (token.type === "html") {
+      const m = token.text.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
+      if (m) return htmlToText(m[1]).replace(/\s+/g, " ").trim();
+    }
+  }
+  return "";
+}
+
+// 生の HTML <img src="..."> / <a href="..."> も拾う(タグ名・属性名の大文字小文字は区別しない)
 export function extractRawHtmlLinks(mdContent) {
   const results = [];
-  const re = /<(?:img|a)[^>]+(?:src|href)=["']([^"']+)["'][^>]*>/g;
+  const re = /<(?:img|a)[^>]+(?:src|href)=["']([^"']+)["'][^>]*>/gi;
   let m;
   while ((m = re.exec(mdContent)) !== null) {
     results.push(m[1].trim());

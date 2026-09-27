@@ -10,11 +10,12 @@
  *   最初に見つかったページの位置で決まる。READMEなどでリンクを書いた順が
  *   そのままナビの並び順になる。
  *
- * ページの表示名:
- *   frontmatterの `title` があればそれを使い、無ければファイル名(例: "cli.md")を使う。
- *   ただし起点のページ(ROOT_MD)に `title` が無い場合は、サイト名(SITE_NAME)があればそれを使う
- *   (GitHub上で README.md の先頭に frontmatter の表が表示されるのを避けたい場合のため)。
- *   本文のh1見出しは使わない(ユーザー向け仕様として固定)。
+ * ページの表示名(優先順):
+ *   1. frontmatter の `title`
+ *   2. 本文の最初の h1 見出しの表示テキスト(crawler が集めた entry.h1)
+ *   3. 起点のページ(ROOT_MD)なら、サイト名(SITE_NAME)
+ *   4. ファイル名(例: "cli.md")
+ *   <title> タグ(frontmatter の title > h1 > ファイルパス)と同じ考え方にそろえている。
  */
 
 import path from "node:path";
@@ -28,16 +29,17 @@ const posix = path.posix;
  */
 
 /**
- * ページの表示名を決める。frontmatterの title > fallback(起点ページのサイト名) > ファイル名。
+ * ページの表示名を決める。frontmatterの title > h1 > fallback(起点ページのサイト名) > ファイル名。
  *
  * @param {string} rel
  * @param {{ title?: string }} [meta]
  * @param {string} [fallback]
+ * @param {string} [h1] - 本文の最初の h1 の表示テキスト
  * @returns {string}
  */
-export function pageLabel(rel, meta, fallback = "") {
+export function pageLabel(rel, meta, fallback = "", h1 = "") {
   const title = typeof meta?.title === "string" ? meta.title.trim() : "";
-  return title || fallback || posix.basename(rel);
+  return title || (h1 || "").trim() || fallback || posix.basename(rel);
 }
 
 /**
@@ -61,7 +63,11 @@ export function buildSiteTree(visitedMdEntries, { rootMd = "", siteName = "" } =
   for (const [rel, entry] of visitedMdEntries) {
     const dirPath = posix.dirname(rel) === "." ? "" : posix.dirname(rel);
     const fallback = rel === rootMd ? siteName : "";
-    getDir(dirPath).children.push({ type: "page", rel, title: pageLabel(rel, entry?.meta, fallback) });
+    getDir(dirPath).children.push({
+      type: "page",
+      rel,
+      title: pageLabel(rel, entry?.meta, fallback, entry?.h1),
+    });
   }
 
   return root;

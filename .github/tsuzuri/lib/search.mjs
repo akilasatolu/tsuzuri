@@ -52,6 +52,7 @@ export const SEARCH_SCRIPT = `(() => {
   input.setAttribute("aria-label", input.placeholder);
   const list = document.createElement("ul");
   list.className = "tsuzuri-search-results";
+  list.setAttribute("aria-live", "polite");
   root.append(input, list);
 
   let index = null;
@@ -98,6 +99,12 @@ export const SEARCH_SCRIPT = `(() => {
   };
 
   input.addEventListener("focus", load, { once: true });
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      input.value = "";
+      list.replaceChildren();
+    }
+  });
   input.addEventListener("input", () => (index ? render() : load().then(render)));
 })();
 `;
