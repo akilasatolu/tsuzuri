@@ -38,7 +38,7 @@ import { marked } from "marked";
 
 import { loadConfig, ALLOWED_THEMES } from "./lib/config.mjs";
 import { crawlSite } from "./lib/crawler.mjs";
-import { toSiteAbsHref } from "./lib/path-utils.mjs";
+import { toSiteAbsHref, resolveInsideRepo } from "./lib/path-utils.mjs";
 import {
   escapeHtml,
   renderTitle,
@@ -48,14 +48,30 @@ import {
   pageTemplate,
 } from "./lib/html-renderer.mjs";
 import { buildSitemap } from "./lib/sitemap.mjs";
+import { buildSiteTree } from "./lib/site-tree.mjs";
 
 async function main() {
   const REPO_ROOT = process.cwd();
   const config = loadConfig(process.env);
-  const OUT_DIR = path.resolve(REPO_ROOT, config.outDir);
+  const OUT_DIR = resolveInsideRepo(REPO_ROOT, config.outDir);
+
+  // ---------- 0. OUT_DIR チェック(致命的) ----------
+  // リポジトリ外やリポジトリ直下そのものへの書き出しは、利用者のファイルを
+  // 上書きしてしまう恐れがあるため受け付けない。
+  if (!OUT_DIR || OUT_DIR === path.resolve(REPO_ROOT)) {
+    console.error(
+      `OUT_DIR (${config.outDir}) にはリポジトリ内のサブディレクトリを指定してください。処理を中止します。`
+    );
+    process.exit(1);
+  }
 
   // ---------- 1. ROOT_MD 存在チェック(致命的) ----------
-  if (!fs.existsSync(path.join(REPO_ROOT, config.rootMd))) {
+  const rootMdAbs = resolveInsideRepo(REPO_ROOT, config.rootMd);
+  if (!rootMdAbs) {
+    console.error(`起点となる ${config.rootMd} がリポジトリの外を指しています。処理を中止します。`);
+    process.exit(1);
+  }
+  if (!fs.existsSync(rootMdAbs)) {
     console.error(`起点となる ${config.rootMd} が見つかりません。処理を中止します。`);
     process.exit(1);
   }
@@ -63,7 +79,7 @@ async function main() {
   // ---------- 2. base.css 読み込み(必須・致命的) ----------
   // OSS本体自身が同梱すべきファイルであるため、不在は利用者の設定ミスではなく
   // パッケージ自体の欠陥として扱う(STYLE_FILE/テーマ本体の不在とは扱いを分ける)。
-  const baseCssAbs = path.join(REPO_ROOT, config.styleDir, "base.css");
+  const baseCssAbs = path.resolve(REPO_ROOT, config.styleDir, "base.css");
   if (!fs.existsSync(baseCssAbs)) {
     console.error(
       `${config.styleDir}/base.css が見つかりません。パッケージが破損している可能性があるため処理を中止します。`
@@ -75,7 +91,7 @@ async function main() {
   // ---------- 3. THEME CSS 読み込み(非致命的・fail-open) ----------
   let themeCss = "";
   if (config.theme !== "none") {
-    const themeCssAbs = path.join(REPO_ROOT, config.styleDir, `${config.theme}.css`);
+    const themeCssAbs = path.resolve(REPO_ROOT, config.styleDir, `${config.theme}.css`);
     if (fs.existsSync(themeCssAbs)) {
       themeCss = fs.readFileSync(themeCssAbs, "utf-8");
     } else {
@@ -105,7 +121,7 @@ async function main() {
       if (spec === "none") return "";
       const cacheKey = `builtin:${spec}`;
       if (pageThemeCssCache.has(cacheKey)) return pageThemeCssCache.get(cacheKey);
-      const abs = path.join(REPO_ROOT, config.styleDir, `${spec}.css`);
+      const abs = path.resolve(REPO_ROOT, config.styleDir, `${spec}.css`);
       if (!fs.existsSync(abs)) {
         console.warn(
           `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" 用のCSS(${config.styleDir}/${spec}.css)が見つかりません。サイト全体のTHEME("${config.theme}")にフォールバックします。`
@@ -118,10 +134,17 @@ async function main() {
     }
 
     // 組み込みテーマ名ではない → リポジトリルートからの相対パスで指定された
-    // ユーザー独自のスタイルファイルとして扱う。
+    // ユーザー独自のスタイルファイルとして扱う。リポジトリ外(../ や絶対パス、
+    // リポジトリ外を指すシンボリックリンク)のファイルは読み込まない。
     const cacheKey = `path:${spec}`;
     if (pageThemeCssCache.has(cacheKey)) return pageThemeCssCache.get(cacheKey);
-    const abs = path.join(REPO_ROOT, spec);
+    const abs = resolveInsideRepo(REPO_ROOT, spec);
+    if (!abs) {
+      console.warn(
+        `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" はリポジトリの外を指しているため無視します。サイト全体のTHEME("${config.theme}")にフォールバックします。`
+      );
+      return themeCss;
+    }
     if (!fs.existsSync(abs)) {
       console.warn(
         `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" は組み込みテーマ名(${ALLOWED_THEMES.join(
@@ -160,8 +183,10 @@ async function main() {
   // ---------- 5. STYLE_FILE / FAVICON_FILE 読み込み(非致命的) ----------
   let customCss = "";
   if (config.styleFile) {
-    const styleAbs = path.join(REPO_ROOT, config.styleFile);
-    if (fs.existsSync(styleAbs)) {
+    const styleAbs = resolveInsideRepo(REPO_ROOT, config.styleFile);
+    if (!styleAbs) {
+      console.warn(`STYLE_FILE (${config.styleFile}) はリポジトリの外を指しているため無視します。`);
+    } else if (fs.existsSync(styleAbs)) {
       customCss = fs.readFileSync(styleAbs, "utf-8");
       console.log(`Custom style loaded: ${config.styleFile}`);
     } else {
@@ -175,10 +200,14 @@ async function main() {
   // 存在した場合に出力先パスが衝突し、どちらかが無警告で上書きされてしまうため。
   let faviconHref = "";
   let faviconOutRel = "";
+  let faviconAbs = "";
   if (config.faviconFile) {
-    const faviconAbs = path.join(REPO_ROOT, config.faviconFile);
-    if (fs.existsSync(faviconAbs)) {
-      faviconOutRel = config.faviconFile.split(path.sep).join("/");
+    faviconAbs = resolveInsideRepo(REPO_ROOT, config.faviconFile) || "";
+    if (!faviconAbs) {
+      // コピー先も OUT_DIR の外になってしまうため、リポジトリ外を指す指定は受け付けない
+      console.warn(`FAVICON_FILE (${config.faviconFile}) はリポジトリの外を指しているため無視します。`);
+    } else if (fs.existsSync(faviconAbs)) {
+      faviconOutRel = path.relative(REPO_ROOT, faviconAbs).split(path.sep).join("/");
       faviconHref = `${config.basePath}/${faviconOutRel}`;
     } else {
       console.warn(`Favicon file not found (${config.faviconFile}); skipping <link rel="icon">.`);
@@ -196,11 +225,14 @@ async function main() {
   if (faviconHref) {
     const faviconDestAbs = path.join(OUT_DIR, faviconOutRel);
     fs.mkdirSync(path.dirname(faviconDestAbs), { recursive: true });
-    fs.copyFileSync(path.join(REPO_ROOT, config.faviconFile), faviconDestAbs);
+    fs.copyFileSync(faviconAbs, faviconDestAbs);
   }
 
   // ---------- 7. HTML 変換 ----------
   marked.setOptions({ gfm: true, breaks: false });
+
+  // ナビゲーション・sitemap.json 用のサイトツリー(ディレクトリ階層)
+  const siteTree = buildSiteTree(visitedMd.entries());
 
   for (const [rel, { content, meta }] of visitedMd.entries()) {
     const renderer = new marked.Renderer();
@@ -220,7 +252,7 @@ async function main() {
     const title = renderTitle(content, rel, meta.title);
 
     const navHtml = config.navEnabled
-      ? renderNav(hierarchy, visitedMd.keys(), rel, config.basePath, config.siteName)
+      ? renderNav(siteTree, rel, config.basePath, config.siteName)
       : "";
 
     const outRel = rel.replace(/\.md$/i, ".html");
@@ -237,7 +269,10 @@ async function main() {
       : "";
     const noindex = meta.noindex === true;
 
-    const hasMetaTags = Boolean(description || ogImage || canonicalUrl || noindex || faviconHref);
+    const siteName = config.siteName;
+    const hasMetaTags = Boolean(
+      description || ogImage || canonicalUrl || noindex || faviconHref || siteName
+    );
     const metaTagsHtml = hasMetaTags
       ? renderMetaTags({
           description,
@@ -247,6 +282,7 @@ async function main() {
           canonicalUrl,
           noindex,
           faviconHref,
+          siteName,
         })
       : "";
 
@@ -273,7 +309,11 @@ async function main() {
 
   // ---------- 8. 画像コピー ----------
   for (const imgRel of imageSet) {
-    const src = path.join(REPO_ROOT, imgRel);
+    const src = resolveInsideRepo(REPO_ROOT, imgRel);
+    if (!src) {
+      console.warn(`リポジトリの外を指しているため画像をコピーしません: ${imgRel}`);
+      continue;
+    }
     if (!fs.existsSync(src)) {
       console.warn(`画像が見つかりません: ${imgRel}`);
       continue;
@@ -292,6 +332,7 @@ async function main() {
     visitedMd,
     imageSet,
     hierarchy,
+    tree: siteTree,
     missing,
     rejected,
     lang: config.lang,

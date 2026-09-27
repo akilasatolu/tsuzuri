@@ -49,14 +49,73 @@ npm test       # node --test で test/ 配下を全件実行
 npm run lint   # ESLint
 ```
 
-ローカルでビルドを試す場合は、ビルド対象のMarkdownがあるディレクトリで次のように実行します
-(出力先は`_site/`)。
+`init`の動作確認は下の「開発中のTsuzuriをローカルで試す」を参照してください。
+
+## 開発中のTsuzuriをローカルで試す
+
+pushしなくても、手元の`main`ブランチの作業ツリーをそのまま使って動作確認できます。
+以下の例では、Tsuzuriのリポジトリを`~/dev/tsuzuri`にcloneし、`npm ci`済みとします。
+
+### 1. 手元のサイトでビルドする(いちばん手軽)
+
+ビルドスクリプトは、Tsuzuriの作業ツリーにあるものを直接実行できます。`marked`は
+Tsuzuri側の`node_modules`から読み込まれるので、ビルド対象のディレクトリに
+インストールする必要はありません。
+
+`docs`ブランチ(このリポジトリ自身のサイト)で試す場合は、worktreeで別ディレクトリに
+取り出すと、`main`と並べて作業できます。
 
 ```sh
-STYLE_DIR=/path/to/tsuzuri/styles NAV_ENABLED=false THEME=wa node /path/to/tsuzuri/.github/scripts/build-docs.mjs
+git worktree add ../tsuzuri-docs docs
+cd ../tsuzuri-docs
 ```
 
-`init`の動作確認は、テスト用の空ディレクトリで`node /path/to/tsuzuri/bin/cli.mjs`を実行します。
+ビルド対象のディレクトリ(任意のMarkdownのフォルダでも可)で、次のように実行します。
+設定ファイルの値は環境変数で渡します(ワークフローが行っている処理と同じです)。
+
+```sh
+STYLE_DIR=~/dev/tsuzuri/styles NAV_ENABLED=true SITE_NAME=Tsuzuri \
+  node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
+```
+
+- `STYLE_DIR`は必須です(テーマCSSの置き場所。`init`後の構成では`.github/tsuzuri/styles`)。
+- それ以外のキー(`ROOT_MD`・`THEME`・`LANG`など)は省略すると既定値になります。
+- 出力先は`_site/`です(`OUT_DIR`で変更可)。
+
+### 2. ブラウザで確認する
+
+生成されるリンクはサイトのルートからの絶対パス(`/docs/cli.html`など)なので、
+`_site/index.html`をファイルとして直接開くとリンクが切れます。簡易サーバーで配信してください。
+
+```sh
+python3 -m http.server --directory _site 8000
+```
+
+`http://localhost:8000/`を開きます。`BASE_PATH`は指定しないでください
+(本番の`/tsuzuri`のようなパスを付けると、ローカルではリンクが切れます)。
+
+### 3. `init`を試す
+
+テスト用の空ディレクトリで、作業ツリーのCLIを直接実行します。
+
+```sh
+mkdir /tmp/tsuzuri-init-test && cd /tmp/tsuzuri-init-test
+node ~/dev/tsuzuri/bin/cli.mjs
+```
+
+生成された`.github/tsuzuri/`を使ってビルドする場合は、1と同じ要領で
+`STYLE_DIR=.github/tsuzuri/styles node .github/tsuzuri/build-docs.mjs`を実行します。
+このときは`marked`がこのディレクトリから読み込まれるため、先に
+`npm install --no-save marked@12.0.2`を実行してください。
+
+### 4. GitHub上で本番と同じ流れを試す
+
+作業ブランチをpushすれば、`npx`でそのブランチを指定して`init`できます。
+テスト用の別リポジトリで実行し、GitHub Pagesへの公開まで確認してください。
+
+```sh
+npx github:akilasatolu/tsuzuri#<作業ブランチ名> init
+```
 
 ## ディレクトリ構成
 
@@ -64,7 +123,7 @@ STYLE_DIR=/path/to/tsuzuri/styles NAV_ENABLED=false THEME=wa node /path/to/tsuzu
 bin/cli.mjs                 セットアップCLI(init)。生成するワークフロー・設定ファイルのテンプレートもここ
 .github/scripts/
   build-docs.mjs            ビルドのエントリーポイント
-  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / sitemap
+  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / sitemap
 styles/*.css                テーマCSSの原本(base + wa / muji / sumi / ai / shu)
 test/                       単体テスト・E2Eテスト(test/fixtures/ にフィクスチャ)
 .github/workflows/ci.yml    lint・testのみを行う開発用CI(Pagesへのデプロイはしない)

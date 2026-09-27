@@ -487,4 +487,107 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  test("SITE_NAME設定時、og:site_nameが出力され、ナビの見出しにも使われる", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+
+      const result = runBuild(dir, { SITE_NAME: "My Site", NAV_ENABLED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+
+      const indexHtml = readOut(dir, "index.html");
+      assert.match(indexHtml, /<meta property="og:site_name" content="My Site">/);
+      assert.match(indexHtml, /<nav aria-label="サイト内ページ"><p>My Site<\/p>/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("ナビはディレクトリ階層に沿い、表示名はfrontmatterのtitle(無ければファイル名)", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(
+        path.join(dir, "docs", "a.md"),
+        ["---", "title: ページA", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
+      );
+
+      const result = runBuild(dir, { NAV_ENABLED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+
+      const indexHtml = readOut(dir, "index.html");
+      assert.match(indexHtml, /<li><a href="\/README\.html" aria-current="page">README\.md<\/a><\/li>/);
+      assert.match(indexHtml, /<li><span>docs<\/span><ul><li><a href="\/docs\/a\.html">ページA<\/a><\/li><\/ul><\/li>/);
+
+      const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
+      assert.equal(sitemap.tree.children[1].name, "docs");
+      assert.equal(sitemap.tree.children[1].children[0].title, "ページA");
+      assert.equal(sitemap.pages.find((p) => p.rel === "docs/a.md").title, "ページA");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("frontmatterのthemeがリポジトリ外のファイルを指す場合は読み込まずフォールバックする", () => {
+    const parent = makeTmpDir();
+    const dir = path.join(parent, "repo");
+    try {
+      fs.mkdirSync(dir);
+      copyBasicSite(dir);
+      copyFixtureStyleDir(dir);
+      fs.writeFileSync(path.join(parent, "secret.css"), "/*SECRET_OUTSIDE_REPO*/");
+      fs.writeFileSync(
+        path.join(dir, "docs", "a.md"),
+        ["---", "theme: ../secret.css", "---", "# Page A"].join("\n")
+      );
+
+      const result = runBuild(dir, { THEME: "sumi", STYLE_DIR: "styles-fixture" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stderr, /リポジトリの外/);
+
+      const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
+      assert.ok(!aStyle.includes("SECRET_OUTSIDE_REPO"));
+      assert.ok(aStyle.includes("/*SUMI_FIXTURE_MARKER*/"));
+    } finally {
+      fs.rmSync(parent, { recursive: true, force: true });
+    }
+  });
+
+  test("FAVICON_FILEがリポジトリ外を指す場合は無視し、出力先の外にもコピーしない", () => {
+    const parent = makeTmpDir();
+    const dir = path.join(parent, "repo");
+    try {
+      fs.mkdirSync(dir);
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(parent, "icon.png"), "png");
+
+      const result = runBuild(dir, { FAVICON_FILE: "../icon.png" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stderr, /FAVICON_FILE.*リポジトリの外/);
+      assert.doesNotMatch(readOut(dir, "index.html"), /<link rel="icon"/);
+      assert.deepEqual(fs.readdirSync(parent).sort(), ["icon.png", "repo"]);
+    } finally {
+      fs.rmSync(parent, { recursive: true, force: true });
+    }
+  });
+
+  test("OUT_DIRがリポジトリ外・リポジトリ直下を指す場合は終了コード1", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+
+      for (const outDir of ["../out", ".", "/tmp"]) {
+        const result = runBuild(dir, { OUT_DIR: outDir });
+        assert.equal(result.status, 1, `OUT_DIR=${outDir}`);
+        assert.match(result.stderr, /OUT_DIR/);
+      }
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

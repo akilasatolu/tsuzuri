@@ -130,4 +130,20 @@ describe("crawlSite", () => {
     const aEntry = result.visitedMd.get("a.md");
     assert.deepEqual(aEntry.meta, {}); // frontmatterがなければ空オブジェクト
   });
+
+  test("実体がリポジトリ外にあるシンボリックリンクのmdは読み込まず rejected(outside-repo) に記録する", () => {
+    const { readFile, exists } = makeFs({
+      "README.md": "# Root\n[secret](secret.md)\n",
+      "secret.md": "should not be read",
+    });
+    const realpath = (p) => {
+      if (p === path.join(REPO_ROOT, "secret.md")) return "/home/user/.ssh/id_rsa.md";
+      return p;
+    };
+    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists, realpath });
+    assert.deepEqual([...result.visitedMd.keys()], ["README.md"]);
+    assert.deepEqual(result.rejected, [
+      { rel: "secret.md", referencedFrom: "README.md", reason: "outside-repo" },
+    ]);
+  });
 });

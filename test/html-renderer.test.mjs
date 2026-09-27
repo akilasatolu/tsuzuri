@@ -9,6 +9,7 @@ import {
   pageTemplate,
   preprocessRawHtmlPaths,
 } from "../.github/scripts/lib/html-renderer.mjs";
+import { buildSiteTree } from "../.github/scripts/lib/site-tree.mjs";
 
 describe("escapeHtml", () => {
   test("& < > \" のみをエスケープする", () => {
@@ -37,50 +38,60 @@ describe("renderTitle", () => {
 });
 
 describe("renderNav", () => {
-  // ルート(root.md) - child1.md - grandchild.md
-  //                 - child2.md
-  const hierarchy = {
-    "root.md": { parent: null, children: ["child1.md", "child2.md"] },
-    "child1.md": { parent: "root.md", children: ["grandchild.md"] },
-    "child2.md": { parent: "root.md", children: [] },
-    "grandchild.md": { parent: "child1.md", children: [] },
-  };
-  const visitedMdKeys = ["root.md", "child1.md", "child2.md", "grandchild.md"];
+  // README.md / guide.md / docs/(a.md, deep/b.md) という構成のサイトツリー
+  const tree = buildSiteTree([
+    ["README.md", { meta: { title: "ホーム" } }],
+    ["docs/a.md", { meta: { title: "ページA" } }],
+    ["guide.md", { meta: {} }],
+    ["docs/deep/b.md", { meta: {} }],
+  ]);
 
   test("全ページがリンクとして出現する", () => {
-    const html = renderNav(hierarchy, visitedMdKeys, "root.md", "", "");
-    for (const rel of visitedMdKeys) {
-      assert.match(html, new RegExp(`<a href="/${rel.replace(".md", ".html")}"`));
+    const html = renderNav(tree, "README.md", "", "");
+    for (const href of ["/README.html", "/docs/a.html", "/guide.html", "/docs/deep/b.html"]) {
+      assert.match(html, new RegExp(`<a href="${href}"`));
     }
   });
 
+  test("ディレクトリは<span>見出し+入れ子の<ul>として出力される", () => {
+    const html = renderNav(tree, "README.md", "", "");
+    assert.match(
+      html,
+      /<li><span>docs<\/span><ul><li><a href="\/docs\/a\.html">ページA<\/a><\/li><li><span>deep<\/span><ul><li><a href="\/docs\/deep\/b\.html">b\.md<\/a><\/li><\/ul><\/li><\/ul><\/li>/
+    );
+  });
+
+  test("表示名はfrontmatterのtitle、無ければファイル名", () => {
+    const html = renderNav(tree, "README.md", "", "");
+    assert.match(html, />ホーム<\/a>/);
+    assert.match(html, />guide\.md<\/a>/);
+    assert.doesNotMatch(html, />docs\/deep\/b\.md</);
+  });
+
   test("currentRelに一致する項目にのみaria-currentが付与される", () => {
-    const html = renderNav(hierarchy, visitedMdKeys, "child2.md", "", "");
-    assert.match(html, /<a href="\/child2\.html" aria-current="page">/);
-    assert.doesNotMatch(html, /<a href="\/root\.html" aria-current="page">/);
-    assert.doesNotMatch(html, /<a href="\/child1\.html" aria-current="page">/);
+    const html = renderNav(tree, "guide.md", "", "");
+    assert.match(html, /<a href="\/guide\.html" aria-current="page">/);
+    assert.equal(html.match(/aria-current/g).length, 1);
   });
 
   test("basePathがhrefに反映される", () => {
-    const html = renderNav(hierarchy, visitedMdKeys, "root.md", "/my-repo", "");
-    assert.match(html, /<a href="\/my-repo\/root\.html"/);
+    const html = renderNav(tree, "README.md", "/my-repo", "");
+    assert.match(html, /<a href="\/my-repo\/README\.html"/);
   });
 
   test("siteNameが設定されていればnav先頭に見出しとして表示する", () => {
-    const html = renderNav(hierarchy, visitedMdKeys, "root.md", "", "My Site");
+    const html = renderNav(tree, "README.md", "", "My Site");
     assert.match(html, /<nav aria-label="サイト内ページ"><p>My Site<\/p>/);
   });
 
   test("siteName未設定なら見出しは出力されない", () => {
-    const html = renderNav(hierarchy, visitedMdKeys, "root.md", "", "");
+    const html = renderNav(tree, "README.md", "", "");
     assert.match(html, /<nav aria-label="サイト内ページ"><ul>/);
   });
 
-  test("visitedMdKeysに含まれないページはリンクとして出現しない", () => {
-    const partiallyVisited = ["root.md", "child1.md"]; // grandchild.md, child2.md は除外
-    const html = renderNav(hierarchy, partiallyVisited, "root.md", "", "");
-    assert.doesNotMatch(html, /grandchild\.html/);
-    assert.doesNotMatch(html, /child2\.html/);
+  test("titleはエスケープされる", () => {
+    const html = renderNav(buildSiteTree([["x.md", { meta: { title: "<b>&" } }]]), "x.md", "", "");
+    assert.match(html, />&lt;b&gt;&amp;<\/a>/);
   });
 });
 
@@ -95,6 +106,16 @@ describe("renderMetaTags", () => {
     const html = renderMetaTags({ ogTitle: "タイトル" });
     assert.doesNotMatch(html, /name="description"/);
     assert.doesNotMatch(html, /og:description/);
+  });
+
+  test("siteNameが非空ならog:site_nameを出力する", () => {
+    const html = renderMetaTags({ ogTitle: "t", siteName: "My & Site" });
+    assert.match(html, /<meta property="og:site_name" content="My &amp; Site">/);
+  });
+
+  test("siteName未設定ならog:site_nameを出力しない", () => {
+    const html = renderMetaTags({ ogTitle: "t" });
+    assert.doesNotMatch(html, /og:site_name/);
   });
 
   test("og:titleは常に出力される", () => {

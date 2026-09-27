@@ -114,6 +114,26 @@ test("buildDocsPagesYml: TRIGGER_BRANCH判定・BASE_PATH算出・デプロイ�
   assert.ok(yml.includes("uses: actions/deploy-pages@"));
 });
 
+test("buildDocsPagesYml: 権限は最小限(トップレベルはcontents: readのみ、pages/id-tokenはdeployジョブだけ)", () => {
+  const yml = buildDocsPagesYml();
+  const [top, jobs] = yml.split("\njobs:\n");
+  assert.ok(top.includes("permissions:\n  contents: read\n"));
+  assert.doesNotMatch(top, /pages: write|id-token: write/);
+  const [buildJob, deployJob] = jobs.split("\n  deploy:\n");
+  assert.doesNotMatch(buildJob, /pages: write|id-token: write/);
+  assert.ok(deployJob.includes("permissions:\n      pages: write\n      id-token: write\n"));
+});
+
+test("buildDocsPagesYml: 設定ファイルは既知のキーだけを取り込み、xargsを使わない", () => {
+  const yml = buildDocsPagesYml();
+  assert.match(
+    yml,
+    /TRIGGER_BRANCH\|ROOT_MD\|OUT_DIR\|STYLE_FILE\|LANG\|NAV_ENABLED\|FAVICON_FILE\|SITE_NAME\|CUSTOM_DOMAIN\|OGP_DEFAULT_IMAGE\|THEME\)/
+  );
+  assert.ok(!yml.includes("| xargs"));
+  assert.ok(yml.includes("--ignore-scripts"));
+});
+
 test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=README.md/THEME=wa", () => {
   const config = buildDocsPagesConfig({
     triggerBranch: "main",

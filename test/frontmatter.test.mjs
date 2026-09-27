@@ -82,3 +82,17 @@ test("lang: en指定時にmeta.lang === 'en'としてパースされる(保持�
   const result = parseFrontmatter(raw);
   assert.equal(result.meta.lang, "en");
 });
+
+test("改行コードがCRLFでもfrontmatterを認識する", () => {
+  const raw = "---\r\ntitle: Windows\r\nnoindex: true\r\n---\r\n# 本文\r\n";
+  const result = parseFrontmatter(raw);
+  assert.deepEqual(result.meta, { title: "Windows", noindex: true });
+  assert.equal(result.body, "# 本文\n");
+});
+
+test("先頭にBOMが付いていてもfrontmatterを認識する", () => {
+  const raw = "\uFEFF---\ntitle: BOM付き\n---\n本文\n";
+  const result = parseFrontmatter(raw);
+  assert.deepEqual(result.meta, { title: "BOM付き" });
+  assert.equal(result.body, "本文\n");
+});

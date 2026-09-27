@@ -194,3 +194,29 @@ test("loadConfig は例外を投げない(不正値だらけの入力)", () => {
     });
   });
 });
+
+test("NAV_ENABLED・THEME・LANGを省略(未設定・空文字)してもwarnは出ない", () => {
+  withCapturedWarn((calls) => {
+    const unset = loadConfig({});
+    const empty = loadConfig({ NAV_ENABLED: "", THEME: "  ", LANG: "" });
+    for (const config of [unset, empty]) {
+      assert.equal(config.navEnabled, false);
+      assert.equal(config.theme, "wa");
+      assert.equal(config.lang, "ja");
+    }
+    assert.deepEqual(calls, []);
+  });
+});
+
+test('LANG="en-US" などBCP 47形式の言語タグはそのまま使う', () => {
+  assert.equal(loadConfig({ LANG: "en-US" }).lang, "en-US");
+  assert.equal(loadConfig({ LANG: "zh-Hant-TW" }).lang, "zh-Hant-TW");
+});
+
+test('LANG="en_US.UTF-8"(OSのロケール値) → warnして"ja"', () => {
+  withCapturedWarn((calls) => {
+    const config = loadConfig({ LANG: "en_US.UTF-8" });
+    assert.equal(config.lang, "ja");
+    assert.ok(calls.some((c) => c.includes("LANG")));
+  });
+});

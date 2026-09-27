@@ -16,6 +16,9 @@ import { normalizeBasePath } from "./path-utils.mjs";
 // 相対パスで指定された独自CSSファイル」とみなされる(build-docs.mjs側の判定基準)。
 export const ALLOWED_THEMES = ["wa", "muji", "sumi", "ai", "shu", "none"];
 const HOSTNAME_RE = /^[a-zA-Z0-9.-]+$/;
+// BCP 47 形式の言語タグ(例: "ja" / "en" / "en-US" / "zh-Hant-TW")の簡易チェック。
+// OSの環境変数 LANG(例: "en_US.UTF-8")がローカル実行時にそのまま渡ってきた場合を弾く。
+const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
 
 /**
  * @typedef {object} Config
@@ -49,7 +52,7 @@ export function loadConfig(env = process.env) {
 
   const basePath = normalizeBasePath((env.BASE_PATH ?? "").trim());
 
-  const lang = trimOr(env.LANG, "ja");
+  const lang = resolveLang(env.LANG);
 
   const navEnabled = parseNavEnabled(env.NAV_ENABLED);
 
@@ -84,10 +87,11 @@ function trimOr(raw, fallback) {
   return trimmed || fallback;
 }
 
+// 省略(未設定・空文字)は既定値 false として黙って扱い、不正値のときだけ warn する。
 function parseNavEnabled(raw) {
   const trimmed = (raw ?? "").trim().toLowerCase();
   if (trimmed === "true") return true;
-  if (trimmed === "false") return false;
+  if (trimmed === "false" || trimmed === "") return false;
   console.warn(
     `[config] NAV_ENABLED の値が不正です("${raw ?? ""}")。false にフォールバックします。`
   );
@@ -105,6 +109,17 @@ function resolveSiteName(env) {
   return "";
 }
 
+// 省略(未設定・空文字)は既定値 "ja" として黙って扱い、言語タグとして不正な値のときだけ warn する。
+function resolveLang(raw) {
+  const trimmed = (raw ?? "").trim();
+  if (trimmed === "") return "ja";
+  if (LANG_TAG_RE.test(trimmed)) return trimmed;
+  console.warn(
+    `[config] LANG の値が言語タグとして不正です("${trimmed}")。"ja" にフォールバックします。`
+  );
+  return "ja";
+}
+
 function resolveCustomDomain(raw) {
   const trimmed = (raw ?? "").trim();
   if (!trimmed) return "";
@@ -115,8 +130,10 @@ function resolveCustomDomain(raw) {
   return "";
 }
 
+// 省略(未設定・空文字)は既定値 "wa" として黙って扱い、不正値のときだけ warn する。
 function resolveTheme(raw) {
   const trimmed = (raw ?? "").trim();
+  if (trimmed === "") return "wa";
   if (ALLOWED_THEMES.includes(trimmed)) return trimmed;
   console.warn(
     `[config] THEME の値が不正です("${trimmed}")。"wa" にフォールバックします。`

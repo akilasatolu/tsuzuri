@@ -14,6 +14,7 @@
  *     依存を排除)。
  */
 
+import fs from "node:fs";
 import path from "node:path";
 
 const posix = path.posix;
@@ -112,4 +113,39 @@ export function toSiteAbsHref(fromRel, rawHref, basePath) {
     repoRel = repoRel.replace(/\.md$/i, ".html");
   }
   return `${basePath}/${repoRel}${rest}`;
+}
+
+function isInsideDir(dir, target) {
+  return target === dir || target.startsWith(dir.endsWith(path.sep) ? dir : dir + path.sep);
+}
+
+// リポジトリルートからの相対パス(設定ファイルやfrontmatterで指定されたもの)を絶対パスに
+// 解決する。解決結果がリポジトリルートの外を指す場合は null を返す。
+//   - "../" や絶対パスでルート外を指すもの(字句上の判定)
+//   - シンボリックリンクをたどった実体がルート外にあるもの(realpathでの判定)
+// のどちらも拒否する。ファイルが存在しない場合は字句上の判定だけを行い、
+// 存在チェックは呼び出し側に任せる。
+//
+// @param {string} repoRoot - リポジトリルートの絶対パス
+// @param {string} relPath
+// @param {(p: string) => string} [realpath] - DI: テスト用(既定 fs.realpathSync)
+// @returns {string|null}
+export function resolveInsideRepo(repoRoot, relPath, realpath = fs.realpathSync) {
+  const root = path.resolve(repoRoot);
+  const abs = path.resolve(root, relPath);
+  if (!isInsideDir(root, abs)) return null;
+
+  let realRoot;
+  try {
+    realRoot = realpath(root);
+  } catch {
+    realRoot = root;
+  }
+  let realAbs;
+  try {
+    realAbs = realpath(abs);
+  } catch {
+    return abs; // 存在しないファイル。存在チェックは呼び出し側で行う
+  }
+  return isInsideDir(realRoot, realAbs) ? abs : null;
 }

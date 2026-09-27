@@ -9,6 +9,7 @@ import {
   splitHref,
   resolveRepoRel,
   toSiteAbsHref,
+  resolveInsideRepo,
 } from "../.github/scripts/lib/path-utils.mjs";
 
 describe("normalizeBasePath", () => {
@@ -161,5 +162,45 @@ describe("toSiteAbsHref", () => {
   test("外部リンク・拒否されたリンクは元の文字列のまま返す", () => {
     assert.equal(toSiteAbsHref("README.md", "https://example.com", "/my-repo"), "https://example.com");
     assert.equal(toSiteAbsHref("README.md", "#section", "/my-repo"), "#section");
+  });
+});
+
+describe("resolveInsideRepo", () => {
+  // 実ファイルに依存しないよう realpath をDIで差し替える。
+  // links: シンボリックリンクの実体を表すテーブル。存在しないパスは ENOENT を投げる。
+  function fakeRealpath(existing, links = {}) {
+    return (p) => {
+      if (links[p]) return links[p];
+      if (existing.includes(p)) return p;
+      throw new Error(`ENOENT: ${p}`);
+    };
+  }
+  const realpath = fakeRealpath(["/repo", "/repo/a.css", "/repo/docs/b.css"], {
+    "/repo/link.css": "/etc/passwd",
+    "/repo/inner-link.css": "/repo/docs/b.css",
+  });
+
+  test("リポジトリ内の相対パスは絶対パスに解決する", () => {
+    assert.equal(resolveInsideRepo("/repo", "a.css", realpath), "/repo/a.css");
+    assert.equal(resolveInsideRepo("/repo", "docs/../a.css", realpath), "/repo/a.css");
+  });
+  test("存在しないファイルでもリポジトリ内なら解決する(存在チェックは呼び出し側)", () => {
+    assert.equal(resolveInsideRepo("/repo", "missing.css", realpath), "/repo/missing.css");
+  });
+  test("../ でリポジトリ外を指すものは null", () => {
+    assert.equal(resolveInsideRepo("/repo", "../outside.css", realpath), null);
+    assert.equal(resolveInsideRepo("/repo", "docs/../../outside.css", realpath), null);
+  });
+  test("絶対パスでリポジトリ外を指すものは null", () => {
+    assert.equal(resolveInsideRepo("/repo", "/etc/passwd", realpath), null);
+  });
+  test("名前が前方一致するだけの隣接ディレクトリは外扱い", () => {
+    assert.equal(resolveInsideRepo("/repo", "../repo-evil/a.css", realpath), null);
+  });
+  test("実体がリポジトリ外のシンボリックリンクは null", () => {
+    assert.equal(resolveInsideRepo("/repo", "link.css", realpath), null);
+  });
+  test("実体がリポジトリ内のシンボリックリンクは許可", () => {
+    assert.equal(resolveInsideRepo("/repo", "inner-link.css", realpath), "/repo/inner-link.css");
   });
 });

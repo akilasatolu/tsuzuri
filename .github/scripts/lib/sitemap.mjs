@@ -33,9 +33,10 @@
  * @param {boolean} opts.customStyleApplied - カスタム CSS が適用されたか
  * @param {Map<string, {content: string, meta?: {title?: string, description?: string}}>} opts.visitedMd
  * @param {Iterable<string>} opts.imageSet - 収集された画像の相対パス集合
- * @param {object} opts.hierarchy - ページ階層構造
+ * @param {object} opts.hierarchy - ページ階層構造(リンクをたどった親子関係)
+ * @param {object} [opts.tree] - ディレクトリ階層に沿ったサイトツリー(site-tree.mjs の buildSiteTree の戻り値)
  * @param {Array} opts.missing - 見つからなかったリンクの一覧
- * @param {Array<{rel: string, referencedFrom: string, reason: "path-traversal"|"decode-error"}>} [opts.rejected]
+ * @param {Array<{rel: string, referencedFrom: string|null, reason: "path-traversal"|"decode-error"|"outside-repo"}>} [opts.rejected]
  *   - パストラバーサル等でスキップされたリンクの一覧 (省略時は空配列)
  * @param {string} opts.lang - サイト全体の言語コード
  * @param {string} opts.siteName - サイト名
@@ -53,6 +54,7 @@ export function buildSitemap(opts) {
     visitedMd,
     imageSet,
     hierarchy,
+    tree,
     missing,
     rejected,
     lang,
@@ -89,6 +91,7 @@ export function buildSitemap(opts) {
     pageRels,
     images: [...imageSet],
     hierarchy,
+    tree: tree ?? null,
     missing,
     rejected: rejected ? [...rejected] : [],
     lang,
