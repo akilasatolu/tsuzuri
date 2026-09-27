@@ -39,6 +39,9 @@ import {
   isBundledPath,
   createBundledConfirm,
   missingConfigKeys,
+  findRepoRoot,
+  checkSetupLocation,
+  guessDefaultBranch,
 } from "../bin/cli.mjs";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
@@ -828,6 +831,85 @@ test("runUpdate: 設定ファイルに無い新しい項目を案内する(設�
     const notice = logs.find((m) => m.includes("設定ファイルに無い項目"));
     assert.ok(notice && notice.includes("LAST_UPDATED") && notice.includes("configuration.html"));
     assert.equal(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), "TRIGGER_BRANCH=main\nTHEME=wa\n");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// --- init を実行する場所・既定ブランチ・.gitignore ---
+
+test("checkSetupLocation: リポジトリ直下なら注意なし、サブディレクトリ・git外なら注意を返す", () => {
+  const exists = (p) => p === "/repo/.git";
+  assert.equal(findRepoRoot("/repo/sub/dir", exists), "/repo");
+  assert.deepEqual(checkSetupLocation("/repo", exists), []);
+  assert.match(checkSetupLocation("/repo/sub", exists)[0], /リポジトリの直下ではありません\(直下: \/repo\)/);
+  assert.match(checkSetupLocation("/elsewhere", exists)[0], /git リポジトリの中ではない/);
+});
+
+test("guessDefaultBranch: origin/HEAD → 今のブランチ → main の順に推測する", () => {
+  assert.equal(guessDefaultBranch("/r", () => "origin/develop\n"), "develop");
+  const noRemote = (args) => {
+    if (args[0] === "symbolic-ref") throw new Error("no remote");
+    return "docs\n";
+  };
+  assert.equal(guessDefaultBranch("/r", noRemote), "docs");
+  assert.equal(guessDefaultBranch("/r", () => { throw new Error("no git"); }), "main");
+});
+
+test("init は .github/tsuzuri/.gitignore(node_modules/)も生成し、--update でも更新対象になる", () => {
+  const target = buildVendorTargets().find((t) => t.relPath === `${VENDOR_DIR}/.gitignore`);
+  assert.ok(target);
+  assert.match(target.content, /^node_modules\/$/m);
+  assert.equal(isBundledPath(`${VENDOR_DIR}/.gitignore`), true);
+});
+
+test("CLI: リポジトリ直下以外・ROOT_MDが無いときは警告し、既定ブランチは今のブランチから推測する", () => {
+  const dir = makeTmpDir();
+  try {
+    const git = (...args) => spawnSync("git", args, { cwd: dir, encoding: "utf8" });
+    git("init", "-q", "-b", "pages");
+    mkdirSync(join(dir, "sub"));
+    const cli = join(PACKAGE_ROOT, "bin/cli.mjs");
+    let result = spawnSync(process.execPath, [cli, "-y", "--root", "nope.md"], { cwd: join(dir, "sub"), encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stderr, /リポジトリの直下ではありません/);
+    assert.match(result.stderr, /起点の nope\.md がまだありません/);
+
+    writeFileSync(join(dir, "README.md"), "# x\n");
+    result = spawnSync(process.execPath, [cli, "-y"], { cwd: dir, encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    assert.doesNotMatch(result.stderr, /直下ではありません|まだありません/);
+    assert.match(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), /^TRIGGER_BRANCH=pages$/m);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// --- 生成ワークフローのシェル部分を実際に動かす ---
+
+test("生成ワークフローの Load config: CRLF・引用符・=を含む値・未知のキー・末尾に改行の無い行を正しく読む", () => {
+  const dir = makeTmpDir();
+  try {
+    const yml = buildDocsPagesYml();
+    const m = yml.match(/- name: Load config\n {8}run: \|\n((?: {10}.*\n|\n)+?)(?= {6}[-#])/);
+    assert.ok(m, "Load config ステップを取り出せること");
+    const script = m[1].split("\n").map((line) => line.slice(10)).join("\n");
+    writeFileSync(join(dir, "load.sh"), script);
+    mkdirSync(join(dir, ".github"));
+    writeFileSync(
+      join(dir, ".github/docs-pages.config"),
+      "# comment\r\nSITE_NAME = Bob's \"docs\"  \r\nOGP_DEFAULT_IMAGE=https://x.example/a.png?w=1&h=2\r\n\r\nNODE_OPTIONS=--require x\nTHEME=sumi  # 暗い配色\nLANG=en"
+    );
+    const envFile = join(dir, "github.env");
+    const result = spawnSync("bash", ["-e", "load.sh"], { cwd: dir, encoding: "utf8", env: { ...process.env, GITHUB_ENV: envFile } });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /未知の設定キー NODE_OPTIONS を無視します/);
+    const env = readFileSync(envFile, "utf8");
+    assert.match(env, /^SITE_NAME=Bob's "docs"$/m);
+    assert.match(env, /^OGP_DEFAULT_IMAGE=https:\/\/x\.example\/a\.png\?w=1&h=2$/m);
+    assert.match(env, /^THEME=sumi {2}# 暗い配色$/m, "行の途中の#はコメントにならない(ドキュメントどおり)");
+    assert.match(env, /^LANG=en$/m, "末尾に改行の無い最後の行も読む");
+    assert.doesNotMatch(env, /NODE_OPTIONS|\r/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

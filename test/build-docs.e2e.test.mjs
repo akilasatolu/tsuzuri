@@ -41,6 +41,8 @@ const CONFIG_ENV_KEYS = [
   "STRICT_LINKS",
   "SITEMAP_JSON",
   "LAST_UPDATED",
+  "GITHUB_SERVER_URL",
+  "GITHUB_SHA",
 ];
 
 function makeTmpDir() {
@@ -511,7 +513,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("ナビはディレクトリ階層に沿い、表示名はfrontmatterのtitle(無ければファイル名)", () => {
+  test("ナビはディレクトリ階層に沿い、表示名はfrontmatterのtitle(無ければh1)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
@@ -525,7 +527,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.equal(result.status, 0, result.stderr);
 
       const indexHtml = readOut(dir, "index.html");
-      assert.match(indexHtml, /<li><a href="\/README\.html" aria-current="page">README\.md<\/a><\/li>/);
+      assert.match(indexHtml, /<li><a href="\/README\.html" aria-current="page">Root Page<\/a><\/li>/);
       assert.match(indexHtml, /<li><span>docs<\/span><ul><li><a href="\/docs\/a\.html">ページA<\/a><\/li><\/ul><\/li>/);
 
       const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
@@ -1074,6 +1076,146 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.ok(!fs.existsSync(path.join(dir, "_site", "README.html")), "直下のREADME.mdは公開しない");
       assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).pageRels.sort(), ["docs/a.md", "docs/index.md"]);
       assert.match(readOut(dir, "index.html"), /<a href="\/">top<\/a>/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("コードブロック・インラインコード内のHTMLの例は書き換えず、生のHTMLは大文字のタグも書き換える", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        [
+          "# Root Page",
+          "",
+          "```html",
+          '<a href="page.md">例</a>',
+          "```",
+          "",
+          '本文 `<img src="logo.png">` と <A HREF="docs/a.md">大文字</A>',
+          "",
+        ].join("\n")
+      );
+      const result = runBuild(dir, { BASE_PATH: "/repo" });
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "index.html");
+      assert.match(html, /&quot;page\.md&quot;/, "コードブロック内はそのまま");
+      assert.doesNotMatch(html, /page\.html/, "コードブロック内のリンクを書き換えない");
+      assert.match(html, /<code>&lt;img src=&quot;logo\.png&quot;&gt;<\/code>/, "インラインコード内はそのまま");
+      assert.match(html, /<A HREF="\/repo\/docs\/a\.html">大文字<\/A>/);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "docs", "a.html")), "大文字の<A>のリンク先もたどる");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("拡張子の無いパス: READMEのあるディレクトリはサイトへ、サイトに出さないファイルはGitHubへ、無ければリンク切れ", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.mkdirSync(path.join(dir, "guide"));
+      fs.writeFileSync(path.join(dir, "guide", "README.md"), "# Guide\n");
+      fs.mkdirSync(path.join(dir, "src"));
+      fs.writeFileSync(path.join(dir, "src", "main.js"), "");
+      fs.writeFileSync(path.join(dir, "LICENSE"), "MIT");
+      fs.writeFileSync(path.join(dir, ".env.example"), "A=1");
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        "# Root Page\n\n[guide](guide) [src](src/) [MIT](LICENSE) [env](.env.example) [none](nothing)\n"
+      );
+      const gh = { GITHUB_SERVER_URL: "https://github.com", GITHUB_REPOSITORY: "o/r", GITHUB_SHA: "abc123" };
+      let result = runBuild(dir, { ...gh, STRICT_LINKS: "" });
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "index.html");
+      assert.match(html, /<a href="\/guide\/">guide<\/a>/);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "guide", "index.html")));
+      assert.match(html, /<a href="https:\/\/github\.com\/o\/r\/tree\/abc123\/src">src<\/a>/);
+      assert.match(html, /<a href="https:\/\/github\.com\/o\/r\/blob\/abc123\/LICENSE">MIT<\/a>/);
+      assert.match(html, /<a href="https:\/\/github\.com\/o\/r\/blob\/abc123\/\.env\.example">env<\/a>/);
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "LICENSE")), "サイトにはコピーしない");
+      assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).missing, [{ rel: "nothing", referencedFrom: "README.md" }]);
+
+      result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
+      assert.equal(result.status, 1, "存在しないリンク先はSTRICT_LINKSで失敗する");
+
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root Page\n\n[MIT](LICENSE)\n");
+      result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 1, "GitHub上のURLが分からない(Actions外)ときはリンク切れとして扱う");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("ナビ・前後ページの表示名はtitleが無ければh1。404.mdの画像はコピーされる。sitemap.xmlはURLをエンコードしlastmodを付ける", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "docs", "with space.md"), "# スペース付き\n");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root Page\n\n[A](docs/a.md) [S](<docs/with space.md>)\n");
+      fs.mkdirSync(path.join(dir, "img"));
+      fs.writeFileSync(path.join(dir, "img", "nf.png"), "png");
+      fs.writeFileSync(path.join(dir, "404.md"), "# 迷子\n\n![nf](img/nf.png)\n");
+      const git = (...args) => spawnSync("git", args, { cwd: dir, encoding: "utf-8" });
+      git("init", "-q");
+      git("add", "-A");
+      git("-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "-m", "init");
+
+      const result = runBuild(dir, {
+        NAV_ENABLED: "true",
+        SITE_ORIGIN: "https://o.github.io",
+        BASE_PATH: "/r",
+        LAST_UPDATED: "true",
+      });
+      assert.equal(result.status, 0, result.stderr);
+      const indexHtml = readOut(dir, "index.html");
+      assert.match(indexHtml, /<a href="\/r\/docs\/a\.html">Page A<\/a>/, "ナビの表示名はh1");
+      assert.match(indexHtml, /<span>次のページ<\/span>Page A<\/a>/, "前後ページの表示名もh1");
+      assert.equal(readOut(dir, "img", "nf.png"), "png", "404.mdの画像をコピーする");
+      const xml = readOut(dir, "sitemap.xml");
+      assert.match(xml, /<loc>https:\/\/o\.github\.io\/r\/docs\/with%20space\.html<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
+      assert.match(readOut(dir, "docs", "with space.html"), /<link rel="canonical" href="https:\/\/o\.github\.io\/r\/docs\/with%20space\.html">/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("日本語の文の途中の改行は取り除き、英語の文の改行は残す", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        "# Root Page\n\n日本語の文を\n途中で改行します。\n続きの文です。\nThis is\nEnglish.\n"
+      );
+      const result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(readOut(dir, "index.html"), /<p>日本語の文を途中で改行します。続きの文です。\nThis is\nEnglish\.<\/p>/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("ナビがあるページは本文へスキップのリンクを持ち、LANG=enならナビのラベルも英語", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      let result = runBuild(dir, { NAV_ENABLED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      let html = readOut(dir, "index.html");
+      assert.match(html, /<a class="tsuzuri-skip" href="#main">本文へスキップ<\/a>/);
+      assert.match(html, /<main id="main">/);
+      assert.match(html, /<nav aria-label="サイト内ページ">/);
+      result = runBuild(dir, { NAV_ENABLED: "true", LANG: "en" });
+      html = readOut(dir, "index.html");
+      assert.match(html, /<nav aria-label="Site pages">/);
+      assert.match(html, />Skip to content<\/a>/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

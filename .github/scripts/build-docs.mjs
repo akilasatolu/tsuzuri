@@ -44,7 +44,15 @@ import hljs from "highlight.js/lib/common";
 
 import { loadConfig, ALLOWED_THEMES } from "./lib/config.mjs";
 import { crawlSite } from "./lib/crawler.mjs";
-import { toSiteAbsHref, resolveInsideRepo, resolveRepoRel, isExternal } from "./lib/path-utils.mjs";
+import {
+  toSiteAbsHref,
+  resolveInsideRepo,
+  resolveRepoRel,
+  isExternal,
+  isImagePath,
+  isLinkedFilePath,
+} from "./lib/path-utils.mjs";
+import { extractLinks } from "./lib/link-extractor.mjs";
 import {
   escapeHtml,
   renderNav,
@@ -172,7 +180,7 @@ async function main() {
   }
 
   // ---------- 4. crawlSite ----------
-  const { visitedMd, imageSet, fileSet, hierarchy, missing, rejected } = crawlSite({
+  const { visitedMd, imageSet, fileSet, linkTargets, hierarchy, missing, rejected } = crawlSite({
     repoRoot: REPO_ROOT,
     rootRel: config.rootMd,
   });
@@ -204,7 +212,8 @@ async function main() {
       customCss = fs.readFileSync(styleAbs, "utf-8");
       console.log(`Custom style loaded: ${config.styleFile}`);
     } else {
-      console.warn(`Custom style file not found (${config.styleFile}); using default style.`);
+      // 独自CSSは任意なので、無くても警告にはしない
+      console.log(`Custom style file not used (${config.styleFile} does not exist).`);
     }
   }
 
@@ -246,6 +255,17 @@ async function main() {
   // marked はこのビルド専用のインスタンスを使う(脚注の拡張機能を組み込むため)。
   const isJaLang = config.lang.toLowerCase().startsWith("ja");
   const md = new Marked({ gfm: true, breaks: false });
+  // 日本語の文を途中で改行したとき、表示に余計な空白が入らないよう、前後がどちらも
+  // 全角文字(漢字・かな・全角の記号)の改行を取り除く(markdown-it-cjk-breaks と同じ考え方)
+  const CJK = "\\p{sc=Han}\\p{sc=Hiragana}\\p{sc=Katakana}\\u3000-\\u303f\\uff00-\\uffef";
+  const cjkBreak = new RegExp(`([${CJK}])\\n([${CJK}])`, "gu");
+  md.use({
+    walkTokens(token) {
+      if (token.type === "text" && !token.tokens && token.text.includes("\n")) {
+        token.text = token.text.replace(cjkBreak, "$1$2");
+      }
+    },
+  });
   md.use(
     markedFootnote({
       prefixId: "fn-",
@@ -344,6 +364,47 @@ async function main() {
 
   // ページの公開URLのうち basePath より後ろの部分。canonical・og:url・sitemap.xml で使う。
   //   ROOT_MD → ""(トップURL)、ディレクトリの README.md → "dir/"、それ以外 → "dir/page.html"
+  // URLのパス部分をパーセントエンコードする("/" はそのまま)。canonical・og:url・sitemap.xml 用。
+  const encodePath = (p) => p.split("/").map(encodeURIComponent).join("/");
+
+  // サイトに出さないが実在するリンク先(LICENSE・ドットファイル・README の無いディレクトリ)は、
+  // GitHub 上のファイル・一覧へのリンクにする。GitHub Actions が自動で設定する環境変数を使い、
+  // 分からない(手元でのビルド等)ときは null(リンク切れとして扱う)。
+  const repoBaseUrl =
+    process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_SHA
+      ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}`
+      : "";
+  function repoUrlOf(repoRel, isDir) {
+    if (!repoBaseUrl) return null;
+    return `${repoBaseUrl}/${isDir ? "tree" : "blob"}/${process.env.GITHUB_SHA}/${encodePath(repoRel)}`;
+  }
+  for (const [repoRel, target] of linkTargets) {
+    if (target.kind === "repo" && !repoUrlOf(repoRel, target.isDir)) {
+      missing.push({ rel: repoRel, referencedFrom: null });
+      console.warn(
+        `[build-docs] ${repoRel} はサイトに含めないファイル・ディレクトリです。GitHub上のURLが分からない(GitHub Actions 以外でのビルド)ため、リンク切れとして扱います。`
+      );
+    }
+  }
+
+  // Markdown・生のHTMLのリンク先を、サイト上のURLに書き換える。
+  //   - README.md / index.md のあるディレクトリ(末尾の "/" の有無を問わない) → サイトの "dir/"
+  //   - サイトに出さない実在のファイル・ディレクトリ → GitHub 上のURL
+  //   - それ以外 → toSiteAbsHref(.md → .html、basePath 付きの絶対パス)
+  function siteHref(fromRel, href) {
+    const resolved = resolveRepoRel(fromRel, href);
+    if (!resolved.rejected) {
+      const bare = resolved.repoRel.replace(/\/+$/, "");
+      const target = linkTargets.get(bare);
+      if (target?.kind === "dir") return `${config.basePath}/${bare}/${resolved.rest}`;
+      if (target?.kind === "repo") {
+        const url = repoUrlOf(bare, target.isDir);
+        if (url) return `${url}${resolved.rest}`;
+      }
+    }
+    return toSiteAbsHref(fromRel, href, config.basePath);
+  }
+
   function urlPathOf(rel) {
     if (rel === config.rootMd) return "";
     const dir = path.posix.dirname(rel);
@@ -358,16 +419,21 @@ async function main() {
     // this.parser.parseInline(tokens) でHTMLにする(this を使うためアロー関数にしない)。
     const renderer = new md.Renderer();
     renderer.link = function ({ href, title, tokens }) {
-      const newHref = toSiteAbsHref(rel, href, config.basePath);
+      const newHref = siteHref(rel, href);
       const text = this.parser.parseInline(tokens);
       return `<a href="${escapeHtml(newHref)}"${title ? ` title="${escapeHtml(title)}"` : ""}>${text}</a>`;
     };
     // 画像は画面に入るまで読み込まない(loading="lazy")。ページの表示を速くするため。
     renderer.image = function ({ href, title, text }) {
-      const newHref = toSiteAbsHref(rel, href, config.basePath);
+      const newHref = siteHref(rel, href);
       return `<img src="${escapeHtml(newHref)}" alt="${escapeHtml(text || "")}"${
         title ? ` title="${escapeHtml(title)}"` : ""
       } loading="lazy" decoding="async">`;
+    };
+    // 生のHTML(<a href>・<img src>)のリンク先も書き換える。marked はコードの中身を html トークンに
+    // しないので、コードブロック・インラインコードに書いたHTMLの例は書き換わらない。
+    renderer.html = function ({ text }) {
+      return preprocessRawHtmlPaths(text, rel, config.basePath, siteHref);
     };
     // GitHub の注意書き(> [!NOTE] など)を、種類ごとの枠として表示する。
     renderer.blockquote = function ({ tokens }) {
@@ -413,13 +479,12 @@ async function main() {
       return `<h${depth} id="${escapeHtml(id)}">${inner}${anchor}</h${depth}>\n`;
     };
 
-    const preprocessed = preprocessRawHtmlPaths(content, rel, config.basePath);
-    let bodyHtml = md.parse(preprocessed, { renderer });
+    let bodyHtml = md.parse(content, { renderer });
     // タイトル: frontmatter の title > 最初の h1 の表示テキスト > ファイルパス。
     // (h1 は描画時の見出しから取るので、コードブロック内の "# コメント" を誤って拾わない)
     const title = (typeof meta.title === "string" && meta.title) || firstH1 || rel;
     if (search && visitedMd.has(rel)) {
-      searchPages.push({ title, url: `${config.basePath}/${urlPathOf(rel)}`, html: bodyHtml });
+      searchPages.push({ title, url: `${config.basePath}/${encodePath(urlPathOf(rel))}`, html: bodyHtml });
     }
     // ページ内の目次(NAV_ENABLED=true で、h2・h3 が3つ以上あるページ。frontmatter の toc: false で消せる)
     if (config.navEnabled && String(meta.toc).trim() !== "false" && headings.length >= 3) {
@@ -440,7 +505,7 @@ async function main() {
     }
 
     const navHtml = config.navEnabled
-      ? renderNav(siteTree, rel, config.basePath, config.siteName, menuLabel, search)
+      ? renderNav(siteTree, rel, config.basePath, config.siteName, menuLabel, search, isJa ? "サイト内ページ" : "Site pages")
       : "";
 
     // SEOメタタグは「出力すべき情報が何もない」場合は metaTagsHtml="" のままとし、
@@ -453,7 +518,9 @@ async function main() {
       : resolveOgImage(config.ogDefaultImage, config.rootMd);
     const ogType = meta.ogType || "website";
     const canonicalUrl =
-      canonical && config.siteOrigin ? `${config.siteOrigin}${config.basePath}/${urlPathOf(rel)}` : "";
+      canonical && config.siteOrigin
+        ? `${config.siteOrigin}${config.basePath}/${encodePath(urlPathOf(rel))}`
+        : "";
     const noindex = meta.noindex === true;
 
     const siteName = config.siteName;
@@ -483,6 +550,7 @@ async function main() {
       lang: config.lang,
       navHtml,
       metaTagsHtml,
+      skipLabel: isJa ? "本文へスキップ" : "Skip to content",
     });
   }
 
@@ -511,6 +579,13 @@ async function main() {
         ? fs.readFileSync(notFoundAbs, "utf-8")
         : defaultNotFoundMarkdown(config.lang);
     const { meta, body } = parseFrontmatter(raw);
+    // 404.md はクロールの対象外なので、中で使っている画像・ファイルはここで出力の対象に加える
+    for (const href of extractLinks(body)) {
+      const resolved = resolveRepoRel("404.md", href);
+      if (resolved.rejected) continue;
+      if (isImagePath(resolved.repoRel)) imageSet.add(resolved.repoRel);
+      else if (isLinkedFilePath(resolved.repoRel)) fileSet.add(resolved.repoRel);
+    }
     writeOut("404.html", renderPage("404.md", body, { ...meta, noindex: true }, { canonical: false }));
   }
 
@@ -544,7 +619,10 @@ async function main() {
   if (config.siteOrigin) {
     const urls = [...visitedMd.entries()]
       .filter(([, { meta }]) => meta.noindex !== true)
-      .map(([rel]) => `${config.siteOrigin}${config.basePath}/${urlPathOf(rel)}`);
+      .map(([rel]) => ({
+        loc: `${config.siteOrigin}${config.basePath}/${encodePath(urlPathOf(rel))}`,
+        lastmod: lastUpdatedOf(rel) || undefined,
+      }));
     fs.writeFileSync(path.join(OUT_DIR, "sitemap.xml"), buildSitemapXml(urls));
     // robots.txt はドメイン直下にしか置けないため、サイトがドメイン直下にあるときだけ作る
     if (!config.basePath) {

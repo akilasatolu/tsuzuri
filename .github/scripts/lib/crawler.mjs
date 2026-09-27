@@ -26,7 +26,7 @@
 
 import fs from "node:fs";
 import { resolveRepoRel, resolveInsideRepo, isMarkdownPath, isImagePath, isLinkedFilePath } from "./path-utils.mjs";
-import { extractLinks } from "./link-extractor.mjs";
+import { extractLinks, firstHeadingText } from "./link-extractor.mjs";
 import { parseFrontmatter } from "./frontmatter.mjs";
 
 /**
@@ -37,6 +37,14 @@ import { parseFrontmatter } from "./frontmatter.mjs";
 
 // ディレクトリへのリンクのとき、たどるページ(優先順)
 const DIR_INDEX_NAMES = ["README.md", "readme.md", "index.md"];
+
+function defaultIsDirectory(abs) {
+  try {
+    return fs.statSync(abs).isDirectory();
+  } catch {
+    return false;
+  }
+}
 
 /**
  * @param {object} options
@@ -60,13 +68,23 @@ export function crawlSite({
   readFile = fs.readFileSync,
   exists = fs.existsSync,
   realpath = fs.realpathSync,
+  isDirectory = defaultIsDirectory,
 }) {
-  const visitedMd = new Map(); // relPath(posix) -> { content, meta }
+  const visitedMd = new Map(); // relPath(posix) -> { content, meta, h1 }
   const imageSet = new Set(); // relPath(posix)
   const fileSet = new Set(); // relPath(posix)。Markdown・画像以外のリンク先(PDF・zip等)
   const hierarchy = {}; // relPath -> { parent, children: [] }
   const missing = [];
   const rejected = [];
+  // サイトのページ・ファイルにはならないが、実在するリンク先(パスの末尾の "/" は除いた形がキー)
+  //   { kind: "dir" }            … README.md / index.md のあるディレクトリ(サイトの "dir/" を指す)
+  //   { kind: "repo", isDir }    … サイトに出さないファイル(LICENSE・ドットファイル等)や、
+  //                                README の無いディレクトリ。描画では GitHub 上の URL に置き換える
+  const linkTargets = new Map();
+  const existsInRepo = (repoRel) => {
+    const abs = resolveInsideRepo(repoRoot, repoRel, realpath);
+    return abs && exists(abs) ? abs : null;
+  };
 
   const queue = [{ rel: rootRel, parent: null }];
   while (queue.length > 0) {
@@ -87,7 +105,7 @@ export function crawlSite({
 
     const rawContent = readFile(abs, "utf-8");
     const { meta, body } = parseFrontmatter(rawContent);
-    visitedMd.set(rel, { content: body, meta });
+    visitedMd.set(rel, { content: body, meta, h1: firstHeadingText(body) });
     hierarchy[rel] = { parent, children: [] };
     if (parent && hierarchy[parent]) {
       hierarchy[parent].children.push(rel);
@@ -107,36 +125,51 @@ export function crawlSite({
       }
 
       const { repoRel } = resolved;
+      const bare = repoRel.replace(/\/+$/, "");
 
-      // ディレクトリへのリンク("guide/" など): 中の README.md か index.md をたどる。
-      // どちらも無ければリンク切れとして記録する(公開サイトでは 404 になるため)。
-      if (repoRel.endsWith("/") || repoRel === ".") {
-        const dir = repoRel === "." || repoRel === "./" ? "" : repoRel;
-        // サイトのルート("/" や "../" で直下を指すリンク)は、描画ではトップURL(= ROOT_MD のページ)を
-        // 指すので、リポジトリ直下の README.md ではなく ROOT_MD をたどる
-        if (!dir) {
-          queue.push({ rel: rootRel, parent: rel });
-          continue;
-        }
-        const indexRel = DIR_INDEX_NAMES.map((name) => `${dir}${name}`).find((candidate) => {
-          const abs = resolveInsideRepo(repoRoot, candidate, realpath);
-          return abs && exists(abs);
-        });
-        if (indexRel) queue.push({ rel: indexRel, parent: rel });
-        else if (dir) missing.push({ rel: repoRel, referencedFrom: rel });
+      // サイトのルート("/" や "../" で直下を指すリンク)は、描画ではトップURL(= ROOT_MD のページ)を
+      // 指すので、リポジトリ直下の README.md ではなく ROOT_MD をたどる
+      if (bare === "" || bare === ".") {
+        queue.push({ rel: rootRel, parent: rel });
         continue;
       }
 
-      if (isMarkdownPath(repoRel)) {
-        queue.push({ rel: repoRel, parent: rel });
-      } else if (isImagePath(repoRel)) {
-        imageSet.add(repoRel);
-      } else if (isLinkedFilePath(repoRel)) {
-        fileSet.add(repoRel);
+      if (isMarkdownPath(bare)) {
+        queue.push({ rel: bare, parent: rel });
+        continue;
       }
-      // 拡張子の無いパス(ディレクトリへのリンク等)・ドットファイルはコピー対象にしない
+      if (isImagePath(bare)) {
+        imageSet.add(bare);
+        continue;
+      }
+      if (isLinkedFilePath(bare) && !repoRel.endsWith("/")) {
+        fileSet.add(bare); // 存在しなければコピー時にリンク切れとして報告される
+        continue;
+      }
+
+      // ここに来るのは、ディレクトリへのリンク("guide/"・"guide")、拡張子の無いファイル(LICENSE)、
+      // ドットファイル(.env.example)。実在するものだけを扱い、無ければリンク切れにする。
+      const abs = existsInRepo(bare);
+      if (!abs) {
+        missing.push({ rel: repoRel, referencedFrom: rel });
+        continue;
+      }
+      if (isDirectory(abs)) {
+        // ディレクトリ: 中の README.md / index.md をたどり、サイトの "dir/" へのリンクにする。
+        // どちらも無ければ、GitHub 上のディレクトリ一覧へのリンクにする。
+        const indexRel = DIR_INDEX_NAMES.map((name) => `${bare}/${name}`).find((c) => existsInRepo(c));
+        if (indexRel) {
+          queue.push({ rel: indexRel, parent: rel });
+          linkTargets.set(bare, { kind: "dir" });
+        } else {
+          linkTargets.set(bare, { kind: "repo", isDir: true });
+        }
+      } else {
+        // サイトには出さないファイル(LICENSE・ドットファイル等)は、GitHub 上のファイルへのリンクにする
+        linkTargets.set(bare, { kind: "repo", isDir: false });
+      }
     }
   }
 
-  return { visitedMd, imageSet, fileSet, hierarchy, missing, rejected };
+  return { visitedMd, imageSet, fileSet, linkTargets, hierarchy, missing, rejected };
 }

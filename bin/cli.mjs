@@ -15,6 +15,7 @@ import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, realpa
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
+import { execFileSync } from "node:child_process";
 
 // 実リポジトリ作成時に確定させる固定値。
 // 「今動いているセットアップコマンド自体がどのバージョンか」を利用者に案内する際や、
@@ -282,6 +283,13 @@ export function buildVendorTargets(packageRoot = PACKAGE_ROOT, fsImpl = { exists
     }
   }
 
+  // 手元でプレビューするときに入れる依存(.github/tsuzuri/node_modules)を誤ってコミットしないように
+  targets.push({
+    name: ".gitignore",
+    relPath: `${VENDOR_DIR}/.gitignore`,
+    content: "# 手元でビルドするときにインストールする依存(コミットしない)\nnode_modules/\n",
+  });
+
   return targets;
 }
 
@@ -415,11 +423,11 @@ export function createAsker(rl) {
  * 対話プロンプトで4項目(TRIGGER_BRANCH/ROOT_MD/THEME/STYLE_FILEひな形作成有無)を収集する。
  * readlineインターフェースは呼び出し側から注入する(テスト時は標準入力をモックしたものを渡す)。
  */
-export async function promptAnswers(rl) {
+export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
   const triggerBranchInput = await rl.question(
-    `? トリガーブランチ (TRIGGER_BRANCH) [${DEFAULT_ANSWERS.triggerBranch}]: `,
+    `? トリガーブランチ (TRIGGER_BRANCH) [${defaults.triggerBranch}]: `,
   );
-  const triggerBranch = triggerBranchInput.trim() || DEFAULT_ANSWERS.triggerBranch;
+  const triggerBranch = triggerBranchInput.trim() || defaults.triggerBranch;
 
   const rootMdInput = await rl.question(
     `? ルートとなるMarkdownファイル (ROOT_MD) [${DEFAULT_ANSWERS.rootMd}]: `,
@@ -600,9 +608,9 @@ function parseCliArgsRaw(argv) {
  * 対話なし実行のときの回答を、コマンドライン引数(指定が無ければ既定値)から作る。
  * @param {ReturnType<typeof parseCliArgs>} args
  */
-export function answersFromArgs(args) {
+export function answersFromArgs(args, defaults = DEFAULT_ANSWERS) {
   return {
-    triggerBranch: args.branch?.trim() ?? DEFAULT_ANSWERS.triggerBranch,
+    triggerBranch: args.branch?.trim() ?? defaults.triggerBranch,
     rootMd: args.root?.trim() ?? DEFAULT_ANSWERS.rootMd,
     theme: args.theme ?? DEFAULT_ANSWERS.theme,
     createStyleFile: args.style,
@@ -619,6 +627,63 @@ export function missingConfigKeys(configText) {
     [...text.matchAll(/^\s*([A-Z_]+)\s*=/gm)].map((m) => m[1]);
   const present = new Set(keysOf(configText));
   return keysOf(buildDocsPagesConfig({})).filter((key) => !present.has(key));
+}
+
+/**
+ * cwd から親をたどって git リポジトリの直下(.git がある場所)を探す。見つからなければ null。
+ * @param {string} cwd
+ * @param {(p: string) => boolean} [exists]
+ */
+export function findRepoRoot(cwd, exists = existsSync) {
+  let dir = cwd;
+  for (;;) {
+    if (exists(join(dir, ".git"))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+}
+
+/**
+ * init を実行する場所についての注意を返す(問題なければ空配列)。
+ * ワークフローは .github/workflows がリポジトリの直下にないと GitHub で動かないため。
+ * @param {string} cwd
+ * @param {(p: string) => boolean} [exists]
+ * @returns {string[]}
+ */
+export function checkSetupLocation(cwd, exists = existsSync) {
+  const root = findRepoRoot(cwd, exists);
+  if (!root) {
+    return ["git リポジトリの中ではないようです。公開したいリポジトリの直下で実行してください。"];
+  }
+  if (root !== cwd) {
+    return [
+      `リポジトリの直下ではありません(直下: ${root})。` +
+        "ワークフローはリポジトリ直下の .github/workflows に置かないと GitHub で動きません。",
+    ];
+  }
+  return [];
+}
+
+/**
+ * トリガーブランチの既定値を、リポジトリの既定ブランチ(origin/HEAD)か、今のブランチから推測する。
+ * 分からなければ "main"。
+ * @param {string} cwd
+ * @param {(args: string[]) => string} [git] - テスト用差し替え
+ */
+export function guessDefaultBranch(
+  cwd,
+  git = (args) => execFileSync("git", args, { cwd, encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"] }),
+) {
+  for (const args of [["symbolic-ref", "--short", "refs/remotes/origin/HEAD"], ["branch", "--show-current"]]) {
+    try {
+      const out = git(args).trim().replace(/^origin\//, "");
+      if (out) return out;
+    } catch {
+      // git が無い・リモートが無い場合は次の方法を試す
+    }
+  }
+  return DEFAULT_ANSWERS.triggerBranch;
 }
 
 /**
@@ -652,8 +717,18 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
     return;
   }
 
+  const locationWarnings = checkSetupLocation(cwd);
+  for (const warning of locationWarnings) console.warn(`⚠ ${warning}`);
+  const defaults = { ...DEFAULT_ANSWERS, triggerBranch: guessDefaultBranch(cwd) };
+  const warnMissingRoot = (rootMd) => {
+    if (!existsSync(join(cwd, rootMd))) {
+      console.warn(`⚠ 起点の ${rootMd} がまだありません。push する前に作成してください(無いとビルドが失敗します)。`);
+    }
+  };
+
   if (args.nonInteractive) {
-    const answers = answersFromArgs(args);
+    const answers = answersFromArgs(args, defaults);
+    warnMissingRoot(answers.rootMd);
     const targets = buildTargets(answers);
     await writeGeneratedFiles(targets, {
       cwd,
@@ -671,7 +746,15 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
 
   let answers;
   try {
-    answers = await promptAnswers(asker);
+    if (locationWarnings.length) {
+      const proceed = parseYesNo(await asker.question("このまま続けますか? (y/N): "), false);
+      if (!proceed) {
+        console.log("中止しました。リポジトリの直下で実行し直してください。");
+        return;
+      }
+    }
+    answers = await promptAnswers(asker, defaults);
+    warnMissingRoot(answers.rootMd);
     const targets = buildTargets(answers);
 
     console.log("\n--- 以下のファイルを生成します ---");

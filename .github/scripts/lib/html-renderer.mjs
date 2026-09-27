@@ -54,7 +54,15 @@ export function escapeHtml(s) {
  *     (検索欄そのものはスクリプトが作るため、JavaScriptが動かない環境では何も表示されない)
  * @returns {string}
  */
-export function renderNav(tree, currentRel, basePath, siteName, menuLabel = "メニュー", search = null) {
+export function renderNav(
+  tree,
+  currentRel,
+  basePath,
+  siteName,
+  menuLabel = "メニュー",
+  search = null,
+  navLabel = "サイト内ページ",
+) {
   function renderNode(node) {
     if (node.type === "dir") {
       return `<li><span>${escapeHtml(node.name)}</span>${renderList(node.children)}</li>`;
@@ -78,7 +86,7 @@ export function renderNav(tree, currentRel, basePath, siteName, menuLabel = "メ
       ` data-placeholder="${escapeHtml(search.placeholder)}" data-empty="${escapeHtml(search.empty)}"></div>` +
       `<script src="${escapeHtml(search.scriptUrl)}" defer></script>`
     : "";
-  return `<nav aria-label="サイト内ページ">${toggle}${searchHtml}${renderList(tree.children)}</nav>`;
+  return `<nav aria-label="${escapeHtml(navLabel)}">${toggle}${searchHtml}${renderList(tree.children)}</nav>`;
 }
 
 /**
@@ -277,12 +285,21 @@ export function defaultNotFoundMarkdown(lang = "ja") {
 // Markdown 記法ではなく生の HTML で書かれた <img src="..">/<a href=".."> は
 // marked のレンダラーを経由しないため、Markdown ソースの時点で
 // 絶対パスに書き換えておく
-export function preprocessRawHtmlPaths(content, fromRel, basePath) {
+//
+// build-docs.mjs は marked の html トークン(renderer.html)の中身にだけ適用する。
+// そのため、コードブロック・インラインコードの中に書いたHTMLの例は書き換えない。
+// hrefFor を渡すと、URLの組み立てをそれに任せる(ディレクトリ・GitHubへのリンクの置き換え用)。
+export function preprocessRawHtmlPaths(
+  content,
+  fromRel,
+  basePath,
+  hrefFor = (from, href) => toSiteAbsHref(from, href, basePath),
+) {
   return content.replace(
-    /(<(?:img|a)[^>]+(?:src|href)=["'])([^"']+)(["'])/g,
+    /(<(?:img|a)\b[^>]*?\s(?:src|href)=["'])([^"']+)(["'])/gi,
     (whole, pre, href, post) => {
       if (isExternal(href) || href.startsWith("#")) return whole;
-      return pre + toSiteAbsHref(fromRel, href, basePath) + post;
+      return pre + hrefFor(fromRel, href) + post;
     }
   );
 }
@@ -315,7 +332,12 @@ export function pageTemplate({
   lang = "ja",
   navHtml = "",
   metaTagsHtml = "",
+  skipLabel = "本文へスキップ",
 }) {
+  // ナビがあるページだけ、先頭に「本文へスキップ」リンクを置き、<main> にその飛び先の id を付ける
+  // (ナビが無いページの出力は従来と同じ)
+  const skipLink = navHtml ? `<a class="tsuzuri-skip" href="#main">${escapeHtml(skipLabel)}</a>\n` : "";
+  const mainTag = navHtml ? `<main id="main">` : "<main>";
   return `<!DOCTYPE html>
 <html lang="${escapeHtml(lang)}">
 <head>
@@ -327,7 +349,7 @@ ${baseCss}${themeCss}${customCss ? `/* ---- Custom style: ${styleFileRel} ---- *
 </style>
 </head>
 <body>
-${navHtml ? navHtml + "\n" : ""}<main>
+${skipLink}${navHtml ? navHtml + "\n" : ""}${mainTag}
 ${body}
 </main>
 </body>

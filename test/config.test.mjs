@@ -18,7 +18,7 @@ test("全キー未設定+GITHUB_REPOSITORY未設定 → 全デフォルト値", 
   const config = loadConfig({});
   assert.equal(config.rootMd, "README.md");
   assert.equal(config.outDir, "_site");
-  assert.equal(config.styleFile, ".github/docs-pages.style.css");
+  assert.equal(config.styleFile, ".github/tsuzuri/styles/custom.css");
   assert.equal(config.basePath, "");
   assert.equal(config.siteOrigin, "");
   assert.equal(config.lang, "ja");

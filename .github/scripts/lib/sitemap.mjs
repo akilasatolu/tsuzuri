@@ -118,11 +118,15 @@ function escapeXml(s) {
  * 検索エンジン向けの sitemap.xml(sitemaps.org 形式)を組み立てる。
  * デバッグ用の sitemap.json とは別物。
  *
- * @param {Iterable<string>} urls - 公開URL(絶対URL)の一覧
+ * @param {Iterable<string | { loc: string, lastmod?: string }>} urls
+ *   - 公開URL(パーセントエンコード済みの絶対URL)。lastmod(YYYY-MM-DD)があれば <lastmod> も出力する
  * @returns {string}
  */
 export function buildSitemapXml(urls) {
-  const entries = [...urls].map((url) => `  <url><loc>${escapeXml(url)}</loc></url>`);
+  const entries = [...urls].map((entry) => {
+    const { loc, lastmod } = typeof entry === "string" ? { loc: entry } : entry;
+    return `  <url><loc>${escapeXml(loc)}</loc>${lastmod ? `<lastmod>${escapeXml(lastmod)}</lastmod>` : ""}</url>`;
+  });
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',

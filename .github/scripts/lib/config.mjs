@@ -51,7 +51,8 @@ export function loadConfig(env = process.env) {
   // 同じ表記になるよう正規化する(そうしないと起点ページが別のページとして二重に扱われる)。
   const rootMd = normalizeRootMd(trimOr(env.ROOT_MD, "README.md"));
   const outDir = trimOr(env.OUT_DIR, "_site");
-  const styleFile = trimOr(env.STYLE_FILE, ".github/docs-pages.style.css");
+  // init が生成する設定ファイルと同じ既定値(組み込みテーマCSSと同じディレクトリの custom.css)
+  const styleFile = trimOr(env.STYLE_FILE, ".github/tsuzuri/styles/custom.css");
   const siteOrigin = trimOr(env.SITE_ORIGIN, "");
   const faviconFile = trimOr(env.FAVICON_FILE, "");
   const ogDefaultImage = trimOr(env.OGP_DEFAULT_IMAGE, "");

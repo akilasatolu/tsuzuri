@@ -123,3 +123,9 @@ test("buildSitemapXml: sitemaps.org形式で、URLはXMLエスケープされる
   assert.match(xml, /<loc>https:\/\/example\.com\/a\.html\?x=1&amp;y=2<\/loc>/);
   assert.match(xml, /<\/urlset>\n$/);
 });
+
+test("buildSitemapXml: lastmod 付きの項目は <lastmod> を出力する", () => {
+  const xml = buildSitemapXml([{ loc: "https://example.com/a.html", lastmod: "2026-09-27" }, "https://example.com/b.html"]);
+  assert.match(xml, /<url><loc>https:\/\/example\.com\/a\.html<\/loc><lastmod>2026-09-27<\/lastmod><\/url>/);
+  assert.match(xml, /<url><loc>https:\/\/example\.com\/b\.html<\/loc><\/url>/);
+});

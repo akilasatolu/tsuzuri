@@ -30,3 +30,8 @@ describe("SEARCH_SCRIPT", () => {
     assert.doesNotMatch(SEARCH_SCRIPT, /innerHTML/);
   });
 });
+
+test("SEARCH_SCRIPT: 結果の一覧は aria-live で読み上げられ、Escで閉じられる", () => {
+  assert.match(SEARCH_SCRIPT, /aria-live", "polite"/);
+  assert.match(SEARCH_SCRIPT, /event\.key === "Escape"/);
+});
