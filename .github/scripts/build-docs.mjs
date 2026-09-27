@@ -24,7 +24,7 @@
  *   9. 404.html 生成(リポジトリ直下の 404.md、無ければ既定の内容)
  *   10. 画像・その他のリンク先ファイル(PDF等)のコピー
  *   11. sitemap.xml / robots.txt(SITE_ORIGIN がある場合のみ)
- *   12. sitemap.buildSitemap() 書き込み(デバッグ用 sitemap.json)
+ *   12. sitemap.buildSitemap() 書き込み(デバッグ用 sitemap.json。SITEMAP_JSON=true のときだけ)
  *   13. 完了ログ
  *
  * エラーハンドリング方針:
@@ -433,26 +433,30 @@ async function main() {
     }
   }
 
-  // ---------- 9. sitemap.json 書き込み ----------
-  const sitemap = buildSitemap({
-    root: config.rootMd,
-    basePath: config.basePath,
-    styleFile: config.styleFile,
-    customStyleApplied: Boolean(customCss),
-    visitedMd,
-    imageSet,
-    fileSet,
-    hierarchy,
-    tree: siteTree,
-    missing,
-    rejected,
-    lang: config.lang,
-    siteName: config.siteName,
-    siteOrigin: config.siteOrigin,
-    customDomain: config.customDomain,
-    theme: config.theme,
-  });
-  fs.writeFileSync(path.join(OUT_DIR, "sitemap.json"), JSON.stringify(sitemap, null, 2));
+  // ---------- 9. sitemap.json 書き込み(SITEMAP_JSON=true のときだけ) ----------
+  // 出力先に置くと公開サイトに含まれ、リンク切れ・拒否したリンクのパスまで外から見えてしまうため、
+  // 既定では書き出さない(リンクの問題はビルドログに出力済み)。
+  if (config.sitemapJson) {
+    const sitemap = buildSitemap({
+      root: config.rootMd,
+      basePath: config.basePath,
+      styleFile: config.styleFile,
+      customStyleApplied: Boolean(customCss),
+      visitedMd,
+      imageSet,
+      fileSet,
+      hierarchy,
+      tree: siteTree,
+      missing,
+      rejected,
+      lang: config.lang,
+      siteName: config.siteName,
+      siteOrigin: config.siteOrigin,
+      customDomain: config.customDomain,
+      theme: config.theme,
+    });
+    fs.writeFileSync(path.join(OUT_DIR, "sitemap.json"), JSON.stringify(sitemap, null, 2));
+  }
 
   // ---------- STRICT_LINKS ----------
   // リンク切れ・拒否したリンクがあればビルドを失敗させる(ワークフローはここで止まり公開されない)。

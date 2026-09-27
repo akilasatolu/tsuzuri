@@ -233,3 +233,11 @@ test("STRICT_LINKS: true/false(大文字小文字区別なし)、省略は警告
     assert.ok(calls.some((c) => c.includes("STRICT_LINKS")));
   });
 });
+
+test("SITEMAP_JSON: 既定はfalse(省略時は警告なし)、trueで出力", () => {
+  withCapturedWarn((calls) => {
+    assert.equal(loadConfig({}).sitemapJson, false);
+    assert.equal(loadConfig({ SITEMAP_JSON: "true" }).sitemapJson, true);
+    assert.equal(calls.length, 0);
+  });
+});

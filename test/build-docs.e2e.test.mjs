@@ -39,6 +39,7 @@ const CONFIG_ENV_KEYS = [
   "STYLE_DIR",
   "GITHUB_REPOSITORY",
   "STRICT_LINKS",
+  "SITEMAP_JSON",
 ];
 
 function makeTmpDir() {
@@ -69,9 +70,12 @@ function copyFixtureStyleDir(dir) {
   });
 }
 
+// sitemap.json(SITEMAP_JSON=true のときだけ出力)の内容を検証するテストが多いため、
+// E2E では既定で SITEMAP_JSON=true にしておく(未設定時の挙動は個別のテストで確認する)。
 function runBuild(cwd, overrides = {}) {
   const env = { ...process.env };
   for (const key of CONFIG_ENV_KEYS) delete env[key];
+  env.SITEMAP_JSON = "true";
   Object.assign(env, overrides);
   return spawnSync(process.execPath, [SCRIPT_PATH], { cwd, env, encoding: "utf-8" });
 }
@@ -787,6 +791,20 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       result = runBuild(dir);
       assert.doesNotMatch(readOut(dir, "index.html"), /class="tsuzuri-pager"/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("SITEMAP_JSON未設定(既定)ではsitemap.jsonを公開サイトに出力しない", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      const result = runBuild(dir, { SITEMAP_JSON: "" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "index.html")));
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "sitemap.json")));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
