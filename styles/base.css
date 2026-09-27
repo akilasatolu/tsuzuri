@@ -18,3 +18,40 @@
   main table { border-collapse: collapse; width: 100%; }
   main th, main td { border: 1px solid var(--border); padding: 6px 10px; }
   main a { color: var(--accent); }
+
+  /* サイト内ナビゲーション(NAV_ENABLED=true のときだけ body 直下に出力される)。
+     広い画面では左側に固定したサイドバー、狭い画面では本文の上に高さを抑えて表示する。
+     色はテーマの変数を使うため、どのテーマでもそのまま馴染む。 */
+  body > nav {
+    font-size: 0.9em;
+    line-height: 1.5;
+    padding: 16px 24px;
+    max-height: 40vh;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--border);
+  }
+  body > nav > p { margin: 0 0 8px; font-weight: 700; }
+  body > nav ul { list-style: none; margin: 0; padding: 0; }
+  body > nav ul ul { margin: 2px 0 4px 0.4em; padding-left: 0.8em; border-left: 1px solid var(--border); }
+  body > nav li > span { display: block; margin-top: 6px; font-weight: 600; opacity: 0.7; }
+  body > nav a { display: block; padding: 3px 0; color: var(--accent); text-decoration: none; }
+  body > nav a:hover { text-decoration: underline; }
+  body > nav a[aria-current="page"] { color: var(--fg); font-weight: 700; }
+
+  @media (min-width: 960px) {
+    body:has(> nav) {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+    }
+    body > nav {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      max-height: none;
+      height: 100vh;
+      padding: 40px 24px;
+      border-bottom: none;
+      border-right: 1px solid var(--border);
+    }
+    body:has(> nav) > main { width: 100%; }
+  }
