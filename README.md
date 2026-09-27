@@ -29,6 +29,9 @@ Webサイトとして公開できます。ページ数が増えても、README�
 生成するページ側のfavicon(`FAVICON_FILE`設定キーで指定するもの)とは無関係
 なので混同しないでください。
 
+このドキュメント自体もTsuzuriで生成し、GitHub Pagesで公開しています:
+https://akilasatolu.github.io/tsuzuri/
+
 ## 特徴
 
 - 設定ファイル(`.github/docs-pages.config`)を1つ書き換えるだけで、ワークフローYAMLを直接編集せずに動作をカスタマイズできる
