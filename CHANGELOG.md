@@ -16,6 +16,8 @@
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-09-28
+
 ### Added
 
 - frontmatterの`nav: false`(そのページをナビ・前後のページのリンクに載せない)と`order`(ナビでの並び順。
@@ -205,7 +207,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.2.0...v1.3.0
