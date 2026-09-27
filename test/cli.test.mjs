@@ -679,6 +679,8 @@ test("parseCliArgs: preview サブコマンドと --port", () => {
   assert.equal(args.command, "preview");
   assert.equal(args.port, 4000);
   assert.equal(parseCliArgs(["preview", "--port", "4001"]).port, 4001);
+  assert.equal(parseCliArgs(["preview"])["no-watch"], false);
+  assert.equal(parseCliArgs(["preview", "--no-watch"])["no-watch"], true);
   assert.throws(() => parseCliArgs(["preview", "--port", "abc"]), /--port には/);
   assert.throws(() => parseCliArgs(["preview", "--port", "70000"]), /--port には/);
   assert.throws(() => parseCliArgs(["init", "preview"]), /不明なサブコマンド/);

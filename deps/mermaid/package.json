@@ -1,0 +1,8 @@
+{
+  "name": "tsuzuri-mermaid-version",
+  "private": true,
+  "description": "生成ページが CDN から読み込む mermaid のバージョン(html-renderer.mjs の MERMAID_VERSION)を Dependabot に監視させるためのファイル。インストールはしない。Dependabot がここを更新したら、MERMAID_VERSION も同じバージョンに更新する(test/html-renderer.test.mjs が確認する)。",
+  "dependencies": {
+    "mermaid": "12.0.0"
+  }
+}

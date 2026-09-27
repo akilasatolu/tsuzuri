@@ -111,9 +111,10 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.match(indexHtml, /href="\/docs\/a\.html"/);
       assert.match(indexHtml, /src="\/docs\/img\.png"/);
 
-      // navHtml="" ・ metaTagsHtml="" (=旧版が出力していなかった要素は出力されない)
+      // ナビ・favicon・canonical など、設定していない要素は出力されない
       assert.doesNotMatch(indexHtml, /<nav/);
-      assert.doesNotMatch(indexHtml, /og:title/);
+      // description を書いていないページも、本文の最初の段落から説明文を作る(v1.6.0〜)
+      assert.match(indexHtml, /<meta name="description" content="See A and image img\.">/);
       assert.doesNotMatch(indexHtml, /<link rel="icon"/);
       assert.doesNotMatch(indexHtml, /<link rel="canonical"/);
 
@@ -1498,6 +1499,35 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const html = readOut(dir, "index.html");
       assert.match(html, /href="\/_\.github\/manual\.pdf"/);
       assert.match(html, /<img src="\/shot\.png" alt="s" width="320" height="200" loading="lazy"/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("コードブロックがあるページはコピーボタンのスクリプトを読み込み、description が無ければ最初の段落から作る", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        "# Root\n\n![badge](docs/img.png)\n\n> [!NOTE]\n> 注意\n\nこれは**最初の**段落です。\n\n```sh\necho hi\n```\n\n```mermaid\ngraph TD\n```\n\n[A](docs/a.md)\n"
+      );
+      const result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "index.html");
+      assert.match(html, /<script src="\/tsuzuri-copy\.js" defer><\/script>/);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "tsuzuri-copy.js")));
+      assert.match(html, /<meta name="description" content="badge">/, "画像だけの段落は alt を使う");
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /<script src="\/tsuzuri-copy\.js"/, "コードの無いページは読み込まない");
+      fs.writeFileSync(path.join(dir, "README.md"), "---\ndescription: 手書き\n---\n# Root\n\n> [!NOTE]\n> 注意の本文\n\n本文。\n");
+      runBuild(dir);
+      assert.match(readOut(dir, "index.html"), /<meta name="description" content="手書き">/);
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n> [!NOTE]\n> 注意の本文\n\n" + "長".repeat(200) + "\n");
+      runBuild(dir);
+      const auto = readOut(dir, "index.html").match(/<meta name="description" content="([^"]*)">/)[1];
+      assert.equal(auto, "注意の本文", "注意書きの見出し(補足)は飛ばす");
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "tsuzuri-copy.js")), "コードが無くなれば出力しない");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

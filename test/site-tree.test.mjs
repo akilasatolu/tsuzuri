@@ -97,3 +97,39 @@ describe("起点ページ(ROOT_MD)の表示名", () => {
     assert.equal(titled.children[0].title, "ホーム");
   });
 });
+
+describe("nav: false / order", () => {
+  const titles = (nodes) => nodes.map((n) => (n.type === "page" ? n.title : `[${n.name}]`));
+
+  test("nav: false のページはツリーに入れず、ページがすべて隠れたディレクトリも出さない", () => {
+    const tree = buildSiteTree([
+      ["README.md", { meta: { title: "Top" } }],
+      ["docs/a.md", { meta: { title: "A" } }],
+      ["docs/b.md", { meta: { title: "B", nav: "false" } }],
+      ["samples/x.md", { meta: { title: "X", nav: "false" } }],
+    ]);
+    assert.deepEqual(titles(tree.children), ["Top", "[docs]"]);
+    assert.deepEqual(titles(tree.children[1].children), ["A"]);
+    assert.deepEqual(flattenPages(tree).map((p) => p.rel), ["README.md", "docs/a.md"]);
+  });
+
+  test("order を書いたページが小さい順に先に並び、書いていないページは見つかった順のまま後ろ", () => {
+    const tree = buildSiteTree([
+      ["docs/c.md", { meta: { title: "C" } }],
+      ["docs/b.md", { meta: { title: "B", order: "2" } }],
+      ["docs/d.md", { meta: { title: "D" } }],
+      ["docs/a.md", { meta: { title: "A", order: "1" } }],
+      ["docs/e.md", { meta: { title: "E", order: "x" } }],
+    ]);
+    assert.deepEqual(titles(tree.children[0].children), ["A", "B", "C", "D", "E"]);
+  });
+
+  test("ディレクトリの位置は、中の README.md / index.md の order で決まる", () => {
+    const tree = buildSiteTree([
+      ["README.md", { meta: {} }],
+      ["guide/a.md", { meta: { title: "GA" } }],
+      ["api/README.md", { meta: { title: "API", order: "1" } }],
+    ]);
+    assert.deepEqual(titles(tree.children), ["[api]", "README.md", "[guide]"]);
+  });
+});

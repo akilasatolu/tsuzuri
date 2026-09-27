@@ -4,12 +4,14 @@
 //   1. ビルド用の依存が .github/tsuzuri/node_modules に無ければ、ワークフローと同じ版をインストールする
 //   2. .github/tsuzuri/build-docs.mjs を実行する(設定ファイルの値が使われる。BASE_PATH は付けない)
 //   3. 出力先(OUT_DIR)を http://localhost:<port>/ で配信する
-// 追加の npm 依存は使わない(node:http で配信する)。
+//   4. リポジトリのファイルが変わったら自動でビルドし直し、開いているページを再読み込みさせる
+//      (--no-watch で止められる)
+// 追加の npm 依存は使わない(node:http で配信し、変更は fs.watch で見張る)。
 
 import { createServer } from "node:http";
-import { existsSync, readFileSync, statSync, createReadStream, realpathSync } from "node:fs";
-import { join, resolve, sep, extname } from "node:path";
-import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync, statSync, createReadStream, realpathSync, watch } from "node:fs";
+import { join, resolve, sep, extname, relative } from "node:path";
+import { spawn, spawnSync } from "node:child_process";
 import { parseConfigText } from "../.github/scripts/lib/config.mjs";
 
 const VENDOR_DIR = ".github/tsuzuri";
@@ -70,18 +72,32 @@ export function resolveServePath(rootDir, urlPath) {
   return real === realRoot || real.startsWith(realRoot + sep) ? abs : null;
 }
 
+// 自動再読み込み用の URL と、HTML に差し込むスクリプト(ビルドし直したら通知を受けて再読み込みする)
+export const RELOAD_EVENTS_PATH = "/__tsuzuri/events";
+export const RELOAD_SCRIPT = `<script>new EventSource("${RELOAD_EVENTS_PATH}").onmessage = () => location.reload();</script>`;
+
 /**
  * 出力先ディレクトリを配信するサーバーを作る(listen は呼び出し側で行う)。
  * 見つからないURLには 404.html(あれば)を 404 で返す。
+ * liveReload のときは、HTML に RELOAD_SCRIPT を差し込み、server.notifyReload() で開いているページを再読み込みさせる。
  * @param {string} rootDir
+ * @param {{ liveReload?: boolean }} [options]
  */
-export function createPreviewServer(rootDir) {
-  return createServer((req, res) => {
+export function createPreviewServer(rootDir, { liveReload = false } = {}) {
+  const clients = new Set();
+  const server = createServer((req, res) => {
     if (req.method !== "GET" && req.method !== "HEAD") {
       res.writeHead(405).end();
       return;
     }
     const urlPath = req.url || "/";
+    if (liveReload && urlPath === RELOAD_EVENTS_PATH) {
+      res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-store", Connection: "keep-alive" });
+      res.write(": connected\n\n");
+      clients.add(res);
+      req.on("close", () => clients.delete(res));
+      return;
+    }
     // "/docs" のようにディレクトリを末尾の "/" なしで開いたときは、"/docs/" に移動させる(相対リンクのため)
     const bare = urlPath.split(/[?#]/)[0];
     if (!bare.endsWith("/")) {
@@ -101,13 +117,45 @@ export function createPreviewServer(rootDir) {
       res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("Not Found");
       return;
     }
-    res.writeHead(status, { "Content-Type": contentTypeOf(file), "Cache-Control": "no-store" });
+    const type = contentTypeOf(file);
+    if (liveReload && type.startsWith("text/html")) {
+      const html = readFileSync(file, "utf-8");
+      const body = html.includes("</body>") ? html.replace("</body>", `${RELOAD_SCRIPT}\n</body>`) : html + RELOAD_SCRIPT;
+      res.writeHead(status, { "Content-Type": type, "Cache-Control": "no-store" });
+      res.end(req.method === "HEAD" ? undefined : body);
+      return;
+    }
+    res.writeHead(status, { "Content-Type": type, "Cache-Control": "no-store" });
     if (req.method === "HEAD") {
       res.end();
       return;
     }
     createReadStream(file).pipe(res);
   });
+  server.notifyReload = () => {
+    for (const client of clients) client.write("data: reload\n\n");
+  };
+  // 再読み込みの接続が残っていても、close() で止められるようにする
+  const close = server.close.bind(server);
+  server.close = (callback) => {
+    for (const client of clients) client.end();
+    clients.clear();
+    return close(callback);
+  };
+  return server;
+}
+
+/**
+ * ファイルの変更で、ビルドし直すべきか。出力先・.git・依存(node_modules)の中の変更は無視する。
+ * @param {string} relPath - リポジトリの直下からのパス
+ * @param {string} outDirRel - 出力先(リポジトリの直下からのパス)
+ */
+export function shouldRebuildFor(relPath, outDirRel) {
+  const p = relPath.split(sep).join("/");
+  if (!p || p.startsWith("../")) return false;
+  const out = outDirRel.split(sep).join("/").replace(/\/+$/, "");
+  if (p === out || p.startsWith(`${out}/`)) return false;
+  return !p.split("/").some((seg) => seg === ".git" || seg === "node_modules");
 }
 
 /**
@@ -126,12 +174,19 @@ export function vendoredVersionOf(workflowText) {
   return workflowText.match(/^# tsuzuri v(\d+\.\d+\.\d+) /m)?.[1] ?? "";
 }
 
+function buildEnv() {
+  // 公開時と同じ設定。手元では BASE_PATH を付けず、サイトのURLも使わない
+  const env = { ...process.env, BASE_PATH: "", SITE_ORIGIN: "" };
+  delete env.GITHUB_ACTIONS;
+  return env;
+}
+
 /**
  * preview コマンド本体。
- * @param {{ cwd: string, port: number, version: string, log?: Function, warn?: Function }} opts
+ * @param {{ cwd: string, port: number, version: string, watch?: boolean, log?: Function, warn?: Function }} opts
  * @returns {Promise<import("node:http").Server | null>} 配信を始めたサーバー(失敗したときは null)
  */
-export async function runPreview({ cwd, port, version, log = console.log, warn = console.warn }) {
+export async function runPreview({ cwd, port, version, watch: watchFiles = true, log = console.log, warn = console.warn }) {
   const script = join(cwd, VENDOR_DIR, "build-docs.mjs");
   if (!existsSync(script)) {
     warn(`${VENDOR_DIR}/build-docs.mjs がありません。先に init を実行してください(リポジトリの直下で実行します)。`);
@@ -166,10 +221,8 @@ export async function runPreview({ cwd, port, version, log = console.log, warn =
     }
   }
 
-  // 2. ビルド(公開時と同じ設定。手元では BASE_PATH を付けず、サイトのURLも使わない)
-  const env = { ...process.env, BASE_PATH: "", SITE_ORIGIN: "" };
-  delete env.GITHUB_ACTIONS;
-  const build = spawnSync(process.execPath, [script], { cwd, env, stdio: "inherit" });
+  // 2. ビルド
+  const build = spawnSync(process.execPath, [script], { cwd, env: buildEnv(), stdio: "inherit" });
   if (build.status !== 0) {
     warn("ビルドに失敗しました(上のメッセージを確認してください)。");
     return null;
@@ -179,7 +232,7 @@ export async function runPreview({ cwd, port, version, log = console.log, warn =
   const configAbs = join(cwd, ".github", "docs-pages.config");
   const config = existsSync(configAbs) ? parseConfigText(readFileSync(configAbs, "utf-8")) : {};
   const outDir = resolve(cwd, config.OUT_DIR || "_site");
-  const server = createPreviewServer(outDir);
+  const server = createPreviewServer(outDir, { liveReload: watchFiles });
   await new Promise((resolveListen, rejectListen) => {
     server.once("error", rejectListen);
     server.listen(port, "127.0.0.1", resolveListen);
@@ -190,6 +243,48 @@ export async function runPreview({ cwd, port, version, log = console.log, warn =
     throw err;
   });
   log(`\nプレビュー: http://localhost:${server.address().port}/`);
-  log("Markdown を変更したら、もう一度 preview を実行してください。終了するには Ctrl+C を押します。");
+
+  // 4. 変更を見張って、ビルドし直す(続けて変更されたときは、まとめて1回にする)
+  if (watchFiles) {
+    const outDirRel = relative(cwd, outDir);
+    let timer = null;
+    let building = false;
+    let pending = false;
+    const rebuild = () => {
+      if (building) {
+        pending = true;
+        return;
+      }
+      building = true;
+      log("\n変更を検知したので、ビルドし直します…");
+      const child = spawn(process.execPath, [script], { cwd, env: buildEnv(), stdio: "inherit" });
+      child.on("close", (code) => {
+        building = false;
+        if (code === 0) {
+          server.notifyReload();
+          log("ビルドし直しました(開いているページを再読み込みします)。");
+        } else {
+          warn("ビルドに失敗しました。直してから保存すると、もう一度ビルドします。");
+        }
+        if (pending) {
+          pending = false;
+          rebuild();
+        }
+      });
+    };
+    try {
+      const watcher = watch(cwd, { recursive: true }, (_event, filename) => {
+        if (!filename || !shouldRebuildFor(String(filename), outDirRel)) return;
+        clearTimeout(timer);
+        timer = setTimeout(rebuild, 300);
+      });
+      server.on("close", () => watcher.close());
+      log("ファイルを保存すると、自動でビルドし直してページを再読み込みします。終了するには Ctrl+C を押します。");
+    } catch (err) {
+      warn(`ファイルの変更を見張れませんでした(${err.message})。変更したら preview を実行し直してください。`);
+    }
+  } else {
+    log("Markdown を変更したら、もう一度 preview を実行してください。終了するには Ctrl+C を押します。");
+  }
   return server;
 }

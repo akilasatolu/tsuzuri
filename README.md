@@ -200,6 +200,11 @@ Dependabotが週1回、`package.json`の依存パッケージと`ci.yml`のGitHu
 Dependabotの更新対象に含めています。本体のCI(`ci.yml`・`sync-docs.yml`)とひな形で
 同じactionの版がずれるとテストが失敗するので、片方だけ更新された場合はもう片方も合わせてください。
 
+生成ページが図の表示に使うmermaid(CDNから読み込む)の版は、`.github/scripts/lib/html-renderer.mjs`の
+`MERMAID_VERSION`です。Dependabotに監視させるため、`deps/mermaid/package.json`にも同じ版を書いています
+(インストールはしません)。このファイルの更新PRが来たら、同じPRで`MERMAID_VERSION`も同じ版に直してください
+(直さないとテストが失敗します)。
+
 ## リリース
 
 `v1`などのタグは`main`ブランチのコミットに付けます。利用者は

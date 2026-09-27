@@ -16,6 +16,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- frontmatterの`nav: false`(そのページをナビ・前後のページのリンクに載せない)と`order`(ナビでの並び順。
+  書いたページが小さい順に先に並ぶ。ディレクトリはその中の README.md / index.md の`order`)。
+- コードブロックの右上に「コピー」ボタンを付けるようにした(コードブロックがあるページだけが`tsuzuri-copy.js`を読み込む)。
+- frontmatterに`description`が無いページは、本文の最初の段落から説明文(meta description・og:description)を作るようにした。
+- `preview`で、ファイルを保存すると自動でビルドし直し、開いているページを再読み込みするようにした(`--no-watch`で止められる)。
+- mermaidのバージョンをDependabotで監視するようにした(`deps/mermaid/package.json`)。
+
 ## [1.5.0] - 2026-09-28
 
 ### Added

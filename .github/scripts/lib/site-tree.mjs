@@ -9,6 +9,12 @@
  *   見つかった順に並べる。サブディレクトリの位置は、そのディレクトリ配下で
  *   最初に見つかったページの位置で決まる。READMEなどでリンクを書いた順が
  *   そのままナビの並び順になる。
+ *   frontmatter に `order`(数値)を書いたページは、同じディレクトリの中で、書いていないページより前に
+ *   小さい順に並ぶ。サブディレクトリの位置は、その中の README.md / index.md の `order` で指定できる。
+ *
+ * ナビに載せないページ:
+ *   frontmatter に `nav: false` と書いたページはツリーに含めない(ページ自体は出力され、リンクで開ける)。
+ *   中のページがすべて載らないディレクトリも表示しない。
  *
  * ページの表示名(優先順):
  *   1. frontmatter の `title`
@@ -23,7 +29,7 @@ import path from "node:path";
 const posix = path.posix;
 
 /**
- * @typedef {{ type: "page", rel: string, title: string }} PageNode
+ * @typedef {{ type: "page", rel: string, title: string, order?: number }} PageNode
  * @typedef {{ type: "dir", name: string, path: string, children: TreeNode[] }} DirNode
  * @typedef {PageNode | DirNode} TreeNode
  */
@@ -47,6 +53,21 @@ export function pageLabel(rel, meta, fallback = "", h1 = "") {
  * @param {{ rootMd?: string, siteName?: string }} [options] - 起点ページの表示名にサイト名を使うための情報
  * @returns {DirNode} ルートディレクトリ(name="", path="")
  */
+// frontmatter の order を数値にする(書いていない・数値でないときは undefined)
+export function pageOrder(meta) {
+  const raw = typeof meta?.order === "string" ? meta.order.trim() : meta?.order;
+  if (raw === undefined || raw === null || raw === "") return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+// frontmatter に nav: false と書いたページか
+export function isHiddenFromNav(meta) {
+  return String(meta?.nav ?? "").trim().toLowerCase() === "false";
+}
+
+const DIR_INDEX_NAMES = ["README.md", "readme.md", "index.md"];
+
 export function buildSiteTree(visitedMdEntries, { rootMd = "", siteName = "" } = {}) {
   const root = { type: "dir", name: "", path: "", children: [] };
   const dirIndex = new Map([["", root]]);
@@ -61,16 +82,36 @@ export function buildSiteTree(visitedMdEntries, { rootMd = "", siteName = "" } =
   }
 
   for (const [rel, entry] of visitedMdEntries) {
+    if (isHiddenFromNav(entry?.meta)) continue;
     const dirPath = posix.dirname(rel) === "." ? "" : posix.dirname(rel);
     const fallback = rel === rootMd ? siteName : "";
-    getDir(dirPath).children.push({
-      type: "page",
-      rel,
-      title: pageLabel(rel, entry?.meta, fallback, entry?.h1),
-    });
+    const node = { type: "page", rel, title: pageLabel(rel, entry?.meta, fallback, entry?.h1) };
+    const order = pageOrder(entry?.meta);
+    if (order !== undefined) node.order = order;
+    getDir(dirPath).children.push(node);
   }
 
+  sortByOrder(root);
   return root;
+}
+
+// order を書いたもの(小さい順)を先に、書いていないものは見つかった順のまま後ろに並べる。
+// ディレクトリの order は、その中の README.md / index.md の order。
+function sortByOrder(dir) {
+  const keyOf = (node) => {
+    if (node.type === "page") return node.order ?? Infinity;
+    const index = node.children.find(
+      (c) => c.type === "page" && DIR_INDEX_NAMES.includes(posix.basename(c.rel))
+    );
+    return index?.order ?? Infinity;
+  };
+  for (const child of dir.children) if (child.type === "dir") sortByOrder(child);
+  // Array.prototype.sort は安定ソートなので、同じ順位のものは見つかった順のまま
+  dir.children.sort((a, b) => {
+    const ka = keyOf(a);
+    const kb = keyOf(b);
+    return ka === kb ? 0 : ka < kb ? -1 : 1;
+  });
 }
 
 /**

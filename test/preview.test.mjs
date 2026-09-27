@@ -9,6 +9,8 @@ import {
   createPreviewServer,
   dependencySpecsFromWorkflow,
   vendoredVersionOf,
+  shouldRebuildFor,
+  RELOAD_EVENTS_PATH,
 } from "../bin/preview.mjs";
 import { buildDocsPagesYml, buildDependencySpecs, readPackageVersion } from "../bin/cli.mjs";
 
@@ -71,4 +73,37 @@ test("生成ワークフローから、ビルド用の依存とコピー済み�
   assert.deepEqual(dependencySpecsFromWorkflow(yml), buildDependencySpecs().split(" "));
   assert.equal(vendoredVersionOf(yml), readPackageVersion());
   assert.deepEqual(dependencySpecsFromWorkflow("no install"), []);
+});
+
+test("shouldRebuildFor: 出力先・.git・node_modules の変更ではビルドし直さない", () => {
+  assert.equal(shouldRebuildFor("README.md", "_site"), true);
+  assert.equal(shouldRebuildFor("docs/a.md", "_site"), true);
+  assert.equal(shouldRebuildFor("_site/index.html", "_site"), false);
+  assert.equal(shouldRebuildFor("_site", "_site"), false);
+  assert.equal(shouldRebuildFor("_site2/x.md", "_site"), true);
+  assert.equal(shouldRebuildFor(".git/index", "_site"), false);
+  assert.equal(shouldRebuildFor(".github/tsuzuri/node_modules/marked/x.js", "_site"), false);
+});
+
+test("liveReload: HTML に再読み込みのスクリプトを入れ、notifyReload で通知する", async () => {
+  const dir = makeSite();
+  const server = createPreviewServer(dir, { liveReload: true });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    const html = await (await fetch(`${base}/`)).text();
+    assert.match(html, new RegExp(`EventSource\\("${RELOAD_EVENTS_PATH}"\\)`));
+    const controller = new AbortController();
+    const res = await fetch(`${base}${RELOAD_EVENTS_PATH}`, { signal: controller.signal });
+    assert.equal(res.headers.get("content-type"), "text/event-stream");
+    const reader = res.body.getReader();
+    await reader.read(); // ": connected"
+    server.notifyReload();
+    const { value } = await reader.read();
+    assert.match(new TextDecoder().decode(value), /data: reload/);
+    controller.abort();
+  } finally {
+    server.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

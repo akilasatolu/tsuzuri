@@ -531,11 +531,11 @@ export async function runUpdate({
 }
 
 export const HELP_TEXT = `使い方: npx github:${OSS_REPO}[#v1] init [オプション]
-        npx github:${OSS_REPO}[#v1] preview [--port <番号>]
+        npx github:${OSS_REPO}[#v1] preview [--port <番号>] [--no-watch]
 
 init: オプションを付けずに実行すると、対話形式で設定を聞きながらファイルを生成します。
 preview: 公開時と同じ設定でサイトを手元にビルドし、ブラウザで確認できるように配信します
-         (init 済みのリポジトリの直下で実行します)。
+         (init 済みのリポジトリの直下で実行します)。ファイルを保存すると自動でビルドし直します。
 
   --update           対話なしで最新版に更新する(ワークフローとビルドスクリプトだけを上書きし、
                      設定ファイル・独自CSSは変更しない)
@@ -547,6 +547,7 @@ preview: 公開時と同じ設定でサイトを手元にビルドし、ブラ�
       --style        独自CSSの空ひな形(${VENDOR_DIR}/styles/custom.css)も作る
       --force        対話なしのとき、既存ファイルも上書きする(既定では既存ファイルはスキップ)
       --port <番号>   preview で使うポート番号。既定: 4000
+      --no-watch     preview で、ファイルの変更を見張らない(自動でビルドし直さない)
   -v, --version      バージョンを表示する
   -h, --help         この説明を表示する
 
@@ -589,6 +590,7 @@ function parseCliArgsRaw(argv) {
       theme: { type: "string" },
       style: { type: "boolean", default: false },
       port: { type: "string" },
+      "no-watch": { type: "boolean", default: false },
       version: { type: "boolean", short: "v", default: false },
       help: { type: "boolean", short: "h", default: false },
     },
@@ -733,7 +735,7 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
   console.log(`tsuzuri v${version}\n`);
 
   if (args.command === "preview") {
-    const server = await runPreview({ cwd, port: args.port, version });
+    const server = await runPreview({ cwd, port: args.port, version, watch: !args["no-watch"] });
     if (!server) process.exitCode = 1;
     return;
   }

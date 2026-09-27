@@ -6,6 +6,14 @@ updates:
     schedule:
       interval: "weekly"
 
+  # 生成ページが CDN から読み込む mermaid のバージョン(.github/scripts/lib/html-renderer.mjs の
+  # MERMAID_VERSION)。deps/mermaid/package.json に同じバージョンを書いて監視させる。
+  # 更新のPRが来たら、MERMAID_VERSION も同じバージョンに直す(直さないとテストが失敗する)。
+  - package-ecosystem: "npm"
+    directory: "/deps/mermaid"
+    schedule:
+      interval: "weekly"
+
   # .github/workflows/*.yml 内の actions/* をコミットSHA固定にしているため、
   # SHAの更新(タグへの追従)はDependabotに任せる運用とする。
   # "/templates" は init が利用者リポジトリに生成するワークフローのひな形

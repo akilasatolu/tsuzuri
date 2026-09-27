@@ -8,10 +8,11 @@
  *   - YAMLパーサライブラリは追加しない(依存量の最小性を維持するため)。
  *     `key: value` 形式のフラットな行のみをサポートする自作パーサとする。
  *   - サポートするキーは `title` / `description` / `ogImage` / `ogType` /
- *     `lang` / `noindex` / `theme` / `styleFile` / `toc` の9つ。`noindex` のみ真偽値化し、それ以外は
+ *     `lang` / `noindex` / `theme` / `styleFile` / `toc` / `nav` / `order` の11個。`noindex` のみ真偽値化し、それ以外は
  *     文字列として保持する(値全体を囲む引用符 "…" / '…' は外す)。
  *     `styleFile` はページ単位の独自CSS(STYLE_FILE の代わりに使うファイル)で、解釈は build-docs.mjs が行う。
- *   - 上記9キー以外の未知のキーも文字列のまま `meta` に保持する
+ *     `nav`(false でナビに載せない)・`order`(ナビの並び順)の解釈は site-tree.mjs が行う。
+ *   - 上記11キー以外の未知のキーも文字列のまま `meta` に保持する
  *     (将来のフォーマット拡張に向けた寛容な扱い)。
  *
  * `theme`キーについて:
