@@ -673,6 +673,28 @@ test("parseCliArgs: 不明なオプション・サブコマンド、不正なテ
   assert.throws(() => parseCliArgs(["--branch", " "]), /--branch に空の値/);
 });
 
+test("parseCliArgs: preview サブコマンドと --port", () => {
+  assert.equal(parseCliArgs([]).command, "init");
+  const args = parseCliArgs(["preview"]);
+  assert.equal(args.command, "preview");
+  assert.equal(args.port, 4000);
+  assert.equal(parseCliArgs(["preview", "--port", "4001"]).port, 4001);
+  assert.throws(() => parseCliArgs(["preview", "--port", "abc"]), /--port には/);
+  assert.throws(() => parseCliArgs(["preview", "--port", "70000"]), /--port には/);
+  assert.throws(() => parseCliArgs(["init", "preview"]), /不明なサブコマンド/);
+});
+
+test("preview: init していないリポジトリではエラーにする", () => {
+  const dir = mkdtempSync(join(tmpdir(), "tsuzuri-preview-cli-"));
+  try {
+    const result = spawnSync(process.execPath, [join(PACKAGE_ROOT, "bin/cli.mjs"), "preview"], { cwd: dir, encoding: "utf8" });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /先に init を実行してください/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("parseCliArgs: -v / -h / --update / --force", () => {
   assert.equal(parseCliArgs(["-v"]).version, true);
   assert.equal(parseCliArgs(["-h"]).help, true);

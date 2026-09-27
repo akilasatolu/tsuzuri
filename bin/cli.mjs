@@ -16,6 +16,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { execFileSync } from "node:child_process";
+import { runPreview } from "./preview.mjs";
 
 // 実リポジトリ作成時に確定させる固定値。
 // 「今動いているセットアップコマンド自体がどのバージョンか」を利用者に案内する際や、
@@ -530,8 +531,11 @@ export async function runUpdate({
 }
 
 export const HELP_TEXT = `使い方: npx github:${OSS_REPO}[#v1] init [オプション]
+        npx github:${OSS_REPO}[#v1] preview [--port <番号>]
 
-オプションを付けずに実行すると、対話形式で設定を聞きながらファイルを生成します。
+init: オプションを付けずに実行すると、対話形式で設定を聞きながらファイルを生成します。
+preview: 公開時と同じ設定でサイトを手元にビルドし、ブラウザで確認できるように配信します
+         (init 済みのリポジトリの直下で実行します)。
 
   --update           対話なしで最新版に更新する(ワークフローとビルドスクリプトだけを上書きし、
                      設定ファイル・独自CSSは変更しない)
@@ -542,6 +546,7 @@ export const HELP_TEXT = `使い方: npx github:${OSS_REPO}[#v1] init [オプシ
       --theme <名前>  テーマ(THEME)。${THEME_CHOICES.map((c) => c.key).join(" / ")}。既定: wa
       --style        独自CSSの空ひな形(${VENDOR_DIR}/styles/custom.css)も作る
       --force        対話なしのとき、既存ファイルも上書きする(既定では既存ファイルはスキップ)
+      --port <番号>   preview で使うポート番号。既定: 4000
   -v, --version      バージョンを表示する
   -h, --help         この説明を表示する
 
@@ -552,7 +557,8 @@ export const HELP_TEXT = `使い方: npx github:${OSS_REPO}[#v1] init [オプシ
  *
  * @param {string[]} argv - process.argv.slice(2) 相当
  * @returns {{ update: boolean, yes: boolean, force: boolean, style: boolean, version: boolean,
- *   help: boolean, branch?: string, root?: string, theme?: string, nonInteractive: boolean }}
+ *   help: boolean, branch?: string, root?: string, theme?: string, port: number, command: "init" | "preview",
+ *   nonInteractive: boolean }}
  */
 export function parseCliArgs(argv = []) {
   let parsed;
@@ -582,13 +588,22 @@ function parseCliArgsRaw(argv) {
       root: { type: "string" },
       theme: { type: "string" },
       style: { type: "boolean", default: false },
+      port: { type: "string" },
       version: { type: "boolean", short: "v", default: false },
       help: { type: "boolean", short: "h", default: false },
     },
   });
-  const unknown = positionals.filter((p) => p !== "init");
-  if (unknown.length) {
-    throw new Error(`不明なサブコマンドです: ${unknown.join(" ")}(--help で使い方を表示します)`);
+  const unknown = positionals.filter((p) => p !== "init" && p !== "preview");
+  if (unknown.length || positionals.length > 1) {
+    throw new Error(`不明なサブコマンドです: ${positionals.join(" ")}(--help で使い方を表示します)`);
+  }
+  const command = positionals[0] ?? "init";
+  let port = 4000;
+  if (values.port !== undefined) {
+    port = Number(values.port);
+    if (!/^\d+$/.test(values.port) || port < 1 || port > 65535) {
+      throw new Error(`--port には 1〜65535 の番号を指定してください(指定: ${values.port})`);
+    }
   }
   if (values.theme !== undefined && !THEME_CHOICES.some((c) => c.key === values.theme)) {
     throw new Error(
@@ -602,7 +617,7 @@ function parseCliArgsRaw(argv) {
   }
   const nonInteractive =
     values.yes || values.style || ["branch", "root", "theme"].some((k) => values[k] !== undefined);
-  return { ...values, nonInteractive };
+  return { ...values, command, port, nonInteractive };
 }
 
 /**
@@ -716,6 +731,12 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
   }
 
   console.log(`tsuzuri v${version}\n`);
+
+  if (args.command === "preview") {
+    const server = await runPreview({ cwd, port: args.port, version });
+    if (!server) process.exitCode = 1;
+    return;
+  }
 
   if (args.update) {
     console.log("最新版に更新します(設定ファイル・独自CSSは変更しません)\n");

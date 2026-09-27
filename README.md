@@ -127,6 +127,9 @@ STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
 - 出力先は`_site/`です(`OUT_DIR`で変更可)。前回の出力は消さないので、ページを消した・
   名前を変えたときは`_site/`を消してからビルドしてください。
 
+`init`済みのディレクトリなら、作業ツリーのCLIの`preview`で、ビルドから配信までまとめて試せます
+(`node ~/dev/tsuzuri/bin/cli.mjs preview`。ビルドにはそのディレクトリの`.github/tsuzuri/`が使われます)。
+
 ### 2. ブラウザで確認する
 
 生成されるリンクはサイトのルートからの絶対パス(`/docs/cli.html`など)なので、

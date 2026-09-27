@@ -1411,4 +1411,95 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  test("frontmatter の styleFile で、そのページだけ独自CSSを差し替える(空のファイルなら当てない)", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "site.css"), "/* SITE CUSTOM */");
+      fs.writeFileSync(path.join(dir, "plain.css"), "");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[A](docs/a.md) [B](docs/b.md)\n");
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\nstyleFile: plain.css\n---\n# A\n");
+      fs.writeFileSync(path.join(dir, "docs", "b.md"), "---\nstyleFile: nope.css\n---\n# B\n");
+      const result = runBuild(dir, { STYLE_FILE: "site.css" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(readOut(dir, "index.html"), /SITE CUSTOM/);
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /SITE CUSTOM/, "空のファイルを指定したページには当てない");
+      assert.match(readOut(dir, "docs", "b.html"), /SITE CUSTOM/, "見つからなければサイト全体のもの");
+      assert.match(result.stderr, /styleFile "nope\.css" が見つかりません/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("見出しが無いページ内リンクは警告し、STRICT_LINKS=true ならビルドを失敗させる", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        "# Root\n\n## 使い方\n\n[ok](#使い方) [ok2](docs/a.md#page-a) [ok3](#%E4%BD%BF%E3%81%84%E6%96%B9) [fn](#top)\n\n[bad](docs/a.md#nope) [bad2](#missing)\n"
+      );
+      let result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stderr, /見出しが見つからないリンク: 2 件/);
+      assert.match(result.stderr, /docs\/a\.md#nope \(referenced from README\.md\)/);
+      assert.match(result.stderr, /README\.md#missing/);
+      result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /見出しが見つかりません: docs\/a\.md#nope/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("前回 Tsuzuri が出力したディレクトリは空にしてからビルドし、目印の無いディレクトリは消さない", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.mkdirSync(path.join(dir, "_site"));
+      fs.writeFileSync(path.join(dir, "_site", "keep.txt"), "user file");
+      let result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "keep.txt")), "目印が無ければ消さない");
+      assert.ok(fs.existsSync(path.join(dir, "_site", ".tsuzuri-build")));
+      fs.writeFileSync(path.join(dir, "_site", "old.html"), "old");
+      result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "old.html")), "前回の出力は消える");
+      assert.ok(fs.existsSync(path.join(dir, "_site", "index.html")));
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test(".で始まるディレクトリの PDF・動画はコピーし、設定ファイルはコピーしない。画像に width・height を付ける", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.mkdirSync(path.join(dir, ".github"));
+      fs.writeFileSync(path.join(dir, ".github", "manual.pdf"), "pdf");
+      fs.writeFileSync(path.join(dir, ".github", "ci.yml"), "secret: x");
+      const pngBuf = Buffer.alloc(33);
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(pngBuf, 0);
+      pngBuf.write("IHDR", 12, "ascii");
+      pngBuf.writeUInt32BE(320, 16);
+      pngBuf.writeUInt32BE(200, 20);
+      fs.writeFileSync(path.join(dir, "shot.png"), pngBuf);
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[m](.github/manual.pdf) [c](.github/ci.yml) ![s](shot.png)\n");
+      const result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "_.github", "manual.pdf")));
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "_.github", "ci.yml")));
+      const html = readOut(dir, "index.html");
+      assert.match(html, /href="\/_\.github\/manual\.pdf"/);
+      assert.match(html, /<img src="\/shot\.png" alt="s" width="320" height="200" loading="lazy"/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

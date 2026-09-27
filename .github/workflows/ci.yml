@@ -1,7 +1,7 @@
 name: CI
 
 # OSS本体自身の開発用CI(配布対象外)。
-# lint・testのみを行う。GitHub Pagesへのデプロイは一切行わないため、
+# lint・test・ワークフローの静的チェック(actionlint)のみを行う。GitHub Pagesへのデプロイは一切行わないため、
 # pages/id-token権限は不要(contents: readのみで完結する)。
 # このワークフローはmainブランチ(tsuzuri本体の開発ブランチ)にのみ存在する。
 # このリポジトリ自身のPagesデプロイは、docsブランチ(tsuzuriで作ったユーザー向けサイト)
@@ -36,3 +36,22 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+
+  # ワークフローの静的チェック(actionlint。run のシェルスクリプトは shellcheck でも確認される)。
+  # このリポジトリのワークフローに加えて、init が生成するワークフロー(ひな形のプレースホルダーを
+  # 置き換えた後の内容)も確認する。
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Render generated workflow
+        run: node -e 'import("./bin/cli.mjs").then((m) => process.stdout.write(m.buildDocsPagesYml()))' > "$RUNNER_TEMP/docs-pages.yml"
+      - name: Run actionlint
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+        run: |
+          bash <(curl -sSfL "https://raw.githubusercontent.com/rhysd/actionlint/v${ACTIONLINT_VERSION}/scripts/download-actionlint.bash") "$ACTIONLINT_VERSION" "$RUNNER_TEMP"
+          "$RUNNER_TEMP/actionlint" -color .github/workflows/*.yml "$RUNNER_TEMP/docs-pages.yml"
