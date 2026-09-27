@@ -81,13 +81,15 @@ npx github:akilasatolu/tsuzuri#v1 preview
 
 `preview`を使わずに、手動で同じことをする場合は次の順に実行します。
 
-1. ビルドに使う依存を`.github/tsuzuri/`にインストールします。コマンドは、生成された
-   `.github/workflows/docs-pages.yml`の「Install build dependency」にある`npm install ...`の行を
-   そのまま使ってください(`__VENDOR_DIR__`などは置き換え済みです)。例:
+1. ビルドに使う依存を`.github/tsuzuri/`にインストールします。`.github/tsuzuri/package-lock.json`の
+   とおりに入るので、ワークフローと同じ版になります(v1.7.0以降)。
 
    ```sh
-   npm install --prefix .github/tsuzuri marked@18.0.14 highlight.js@11.12.0 marked-footnote@1.4.0 --no-save
+   npm ci --prefix .github/tsuzuri --ignore-scripts
    ```
+
+   v1.6.0以前は`package-lock.json`が無いので、生成された`.github/workflows/docs-pages.yml`の
+   「Install build dependency」にある`npm install ...`の行をそのまま使ってください。
 
    インストール先の`.github/tsuzuri/node_modules/`は、`init`が生成する`.github/tsuzuri/.gitignore`に
    よってコミットの対象外になっています。

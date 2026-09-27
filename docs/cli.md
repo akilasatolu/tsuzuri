@@ -36,14 +36,17 @@ npx github:akilasatolu/tsuzuri#v1 init
 | `--branch <名前>` | トリガーブランチ(`TRIGGER_BRANCH`)。既定: リポジトリの既定ブランチ(`origin`の既定ブランチ。分からなければ`main`。v1.3.0以前は今のブランチになることがある) |
 | `--root <パス>` | 起点となるMarkdownファイル(`ROOT_MD`)。既定: `README.md` |
 | `--theme <名前>` | テーマ(`THEME`)。`wa` / `muji` / `sumi` / `ai` / `shu` / `none`。既定: `wa` |
+| `--site-name <名前>` | サイト名(`SITE_NAME`)。既定: 空(ビルド時にリポジトリ名になる) |
+| `--no-nav` | ナビ・サイト内検索・目次を表示しない(`NAV_ENABLED=false`)。既定: 表示する |
 | `--style` | 独自CSSの空ひな形(`.github/tsuzuri/styles/custom.css`)も作る |
 | `--force` | 対話なしのとき、既存ファイルも上書きする |
 | `--port <番号>` | `preview`で使うポート番号。既定: `4000` |
 | `--no-watch` | `preview`で、ファイルの変更を見張らない(自動でビルドし直さない) |
+| `--open` | `preview`で、起動したらブラウザでサイトを開く |
 | `-v`, `--version` | バージョンを表示する |
 | `-h`, `--help` | 使い方を表示する |
 
-`--yes`・`--branch`・`--root`・`--theme`・`--style`のいずれかを付けると、質問せずに生成します
+`--yes`・`--branch`・`--root`・`--theme`・`--site-name`・`--no-nav`・`--style`のいずれかを付けると、質問せずに生成します
 (スクリプトやCIから実行する場合に使えます)。このとき、既に存在するファイルは上書きせずに
 スキップします。上書きしたい場合は`--force`を付けてください。
 
@@ -62,14 +65,16 @@ pushする前に、公開時と同じ設定でサイトを手元にビルドし�
 npx github:akilasatolu/tsuzuri#v1 preview
 ```
 
-1. ビルド用の依存が`.github/tsuzuri/node_modules/`に無ければ、生成済みのワークフローと同じバージョンを
-   インストールします(`init`が作る`.github/tsuzuri/.gitignore`でコミットの対象外になっています)。
+1. ビルド用の依存が`.github/tsuzuri/node_modules/`に無ければ、ワークフローと同じく
+   `.github/tsuzuri/package-lock.json`のとおりにインストールします(`init`が作る`.github/tsuzuri/.gitignore`で
+   コミットの対象外になっています)。
 2. `.github/tsuzuri/`のビルドスクリプトで、`.github/docs-pages.config`の設定どおりにビルドします
    (リンク切れなどの警告もここに表示されます)。
 3. 出力先(`OUT_DIR`、既定は`_site/`)を`http://localhost:4000/`で配信します。
 4. ファイルを保存すると、自動でビルドし直して、開いているページを再読み込みします(v1.6.0以降。
    v1.5.0では、`Ctrl+C`で止めてからもう一度実行します)。
 
+`--open`を付けると、起動したときにブラウザでサイトを開きます。
 ポートが使用中の場合は、`--port 4001`のように別の番号を指定してください。自動でビルドし直したくない場合は
 `--no-watch`を付けます。終了するには`Ctrl+C`を押します。
 
@@ -86,7 +91,7 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 
 ## 対話フロー
 
-実行すると、次の4つの質問に順番に答えます(すべてEnterキーだけで既定値を選べます)。
+実行すると、次の質問に順番に答えます(すべてEnterキーだけで既定値を選べます)。
 
 1. **トリガーブランチ(`TRIGGER_BRANCH`)** `[main]`
    - デプロイを実行するブランチ名を聞かれます。空欄のまま(未入力で)Enterを押すと、かっこ内の既定値に
@@ -98,7 +103,12 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
    - `wa`(和・推奨)/`muji`(無地)/`sumi`(墨)/`ai`(藍)/`shu`(朱)/`none`(装飾なし)の
      6択が番号(1〜6)付きで表示されるので、番号を入力します。未入力なら`1`(`wa`)になります。
    - テーマの見た目の詳細は[theming.md](./theming.md)を参照してください。
-4. **独自CSSのひな形ファイルを作成するか(y/N)**
+4. **ナビを表示するか(`NAV_ENABLED`)(Y/n)**(v1.7.0以降)
+   - サイドバーのナビ・サイト内検索・ページ内の目次・前後のページへのリンクを表示するかどうかです。
+     未入力(または`y`)なら表示します。
+5. **サイト名(`SITE_NAME`)**(v1.7.0以降)
+   - ナビの見出しやSNSでのシェアに使うサイト名です。未入力ならビルド時にリポジトリ名になります。
+6. **独自CSSのひな形ファイルを作成するか(y/N)**
    - `.github/tsuzuri/styles/custom.css`という、コメントだけが書かれた空のCSSファイルを
      作るかどうかを聞かれます。組み込みテーマCSS一式と同じディレクトリに置かれるため、
      既存テーマのCSSを参考にしながら書けます。未入力(または`n`)なら作成しません。
@@ -114,8 +124,9 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 | `.github/tsuzuri/build-docs.mjs` | 常に生成 | ビルド本体のスクリプト(OSS本体リポジトリの`.github/scripts/build-docs.mjs`と同一内容) |
 | `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/crawler/frontmatter/html-renderer/link-extractor/path-utils/site-tree/slugger/search/sitemap) |
 | `.github/tsuzuri/styles/*.css` | 常に生成 | 組み込み6テーマ(`base.css`+`wa`/`muji`/`sumi`/`ai`/`shu`)のCSS一式。frontmatterの`theme`キー([参照](./frontmatter.md#theme))で選択中以外のテーマを使う場合に備え、常に全テーマ分コピーされる |
+| `.github/tsuzuri/package.json`・`package-lock.json` | 常に生成(v1.7.0以降) | ビルド用の依存(marked など)の版と、ダウンロードした中身を確かめるハッシュ。ワークフローと`preview`はこのとおりに`npm ci`でインストールする |
 | `.github/tsuzuri/.gitignore` | 常に生成 | 手元でプレビューするときにインストールする依存(`node_modules/`)をコミットしないための設定 |
-| `.github/tsuzuri/styles/custom.css` | 質問4で「y」と答えた場合のみ | コメントのみの空の独自CSSひな形。組み込みテーマCSSと同じディレクトリに置かれる |
+| `.github/tsuzuri/styles/custom.css` | 最後の質問で「y」と答えた場合のみ | コメントのみの空の独自CSSひな形。組み込みテーマCSSと同じディレクトリに置かれる |
 
 `.github/tsuzuri/`配下のファイルは、`build-docs.mjs`実行時に読み込まれる「ビルドスクリプト本体
 そのもの」です。利用者が直接編集する必要はありませんが、削除・改変すると

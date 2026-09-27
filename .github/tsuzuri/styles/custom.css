@@ -43,8 +43,9 @@
   --alert-caution: #b33823;    /* 朱 */
 }
 
+/* ダーク表示: OS がダークモードのとき(ナビのボタンでライト表示を選んだときを除く)と、ダーク表示を選んだとき */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
     --fg: #e8e4da;
     --fg-soft: #a9b0b4;
@@ -70,6 +71,32 @@
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
     --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.4);
   }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fg: #e8e4da;
+  --fg-soft: #a9b0b4;
+  --bg: #111c22;       /* 藍墨 */
+  --surface: #182830;
+  --surface-2: #213640;
+  --border: #2c434e;
+  --accent: #6fa8c2;     /* アイコンのダークモードの藍 */
+  --accent-2: #e8794f;     /* アイコンのダークモードの朱 */
+  --accent-3: #e6b847;
+  --tint: #1f3a46;
+  --gradient: linear-gradient(135deg, #2f7a92 0%, #6fa8c2 100%);
+  --gradient-shu: linear-gradient(135deg, #d4572e 0%, #e8794f 100%);
+  --wave: color-mix(in srgb, #6fa8c2 6%, var(--bg));
+  --code-bg: #2a2a2c;
+  --code-fg: #f0a07e;
+  --pre-bg: #0b1418;
+  --alert-note: #6fa8c2;
+  --alert-tip: #7fb87f;
+  --alert-important: #b48fc7;
+  --alert-warning: #e6b847;
+  --alert-caution: #e8794f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.4);
 }
 
 /* ---------- 全体 ---------- */
@@ -335,7 +362,7 @@ body > nav a[aria-current="page"] {
   background: var(--gradient);
   box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent);
 }
-body > nav li > span {
+body > nav summary {
   margin: 14px 0 4px;
   padding-left: 12px;
   font-size: 0.78em;
@@ -482,3 +509,18 @@ main .tsuzuri-feature h3::before { content: none; }
 
 /* ---------- 404 ページのボタン(トップページの入口と同じ見た目) ---------- */
 main > .tsuzuri-hero-actions { justify-content: flex-start; }
+
+/* ---------- ライト/ダークの切り替えボタン(ナビの見出しの横) ---------- */
+.tsuzuri-theme-toggle {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--accent);
+  background: var(--surface-2);
+  border: 0;
+  border-radius: 999px;
+  transition: background-color 0.15s, color 0.15s;
+}
+.tsuzuri-theme-toggle:hover { color: #fff; background: var(--gradient); }

@@ -92,6 +92,7 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 - [デプロイ設定(Deployment)](docs/deployment.md)
 - [使用例(Examples)](docs/examples.md)
 - [FAQ](docs/faq.md)
+- [更新履歴(リリースノート)](https://github.com/akilasatolu/tsuzuri/releases)
 
 ## スタイルのカスタマイズ
 

@@ -122,6 +122,9 @@ CUSTOM_DOMAIN=docs.example.com
 npx github:akilasatolu/tsuzuri#v1 init --update
 ```
 
+ビルド用の依存(marked など)も、`.github/tsuzuri/package-lock.json`に書かれた版とハッシュで固定されています
+(v1.7.0以降)。`--update`を実行するまで変わりません。
+
 特定のバージョンに固定したい場合は、タグを指定します。`#v1`はv1系の最新版(互換性を保ったまま更新される)、
 `#v1.2.0`のように完全なバージョンを指定すると、そのリリースに固定されます。
 
