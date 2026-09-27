@@ -84,14 +84,15 @@ pushしてGitHub Actionsを待たなくても、手元で同じビルドを実�
    インストール先の`.github/tsuzuri/node_modules/`は、`init`が生成する`.github/tsuzuri/.gitignore`に
    よってコミットの対象外になっています。
 
-2. ビルドします。設定ファイルの値は自動では読まれないので、試したい値を環境変数で渡します。
+2. ビルドします。`.github/docs-pages.config`の設定がそのまま使われるので、公開サイトと同じ
+   見た目で確認できます。
 
    ```sh
-   STYLE_DIR=.github/tsuzuri/styles LANG=ja NAV_ENABLED=true STRICT_LINKS=true node .github/tsuzuri/build-docs.mjs
+   node .github/tsuzuri/build-docs.mjs
    ```
 
-   `LANG=ja`は必ず指定してください(指定しないと、パソコンの言語設定(`ja_JP.UTF-8`など)が使われ、
-   言語タグとして不正なので警告が出ます)。
+   試しに設定を変えたいときは、`THEME=sumi node .github/tsuzuri/build-docs.mjs`のように
+   環境変数で渡すと、そのキーだけ設定ファイルより優先されます。
 
 3. できあがった`_site/`を簡易サーバーで開きます(ファイルを直接開くとリンクが切れます)。
 
@@ -100,6 +101,8 @@ pushしてGitHub Actionsを待たなくても、手元で同じビルドを実�
    ```
 
    `http://localhost:3000/`などで確認できます。確認が終わったら`_site/`は削除して構いません。
+   ビルドは前回の出力を消さないので、ページを削除・改名したときは`_site/`を消してから
+   ビルドし直してください。
    `_site/`を誤ってコミットしないよう、リポジトリの`.gitignore`に次の1行を追加しておくと安心です。
 
    ```

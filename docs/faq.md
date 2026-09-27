@@ -50,7 +50,7 @@ Markdown内でリンクした先のファイルが実際には存在しない場
 1. `THEME`のスペルミス。存在しないテーマ名(例: `sepia`)を指定すると警告のうえ
    自動的に`wa`にフォールバックします([configuration.md](./configuration.md))。
 2. `STYLE_FILE`に指定したパスに、実際にファイルが存在しているか。存在しない場合は
-   警告のみでビルドは継続し、独自CSSは反映されません。
+   警告は出ず(ビルドのログに`Custom style file not used`と出るだけで)、独自CSSは反映されません。
 3. 3層カスケード(基礎CSS→THEME→STYLE_FILE)の優先順位。`STYLE_FILE`は最後に
    読み込まれる最優先層のため、ここに書いたCSSルールが期待通り上書きしているか、
    詳細度(セレクタの強さ)の観点でも確認してください。詳しくは
@@ -61,11 +61,12 @@ Markdown内でリンクした先のファイルが実際には存在しない場
 `npx github:akilasatolu/tsuzuri#v1 init`を実行した際に、最新の変更が反映されていない
 (修正したはずの挙動が変わらない)場合は、`npx`側またはgit側のキャッシュが古いバージョンを
 再利用している可能性があります。実行時の最初の行に表示されるバージョン(`tsuzuri v1.0.0`など)で、
-実際に動いているバージョンを確認できます。古い場合は、次のように完全なバージョンを指定して
+実際に動いているバージョンを確認できます。古い場合は、次のように完全なバージョン
+([リリース一覧](https://github.com/akilasatolu/tsuzuri/releases)にある最新のもの)を指定して
 実行してみてください。
 
 ```
-npx github:akilasatolu/tsuzuri#v1.0.0 init --update
+npx github:akilasatolu/tsuzuri#v<最新のバージョン> init --update
 ```
 
 これでも解消しない場合は、ローカル環境の`npx`のキャッシュを一度クリアしてから
