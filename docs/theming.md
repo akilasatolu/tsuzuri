@@ -94,7 +94,11 @@ OS側の設定に関わらず常時ダークテーマで表示されます。リ
 > [!TIP]
 > このサイト自体も、`THEME=none`にして`STYLE_FILE`の独自CSSだけで見た目を作っています。
 > 書き方の例として[custom.css](https://github.com/akilasatolu/tsuzuri/blob/docs/.github/tsuzuri/styles/custom.css)を
-> 参考にしてください(テーマの見本ページには当てないよう、目印のあるページを除外する書き方もしています)。
+> 参考にしてください(見た目は[独自CSSの例](gallery/custom.md)で確認できます)。
+>
+> 一部のページだけ独自CSSを変えたい・当てたくない場合は、そのページのfrontmatterの
+> [`styleFile`](frontmatter.md#stylefile)で別のCSSファイルを指定します(v1.5.0以降)。このサイトの
+> テーマギャラリーは、中身が空のCSSを指定して、組み込みテーマだけの見た目にしています。
 
 変数の上書きだけでなく、`main h1 { ... }`のような通常のCSSルールを`STYLE_FILE`に
 直接追記して細部を調整することも可能です。`STYLE_FILE`は基礎CSS・THEMEの後に

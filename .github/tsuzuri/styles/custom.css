@@ -5,12 +5,11 @@
  *   - 丸みのあるカード・やわらかい影・藍と朱(Tsuzuri のアイコンの色)・青海波の地紋
  *   - ライト/ダークモードの両方に対応(OSの設定に追従)
  *
- * テーマの見本ページ(docs/gallery/*.md。本文に .tsuzuri-theme-sample の目印を置いている)では、
- * それぞれのテーマの見た目をそのまま見せるため、このスタイルを当てない。
- * そのため、すべてのルールを :root:not(:has(.tsuzuri-theme-sample)) の中に入れ子で書く(CSS Nesting)。
+ * テーマの見本ページ(docs/gallery/*.md)は、それぞれのテーマの見た目をそのまま見せるため、
+ * frontmatter の styleFile で中身が空の plain.css を指定して、このスタイルを当てないようにしている。
  */
 
-:root:not(:has(.tsuzuri-theme-sample)) {
+:root {
   /* Tsuzuri のアイコンと同じ藍(#1D4E64)と朱(#B33823)を軸に、生成り・山吹・若竹を添えた和の配色 */
   color-scheme: light;
   --fg: #2a2d34;               /* 墨 */
@@ -42,8 +41,10 @@
   --alert-important: #7a4f8c;  /* 江戸紫 */
   --alert-warning: #c98a12;    /* 山吹 */
   --alert-caution: #b33823;    /* 朱 */
+}
 
-  @media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
+  :root {
     color-scheme: dark;
     --fg: #e8e4da;
     --fg-soft: #a9b0b4;
@@ -69,302 +70,396 @@
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
     --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.4);
   }
-
-  /* ---------- 全体 ---------- */
-  body {
-    line-height: 1.8;
-    letter-spacing: 0.02em;
-    /* 青海波の地紋 */
-    background-color: var(--bg);
-    background-image:
-      radial-gradient(circle at 100% 150%, var(--bg) 24%, var(--wave) 24%, var(--wave) 28%, var(--bg) 28%, var(--bg) 36%, var(--wave) 36%, var(--wave) 40%, transparent 40%, transparent),
-      radial-gradient(circle at 0 150%, var(--bg) 24%, var(--wave) 24%, var(--wave) 28%, var(--bg) 28%, var(--bg) 36%, var(--wave) 36%, var(--wave) 40%, transparent 40%, transparent),
-      radial-gradient(circle at 50% 100%, var(--wave) 10%, var(--bg) 10%, var(--bg) 23%, var(--wave) 23%, var(--wave) 30%, var(--bg) 30%, var(--bg) 43%, var(--wave) 43%, var(--wave) 50%, var(--bg) 50%, var(--bg) 63%, var(--wave) 63%, var(--wave) 71%, transparent 71%, transparent),
-      radial-gradient(circle at 100% 50%, var(--wave) 5%, var(--bg) 5%, var(--bg) 15%, var(--wave) 15%, var(--wave) 20%, var(--bg) 20%, var(--bg) 29%, var(--wave) 29%, var(--wave) 34%, var(--bg) 34%, var(--bg) 44%, var(--wave) 44%, var(--wave) 49%, transparent 49%, transparent),
-      radial-gradient(circle at 0 50%, var(--wave) 5%, var(--bg) 5%, var(--bg) 15%, var(--wave) 15%, var(--wave) 20%, var(--bg) 20%, var(--bg) 29%, var(--wave) 29%, var(--wave) 34%, var(--bg) 34%, var(--bg) 44%, var(--wave) 44%, var(--wave) 49%, transparent 49%, transparent);
-    background-size: 80px 40px;
-    -webkit-font-smoothing: antialiased;
-  }
-  ::selection { background: color-mix(in srgb, var(--accent-2) 30%, transparent); }
-
-  /* 本文はカードにのせる */
-  main {
-    margin: 24px auto 48px;
-    padding: 40px 48px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 28px;
-    box-shadow: var(--shadow-lg);
-  }
-  body:has(> nav) > main { width: auto; margin: 24px 16px 48px; }
-  @media (max-width: 640px) {
-    main { padding: 28px 20px; border-radius: 22px; }
-  }
-
-  /* ---------- 見出し ---------- */
-  main h1 {
-    width: fit-content;
-    margin: 0 0 24px;
-    font-size: clamp(1.9rem, 4vw, 2.6rem);
-    line-height: 1.3;
-    font-weight: 800;
-    letter-spacing: 0.01em;
-    background: var(--gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  main h1::after {
-    content: "";
-    display: block;
-    width: 64px;
-    height: 6px;
-    margin-top: 14px;
-    border-radius: 999px;
-    background: var(--gradient-shu);
-  }
-  main h2 {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 48px 0 16px;
-    font-size: 1.45rem;
-    font-weight: 800;
-  }
-  main h2::before {
-    content: "";
-    flex: none;
-    width: 12px;
-    height: 28px;
-    border-radius: 999px;
-    background: var(--gradient-shu);
-  }
-  main h3 { margin: 32px 0 12px; font-size: 1.15rem; font-weight: 700; }
-  main h3::before { content: "● "; color: var(--accent-2); font-size: 0.7em; vertical-align: 0.15em; }
-  main h4 { margin: 24px 0 8px; font-weight: 700; color: var(--fg-soft); }
-  .tsuzuri-anchor { color: var(--accent-2); }
-
-  /* ---------- 本文 ---------- */
-  main a {
-    color: var(--accent);
-    font-weight: 600;
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 4px;
-    text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
-    border-radius: 4px;
-    transition: color 0.15s, background-color 0.15s, text-decoration-color 0.15s;
-  }
-  main a:hover {
-    color: var(--accent-2);
-    text-decoration-color: var(--accent-2);
-    background: color-mix(in srgb, var(--accent-2) 10%, transparent);
-  }
-  main a:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 2px; }
-  main strong { color: var(--fg); background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent-3) 45%, transparent) 62%); }
-  main hr { height: 4px; margin: 40px 0; border: 0; border-radius: 999px; background: var(--gradient-shu); opacity: 0.4; }
-  main img { border-radius: 16px; }
-  main ul, main ol { padding-left: 1.4em; }
-  main li { margin: 4px 0; }
-  main li::marker { color: var(--accent); font-weight: 700; }
-
-  main blockquote {
-    margin: 20px 0;
-    padding: 12px 20px;
-    color: var(--fg-soft);
-    background: var(--tint);
-    border-left: 6px solid var(--accent);
-    border-radius: 0 16px 16px 0;
-  }
-
-  /* ---------- コード ---------- */
-  main code {
-    font-family: var(--mono);
-    color: var(--code-fg);
-    background: var(--code-bg);
-    padding: 2px 6px;
-    border-radius: 8px;
-  }
-  main pre:not(.mermaid) {
-    position: relative;
-    padding: 40px 20px 18px;
-    color: var(--pre-fg);
-    background: var(--pre-bg);
-    border-radius: 18px;
-    box-shadow: var(--shadow);
-    line-height: 1.6;
-    /* コードの色分け(highlight.js)。暗い背景に合わせた明るい色 */
-    --hl-keyword: #f08a67;   /* 朱 */
-    --hl-string: #9fcf95;    /* 若竹 */
-    --hl-number: #e8c15a;    /* 山吹 */
-    --hl-title: #8cc3dc;     /* 浅葱 */
-    --hl-attr: #d6b3dd;      /* 藤 */
-    --hl-comment: #8a9aa2;
-  }
-  /* ウィンドウ風の3つの丸 */
-  main pre:not(.mermaid)::before {
-    content: "";
-    position: absolute;
-    top: 15px;
-    left: 18px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #d4572e;
-    box-shadow: 20px 0 0 #e0a526, 40px 0 0 #6aa06a;
-  }
-  main pre code { color: inherit; background: none; padding: 0; border-radius: 0; font-size: 0.88em; }
-
-  /* ---------- 表 ---------- */
-  main table {
-    border-collapse: separate;
-    border-spacing: 0;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-  }
-  main th, main td { border: 0; border-bottom: 1px solid var(--border); padding: 10px 14px; }
-  /* 見出し行と、1列目のコード(オプション名・キー名など)は途中で折り返さない */
-  main th, main td:first-child code { white-space: nowrap; }
-  main th {
-    text-align: left;
-    font-weight: 800;
-    color: var(--accent);
-    background: var(--tint);
-  }
-  main tr:last-child td { border-bottom: 0; }
-  main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 45%, transparent); }
-  main tbody tr:hover td { background: color-mix(in srgb, var(--accent-3) 12%, transparent); }
-
-  /* ---------- 注意書き(> [!NOTE] など) ---------- */
-  .markdown-alert {
-    padding: 14px 20px;
-    border: 0;
-    border-radius: 18px;
-    background: color-mix(in srgb, var(--alert-color) 11%, var(--surface));
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--alert-color) 25%, transparent);
-  }
-  .markdown-alert-title {
-    display: inline-block;
-    padding: 2px 12px;
-    font-size: 0.85em;
-    color: #fff;
-    background: var(--alert-color);
-    border-radius: 999px;
-  }
-
-  /* ---------- 目次 ---------- */
-  .tsuzuri-toc {
-    padding: 16px 22px;
-    background: var(--tint);
-    border: 0;
-    border-radius: 18px;
-  }
-  .tsuzuri-toc > p { color: var(--accent); }
-  .tsuzuri-toc a { font-weight: 500; text-decoration: none; }
-
-  /* ---------- 前後のページ ---------- */
-  .tsuzuri-pager { border-top: 0; }
-  main .tsuzuri-pager a {
-    padding: 14px 20px;
-    color: var(--fg);
-    background: var(--surface);
-    border: 2px solid var(--border);
-    border-radius: 18px;
-    box-shadow: var(--shadow);
-    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-  }
-  main .tsuzuri-pager a:hover {
-    transform: translateY(-3px);
-    border-color: var(--accent);
-    box-shadow: var(--shadow-lg);
-    background: var(--surface);
-    color: var(--accent);
-  }
-  .tsuzuri-pager span { color: var(--accent-2); opacity: 1; font-weight: 700; }
-
-  .tsuzuri-updated {
-    display: inline-block;
-    padding: 4px 14px;
-    color: var(--fg-soft);
-    background: var(--surface-2);
-    border-radius: 999px;
-    opacity: 1;
-  }
-  .footnotes { border-top: 2px dashed var(--border); }
-
-  /* ---------- ナビ(サイドバー・メニュー) ---------- */
-  body > nav {
-    margin: 16px 16px 0;
-    padding: 16px 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    box-shadow: var(--shadow);
-  }
-  .tsuzuri-nav-head > p {
-    font-size: 1.25rem;
-    font-weight: 800;
-    background: var(--gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .tsuzuri-nav-label {
-    padding: 6px 16px;
-    color: #fff;
-    font-weight: 700;
-    background: var(--gradient-shu);
-    border: 0;
-    border-radius: 999px;
-    box-shadow: var(--shadow);
-  }
-  body > nav a {
-    margin: 2px 0;
-    padding: 6px 12px;
-    color: var(--fg);
-    border-radius: 12px;
-    transition: background-color 0.15s, color 0.15s;
-  }
-  body > nav a:hover { color: var(--accent); background: var(--surface-2); text-decoration: none; }
-  body > nav a[aria-current="page"] {
-    color: #fff;
-    background: var(--gradient);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent);
-  }
-  body > nav li > span {
-    margin: 14px 0 4px;
-    padding-left: 12px;
-    font-size: 0.78em;
-    letter-spacing: 0.08em;
-    color: var(--accent-2);
-    opacity: 1;
-  }
-  body > nav ul ul { border-left: 2px solid var(--border); }
-
-  /* 検索 */
-  .tsuzuri-search input {
-    padding: 9px 16px;
-    background: var(--surface-2);
-    border: 2px solid transparent;
-    border-radius: 999px;
-    transition: border-color 0.15s, background-color 0.15s;
-  }
-  .tsuzuri-search input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
-  .tsuzuri-search-results li { padding: 6px 4px; border-bottom: 1px dashed var(--border); }
-
-  .tsuzuri-skip { color: #fff; background: var(--accent); border: 0; border-radius: 999px; }
-
-  @media (min-width: 960px) {
-    body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }
-    body > nav {
-      top: 16px;
-      height: calc(100vh - 32px);
-      margin: 16px 0 16px 16px;
-      padding: 28px 20px;
-      border-right: 1px solid var(--border);
-    }
-    body:has(> nav) > main { margin: 16px 24px 48px; max-width: var(--content-width); justify-self: center; }
-  }
 }
+
+/* ---------- 全体 ---------- */
+body {
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+  /* 青海波の地紋 */
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 100% 150%, var(--bg) 24%, var(--wave) 24%, var(--wave) 28%, var(--bg) 28%, var(--bg) 36%, var(--wave) 36%, var(--wave) 40%, transparent 40%, transparent),
+    radial-gradient(circle at 0 150%, var(--bg) 24%, var(--wave) 24%, var(--wave) 28%, var(--bg) 28%, var(--bg) 36%, var(--wave) 36%, var(--wave) 40%, transparent 40%, transparent),
+    radial-gradient(circle at 50% 100%, var(--wave) 10%, var(--bg) 10%, var(--bg) 23%, var(--wave) 23%, var(--wave) 30%, var(--bg) 30%, var(--bg) 43%, var(--wave) 43%, var(--wave) 50%, var(--bg) 50%, var(--bg) 63%, var(--wave) 63%, var(--wave) 71%, transparent 71%, transparent),
+    radial-gradient(circle at 100% 50%, var(--wave) 5%, var(--bg) 5%, var(--bg) 15%, var(--wave) 15%, var(--wave) 20%, var(--bg) 20%, var(--bg) 29%, var(--wave) 29%, var(--wave) 34%, var(--bg) 34%, var(--bg) 44%, var(--wave) 44%, var(--wave) 49%, transparent 49%, transparent),
+    radial-gradient(circle at 0 50%, var(--wave) 5%, var(--bg) 5%, var(--bg) 15%, var(--wave) 15%, var(--wave) 20%, var(--bg) 20%, var(--bg) 29%, var(--wave) 29%, var(--wave) 34%, var(--bg) 34%, var(--bg) 44%, var(--wave) 44%, var(--wave) 49%, transparent 49%, transparent);
+  background-size: 80px 40px;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: color-mix(in srgb, var(--accent-2) 30%, transparent); }
+
+/* 本文はカードにのせる */
+main {
+  margin: 24px auto 48px;
+  padding: 40px 48px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  box-shadow: var(--shadow-lg);
+}
+body:has(> nav) > main { width: auto; margin: 24px 16px 48px; }
+@media (max-width: 640px) {
+  main { padding: 28px 20px; border-radius: 22px; }
+}
+
+/* ---------- 見出し ---------- */
+main h1 {
+  width: fit-content;
+  margin: 0 0 24px;
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+main h1::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 6px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: var(--gradient-shu);
+}
+main h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 48px 0 16px;
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+main h2::before {
+  content: "";
+  flex: none;
+  width: 12px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--gradient-shu);
+}
+main h3 { margin: 32px 0 12px; font-size: 1.15rem; font-weight: 700; }
+main h3::before { content: "● "; color: var(--accent-2); font-size: 0.7em; vertical-align: 0.15em; }
+main h4 { margin: 24px 0 8px; font-weight: 700; color: var(--fg-soft); }
+.tsuzuri-anchor { color: var(--accent-2); }
+
+/* ---------- 本文 ---------- */
+main a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 4px;
+  transition: color 0.15s, background-color 0.15s, text-decoration-color 0.15s;
+}
+main a:hover {
+  color: var(--accent-2);
+  text-decoration-color: var(--accent-2);
+  background: color-mix(in srgb, var(--accent-2) 10%, transparent);
+}
+main a:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 2px; }
+main strong { color: var(--fg); background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent-3) 45%, transparent) 62%); }
+main hr { height: 4px; margin: 40px 0; border: 0; border-radius: 999px; background: var(--gradient-shu); opacity: 0.4; }
+main img { border-radius: 16px; }
+main ul, main ol { padding-left: 1.4em; }
+main li { margin: 4px 0; }
+main li::marker { color: var(--accent); font-weight: 700; }
+
+main blockquote {
+  margin: 20px 0;
+  padding: 12px 20px;
+  color: var(--fg-soft);
+  background: var(--tint);
+  border-left: 6px solid var(--accent);
+  border-radius: 0 16px 16px 0;
+}
+
+/* ---------- コード ---------- */
+main code {
+  font-family: var(--mono);
+  color: var(--code-fg);
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+main pre:not(.mermaid) {
+  position: relative;
+  padding: 40px 20px 18px;
+  color: var(--pre-fg);
+  background: var(--pre-bg);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  line-height: 1.6;
+  /* コードの色分け(highlight.js)。暗い背景に合わせた明るい色 */
+  --hl-keyword: #f08a67;   /* 朱 */
+  --hl-string: #9fcf95;    /* 若竹 */
+  --hl-number: #e8c15a;    /* 山吹 */
+  --hl-title: #8cc3dc;     /* 浅葱 */
+  --hl-attr: #d6b3dd;      /* 藤 */
+  --hl-comment: #8a9aa2;
+}
+/* ウィンドウ風の3つの丸 */
+main pre:not(.mermaid)::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 18px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #d4572e;
+  box-shadow: 20px 0 0 #e0a526, 40px 0 0 #6aa06a;
+}
+main pre code { color: inherit; background: none; padding: 0; border-radius: 0; font-size: 0.88em; }
+
+/* ---------- 表 ---------- */
+main table {
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+main th, main td { border: 0; border-bottom: 1px solid var(--border); padding: 10px 14px; }
+/* 見出し行と、1列目のコード(オプション名・キー名など)は途中で折り返さない */
+main th, main td:first-child code { white-space: nowrap; }
+main th {
+  text-align: left;
+  font-weight: 800;
+  color: var(--accent);
+  background: var(--tint);
+}
+main tr:last-child td { border-bottom: 0; }
+main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 45%, transparent); }
+main tbody tr:hover td { background: color-mix(in srgb, var(--accent-3) 12%, transparent); }
+
+/* ---------- 注意書き(> [!NOTE] など) ---------- */
+.markdown-alert {
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--alert-color) 11%, var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--alert-color) 25%, transparent);
+}
+.markdown-alert-title {
+  display: inline-block;
+  padding: 2px 12px;
+  font-size: 0.85em;
+  color: #fff;
+  background: var(--alert-color);
+  border-radius: 999px;
+}
+
+/* ---------- 目次 ---------- */
+.tsuzuri-toc {
+  padding: 16px 22px;
+  background: var(--tint);
+  border: 0;
+  border-radius: 18px;
+}
+.tsuzuri-toc > p { color: var(--accent); }
+.tsuzuri-toc a { font-weight: 500; text-decoration: none; }
+
+/* ---------- 前後のページ ---------- */
+.tsuzuri-pager { border-top: 0; }
+main .tsuzuri-pager a {
+  padding: 14px 20px;
+  color: var(--fg);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+main .tsuzuri-pager a:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-lg);
+  background: var(--surface);
+  color: var(--accent);
+}
+.tsuzuri-pager span { color: var(--accent-2); opacity: 1; font-weight: 700; }
+
+.tsuzuri-updated {
+  display: inline-block;
+  padding: 4px 14px;
+  color: var(--fg-soft);
+  background: var(--surface-2);
+  border-radius: 999px;
+  opacity: 1;
+}
+.footnotes { border-top: 2px dashed var(--border); }
+
+/* ---------- ナビ(サイドバー・メニュー) ---------- */
+body > nav {
+  margin: 16px 16px 0;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+}
+.tsuzuri-nav-head > p {
+  font-size: 1.25rem;
+  font-weight: 800;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.tsuzuri-nav-label {
+  padding: 6px 16px;
+  color: #fff;
+  font-weight: 700;
+  background: var(--gradient-shu);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+}
+body > nav a {
+  margin: 2px 0;
+  padding: 6px 12px;
+  color: var(--fg);
+  border-radius: 12px;
+  transition: background-color 0.15s, color 0.15s;
+}
+body > nav a:hover { color: var(--accent); background: var(--surface-2); text-decoration: none; }
+body > nav a[aria-current="page"] {
+  color: #fff;
+  background: var(--gradient);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+body > nav li > span {
+  margin: 14px 0 4px;
+  padding-left: 12px;
+  font-size: 0.78em;
+  letter-spacing: 0.08em;
+  color: var(--accent-2);
+  opacity: 1;
+}
+body > nav ul ul { border-left: 2px solid var(--border); }
+
+/* 検索 */
+.tsuzuri-search input {
+  padding: 9px 16px;
+  background: var(--surface-2);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.tsuzuri-search input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+.tsuzuri-search-results li { padding: 6px 4px; border-bottom: 1px dashed var(--border); }
+
+.tsuzuri-skip { color: #fff; background: var(--accent); border: 0; border-radius: 999px; }
+
+@media (min-width: 960px) {
+  body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }
+  body > nav {
+    top: 16px;
+    height: calc(100vh - 32px);
+    margin: 16px 0 16px 16px;
+    padding: 28px 20px;
+    border-right: 1px solid var(--border);
+  }
+  body:has(> nav) > main { margin: 16px 24px 48px; max-width: var(--content-width); justify-self: center; }
+}
+
+/* ---------- トップページの入口(README の <div class="tsuzuri-hero">) ---------- */
+.tsuzuri-hero {
+  margin: -8px -8px 40px;
+  padding: 40px 24px 32px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--accent-2) 12%, transparent) 0, transparent 40%),
+    radial-gradient(circle at 88% 82%, color-mix(in srgb, var(--accent) 14%, transparent) 0, transparent 45%),
+    var(--tint);
+  border-radius: 24px;
+}
+.tsuzuri-hero img[alt="Tsuzuri logo"] {
+  border-radius: 0;
+  filter: drop-shadow(0 6px 12px color-mix(in srgb, var(--accent) 25%, transparent));
+}
+.tsuzuri-hero h1 {
+  margin: 8px auto 12px;
+  font-size: clamp(2.4rem, 7vw, 3.6rem);
+}
+.tsuzuri-hero h1::after { margin: 14px auto 0; }
+/* 入口では目次を出さない(ナビと「ドキュメント」の一覧で足りるため) */
+.tsuzuri-hero .tsuzuri-toc { display: none; }
+.tsuzuri-hero-lead {
+  margin: 0 0 8px;
+  font-size: clamp(1.2rem, 3.4vw, 1.6rem);
+  font-weight: 800;
+  color: var(--accent-2);
+}
+.tsuzuri-hero-sub { margin: 0 auto 24px; max-width: 34em; color: var(--fg-soft); }
+.tsuzuri-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 0 0 20px; }
+main a.tsuzuri-button {
+  display: inline-block;
+  padding: 10px 24px;
+  color: var(--accent);
+  font-weight: 800;
+  text-decoration: none;
+  background: var(--surface);
+  border: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+main a.tsuzuri-button:hover {
+  color: var(--accent);
+  background: var(--surface);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+main a.tsuzuri-button-primary,
+main a.tsuzuri-button-primary:hover {
+  color: #fff;
+  background: var(--gradient-shu);
+  border-color: transparent;
+}
+.tsuzuri-hero p:has(> a > img) { margin: 0; }
+.tsuzuri-hero p:has(> a > img) a { background: none; }
+.tsuzuri-hero p:has(> a > img) img { border-radius: 4px; }
+
+/* ---------- 特徴のカード(README の <div class="tsuzuri-features">) ---------- */
+.tsuzuri-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 20px 0 8px;
+}
+.tsuzuri-feature {
+  padding: 20px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.tsuzuri-feature:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+/* 落款(はんこ)風の一文字 */
+.tsuzuri-feature-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 800;
+  background: var(--gradient-shu);
+  border-radius: 12px;
+  transform: rotate(-4deg);
+}
+.tsuzuri-feature:nth-child(even) .tsuzuri-feature-mark { background: var(--gradient); transform: rotate(3deg); }
+main .tsuzuri-feature h3 { margin: 0 0 6px; font-size: 1.05rem; }
+main .tsuzuri-feature h3::before { content: none; }
+.tsuzuri-feature p:last-child { margin: 0; color: var(--fg-soft); font-size: 0.93em; line-height: 1.7; }

@@ -1,0 +1,5 @@
+/*
+ * 中身が空の独自スタイル。
+ * テーマの見本ページ(docs/gallery/*.md)の frontmatter で styleFile に指定し、サイト全体の独自スタイル
+ * (custom.css)を当てずに、そのページのテーマ(theme)の見た目だけで表示するために使う。
+ */

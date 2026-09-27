@@ -20,8 +20,8 @@ npx github:akilasatolu/tsuzuri#v1 init
 ```
 
 `npx`はNode.jsに付属するコマンドで、パッケージをローカルにインストールせずに一時的に取得して
-実行できる仕組みです(Node.js 20以上が必要です)。`init`は将来のサブコマンド追加に備えた名前ですが、
-現時点では省略しても常にinit相当の動作になります。
+実行できる仕組みです(Node.js 20以上が必要です)。サブコマンドは、セットアップの`init`(省略可)と、
+手元でサイトを確認する[`preview`](#手元で確認するpreview)の2つです。
 
 実行すると、最初に`tsuzuri v1.0.0`のように、実際に動いているtsuzuriのバージョンが表示されます。
 意図したバージョンか確認してください(`npx`のキャッシュで古いバージョンが動くことがあるため)。
@@ -38,6 +38,7 @@ npx github:akilasatolu/tsuzuri#v1 init
 | `--theme <名前>` | テーマ(`THEME`)。`wa` / `muji` / `sumi` / `ai` / `shu` / `none`。既定: `wa` |
 | `--style` | 独自CSSの空ひな形(`.github/tsuzuri/styles/custom.css`)も作る |
 | `--force` | 対話なしのとき、既存ファイルも上書きする |
+| `--port <番号>` | `preview`で使うポート番号。既定: `4000` |
 | `-v`, `--version` | バージョンを表示する |
 | `-h`, `--help` | 使い方を表示する |
 
@@ -50,6 +51,28 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --theme sumi
 ```
 
 知らないオプションを指定した場合はエラーになり、何も生成しません。
+
+## 手元で確認する(`preview`)
+
+pushする前に、公開時と同じ設定でサイトを手元にビルドして、ブラウザで確認できます(v1.5.0以降)。
+`init`済みのリポジトリの直下で実行します。
+
+```
+npx github:akilasatolu/tsuzuri#v1 preview
+```
+
+1. ビルド用の依存が`.github/tsuzuri/node_modules/`に無ければ、生成済みのワークフローと同じバージョンを
+   インストールします(`init`が作る`.github/tsuzuri/.gitignore`でコミットの対象外になっています)。
+2. `.github/tsuzuri/`のビルドスクリプトで、`.github/docs-pages.config`の設定どおりにビルドします
+   (リンク切れなどの警告もここに表示されます)。
+3. 出力先(`OUT_DIR`、既定は`_site/`)を`http://localhost:4000/`で配信します。
+
+ポートが使用中の場合は、`--port 4001`のように別の番号を指定してください。Markdownを変更したら、
+`Ctrl+C`で止めてからもう一度実行します。
+
+ビルドには、リポジトリにコピー済みのビルドスクリプトを使います(公開時と同じ結果にするため)。
+コピー済みのバージョンと`npx`で実行したバージョンが違う場合は、その旨を表示します。最新にするには
+`init --update`を実行してください。
 
 ## 実行する場所の確認
 

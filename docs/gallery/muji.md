@@ -1,11 +1,9 @@
 ---
 title: 無地(muji)
 theme: muji
+styleFile: .github/tsuzuri/styles/plain.css
 description: Tsuzuriの組み込みテーマ「無地(muji)」の見本ページ
 ---
-
-<!-- テーマの見本ページの目印(このページにはサイトの独自スタイルを当てない。custom.css 参照) -->
-<div class="tsuzuri-theme-sample" hidden></div>
 
 # 無地(muji)
 

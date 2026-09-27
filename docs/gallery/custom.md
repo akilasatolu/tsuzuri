@@ -1,19 +1,18 @@
 ---
-title: 装飾なし(none)
-theme: none
-styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「装飾なし(none)」の見本ページ
+title: 独自CSSの例(このサイト)
+description: THEME=noneと独自CSS(STYLE_FILE)だけで作った、このサイト自身の見た目の見本ページ
 ---
 
-# 装飾なし(none)
+# 独自CSSの例(このサイト)
 
-テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。
+組み込みテーマを使わず(`THEME=none`)、`STYLE_FILE`の独自CSSだけで作った見た目です。
+このサイト全体がこの見た目になっています。丸みのあるカードに、Tsuzuriのアイコンと同じ藍と朱、
+生成りの地に青海波の地紋を合わせました。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=none`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: none`と書きます
-([テーマ・スタイル](../theming.md)参照)。
+使っているCSSは[custom.css](https://github.com/akilasatolu/tsuzuri/blob/docs/.github/tsuzuri/styles/custom.css)です。
+書き方は[テーマ・スタイル](../theming.md#独自cssでカスタマイズする)を参照してください。
 
-[← 朱(shu)](shu.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 装飾なし(none)](none.md) ・ [ギャラリー一覧](../gallery.md)
 
 ## 見出しレベル2
 
@@ -50,4 +49,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 朱(shu)](shu.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 装飾なし(none)](none.md) ・ [ギャラリー一覧](../gallery.md)

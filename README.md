@@ -1,11 +1,19 @@
-<img src="assets/favicon.svg" width="48" alt="Tsuzuri logo">
+<div class="tsuzuri-hero">
+
+<img src="assets/favicon.svg" width="72" height="72" alt="Tsuzuri logo">
 
 # Tsuzuri
 
-> READMEを起点に、リンクをたどってGitHub Pagesへ自動デプロイするツール
+<p class="tsuzuri-hero-lead">README を綴じて、あなたのサイトに。</p>
+
+<p class="tsuzuri-hero-sub">README を起点にリンクをたどり、つながった Markdown を GitHub Pages のサイトにして自動で公開します。</p>
+
+<p class="tsuzuri-hero-actions"><a class="tsuzuri-button tsuzuri-button-primary" href="docs/getting-started.md">はじめる</a> <a class="tsuzuri-button" href="#ドキュメント">ドキュメント</a> <a class="tsuzuri-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/akilasatolu/tsuzuri/blob/main/LICENSE)
 [![Build Status](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml)
+
+</div>
 
 ## Tsuzuriとは
 
@@ -30,10 +38,28 @@ https://akilasatolu.github.io/tsuzuri/
 
 ## 特徴
 
-- 設定ファイル(`.github/docs-pages.config`)を1つ書き換えるだけで、ワークフローYAMLを直接編集せずに動作をカスタマイズできる
-- READMEを起点にリンクをたどって自動でページを収集・階層化するので、サイトマップを手動で管理する必要がない
-- テーマ5種(和/無地/墨/藍/朱)+独自CSSの3層カスケードで、見た目を自分好みに調整できる
-- SEOメタタグ・OGP・favicon・簡易ナビゲーションに対応しており、社内サイトやコーポレートページのような使い方にも耐えられる
+<div class="tsuzuri-features">
+<div class="tsuzuri-feature">
+<p class="tsuzuri-feature-mark">綴</p>
+<h3>リンクをたどって、1つのサイトに</h3>
+<p>READMEからリンクでつながったページと画像を自動で集めます。ページを増やすときは、リンクを1本張るだけ。サイトマップの管理は要りません。</p>
+</div>
+<div class="tsuzuri-feature">
+<p class="tsuzuri-feature-mark">設</p>
+<h3>設定ファイルは1つだけ</h3>
+<p>.github/docs-pages.config を書き換えるだけで動作を変えられます。ワークフローのYAMLを編集する必要はありません。</p>
+</div>
+<div class="tsuzuri-feature">
+<p class="tsuzuri-feature-mark">彩</p>
+<h3>テーマと独自CSS</h3>
+<p>和・無地・墨・藍・朱の5つのテーマに、独自CSSを重ねて自由に調整できます。このサイトも独自CSSで作っています。</p>
+</div>
+<div class="tsuzuri-feature">
+<p class="tsuzuri-feature-mark">探</p>
+<h3>ナビ・検索・目次</h3>
+<p>サイドバーのナビ、サイト内検索、ページ内の目次を自動で作ります。OGP・favicon・sitemap.xmlにも対応しています。</p>
+</div>
+</div>
 
 ## クイックスタート
 

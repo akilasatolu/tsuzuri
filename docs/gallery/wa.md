@@ -1,11 +1,9 @@
 ---
 title: 和(wa)
 theme: wa
+styleFile: .github/tsuzuri/styles/plain.css
 description: Tsuzuriの組み込みテーマ「和(wa)」の見本ページ
 ---
-
-<!-- テーマの見本ページの目印(このページにはサイトの独自スタイルを当てない。custom.css 参照) -->
-<div class="tsuzuri-theme-sample" hidden></div>
 
 # 和(wa)
 
