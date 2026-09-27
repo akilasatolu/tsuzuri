@@ -50,6 +50,29 @@ const DEFAULT_ANSWERS = {
 };
 
 /**
+ * 生成するワークフローで利用者側にインストールする marked のバージョンを返す。
+ *
+ * package.json の devDependencies.marked(範囲指定ではなく "12.0.2" のような完全一致)を
+ * そのまま使うことで、テストで使っている版と利用者に配る版を常に一致させる。
+ * dependabot が package.json の marked を更新すると、その PR 1つで生成ワークフローの
+ * 版も追従する。
+ *
+ * @param {string} [packageRoot] - 既定は`PACKAGE_ROOT`。テスト時に差し替え可能にするため引数化している。
+ * @param {{readFileSync}} [fsImpl] - テスト用差し替え
+ * @returns {string}
+ */
+export function readMarkedVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFileSync }) {
+  const pkg = JSON.parse(fsImpl.readFileSync(join(packageRoot, "package.json"), "utf-8"));
+  const version = pkg.devDependencies?.marked;
+  if (typeof version !== "string" || !/^\d+\.\d+\.\d+$/.test(version)) {
+    throw new Error(
+      `package.json の devDependencies.marked は "12.0.2" のような完全一致のバージョンで指定してください(現在: ${version})`,
+    );
+  }
+  return version;
+}
+
+/**
  * docs-pages.yml の内容を組み立てる。
  *
  * v3で自己完結型に変更: 以前はOSS本体リポジトリ(tsuzuri)の再利用可能ワークフロー
@@ -58,7 +81,7 @@ const DEFAULT_ANSWERS = {
  * ビルドスクリプト本体(build-docs.mjs等)は `init` 実行時に
  * `${VENDOR_DIR}/` 配下へコピー済みであることが前提。
  */
-export function buildDocsPagesYml() {
+export function buildDocsPagesYml(markedVersion = readMarkedVersion()) {
   return `name: Deploy Docs to GitHub Pages
 
 # npx github:${OSS_REPO} init によって生成された、自己完結型のワークフローです。
@@ -163,7 +186,7 @@ jobs:
 
       - name: Install build dependency
         if: steps.trigger.outputs.should_deploy != 'false'
-        run: npm install marked@12.0.2 --no-save --no-audit --no-fund --ignore-scripts
+        run: npm install marked@${markedVersion} --no-save --no-audit --no-fund --ignore-scripts
 
       - name: Build
         if: steps.trigger.outputs.should_deploy != 'false'

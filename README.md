@@ -107,7 +107,7 @@ node ~/dev/tsuzuri/bin/cli.mjs
 生成された`.github/tsuzuri/`を使ってビルドする場合は、1と同じ要領で
 `STYLE_DIR=.github/tsuzuri/styles node .github/tsuzuri/build-docs.mjs`を実行します。
 このときは`marked`がこのディレクトリから読み込まれるため、先に
-`npm install --no-save marked@12.0.2`を実行してください。
+`npm install --no-save marked@<package.jsonのmarkedと同じバージョン>`を実行してください。
 
 ### 4. GitHub上で本番と同じ流れを試す
 
@@ -132,6 +132,18 @@ test/                       単体テスト・E2Eテスト(test/fixtures/ にフ
 
 `init`は`.github/scripts/`と`styles/`の中身を、利用者リポジトリの`.github/tsuzuri/`配下へ
 そのままコピーします。ここに置いたファイルはそのまま利用者に配布される点に注意してください。
+
+## 依存パッケージの更新
+
+Dependabotが週1回、`package.json`の依存パッケージと`ci.yml`のGitHub Actionsの更新PRを作ります。
+
+`marked`は、利用者側のワークフローでも使うビルド用の依存です。`init`が生成するワークフローは
+`package.json`の`devDependencies.marked`の版をそのまま埋め込むため、`marked`の更新PRを
+マージすれば、テストで使う版と利用者に配る版が一緒に更新されます。このため`marked`の版は
+`^`などの範囲ではなく`12.0.2`のような完全一致で書いてください(範囲指定だと`init`がエラーになります)。
+
+なお、生成ワークフロー内のGitHub Actions(`actions/upload-pages-artifact`など)の版は
+`bin/cli.mjs`に直接書かれており、Dependabotの対象外です。更新する場合は手で書き換えてください。
 
 ## リリース
 

@@ -10,6 +10,7 @@ import {
   PACKAGE_ROOT,
   THEME_CHOICES,
   buildDocsPagesYml,
+  readMarkedVersion,
   buildDocsPagesConfig,
   buildStyleCssTemplate,
   buildVendorTargets,
@@ -132,6 +133,30 @@ test("buildDocsPagesYml: 設定ファイルは既知のキーだけを取り込�
   );
   assert.ok(!yml.includes("| xargs"));
   assert.ok(yml.includes("--ignore-scripts"));
+});
+
+test("readMarkedVersion: package.jsonのdevDependencies.markedをそのまま返す", () => {
+  const pkg = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package.json"), "utf8"));
+  assert.equal(readMarkedVersion(), pkg.devDependencies.marked);
+});
+
+test("readMarkedVersion: ^や~などの範囲指定は受け付けない", () => {
+  for (const range of ["^12.0.2", "~12.0.2", "12.x", undefined]) {
+    const fsImpl = {
+      readFileSync: () => JSON.stringify({ devDependencies: { marked: range } }),
+    };
+    assert.throws(() => readMarkedVersion("/pkg", fsImpl), /完全一致/);
+  }
+});
+
+test("package.jsonのmarkedとpackage-lock.jsonで実際に入る版が一致している(テストと配布物の版が揃う)", () => {
+  const lock = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package-lock.json"), "utf8"));
+  assert.equal(lock.packages["node_modules/marked"].version, readMarkedVersion());
+});
+
+test("buildDocsPagesYml: 利用者側でインストールするmarkedはpackage.jsonの版", () => {
+  assert.ok(buildDocsPagesYml().includes(`npm install marked@${readMarkedVersion()} `));
+  assert.ok(buildDocsPagesYml("99.1.0").includes("npm install marked@99.1.0 "));
 });
 
 test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=README.md/THEME=wa", () => {

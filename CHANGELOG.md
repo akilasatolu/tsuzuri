@@ -37,6 +37,9 @@
 - `LANG`が言語タグとして不正な値(例: ローカル実行時のOSの`en_US.UTF-8`)のときは、
   警告して`ja`にフォールバックするようにした。
 - `STYLE_DIR`に絶対パスを指定できるようにした(ローカルでの動作確認用)。
+- `init`が生成するワークフローでインストールする`marked`のバージョンを、ハードコードではなく
+  `package.json`の`devDependencies.marked`(完全一致で固定)から埋め込むようにした。
+  テストで使う版と利用者に配る版が常に一致し、Dependabotの更新PR 1つで両方が追従する。
 
 - `npx github:akilasatolu/tsuzuri init`が生成するワークフローを自己完結型に変更。
   以前は利用者側`docs-pages.yml`がOSS本体リポジトリの再利用可能ワークフロー
