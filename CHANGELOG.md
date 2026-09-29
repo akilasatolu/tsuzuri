@@ -16,6 +16,14 @@
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-09-30
+
+### Changed
+
+- ナビのディレクトリを、最初からすべて開いた状態で表示するようにした(これまでは、いちばん上の階層と今のページが
+  あるディレクトリだけを開いていたため、ほかのページを見ているときに一部のページへのリンクが見えなかった)。
+  クリックで折りたためるのはこれまでどおり。
+
 ## [1.13.0] - 2026-09-30
 
 ### Added
@@ -317,7 +325,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.13.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.14.0...HEAD
+[1.14.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.11.0...v1.12.0
 [1.11.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.10.0...v1.11.0
