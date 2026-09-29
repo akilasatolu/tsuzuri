@@ -1,16 +1,16 @@
 ---
-title: 朱(shu)
-theme: shu
+title: 歌舞伎(kabuki)
+theme: kabuki
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「朱(shu)」の見本ページ
+description: Tsuzuriの組み込みテーマ「歌舞伎(kabuki)」の見本ページ
 ---
 
-# 朱(shu)
+# 歌舞伎(kabuki)
 
-朱色を効かせた力強い配色。朱の太い下線・帯の見出しと、朱の見出し行の表。製品紹介・告知など印象を残したいページ向け。
+歌舞伎がテーマ。定式幕の黒・柿色・萌葱色と、隈取の紅。明朝体の太い見出しに、定式幕の三色の帯と縦縞。表の見出し行は黒。ライト/ダークモードを自動で切り替える。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=shu`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: shu`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=kabuki`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: kabuki`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
 [← 藍(ai)](ai.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)

@@ -6,8 +6,9 @@ description: THEME=noneと独自CSS(STYLE_FILE)だけで作った、このサイ
 # 独自CSSの例(このサイト)
 
 組み込みテーマを使わず(`THEME=none`)、`STYLE_FILE`の独自CSSだけで作った見た目です。
-このサイト全体がこの見た目になっています。丸みのあるカードに、Tsuzuriのアイコンと同じ藍と朱、
-生成りの地に青海波の地紋を合わせました。
+このサイト全体がこの見た目になっています。水墨画をイメージして、和紙の地に墨の濃淡(濃墨・中墨・淡墨)だけで組み、
+差し色は落款(はんこ)の朱を少しだけにしました。見出しは明朝体で、h1の下には筆で払ったような線、
+背景には遠山のような淡い墨のぼかしを入れています。
 
 使っているCSSは[custom.css](https://github.com/akilasatolu/tsuzuri/blob/docs/.github/tsuzuri/styles/custom.css)です。
 書き方は[テーマ・スタイル](../theming.md#独自cssでカスタマイズする)を参照してください。

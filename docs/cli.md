@@ -35,7 +35,7 @@ npx github:akilasatolu/tsuzuri#v1 init
 | `-y`, `--yes` | 対話なしで、すべて既定値で生成する |
 | `--branch <名前>` | トリガーブランチ(`TRIGGER_BRANCH`)。既定: リポジトリの既定ブランチ(`origin`の既定ブランチ。分からなければ`main`。v1.3.0以前は今のブランチになることがある) |
 | `--root <パス>` | 起点となるMarkdownファイル(`ROOT_MD`)。既定: `README.md` |
-| `--theme <名前>` | テーマ(`THEME`)。`wa` / `sora` / `akari` / `ai` / `shu` / `none`。既定: `wa` |
+| `--theme <名前>` | テーマ(`THEME`)。`wa` / `sora` / `akari` / `ai` / `kabuki` / `none`。既定: `wa` |
 | `--site-name <名前>` | サイト名(`SITE_NAME`)。既定: 空(ビルド時にリポジトリ名になる) |
 | `--no-nav` | ナビ・サイト内検索・目次を表示しない(`NAV_ENABLED=false`)。既定: 表示する |
 | `--style` | 独自CSSの空ひな形(`.github/tsuzuri/styles/custom.css`)も作る |
@@ -100,7 +100,7 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 2. **起点となるMarkdownファイル(`ROOT_MD`)** `[README.md]`
    - サイトの入り口となるMarkdownファイルのパスです。未入力なら`README.md`になります。
 3. **テーマ(`THEME`)の選択**
-   - `wa`(和・推奨)/`sora`(宙)/`akari`(灯)/`ai`(藍)/`shu`(朱)/`none`(装飾なし)の
+   - `wa`(和・推奨)/`sora`(宙)/`akari`(灯)/`ai`(藍)/`kabuki`(歌舞伎)/`none`(装飾なし)の
      6択が番号(1〜6)付きで表示されるので、番号を入力します。未入力なら`1`(`wa`)になります。
    - テーマの見た目の詳細は[theming.md](./theming.md)を参照してください。
 4. **ナビを表示するか(`NAV_ENABLED`)(Y/n)**(v1.7.0以降)
@@ -123,7 +123,7 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 | `.github/docs-pages.config` | 常に生成 | `TRIGGER_BRANCH`/`ROOT_MD`/`THEME`は回答内容を反映し、それ以外のキーは既定値で出力される設定ファイル |
 | `.github/tsuzuri/build-docs.mjs` | 常に生成 | ビルド本体のスクリプト(OSS本体リポジトリの`.github/scripts/build-docs.mjs`と同一内容) |
 | `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/crawler/frontmatter/html-renderer/link-extractor/path-utils/site-tree/slugger/search/sitemap) |
-| `.github/tsuzuri/styles/*.css` | 常に生成 | 組み込み6テーマ(`base.css`+`wa`/`sora`/`akari`/`ai`/`shu`)のCSS一式。frontmatterの`theme`キー([参照](./frontmatter.md#theme))で選択中以外のテーマを使う場合に備え、常に全テーマ分コピーされる |
+| `.github/tsuzuri/styles/*.css` | 常に生成 | 組み込み6テーマ(`base.css`+`wa`/`sora`/`akari`/`ai`/`kabuki`)のCSS一式。frontmatterの`theme`キー([参照](./frontmatter.md#theme))で選択中以外のテーマを使う場合に備え、常に全テーマ分コピーされる |
 | `.github/tsuzuri/package.json`・`package-lock.json` | 常に生成(v1.7.0以降) | ビルド用の依存(marked など)の版と、ダウンロードした中身を確かめるハッシュ。ワークフローと`preview`はこのとおりに`npm ci`でインストールする |
 | `.github/tsuzuri/.gitignore` | 常に生成 | 手元でプレビューするときにインストールする依存(`node_modules/`)をコミットしないための設定 |
 | `.github/tsuzuri/styles/custom.css` | 最後の質問で「y」と答えた場合のみ | コメントのみの空の独自CSSひな形。組み込みテーマCSSと同じディレクトリに置かれる |

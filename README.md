@@ -49,7 +49,7 @@ https://akilasatolu.github.io/tsuzuri/
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>テーマと独自CSS</h3>
-<p>和・宙・灯・藍・朱の5つのテーマに、独自CSSを重ねて自由に調整できます。このサイトも独自CSSで作っています。</p>
+<p>和・宙・灯・藍・歌舞伎の5つのテーマに、独自CSSを重ねて自由に調整できます。このサイトも独自CSSで作っています。</p>
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">探</span><span class="tsuzuri-sep">】</span>ナビ・検索・目次</h3>
@@ -98,7 +98,7 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 
 見た目を変えたい場合、CSSを自分で書く必要は必ずしもありません。
 `.github/docs-pages.config`の`THEME`に、和(`wa`・既定)/宙(`sora`)/灯(`akari`)/
-藍(`ai`)/朱(`shu`)/装飾なし(`none`)のいずれかを指定するだけで、配色や
+藍(`ai`)/歌舞伎(`kabuki`)/装飾なし(`none`)のいずれかを指定するだけで、配色や
 リンクの下線の有無などの見た目がまとめて切り替わります。詳しくは
 [テーマ・スタイル(Theming)](docs/theming.md)を参照してください。
 
