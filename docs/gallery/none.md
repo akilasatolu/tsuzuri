@@ -13,7 +13,7 @@ description: Tsuzuriの組み込みテーマ「装飾なし(none)」の見本ペ
 1ページだけ使う場合は、そのページのfrontmatterに`theme: none`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 金(kin)](kin.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 雪(yuki)](yuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 金(kin)](kin.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 雪(yuki)](yuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
