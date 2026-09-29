@@ -1,0 +1,108 @@
+/*
+ * umi.css (海)
+ * 海をテーマにしたスタイル。ライト表示は明るい浅瀬、ダーク表示は深い海の底。
+ * 見出しの下や区切り線に波の線を引き、差し色は海の青と、珊瑚の色を少しだけ使う。
+ * 明るく爽やかで、長く読んでも疲れにくい配色にしている。ライト/ダーク表示に対応する。
+ */
+:root {
+  color-scheme: light dark;
+  --fg: #12303f;             /* 深い海 */
+  --muted: #4f6b78;
+  --bg: #f4fafc;             /* 浅瀬 */
+  --bg-deep: #e3f1f6;        /* 下にいくほど深くなる海の色 */
+  --surface: #ffffff;
+  --border: #cfe3ea;
+  --accent: #0a6c96;         /* 海の青 */
+  --accent-2: #14958d;       /* 浅瀬の青緑 */
+  --coral: #e0735a;          /* 珊瑚 */
+  --accent-soft: #e0f0f6;
+  --code-bg: #eaf4f7;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --content-width: 840px;
+  /* 波の線(見出しの下・区切り線)。色は画像の中に書くので、ライト/ダークで別の画像にする */
+  --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%230a6c96' stroke-width='2'/%3E%3C/svg%3E");
+  --wave-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%2314958d' stroke-width='1.5' stroke-opacity='0.6'/%3E%3C/svg%3E");
+}
+
+/* ダーク表示: 深い海の底に、夜光虫のような青緑の光。OS がダークモードのとき(ライト表示に切り替えたときを除く)と、
+   ダーク表示に切り替えたとき */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fg: #d9eef5;
+    --muted: #8fb1bf;
+    --bg: #071a26;
+    --bg-deep: #03101a;
+    --surface: #0c2433;
+    --border: #1c3d4f;
+    --accent: #5cc3ef;
+    --accent-2: #45d6c6;
+    --coral: #f2917b;
+    --accent-soft: #0f2f42;
+    --code-bg: #0a2130;
+    --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%235cc3ef' stroke-width='2'/%3E%3C/svg%3E");
+    --wave-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%2345d6c6' stroke-width='1.5' stroke-opacity='0.6'/%3E%3C/svg%3E");
+  }
+}
+:root[data-theme="dark"] {
+  --fg: #d9eef5;
+  --muted: #8fb1bf;
+  --bg: #071a26;
+  --bg-deep: #03101a;
+  --surface: #0c2433;
+  --border: #1c3d4f;
+  --accent: #5cc3ef;
+  --accent-2: #45d6c6;
+  --coral: #f2917b;
+  --accent-soft: #0f2f42;
+  --code-bg: #0a2130;
+  --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%235cc3ef' stroke-width='2'/%3E%3C/svg%3E");
+  --wave-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%2345d6c6' stroke-width='1.5' stroke-opacity='0.6'/%3E%3C/svg%3E");
+}
+
+/* 海: 上は明るい水面、下にいくほど深い色 */
+body {
+  line-height: 1.8;
+  background-color: var(--bg);
+  background-image: linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+/* 見出し: 海の青。h1 の下に波の線、h2 は青緑の小さな波の印、h3 は浅瀬の青緑 */
+main :is(h1, h2, h3, h4) { color: var(--fg); font-weight: 700; line-height: 1.45; }
+main h1 { margin: 0 0 1.2em; font-size: 2em; color: var(--accent); }
+main h1::after { content: ""; display: block; height: 8px; margin-top: 0.4em; background: var(--wave) repeat-x left center; }
+main h2 { margin: 2.4em 0 0.8em; padding-bottom: 0.3em; font-size: 1.4em; border-bottom: 1px solid var(--border); }
+main h2::before { content: ""; display: inline-block; width: 24px; height: 8px; margin-right: 0.5em; vertical-align: 0.2em; background: var(--wave) no-repeat center; }
+main h3 { margin: 2em 0 0.6em; font-size: 1.15em; color: var(--accent-2); }
+main h4 { margin: 1.6em 0 0.4em; font-size: 1em; color: var(--muted); }
+
+/* リンク: 海の青。カーソルを当てると青緑 */
+main a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); text-underline-offset: 0.2em; }
+main a:hover { color: var(--accent-2); text-decoration-color: var(--accent-2); }
+
+main strong { color: var(--fg); background: linear-gradient(transparent 65%, color-mix(in srgb, var(--accent-2) 22%, transparent) 65%); }
+main blockquote { margin: 1.4em 0; padding: 0.6em 1.2em; color: var(--muted); background: var(--accent-soft); border-left: 4px solid var(--accent-2); border-radius: 0 10px 10px 0; }
+main hr { margin: 2.5em 0; height: 8px; border: 0; background: var(--wave-soft) repeat-x left center; }
+main kbd { padding: 0.1em 0.45em; font-size: 0.85em; background: var(--surface); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; }
+main img { border-radius: 8px; }
+
+/* コード・表 */
+main pre { border: 1px solid var(--border); border-radius: 10px; line-height: 1.6; }
+main code { color: color-mix(in srgb, var(--coral) 80%, var(--fg)); }
+main pre code { color: inherit; }
+main table { font-size: 0.95em; background: var(--surface); }
+main th { text-align: left; color: var(--bg); background: var(--accent); border-color: var(--accent); }
+main th, main td { border-color: var(--border); padding: 8px 12px; }
+main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--accent-soft) 60%, transparent); }
+
+/* ナビ・目次・前後のページ */
+body > nav { background: color-mix(in srgb, var(--surface) 70%, transparent); }
+body > nav a { padding: 4px 10px; color: var(--fg); border-radius: 999px; }
+body > nav a:hover { color: var(--accent); background: var(--accent-soft); text-decoration: none; }
+body > nav a[aria-current="page"] { color: var(--bg); background: var(--accent); font-weight: 600; }
+.tsuzuri-nav-head > p { color: var(--accent); }
+.tsuzuri-toc { background: var(--surface); border-color: var(--border); border-radius: 12px; }
+main .tsuzuri-pager a { background: var(--surface); border-color: var(--border); border-radius: 12px; }
+main .tsuzuri-pager a:hover { border-color: var(--accent-2); }
