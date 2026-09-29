@@ -16,6 +16,21 @@
 
 ## [Unreleased]
 
+## [1.17.0] - 2026-09-30
+
+### Added
+
+- 竹林をテーマにした組み込みテーマ「竹(`take`)」。淡い若竹色がかった地に深緑と若竹色を差し色にし、h1 の下に節のある
+  竹の帯、h2 の左に節のある竹の幹、ページの右上に竹の葉の影。ダーク表示は夜の竹林。
+- 秋の庭園をテーマにした「紅葉(`momiji`)」。生成りの地に紅・橙・黄金、h2 の印は紅葉の葉、ページの右上に散る紅葉。
+- 藤棚をテーマにした「藤(`fuji`)」。淡い地に藤色と江戸紫、ページの上から垂れ下がる藤の房、h2 の印は藤の房。
+- 雪の夜の静けさをテーマにした「雪(`yuki`)」。白・銀鼠・淡い藍、h2 の印は雪輪、ページ全体にちらつく雪。
+- 金屏風と金箔をテーマにした「金(`kin`)」。黒漆の地に金、ページの右上に金箔、h1 の下に雲取りの金の帯。常にダーク表示。
+
+### Removed
+
+- 組み込みテーマ「海(`umi`)」を削除した。
+
 ## [1.16.0] - 2026-09-30
 
 ### Changed
@@ -347,7 +362,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.16.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.17.0...HEAD
+[1.17.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.16.0...v1.17.0
 [1.16.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.14.0...v1.15.0
 [1.14.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.13.0...v1.14.0

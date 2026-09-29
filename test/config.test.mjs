@@ -262,8 +262,8 @@ test("parseConfigText: コメント・空行・未知のキーを読み飛ばし
 
 test("withConfigFileDefaults: 環境変数を優先し、OSのLANG(言語タグでない)は設定ファイルの値にする", () => {
   const file = { THEME: "akari", LANG: "en", NAV_ENABLED: "true" };
-  const env = withConfigFileDefaults({ THEME: "umi", LANG: "ja_JP.UTF-8" }, file);
-  assert.equal(env.THEME, "umi");
+  const env = withConfigFileDefaults({ THEME: "take", LANG: "ja_JP.UTF-8" }, file);
+  assert.equal(env.THEME, "take");
   assert.equal(env.LANG, "en");
   assert.equal(env.NAV_ENABLED, "true");
   assert.equal(withConfigFileDefaults({ LANG: "ja" }, file).LANG, "ja", "言語タグなら環境変数を優先");

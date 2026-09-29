@@ -1,0 +1,88 @@
+/*
+ * kin.css (金)
+ * 金屏風と金箔をテーマにしたスタイル。黒漆の地に、金を差し色にする。
+ * ページの右上に金箔を散らし、h1 の下と区切り線に雲取り(くもどり)の金の帯、h2 の印は金の菱。
+ * 華やかさを出しつつ、本文は落ち着いた象牙色で読みやすくしている。常にダーク表示にする(OSの設定に関わらない)。
+ */
+:root {
+  color-scheme: dark;
+  --fg: #ede3cf;
+  --muted: #a89c86;
+  --bg: #120f0c;
+  --surface: #1c1712;
+  --border: #3a3024;
+  --heading: #f3e3b3;
+  --accent: #d4af5a;
+  --accent-2: #e8c874;
+  --on-accent: #120f0c;
+  --accent-soft: #221b12;
+  --code-bg: #18130e;
+  --band: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='14' viewBox='0 0 60 14'%3E%3Cpath d='M0 12 C4 12 5 5 11 5 C15 5 16 9 20 9 C24 9 25 2 32 2 C38 2 39 8 44 8 C48 8 50 5 54 5 C57 5 58 9 60 12' fill='none' stroke='%23d4af5a' stroke-width='1.6'/%3E%3C/svg%3E") repeat-x left center;
+  --band-h: 14px;
+  --mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='5' width='14' height='14' transform='rotate(45 12 12)' fill='%23d4af5a'/%3E%3Crect x='9' y='9' width='6' height='6' transform='rotate(45 12 12)' fill='%23120f0c'/%3E%3C/svg%3E");
+  --leaf: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='170' viewBox='0 0 420 170'%3E%3Cg opacity='0.22'%3E%3Crect x='300' y='10' width='40' height='40' transform='rotate(8 320.0 30.0)' fill='%23d4af5a' opacity='0.9'/%3E%3Crect x='340' y='50' width='28' height='28' transform='rotate(-6 354.0 64.0)' fill='%23d4af5a' opacity='0.7'/%3E%3Crect x='270' y='60' width='22' height='22' transform='rotate(12 281.0 71.0)' fill='%23d4af5a' opacity='0.6'/%3E%3Crect x='360' y='110' width='34' height='34' transform='rotate(4 377.0 127.0)' fill='%23d4af5a' opacity='0.8'/%3E%3Crect x='318' y='96' width='18' height='18' transform='rotate(-10 327.0 105.0)' fill='%23d4af5a' opacity='0.5'/%3E%3Crect x='240' y='20' width='16' height='16' transform='rotate(15 248.0 28.0)' fill='%23d4af5a' opacity='0.45'/%3E%3Crect x='380' y='20' width='22' height='22' transform='rotate(-3 391.0 31.0)' fill='%23d4af5a' opacity='0.6'/%3E%3Crect x='250' y='110' width='12' height='12' transform='rotate(20 256.0 116.0)' fill='%23d4af5a' opacity='0.4'/%3E%3C/g%3E%3C/svg%3E");
+  --hl-keyword: #e8c874;
+  --hl-string: #c9b98a;
+  --hl-number: #f0a46a;
+  --hl-title: #f3e3b3;
+  --hl-attr: #c7a879;
+  --hl-comment: #7a6f5e;
+  --alert-note: #b9a8e0;
+  --alert-tip: #a8c98a;
+  --alert-important: #d9a2c8;
+  --alert-warning: #e8c874;
+  --alert-caution: #e88a70;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --heading-font: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", "BIZ UDPMincho", serif;
+  --content-width: 820px;
+}
+
+body {
+  line-height: 1.85;
+  letter-spacing: 0.02em;
+  background-color: var(--bg);
+  background-image: var(--leaf);
+  background-position: right -10px top -10px;
+  background-size: 420px 170px;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* 見出し: 明朝体 */
+main :is(h1, h2, h3, h4) { font-family: var(--heading-font); font-weight: 700; line-height: 1.45; letter-spacing: 0.05em; color: var(--heading); }
+main h1 { margin: 0 0 1.3em; font-size: 2em; }
+main h1::after { content: ""; display: block; height: var(--band-h); margin-top: 0.4em; background: var(--band); }
+main h2 { margin: 2.4em 0 0.8em; padding-bottom: 0.3em; font-size: 1.4em; border-bottom: 1px solid var(--border); }
+main h2::before { content: ""; display: inline-block; width: 1em; height: 1em; margin-right: 0.45em; vertical-align: -0.12em; background: var(--mark) no-repeat center / contain; }
+main h3 { margin: 2em 0 0.6em; font-size: 1.15em; color: var(--accent-2); }
+main h4 { margin: 1.6em 0 0.4em; font-size: 1em; color: var(--muted); }
+
+main a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 38%, transparent); text-underline-offset: 0.2em; }
+main a:hover { color: var(--accent-2); text-decoration-color: var(--accent-2); }
+
+main strong { color: var(--fg); background: linear-gradient(transparent 65%, color-mix(in srgb, var(--accent-2) 22%, transparent) 65%); }
+main blockquote { margin: 1.4em 0; padding: 0.5em 1.2em; color: var(--muted); background: var(--accent-soft); border-left: 4px solid var(--accent-2); }
+main hr { margin: 2.5em 0; height: var(--band-h); border: 0; background: var(--band); opacity: 0.6; }
+main kbd { padding: 0.1em 0.45em; font-size: 0.85em; background: var(--bg); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 3px; }
+main img { border-radius: 4px; }
+
+main pre { border: 1px solid var(--border); border-top: 3px solid var(--accent); border-radius: 3px; line-height: 1.6; }
+main table { font-size: 0.95em; background: color-mix(in srgb, var(--bg) 85%, transparent); }
+main th { text-align: left; font-family: var(--heading-font); font-weight: 700; color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+main th, main td { border-color: var(--border); padding: 8px 12px; }
+main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface) 60%, transparent); }
+
+body > nav a { padding: 4px 10px; color: var(--fg); border-radius: 3px; }
+body > nav a:hover { color: var(--accent); background: var(--surface); text-decoration: none; }
+body > nav a[aria-current="page"] { color: var(--on-accent); background: var(--accent); font-weight: 600; box-shadow: inset 4px 0 0 var(--accent-2); }
+.tsuzuri-nav-head > p { font-family: var(--heading-font); font-weight: 700; letter-spacing: 0.08em; color: var(--heading); }
+.tsuzuri-toc { background: var(--surface); border-color: var(--border); border-radius: 3px; }
+.tsuzuri-toc > p { color: var(--accent-2); }
+main .tsuzuri-pager a { border-radius: 3px; background: color-mix(in srgb, var(--bg) 85%, transparent); }
+main .tsuzuri-pager a:hover { border-color: var(--accent-2); background: var(--surface); }
+
+/* 金: 見出し h1 はほのかに金色に光る */
+main h1 { text-shadow: 0 0 16px rgba(212, 175, 90, 0.25); }
+body > nav { background: #0e0b09; }
