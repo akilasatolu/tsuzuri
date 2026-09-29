@@ -7,7 +7,7 @@ description: Tsuzuriの組み込みテーマ「無地(muji)」の見本ページ
 
 # 無地(muji)
 
-装飾を極力削った、モノスペースフォント中心の最小構成。
+色を使わない白と黒だけの最小構成。見出し・ナビ・コードは等幅フォント、本文は読みやすいゴシック体。技術文書・README集向け。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=muji`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: muji`と書きます

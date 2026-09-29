@@ -7,7 +7,7 @@ description: Tsuzuriの組み込みテーマ「墨(sumi)」の見本ページ
 
 # 墨(sumi)
 
-OSの設定に関わらず常にダーク表示。リンクは下側の罫線で表現。
+OSの設定に関わらず常にダーク表示。墨色の地に温かみのある白い文字と、淡い青の差し色。夜間や長く読む資料向け。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=sumi`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: sumi`と書きます
