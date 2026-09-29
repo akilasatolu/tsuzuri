@@ -16,6 +16,22 @@
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-09-30
+
+### Added
+
+- 海をテーマにした組み込みテーマ「海(`umi`)」。ライト表示は明るい浅瀬、ダーク表示は深い海の底。見出しの下・区切り線に
+  波の線を引き、差し色は海の青と青緑。ライト/ダーク表示に対応。
+
+### Removed
+
+- 組み込みテーマ「藍(`ai`)」を削除した。
+
+### Fixed
+
+- 同じタグの push でリリースのワークフローが2回動いたとき、2回目が「Release は作成済み」で失敗していた。
+  作成済みなら作成をスキップするようにした。
+
 ## [1.11.0] - 2026-09-30
 
 ### Added
@@ -283,7 +299,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.11.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.12.0...HEAD
+[1.12.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.11.0...v1.12.0
 [1.11.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.8.0...v1.9.0

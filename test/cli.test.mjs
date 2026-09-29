@@ -560,7 +560,7 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
 
 test("THEME_CHOICES: 宙(sora)があり、無地(muji)は無い", () => {
   const keys = THEME_CHOICES.map((c) => c.key);
-  assert.deepEqual(keys, ["wa", "sora", "akari", "ai", "kabuki", "none"]);
+  assert.deepEqual(keys, ["wa", "sora", "akari", "umi", "kabuki", "none"]);
   assert.ok(buildDocsPagesConfig({}).includes("sora(宙)"));
 });
 
