@@ -7,7 +7,7 @@ description: Tsuzuriの組み込みテーマ「レトロフューチャー(retro
 
 # レトロフューチャー(retro)
 
-Retrofuturism。80年代の夕焼けの空と光るグリッド、ネオンの差し色。常にダーク表示。
+Retrofuturism。星の夜空と地平線に沈む縞模様の夕日、奥へ流れる光るグリッド、クロームの見出し。常にダーク表示。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=retro`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: retro`と書きます

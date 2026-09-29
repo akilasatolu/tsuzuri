@@ -7,7 +7,7 @@ description: Tsuzuriの組み込みテーマ「ピクセル(pixel)」の見本�
 
 # ピクセル(pixel)
 
-Pixel art。8ビットゲームのような太い枠と市松模様、ドットの影の見出し。
+Pixel art。8ビットゲームのような太い枠と市松模様、ステージ名の札の見出しと▶カーソル。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=pixel`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: pixel`と書きます

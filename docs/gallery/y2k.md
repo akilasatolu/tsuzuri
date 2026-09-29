@@ -7,7 +7,7 @@ description: Tsuzuriの組み込みテーマ「Y2K(y2k)」の見本ページ
 
 # Y2K(y2k)
 
-Y2K UI。パステルの虹色ときらめく星、クロームの見出し、つやのあるボタン。
+Y2K UI。パステルの地にシャボン玉と星、虹色に光る縁のカード、アクア風のつやのあるボタン。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=y2k`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: y2k`と書きます

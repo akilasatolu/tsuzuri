@@ -16,9 +16,9 @@ Tsuzuriの組み込みテーマの見た目を、実際に生成されたペー�
 | [グラス(glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism。色とりどりの光の地に、すりガラスのような半透明のカード。 |
 | [ニューモーフィズム(neumorphism)](gallery/neumorphism.md) | `THEME=neumorphism` | Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。 |
 | [フロスト(frosted)](gallery/frosted.md) | `THEME=frosted` | Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青。 |
-| [レトロフューチャー(retro)](gallery/retro.md) | `THEME=retro` | Retrofuturism。80年代の夕焼けの空と光るグリッド、ネオンの差し色。常にダーク表示。 |
-| [Y2K(y2k)](gallery/y2k.md) | `THEME=y2k` | Y2K UI。パステルの虹色ときらめく星、クロームの見出し、つやのあるボタン。 |
-| [ピクセル(pixel)](gallery/pixel.md) | `THEME=pixel` | Pixel art。8ビットゲームのような太い枠と市松模様、ドットの影の見出し。 |
+| [レトロフューチャー(retro)](gallery/retro.md) | `THEME=retro` | Retrofuturism。星の夜空と地平線に沈む縞模様の夕日、奥へ流れる光るグリッド、クロームの見出し。常にダーク表示。 |
+| [Y2K(y2k)](gallery/y2k.md) | `THEME=y2k` | Y2K UI。パステルの地にシャボン玉と星、虹色に光る縁のカード、アクア風のつやのあるボタン。 |
+| [ピクセル(pixel)](gallery/pixel.md) | `THEME=pixel` | Pixel art。8ビットゲームのような太い枠と市松模様、ステージ名の札の見出しと▶カーソル。 |
 | [90年代(nineties)](gallery/nineties.md) | `THEME=nineties` | 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。 |
 | [装飾なし(none)](gallery/none.md) | `THEME=none` | テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。 |
 | [独自CSSの例(このサイト)](gallery/custom.md) | `THEME=none`+`STYLE_FILE` | テーマを使わず、独自CSSだけで作ったこのサイト自身の見た目。 |
