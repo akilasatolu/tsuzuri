@@ -16,6 +16,17 @@
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-09-30
+
+### Added
+
+- 歌舞伎をテーマにした組み込みテーマ「歌舞伎(`kabuki`)」。定式幕の黒・柿色・萌葱色と隈取の紅を差し色にし、
+  明朝体の太い見出しに三色の帯・縦縞を付ける。ライト/ダーク表示に対応。
+
+### Removed
+
+- 組み込みテーマ「朱(`shu`)」を削除した。
+
 ## [1.10.0] - 2026-09-30
 
 ### Added
@@ -272,7 +283,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.10.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.11.0...HEAD
+[1.11.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.7.0...v1.8.0

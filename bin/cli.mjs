@@ -47,7 +47,7 @@ export const THEME_CHOICES = [
   { key: "sora", label: "宙(宇宙がテーマ。星をちりばめた夜空の地に、星の光と星雲の差し色。常にダーク表示)" },
   { key: "akari", label: "灯(ネオン街がテーマ。夜の街の地に、桃色・水色・黄色のネオンの灯り。常にダーク表示)" },
   { key: "ai", label: "藍(藍色の見出しと表。マニュアル・仕様書向け)" },
-  { key: "shu", label: "朱(朱色の太い見出しと帯。製品紹介・告知向け)" },
+  { key: "kabuki", label: "歌舞伎(定式幕の黒・柿色・萌葱色と隈取の紅。力強い明朝体の見出し)" },
   { key: "none", label: "装飾なし" },
 ];
 
@@ -235,7 +235,7 @@ ROOT_MD=${rootMd}
 # ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# テーマ: wa(和) / sora(宙) / akari(灯) / ai(藍) / shu(朱) / none(装飾なし)
+# テーマ: wa(和) / sora(宙) / akari(灯) / ai(藍) / kabuki(歌舞伎) / none(装飾なし)
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 
