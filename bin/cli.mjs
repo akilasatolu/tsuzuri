@@ -44,7 +44,7 @@ export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.ym
 // THEME選択肢(番号選択、1始まり)。
 export const THEME_CHOICES = [
   { key: "wa", label: "和(推奨。生成り地に墨色の文字、朱色の控えめなリンク、明朝体の見出し)" },
-  { key: "muji", label: "無地(白と黒だけの最小構成。等幅フォントの見出し。技術文書向け)" },
+  { key: "sora", label: "宙(宇宙がテーマ。星をちりばめた夜空の地に、星の光と星雲の差し色。常にダーク表示)" },
   { key: "sumi", label: "墨(常にダーク表示。墨色の地に淡い青の差し色)" },
   { key: "ai", label: "藍(藍色の見出しと表。マニュアル・仕様書向け)" },
   { key: "shu", label: "朱(朱色の太い見出しと帯。製品紹介・告知向け)" },
@@ -235,7 +235,7 @@ ROOT_MD=${rootMd}
 # ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# テーマ: wa(和) / muji(無地) / sumi(墨) / ai(藍) / shu(朱) / none(装飾なし)
+# テーマ: wa(和) / sora(宙) / sumi(墨) / ai(藍) / shu(朱) / none(装飾なし)
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 

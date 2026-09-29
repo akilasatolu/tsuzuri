@@ -277,3 +277,7 @@ test("CONFIG_FILE_KEYS はワークフローの Load config が受け付ける�
   assert.ok(m, "Load config の case 文");
   assert.deepEqual(m[1].split("|").sort(), [...CONFIG_FILE_KEYS].sort());
 });
+
+test('THEME="sora"(宙) → 正常反映', () => {
+  assert.equal(loadConfig({ THEME: "sora" }).theme, "sora");
+});

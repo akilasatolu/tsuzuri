@@ -1,0 +1,117 @@
+/*
+ * sora.css (宙)
+ * 宇宙をテーマにしたスタイル。深い夜空の地に小さな星をちりばめ、星雲のような淡い光を差す。
+ * 差し色は星の光の水色と、星雲の紫。常にダーク表示にする(OSの設定に関わらない)。
+ * 星は小さく控えめにして、本文の読みやすさを優先している。
+ */
+:root {
+  color-scheme: dark;
+  --fg: #e4e8f7;
+  --muted: #9aa3c4;
+  --bg: #0a0f1f;             /* 夜空 */
+  --surface: #111a33;        /* 一段明るい面(コード・表の見出し・目次など) */
+  --border: #243057;
+  --accent: #7cc6ff;         /* 星の光(水色) */
+  --accent-2: #b59cff;       /* 星雲(紫) */
+  --accent-soft: #16244a;
+  --gradient: linear-gradient(90deg, #7cc6ff 0%, #b59cff 100%);
+  --code-bg: #0e1631;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --content-width: 840px;
+  /* 暗い地でも見分けやすいコードの色 */
+  --hl-keyword: #b59cff;
+  --hl-string: #8fe3c2;
+  --hl-number: #ffd27a;
+  --hl-title: #7cc6ff;
+  --hl-attr: #ff9ec7;
+  --hl-comment: #7a84a8;
+  /* 注意書きの色も暗い地に合わせる */
+  --alert-note: #7cc6ff;
+  --alert-tip: #8fe3c2;
+  --alert-important: #b59cff;
+  --alert-warning: #ffd27a;
+  --alert-caution: #ff8f8f;
+}
+
+/* 夜空: 小さな星(繰り返しの模様)と、左上・右下の星雲の光 */
+body {
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--bg);
+  background-image:
+    /* 大きな模様(400×300)の星 */
+    radial-gradient(1.5px 1.5px at 24px 36px, rgba(255, 255, 255, 0.95), transparent 70%),
+    radial-gradient(1px 1px at 132px 88px, rgba(255, 255, 255, 0.7), transparent 70%),
+    radial-gradient(2px 2px at 218px 164px, rgba(190, 215, 255, 0.9), transparent 70%),
+    radial-gradient(1px 1px at 312px 46px, rgba(255, 255, 255, 0.65), transparent 70%),
+    radial-gradient(1.5px 1.5px at 356px 232px, rgba(255, 255, 255, 0.8), transparent 70%),
+    radial-gradient(1px 1px at 72px 268px, rgba(220, 205, 255, 0.75), transparent 70%),
+    /* 小さな模様(230×190)の星。大きな模様とずれて重なるので、星の並びが目立たない */
+    radial-gradient(1px 1px at 40px 150px, rgba(255, 255, 255, 0.6), transparent 70%),
+    radial-gradient(1.5px 1.5px at 170px 30px, rgba(200, 225, 255, 0.8), transparent 70%),
+    radial-gradient(1px 1px at 110px 120px, rgba(255, 255, 255, 0.5), transparent 70%),
+    radial-gradient(1px 1px at 200px 175px, rgba(225, 210, 255, 0.65), transparent 70%),
+    /* 星雲の光 */
+    radial-gradient(ellipse 60% 45% at 85% -5%, rgba(124, 92, 255, 0.28), transparent 70%),
+    radial-gradient(ellipse 55% 40% at 0% 105%, rgba(56, 170, 248, 0.18), transparent 70%);
+  background-size:
+    400px 300px, 400px 300px, 400px 300px, 400px 300px, 400px 300px, 400px 300px,
+    230px 190px, 230px 190px, 230px 190px, 230px 190px,
+    100% 100%, 100% 100%;
+  background-repeat: repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, no-repeat, no-repeat;
+  min-height: 100vh;
+}
+
+/* 見出し: h1 は星の光から星雲へのグラデーション、h2 は光る点(惑星)の印、h3 は星雲の紫 */
+main :is(h1, h2, h3, h4) { color: #f3f5ff; font-weight: 700; line-height: 1.45; letter-spacing: 0.02em; }
+main h1 {
+  width: fit-content;
+  margin: 0 0 1.2em;
+  font-size: 2em;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+main h2 { margin: 2.4em 0 0.8em; padding-bottom: 0.35em; font-size: 1.4em; border-bottom: 1px solid var(--border); }
+main h2::before {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  margin-right: 0.55em;
+  vertical-align: 0.12em;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+main h3 { margin: 2em 0 0.6em; font-size: 1.15em; color: var(--accent-2); }
+main h4 { margin: 1.6em 0 0.4em; font-size: 1em; color: var(--muted); }
+
+/* リンク: 星の光の水色。カーソルを当てると淡く光る */
+main a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); text-underline-offset: 0.2em; }
+main a:hover { text-decoration-color: var(--accent); text-shadow: 0 0 8px color-mix(in srgb, var(--accent) 55%, transparent); }
+
+main blockquote { margin: 1.4em 0; padding: 0.6em 1.2em; color: var(--muted); background: color-mix(in srgb, var(--surface) 80%, transparent); border-left: 3px solid var(--accent-2); border-radius: 0 8px 8px 0; }
+main hr { margin: 2.5em 0; height: 1px; border: 0; background: linear-gradient(90deg, transparent, var(--accent-2), var(--accent), transparent); }
+main kbd { padding: 0.1em 0.45em; font-size: 0.85em; background: var(--surface); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; }
+main img { border-radius: 6px; }
+
+/* コード・表 */
+main pre { border: 1px solid var(--border); border-radius: 10px; line-height: 1.6; box-shadow: 0 0 0 1px rgba(124, 198, 255, 0.04), 0 10px 30px rgba(0, 0, 0, 0.35); }
+main table { font-size: 0.95em; background: color-mix(in srgb, var(--surface) 70%, transparent); }
+main th { text-align: left; color: var(--accent-2); background: var(--surface); }
+main th, main td { border-color: var(--border); padding: 8px 12px; }
+main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+
+/* ナビ・目次・前後のページ */
+body > nav { background: color-mix(in srgb, #070b17 88%, transparent); }
+body > nav a { padding: 4px 10px; color: var(--fg); border-radius: 999px; }
+body > nav a:hover { color: var(--accent); background: var(--accent-soft); text-decoration: none; }
+body > nav a[aria-current="page"] { color: #0a0f1f; background: var(--gradient); font-weight: 700; }
+.tsuzuri-nav-head > p { background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800; letter-spacing: 0.04em; }
+.tsuzuri-toc { background: color-mix(in srgb, var(--surface) 85%, transparent); border-color: var(--border); }
+main .tsuzuri-pager a { background: color-mix(in srgb, var(--surface) 70%, transparent); border-color: var(--border); }
+main .tsuzuri-pager a:hover { border-color: var(--accent); box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 30%, transparent); }
+.tsuzuri-search input { background: var(--surface); }

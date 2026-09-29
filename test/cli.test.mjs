@@ -558,6 +558,12 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
   }
 });
 
+test("THEME_CHOICES: 宙(sora)があり、無地(muji)は無い", () => {
+  const keys = THEME_CHOICES.map((c) => c.key);
+  assert.deepEqual(keys, ["wa", "sora", "sumi", "ai", "shu", "none"]);
+  assert.ok(buildDocsPagesConfig({}).includes("sora(宙)"));
+});
+
 test("runUpdate: 設定ファイルが無い(未init)リポジトリではエラーにして何も書き込まない", async () => {
   const dir = makeTmpDir();
   try {

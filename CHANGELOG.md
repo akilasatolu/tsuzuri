@@ -16,6 +16,17 @@
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-09-30
+
+### Added
+
+- 宇宙をテーマにした組み込みテーマ「宙(`sora`)」。星をちりばめた夜空の地に、星の光(水色)と星雲(紫)の差し色。
+  常にダーク表示。
+
+### Removed
+
+- 組み込みテーマ「無地(`muji`)」を削除した。
+
 ## [1.8.0] - 2026-09-29
 
 ### Changed
@@ -250,7 +261,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.5.0...v1.6.0
