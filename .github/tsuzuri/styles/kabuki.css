@@ -1,0 +1,97 @@
+/*
+ * kabuki.css (歌舞伎)
+ * 歌舞伎をテーマにしたスタイル。定式幕(じょうしきまく)の黒・柿色・萌葱色の三色と、隈取(くまどり)の紅を
+ * 差し色にする。見出しは太く力強く、h1 には定式幕の三色の帯、h2 には三色の縦縞の印を付ける。
+ * 華やかさを出しつつ、本文は落ち着いた地で読みやすくしている。ライト/ダーク表示に対応する。
+ */
+:root {
+  color-scheme: light dark;
+  --fg: #1f1a16;             /* 墨 */
+  --muted: #6a5d53;
+  --bg: #fbf6ee;             /* 舞台の白木 */
+  --surface: #f3ebdf;
+  --border: #e3d6c4;
+  --kuro: #1f1a16;           /* 定式幕の黒 */
+  --kaki: #c55a24;           /* 定式幕の柿色 */
+  --moegi: #2e6b4c;          /* 定式幕の萌葱色 */
+  --beni: #b8232f;           /* 隈取の紅 */
+  --accent: #b8232f;         /* リンクなどの強調は紅 */
+  --accent-soft: #f7e1dc;
+  --code-bg: #f1e8da;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --heading-font: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", "BIZ UDPMincho", serif;
+  --content-width: 820px;
+  /* 定式幕の三色の縞 */
+  --joshiki: linear-gradient(90deg, var(--kuro) 0 33.4%, var(--kaki) 33.4% 66.7%, var(--moegi) 66.7% 100%);
+  --joshiki-v: linear-gradient(180deg, var(--kuro) 0 33.4%, var(--kaki) 33.4% 66.7%, var(--moegi) 66.7% 100%);
+}
+
+/* ダーク表示: 暗い舞台の黒に、明るくした柿色・萌葱色・紅。OS がダークモードのとき(ライト表示に切り替えたときを除く)と、
+   ダーク表示に切り替えたとき */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fg: #f1e9dd;
+    --muted: #b4a595;
+    --bg: #15110e;
+    --surface: #211a15;
+    --border: #3a2e25;
+    --kuro: #efe6d8;
+    --kaki: #e67a41;
+    --moegi: #5fb088;
+    --beni: #ef5a62;
+    --accent: #ef5a62;
+    --accent-soft: #3a1c1d;
+    --code-bg: #221b16;
+  }
+}
+:root[data-theme="dark"] {
+  --fg: #f1e9dd;
+  --muted: #b4a595;
+  --bg: #15110e;
+  --surface: #211a15;
+  --border: #3a2e25;
+  --kuro: #efe6d8;
+  --kaki: #e67a41;
+  --moegi: #5fb088;
+  --beni: #ef5a62;
+  --accent: #ef5a62;
+  --accent-soft: #3a1c1d;
+  --code-bg: #221b16;
+}
+
+body { line-height: 1.8; }
+
+/* 見出し: 明朝体で太く。h1 の下に定式幕の三色の帯、h2 の左に三色の縦縞、h3 は紅 */
+main :is(h1, h2, h3) { font-family: var(--heading-font); font-weight: 800; line-height: 1.4; letter-spacing: 0.05em; }
+main h1 { margin: 0 0 1.2em; font-size: 2.1em; }
+main h1::after { content: ""; display: block; height: 8px; margin-top: 0.35em; border-radius: 2px; background: var(--joshiki); }
+main h2 { margin: 2.4em 0 0.8em; padding-left: 0.75em; font-size: 1.45em; border-left: 9px solid transparent; border-image: var(--joshiki-v) 1; }
+main h3 { margin: 2em 0 0.6em; font-size: 1.18em; color: var(--beni); }
+main h4 { margin: 1.6em 0 0.4em; font-size: 1em; color: var(--muted); }
+
+/* リンク: 隈取の紅。カーソルを当てると柿色 */
+main a { color: var(--accent); font-weight: 600; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 0.2em; }
+main a:hover { color: var(--kaki); background: var(--accent-soft); }
+main :is(h1, h2, h3, h4) a.tsuzuri-anchor { background: none; }
+
+main strong { color: var(--fg); background: linear-gradient(transparent 65%, color-mix(in srgb, var(--kaki) 28%, transparent) 65%); }
+main blockquote { margin: 1.4em 0; padding: 0.6em 1.2em; color: var(--muted); background: var(--surface); border-left: 4px solid var(--moegi); border-radius: 0 6px 6px 0; }
+main hr { margin: 2.5em 0; height: 4px; border: 0; background: var(--joshiki); opacity: 0.85; }
+main kbd { padding: 0.1em 0.45em; font-size: 0.85em; background: var(--bg); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; }
+
+/* コード・表: 表の見出し行は定式幕の黒 */
+main pre { border: 1px solid var(--border); border-top: 3px solid var(--kaki); border-radius: 4px; line-height: 1.6; }
+main table { font-size: 0.95em; }
+main th { text-align: left; color: var(--bg); background: var(--kuro); border-color: var(--kuro); }
+main th, main td { border-color: var(--border); padding: 8px 12px; }
+main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface) 65%, transparent); }
+
+/* ナビ・目次・前後のページ */
+body > nav a { padding: 4px 10px; color: var(--fg); border-radius: 4px; }
+body > nav a:hover { color: var(--accent); background: var(--surface); text-decoration: none; }
+body > nav a[aria-current="page"] { color: var(--bg); background: var(--kuro); font-weight: 700; box-shadow: inset 4px 0 0 var(--kaki); }
+.tsuzuri-nav-head > p { font-family: var(--heading-font); font-weight: 800; letter-spacing: 0.08em; }
+.tsuzuri-toc { background: var(--surface); border: 0; border-top: 4px solid transparent; border-image: var(--joshiki) 1; border-radius: 0; }
+main .tsuzuri-pager a { border: 2px solid var(--border); text-decoration: none; }
+main .tsuzuri-pager a:hover { border-color: var(--kaki); background: var(--surface); }
