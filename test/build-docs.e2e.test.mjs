@@ -55,10 +55,10 @@ function copyBasicSite(dir) {
   fs.cpSync(FIXTURE_SITE, dir, { recursive: true, filter: (src) => !src.includes("styles-fixture") });
 }
 
-// 実プロジェクトの styles/base.css・styles/wa.css (T-010成果物) を
-// tmp dir 内の既定 STYLE_DIR ("styles") にコピーする(=既定THEME="wa"での
+// 実プロジェクトの styles/base.css・styles/material.css (T-010成果物) を
+// tmp dir 内の既定 STYLE_DIR ("styles") にコピーする(=既定THEME="material"での
 // 実運用と同じ構成を再現する)。
-function copyRealBaseAndThemeStyles(dir, themeFile = "wa.css") {
+function copyRealBaseAndThemeStyles(dir, themeFile = "material.css") {
   const stylesDir = path.join(dir, "styles");
   fs.mkdirSync(stylesDir, { recursive: true });
   fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(stylesDir, "base.css"));
@@ -66,7 +66,7 @@ function copyRealBaseAndThemeStyles(dir, themeFile = "wa.css") {
 }
 
 // フィクスチャ専用の STYLE_DIR ("styles-fixture") を tmp dir にコピーする。
-// マーカーコメントのみの base.css / akari.css を持ち、T-012(styles/akari.css)の
+// マーカーコメントのみの base.css / retro.css を持ち、T-012(styles/retro.css)の
 // 完成有無に依存せずテーマカスケードの挙動を検証できる。
 function copyFixtureStyleDir(dir) {
   fs.cpSync(path.join(FIXTURE_SITE, "styles-fixture"), path.join(dir, "styles-fixture"), {
@@ -103,7 +103,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir); // 既定 THEME=wa 相当
+      copyRealBaseAndThemeStyles(dir); // 既定 THEME=material 相当
 
       const result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
@@ -123,13 +123,13 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.doesNotMatch(indexHtml, /<link rel="canonical"/);
 
       // 【v3修正の緩和基準】バイト単位一致ではなく、旧pageTemplateが出力していた
-      // 個々のCSS宣言ブロック(=base.css/wa.cssの内容そのもの)が、順序を問わず
+      // 個々のCSS宣言ブロック(=base.css/material.cssの内容そのもの)が、順序を問わず
       // 連結後の<style>文字列に一字一句そのまま含まれていること。
       const styleBlock = extractStyleBlock(indexHtml);
       const baseCssContent = fs.readFileSync(path.join(REAL_STYLES_DIR, "base.css"), "utf-8");
-      const waCssContent = fs.readFileSync(path.join(REAL_STYLES_DIR, "wa.css"), "utf-8");
+      const waCssContent = fs.readFileSync(path.join(REAL_STYLES_DIR, "material.css"), "utf-8");
       assert.ok(styleBlock.includes(baseCssContent), "base.css相当のブロックが含まれること");
-      assert.ok(styleBlock.includes(waCssContent), ":root/@media(wa.css相当)のブロックが含まれること");
+      assert.ok(styleBlock.includes(waCssContent), ":root/@media(material.css相当)のブロックが含まれること");
 
       // .nojekyll 存在
       assert.equal(readOut(dir, ".nojekyll"), "");
@@ -144,27 +144,27 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.deepEqual(sitemap.images, ["docs/img.png"]);
       assert.deepEqual(sitemap.missing, []);
       assert.equal(sitemap.customStyleApplied, false);
-      assert.equal(sitemap.theme, "wa");
+      assert.equal(sitemap.theme, "material");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  test("THEME=akari実行時、base.css相当とakari.css相当が正しい順序で<style>に含まれる", () => {
+  test("THEME=retro実行時、base.css相当とretro.css相当が正しい順序で<style>に含まれる", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
 
-      const result = runBuild(dir, { THEME: "akari", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "retro", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
 
       const indexHtml = readOut(dir, "index.html");
       const styleBlock = extractStyleBlock(indexHtml);
       assert.ok(styleBlock.includes("/*BASE_FIXTURE_MARKER*/"));
-      assert.ok(styleBlock.includes("/*AKARI_FIXTURE_MARKER*/"));
+      assert.ok(styleBlock.includes("/*RETRO_FIXTURE_MARKER*/"));
       assert.ok(
-        styleBlock.indexOf("/*BASE_FIXTURE_MARKER*/") < styleBlock.indexOf("/*AKARI_FIXTURE_MARKER*/"),
+        styleBlock.indexOf("/*BASE_FIXTURE_MARKER*/") < styleBlock.indexOf("/*RETRO_FIXTURE_MARKER*/"),
         "baseCss -> themeCss の順で連結されること"
       );
     } finally {
@@ -184,7 +184,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const indexHtml = readOut(dir, "index.html");
       const styleBlock = extractStyleBlock(indexHtml);
       assert.ok(styleBlock.includes("/*BASE_FIXTURE_MARKER*/"));
-      assert.ok(!styleBlock.includes("/*AKARI_FIXTURE_MARKER*/"));
+      assert.ok(!styleBlock.includes("/*RETRO_FIXTURE_MARKER*/"));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -194,7 +194,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      // styles-fixture には base.css のみコピーし、akari.css を欠落させる
+      // styles-fixture には base.css のみコピーし、retro.css を欠落させる
       const stylesDir = path.join(dir, "styles-fixture");
       fs.mkdirSync(stylesDir, { recursive: true });
       fs.copyFileSync(
@@ -202,14 +202,14 @@ describe("build-docs.mjs :: main (E2E)", () => {
         path.join(stylesDir, "base.css")
       );
 
-      const result = runBuild(dir, { THEME: "akari", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "retro", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /akari\.css.*見つかりません/);
+      assert.match(result.stderr, /retro\.css.*見つかりません/);
 
       const indexHtml = readOut(dir, "index.html");
       const styleBlock = extractStyleBlock(indexHtml);
       assert.ok(styleBlock.includes("/*BASE_FIXTURE_MARKER*/"));
-      assert.ok(!styleBlock.includes("/*AKARI_FIXTURE_MARKER*/"));
+      assert.ok(!styleBlock.includes("/*RETRO_FIXTURE_MARKER*/"));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -369,10 +369,10 @@ describe("build-docs.mjs :: main (E2E)", () => {
     try {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
-      // docs/a.md だけ frontmatter で theme: akari を指定する。
+      // docs/a.md だけ frontmatter で theme: retro を指定する。
       fs.writeFileSync(
         path.join(dir, "docs", "a.md"),
-        ["---", "theme: akari", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
+        ["---", "theme: retro", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
       );
 
       // サイト全体は THEME=none(=デフォルトではテーマ層を適用しない)。
@@ -382,15 +382,15 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const indexStyle = extractStyleBlock(readOut(dir, "index.html"));
       assert.ok(indexStyle.includes("/*BASE_FIXTURE_MARKER*/"));
       assert.ok(
-        !indexStyle.includes("/*AKARI_FIXTURE_MARKER*/"),
+        !indexStyle.includes("/*RETRO_FIXTURE_MARKER*/"),
         "frontmatter未指定のページはサイト全体のTHEME(none)のまま"
       );
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(aStyle.includes("/*BASE_FIXTURE_MARKER*/"));
       assert.ok(
-        aStyle.includes("/*AKARI_FIXTURE_MARKER*/"),
-        "frontmatterでtheme: akariを指定したページだけ上書きされる"
+        aStyle.includes("/*RETRO_FIXTURE_MARKER*/"),
+        "frontmatterでtheme: retroを指定したページだけ上書きされる"
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -451,14 +451,14 @@ describe("build-docs.mjs :: main (E2E)", () => {
         ].join("\n")
       );
 
-      const result = runBuild(dir, { THEME: "akari", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "retro", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
       assert.match(result.stderr, /no-such-file\.css.*見つかりません/);
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(
-        aStyle.includes("/*AKARI_FIXTURE_MARKER*/"),
-        "解決できないthemeはサイト全体のTHEME(akari)にフォールバックする"
+        aStyle.includes("/*RETRO_FIXTURE_MARKER*/"),
+        "解決できないthemeはサイト全体のTHEME(retro)にフォールバックする"
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -475,14 +475,14 @@ describe("build-docs.mjs :: main (E2E)", () => {
         ["---", "theme: none", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
       );
 
-      const result = runBuild(dir, { THEME: "akari", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "retro", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
 
       const indexStyle = extractStyleBlock(readOut(dir, "index.html"));
-      assert.ok(indexStyle.includes("/*AKARI_FIXTURE_MARKER*/"));
+      assert.ok(indexStyle.includes("/*RETRO_FIXTURE_MARKER*/"));
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
-      assert.ok(!aStyle.includes("/*AKARI_FIXTURE_MARKER*/"));
+      assert.ok(!aStyle.includes("/*RETRO_FIXTURE_MARKER*/"));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -558,13 +558,13 @@ describe("build-docs.mjs :: main (E2E)", () => {
         ["---", "theme: ../secret.css", "---", "# Page A"].join("\n")
       );
 
-      const result = runBuild(dir, { THEME: "akari", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "retro", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
       assert.match(result.stderr, /リポジトリの外/);
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(!aStyle.includes("SECRET_OUTSIDE_REPO"));
-      assert.ok(aStyle.includes("/*AKARI_FIXTURE_MARKER*/"));
+      assert.ok(aStyle.includes("/*RETRO_FIXTURE_MARKER*/"));
     } finally {
       fs.rmSync(parent, { recursive: true, force: true });
     }
@@ -1338,10 +1338,10 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const vendored = path.join(dir, ".github", "tsuzuri", "styles");
       fs.mkdirSync(vendored, { recursive: true });
       fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(vendored, "base.css"));
-      fs.copyFileSync(path.join(REAL_STYLES_DIR, "akari.css"), path.join(vendored, "akari.css"));
+      fs.copyFileSync(path.join(REAL_STYLES_DIR, "retro.css"), path.join(vendored, "retro.css"));
       fs.writeFileSync(
         path.join(dir, ".github", "docs-pages.config"),
-        "# c\nTHEME=akari\nSITE_NAME=FromFile\nLANG=en\nNAV_ENABLED=true\n"
+        "# c\nTHEME=retro\nSITE_NAME=FromFile\nLANG=en\nNAV_ENABLED=true\n"
       );
       let result = runBuild(dir, { LANG: "ja_JP.UTF-8" });
       assert.equal(result.status, 0, result.stderr);
@@ -1349,7 +1349,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       let html = readOut(dir, "index.html");
       assert.match(html, /<html lang="en">/);
       assert.match(html, /FromFile/);
-      assert.ok(extractStyleBlock(html).includes(fs.readFileSync(path.join(REAL_STYLES_DIR, "akari.css"), "utf-8").slice(0, 200)));
+      assert.ok(extractStyleBlock(html).includes(fs.readFileSync(path.join(REAL_STYLES_DIR, "retro.css"), "utf-8").slice(0, 200)));
       result = runBuild(dir, { SITE_NAME: "FromEnv" });
       html = readOut(dir, "index.html");
       assert.match(html, /FromEnv/, "環境変数を優先する");
@@ -1388,7 +1388,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const vendored = path.join(dir, ".github", "tsuzuri", "styles");
       fs.mkdirSync(vendored, { recursive: true });
       fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(vendored, "base.css"));
-      fs.copyFileSync(path.join(REAL_STYLES_DIR, "wa.css"), path.join(vendored, "wa.css"));
+      fs.copyFileSync(path.join(REAL_STYLES_DIR, "material.css"), path.join(vendored, "material.css"));
       const result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
       assert.doesNotMatch(extractStyleBlock(readOut(dir, "index.html")), /MY APP BASE/);

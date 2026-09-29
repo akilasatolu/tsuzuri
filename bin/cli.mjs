@@ -43,18 +43,11 @@ export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.ym
 
 // THEME選択肢(番号選択、1始まり)。
 export const THEME_CHOICES = [
-  { key: "wa", label: "和(推奨。墨絵と江戸がテーマ。和紙の地に墨の筆跡と朱の落款、明朝体の見出し)" },
-  { key: "sakura", label: "桜(和・桜・墨。和紙の地に墨色の文字、桜色の差し色と花びら)" },
-  { key: "tsuki", label: "月(満月の夜がテーマ。夜空に満月と光の輪、月明かりの金色。常にダーク表示)" },
-  { key: "akari", label: "灯(暗闇に灯る灯籠がテーマ。夜の闇に揺らぐ炎の灯り。常にダーク表示)" },
-  { key: "yuki", label: "雪(雪の夜の静けさがテーマ。夜の地に雪の白と銀鼠、雪輪とちらつく雪。常にダーク表示)" },
+  { key: "material", label: "マテリアル(推奨。Material Design 3 風。紫系の配色、角丸のカードと影、トーンのついたナビの選択)" },
   { key: "clay", label: "クレイ(Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。パステルの地に紫と桃色)" },
-  { key: "grainy", label: "グレイン(Grainy Gradient。鮮やかな色が溶け合うグラデーションに、フィルムのようなざらつき)" },
   { key: "glass", label: "グラス(Glassmorphism。色とりどりの光の地に、すりガラスのような半透明のカード)" },
   { key: "neumorphism", label: "ニューモーフィズム(Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする)" },
-  { key: "material", label: "マテリアル(Material Design 3 風。紫系の配色、角丸のカードと影、トーンのついたナビの選択)" },
   { key: "frosted", label: "フロスト(Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青)" },
-  { key: "liquid", label: "リキッド(Liquid UI。しずくのような形のカード、揺れる印、水色から紫へ流れるグラデーション)" },
   { key: "retro", label: "レトロフューチャー(Retrofuturism。80年代の夕焼けの空と光るグリッド、ネオンの差し色。常にダーク表示)" },
   { key: "y2k", label: "Y2K(Y2K UI。パステルの虹色ときらめく星、クロームの見出し、つやのあるボタン)" },
   { key: "pixel", label: "ピクセル(Pixel art。8ビットゲームのような太い枠と市松模様、ドットの影の見出し)" },
@@ -65,7 +58,7 @@ export const THEME_CHOICES = [
 const DEFAULT_ANSWERS = {
   triggerBranch: "main",
   rootMd: "README.md",
-  theme: "wa",
+  theme: "material",
   // ナビ(サイドバー・検索・目次・前後のページ)は、新しく作るときは表示する
   navEnabled: true,
   // 空ならビルド時にリポジトリ名になる
@@ -246,8 +239,7 @@ ROOT_MD=${rootMd}
 # ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# テーマ: wa(和) / sakura(桜) / tsuki(月) / akari(灯) / yuki(雪) / none(装飾なし)
-# モダン: clay(クレイ) / grainy(グレイン) / glass(グラス) / neumorphism(ニューモーフィズム) / material(マテリアル) / frosted(フロスト) / liquid(リキッド) / retro(レトロフューチャー) / y2k(Y2K) / pixel(ピクセル) / nineties(90年代)
+# テーマ: material(マテリアル) / clay(クレイ) / glass(グラス) / neumorphism(ニューモーフィズム) / frosted(フロスト) / retro(レトロフューチャー) / y2k(Y2K) / pixel(ピクセル) / nineties(90年代) / none(装飾なし)
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 
@@ -449,7 +441,7 @@ export async function writeGeneratedFiles(targets, opts) {
 
 /**
  * THEME番号選択肢の入力文字列を key に変換する。
- * 不正値・空文字はデフォルト("1" = wa)扱いにする。
+ * 不正値・空文字はデフォルト("1" = material)扱いにする。
  */
 export function resolveThemeChoice(input) {
   const trimmed = (input ?? "").trim();
@@ -623,7 +615,7 @@ preview: 公開時と同じ設定でサイトを手元にビルドし、ブラ�
       --branch <名前> トリガーブランチ(TRIGGER_BRANCH)。既定: リポジトリの既定ブランチ
                      (origin/HEAD。分からなければ main)
       --root <パス>   起点となるMarkdownファイル(ROOT_MD)。既定: README.md
-      --theme <名前>  テーマ(THEME)。${THEME_CHOICES.map((c) => c.key).join(" / ")}。既定: wa
+      --theme <名前>  テーマ(THEME)。${THEME_CHOICES.map((c) => c.key).join(" / ")}。既定: material
       --site-name <名前>
                      サイト名(SITE_NAME)。既定: 空(ビルド時にリポジトリ名になる)
       --no-nav       ナビ・サイト内検索・目次を表示しない(NAV_ENABLED=false)。既定: 表示する

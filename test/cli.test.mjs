@@ -72,18 +72,18 @@ test("promptAnswers: 全てデフォルト値で応答すると既定値が返�
   assert.deepEqual(answers, {
     triggerBranch: "main",
     rootMd: "README.md",
-    theme: "wa",
+    theme: "material",
     navEnabled: true,
     siteName: "",
     createStyleFile: false,
   });
 });
 
-test("promptAnswers: THEME番号入力(4)でakariが選ばれる", async () => {
-  const rl = fakeRl(["", "", "4", "", "", ""]);
+test("promptAnswers: THEME番号入力(6)でretroが選ばれる", async () => {
+  const rl = fakeRl(["", "", "6", "", "", ""]);
   const answers = await promptAnswers(rl);
-  assert.equal(answers.theme, "akari");
-  assert.equal(THEME_CHOICES[3].key, "akari");
+  assert.equal(answers.theme, "retro");
+  assert.equal(THEME_CHOICES[5].key, "retro");
 });
 
 test("promptAnswers: STYLE_FILEひな形作成をyで応答するとtrueになる", async () => {
@@ -118,11 +118,11 @@ test("--site-name / --no-nav で対話なしに指定できる", () => {
   assert.equal(answersFromArgs(parseCliArgs(["-y"])).navEnabled, true);
 });
 
-test("resolveThemeChoice: 不正値・範囲外は既定(wa)にフォールバックする", () => {
-  assert.equal(resolveThemeChoice("0"), "wa");
-  assert.equal(resolveThemeChoice("99"), "wa");
-  assert.equal(resolveThemeChoice("abc"), "wa");
-  assert.equal(resolveThemeChoice(""), "wa");
+test("resolveThemeChoice: 不正値・範囲外は既定(material)にフォールバックする", () => {
+  assert.equal(resolveThemeChoice("0"), "material");
+  assert.equal(resolveThemeChoice("99"), "material");
+  assert.equal(resolveThemeChoice("abc"), "material");
+  assert.equal(resolveThemeChoice(""), "material");
 });
 
 test("parseYesNo: y/yes/大文字小文字を真、それ以外・空文字はデフォルト値", () => {
@@ -223,26 +223,26 @@ test("ビルド用の依存の package.json・package-lock.json を、本体の 
   assert.equal(buildBuildLockfiles("/nonexistent", { existsSync: () => false, readFileSync }), null);
 });
 
-test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=README.md/THEME=wa", () => {
+test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=README.md/THEME=material", () => {
   const config = buildDocsPagesConfig({
     triggerBranch: "main",
     rootMd: "README.md",
-    theme: "wa",
+    theme: "material",
   });
   assert.ok(config.includes("TRIGGER_BRANCH=main"));
   assert.ok(config.includes("ROOT_MD=README.md"));
-  assert.ok(config.includes("THEME=wa"));
+  assert.ok(config.includes("THEME=material"));
   assert.ok(config.includes("OUT_DIR=_site"));
   assert.ok(config.includes(`STYLE_FILE=${VENDOR_DIR}/styles/custom.css`));
 });
 
-test("buildDocsPagesConfig: THEME=akariが反映される", () => {
+test("buildDocsPagesConfig: THEME=retroが反映される", () => {
   const config = buildDocsPagesConfig({
     triggerBranch: "main",
     rootMd: "README.md",
-    theme: "akari",
+    theme: "retro",
   });
-  assert.ok(config.includes("THEME=akari"));
+  assert.ok(config.includes("THEME=retro"));
 });
 
 test("buildStyleCssTemplate: コメントのみの空ひな形である", () => {
@@ -273,9 +273,9 @@ test("buildVendorTargets: build-docs.mjs・lib/*.mjs・styles/*.cssが実ファ�
     readFileSync(join(PACKAGE_ROOT, ".github/scripts/lib/config.mjs"), "utf8"),
   );
 
-  const waThemeTarget = targets.find((t) => t.relPath === `${VENDOR_DIR}/styles/wa.css`);
-  assert.ok(waThemeTarget, "styles/wa.cssが含まれること(選択したTHEME以外も含め全テーマをコピー)");
-  assert.equal(waThemeTarget.content, readFileSync(join(PACKAGE_ROOT, "styles/wa.css"), "utf8"));
+  const waThemeTarget = targets.find((t) => t.relPath === `${VENDOR_DIR}/styles/material.css`);
+  assert.ok(waThemeTarget, "styles/material.cssが含まれること(選択したTHEME以外も含め全テーマをコピー)");
+  assert.equal(waThemeTarget.content, readFileSync(join(PACKAGE_ROOT, "styles/material.css"), "utf8"));
 
   // styles/README.md や styles/fixtures/ のような .css 以外・ディレクトリは対象外
   assert.ok(!targets.some((t) => t.relPath.includes("styles/README.md")));
@@ -307,7 +307,7 @@ test("writeGeneratedFiles: 空ディレクトリに全てデフォルト値で�
     const targets = buildTargets({
       triggerBranch: "main",
       rootMd: "README.md",
-      theme: "wa",
+      theme: "material",
       createStyleFile: false,
     });
     const confirmOverwrite = async () => {
@@ -324,7 +324,7 @@ test("writeGeneratedFiles: 空ディレクトリに全てデフォルト値で�
     const config = readFileSync(join(dir, ".github/docs-pages.config"), "utf8");
     assert.ok(config.includes("TRIGGER_BRANCH=main"));
     assert.ok(config.includes("ROOT_MD=README.md"));
-    assert.ok(config.includes("THEME=wa"));
+    assert.ok(config.includes("THEME=material"));
 
     // ベンダリングされたファイルも実際に書き出されていること
     const vendoredBuildDocs = readFileSync(join(dir, VENDOR_DIR, "build-docs.mjs"), "utf8");
@@ -377,7 +377,7 @@ test("writeGeneratedFiles: 既存ファイルはconfirmOverwriteがfalse(デフ�
       results.find((r) => r.relPath === ".github/docs-pages.config").status,
       "created",
     );
-    assert.ok(readFileSync(join(dir, ".github/docs-pages.config"), "utf8").includes("THEME=wa"));
+    assert.ok(readFileSync(join(dir, ".github/docs-pages.config"), "utf8").includes("THEME=material"));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -560,8 +560,8 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
 
 test("THEME_CHOICES: 組み込みテーマの一覧", () => {
   const keys = THEME_CHOICES.map((c) => c.key);
-  assert.deepEqual(keys, ["wa", "sakura", "tsuki", "akari", "yuki", "clay", "grainy", "glass", "neumorphism", "material", "frosted", "liquid", "retro", "y2k", "pixel", "nineties", "none"]);
-  assert.ok(buildDocsPagesConfig({}).includes("tsuki(月)"));
+  assert.deepEqual(keys, ["material", "clay", "glass", "neumorphism", "frosted", "retro", "y2k", "pixel", "nineties", "none"]);
+  assert.ok(buildDocsPagesConfig({}).includes("retro(レトロフューチャー)"));
 });
 
 test("runUpdate: 設定ファイルが無い(未init)リポジトリではエラーにして何も書き込まない", async () => {
@@ -698,12 +698,12 @@ test("parseCliArgs: 引数なし・init だけなら対話モード", () => {
 
 test("parseCliArgs: --yes や値の指定があれば対話なし。値は answersFromArgs で回答になる", () => {
   assert.equal(parseCliArgs(["-y"]).nonInteractive, true);
-  const args = parseCliArgs(["init", "--branch", "docs", "--root", "index.md", "--theme", "akari", "--style"]);
+  const args = parseCliArgs(["init", "--branch", "docs", "--root", "index.md", "--theme", "retro", "--style"]);
   assert.equal(args.nonInteractive, true);
   assert.deepEqual(answersFromArgs(args), {
     triggerBranch: "docs",
     rootMd: "index.md",
-    theme: "akari",
+    theme: "retro",
     navEnabled: true,
     siteName: "",
     createStyleFile: true,
@@ -711,7 +711,7 @@ test("parseCliArgs: --yes や値の指定があれば対話なし。値は answe
   assert.deepEqual(answersFromArgs(parseCliArgs(["--yes"])), {
     triggerBranch: "main",
     rootMd: "README.md",
-    theme: "wa",
+    theme: "material",
     navEnabled: true,
     siteName: "",
     createStyleFile: false,
@@ -759,7 +759,7 @@ test("parseCliArgs: -v / -h / --update / --force", () => {
 });
 
 test("HELP_TEXT: 主なオプションとテーマ名を説明している", () => {
-  for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--style", "--force", "--version", "akari"]) {
+  for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--style", "--force", "--version", "retro"]) {
     assert.ok(HELP_TEXT.includes(word), word);
   }
 });
@@ -861,7 +861,7 @@ test("更新の案内はメジャーバージョンのタグ付き(未リリー�
 test("isBundledPath: ワークフローとビルドスクリプト一式だけが対象(設定ファイル・独自CSSは対象外)", () => {
   assert.equal(isBundledPath(".github/workflows/docs-pages.yml"), true);
   assert.equal(isBundledPath(`${VENDOR_DIR}/build-docs.mjs`), true);
-  assert.equal(isBundledPath(`${VENDOR_DIR}/styles/wa.css`), true);
+  assert.equal(isBundledPath(`${VENDOR_DIR}/styles/material.css`), true);
   assert.equal(isBundledPath(".github/docs-pages.config"), false);
   assert.equal(isBundledPath(`${VENDOR_DIR}/styles/custom.css`), false);
 });
@@ -895,7 +895,7 @@ test("生成する設定ファイル・CSSひな形に、開発側の内部的�
 });
 
 test("missingConfigKeys: 最新のひな形にあって設定ファイルに無いキーを返す(コメント内のキーは数えない)", () => {
-  const old = ["TRIGGER_BRANCH=main", "# LAST_UPDATED=true", "THEME=wa", "NAV_ENABLED=true"].join("\n");
+  const old = ["TRIGGER_BRANCH=main", "# LAST_UPDATED=true", "THEME=material", "NAV_ENABLED=true"].join("\n");
   const missing = missingConfigKeys(old);
   assert.ok(missing.includes("LAST_UPDATED"));
   assert.ok(missing.includes("STRICT_LINKS"));
@@ -907,12 +907,12 @@ test("runUpdate: 設定ファイルに無い新しい項目を案内する(設�
   const dir = makeTmpDir();
   try {
     mkdirSync(join(dir, ".github"), { recursive: true });
-    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=main\nTHEME=wa\n");
+    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=main\nTHEME=material\n");
     const logs = [];
     await runUpdate({ cwd: dir, log: (m) => logs.push(m) });
     const notice = logs.find((m) => m.includes("設定ファイルに無い項目"));
     assert.ok(notice && notice.includes("LAST_UPDATED") && notice.includes("configuration.html"));
-    assert.equal(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), "TRIGGER_BRANCH=main\nTHEME=wa\n");
+    assert.equal(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), "TRIGGER_BRANCH=main\nTHEME=material\n");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -984,7 +984,7 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     mkdirSync(join(dir, ".github"));
     writeFileSync(
       join(dir, ".github/docs-pages.config"),
-      "# comment\r\nSITE_NAME = Bob's \"docs\"  \r\nOGP_DEFAULT_IMAGE=https://x.example/a.png?w=1&h=2\r\n\r\nNODE_OPTIONS=--require x\nTHEME=akari  # 暗い配色\nLANG=en"
+      "# comment\r\nSITE_NAME = Bob's \"docs\"  \r\nOGP_DEFAULT_IMAGE=https://x.example/a.png?w=1&h=2\r\n\r\nNODE_OPTIONS=--require x\nTHEME=retro  # 暗い配色\nLANG=en"
     );
     const envFile = join(dir, "github.env");
     const result = spawnSync("bash", ["-e", "load.sh"], { cwd: dir, encoding: "utf8", env: { ...process.env, GITHUB_ENV: envFile } });
@@ -993,7 +993,7 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     const env = readFileSync(envFile, "utf8");
     assert.match(env, /^SITE_NAME=Bob's "docs"$/m);
     assert.match(env, /^OGP_DEFAULT_IMAGE=https:\/\/x\.example\/a\.png\?w=1&h=2$/m);
-    assert.match(env, /^THEME=akari {2}# 暗い配色$/m, "行の途中の#はコメントにならない(ドキュメントどおり)");
+    assert.match(env, /^THEME=retro {2}# 暗い配色$/m, "行の途中の#はコメントにならない(ドキュメントどおり)");
     assert.match(env, /^LANG=en$/m, "末尾に改行の無い最後の行も読む");
     assert.doesNotMatch(env, /NODE_OPTIONS|\r/);
   } finally {

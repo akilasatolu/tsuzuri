@@ -122,7 +122,7 @@ STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
 - `STYLE_DIR`は、作業ツリーのテーマCSSを使うために指定します(省略すると、ビルド対象の
   `.github/tsuzuri/styles`を使います)。
 - GitHub Actionsの外では、`.github/docs-pages.config`があればその値を使います。環境変数で
-  指定したキー(例: `THEME=akari`)は環境変数の値が優先されます。OSが設定する`LANG`
+  指定したキー(例: `THEME=retro`)は環境変数の値が優先されます。OSが設定する`LANG`
   (`ja_JP.UTF-8`など)は無視され、設定ファイルの値になります。
 - 出力先は`_site/`です(`OUT_DIR`で変更可)。前回の出力は消さないので、ページを消した・
   名前を変えたときは`_site/`を消してからビルドしてください。
@@ -175,7 +175,7 @@ bin/cli.mjs                 セットアップCLI(init)。生成するワーク�
 .github/scripts/
   build-docs.mjs            ビルドのエントリーポイント
   lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap
-styles/*.css                テーマCSSの原本(base + wa / sakura / tsuki / akari / yuki / clay / grainy / glass / neumorphism / material / frosted / liquid / retro / y2k / pixel / nineties)
+styles/*.css                テーマCSSの原本(base + material / clay / glass / neumorphism / frosted / retro / y2k / pixel / nineties)
 templates/.github/workflows/docs-pages.yml  initが生成するワークフローのひな形
 scripts/release-notes.mjs   CHANGELOGからGitHubのReleaseの本文を作る(release.ymlが使う。配布対象外)
 test/                       単体テスト・E2Eテスト(test/fixtures/ にフィクスチャ)

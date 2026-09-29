@@ -15,7 +15,7 @@ import { normalizeBasePath } from "./path-utils.mjs";
 // frontmatterの `theme` キー(ページ単位のテーマ上書き)からも参照するため export する。
 // この配列に含まれない値は「組み込みテーマ名ではなく、リポジトリルートからの
 // 相対パスで指定された独自CSSファイル」とみなされる(build-docs.mjs側の判定基準)。
-export const ALLOWED_THEMES = ["wa", "sakura", "tsuki", "akari", "yuki", "clay", "grainy", "glass", "neumorphism", "material", "frosted", "liquid", "retro", "y2k", "pixel", "nineties", "none"];
+export const ALLOWED_THEMES = ["material", "clay", "glass", "neumorphism", "frosted", "retro", "y2k", "pixel", "nineties", "none"];
 const HOSTNAME_RE = /^[a-zA-Z0-9.-]+$/;
 // BCP 47 形式の言語タグ(例: "ja" / "en" / "en-US" / "zh-Hant-TW")の簡易チェック。
 // OSの環境変数 LANG(例: "en_US.UTF-8")がローカル実行時にそのまま渡ってきた場合を弾く。
@@ -209,13 +209,13 @@ function resolveCustomDomain(raw) {
   return "";
 }
 
-// 省略(未設定・空文字)は既定値 "wa" として黙って扱い、不正値のときだけ warn する。
+// 省略(未設定・空文字)は既定値 "material" として黙って扱い、不正値のときだけ warn する。
 function resolveTheme(raw) {
   const trimmed = (raw ?? "").trim();
-  if (trimmed === "") return "wa";
+  if (trimmed === "") return "material";
   if (ALLOWED_THEMES.includes(trimmed)) return trimmed;
   console.warn(
-    `[config] THEME の値が不正です("${trimmed}")。"wa" にフォールバックします。`
+    `[config] THEME の値が不正です("${trimmed}")。"material" にフォールバックします。`
   );
-  return "wa";
+  return "material";
 }

@@ -28,7 +28,7 @@ test("全キー未設定+GITHUB_REPOSITORY未設定 → 全デフォルト値", 
   assert.equal(config.siteName, "");
   assert.equal(config.customDomain, "");
   assert.equal(config.ogDefaultImage, "");
-  assert.equal(config.theme, "wa");
+  assert.equal(config.theme, "material");
   assert.equal(config.styleDir, "styles");
 });
 
@@ -45,7 +45,7 @@ test("全キー設定済みで正しく反映される", () => {
     SITE_NAME: "My Site",
     CUSTOM_DOMAIN: "docs.example.com",
     OGP_DEFAULT_IMAGE: "og.png",
-    THEME: "akari",
+    THEME: "retro",
     STYLE_DIR: "_pkg-src/styles",
   });
   assert.equal(config.rootMd, "docs/index.md");
@@ -59,7 +59,7 @@ test("全キー設定済みで正しく反映される", () => {
   assert.equal(config.siteName, "My Site");
   assert.equal(config.customDomain, "docs.example.com");
   assert.equal(config.ogDefaultImage, "og.png");
-  assert.equal(config.theme, "akari");
+  assert.equal(config.theme, "retro");
   assert.equal(config.styleDir, "_pkg-src/styles");
 });
 
@@ -93,7 +93,7 @@ test('NAV_ENABLED="TRUE" (大文字) → true', () => {
 
 test('NAV_ENABLED="yes" → warnしてfalse', () => {
   withCapturedWarn((calls) => {
-    const config = loadConfig({ NAV_ENABLED: "yes", THEME: "wa" });
+    const config = loadConfig({ NAV_ENABLED: "yes", THEME: "material" });
     assert.equal(config.navEnabled, false);
     assert.ok(calls.some((c) => c.includes("NAV_ENABLED")));
   });
@@ -104,7 +104,7 @@ test('CUSTOM_DOMAIN="https://example.com/path" → warnして空文字', () => {
     const config = loadConfig({
       CUSTOM_DOMAIN: "https://example.com/path",
       NAV_ENABLED: "false",
-      THEME: "wa",
+      THEME: "material",
     });
     assert.equal(config.customDomain, "");
     assert.ok(calls.some((c) => c.includes("CUSTOM_DOMAIN")));
@@ -116,23 +116,23 @@ test('LANG="" → "ja" にフォールバック', () => {
   assert.equal(config.lang, "ja");
 });
 
-test('THEME="akari" → 正常反映', () => {
-  const config = loadConfig({ THEME: "akari" });
-  assert.equal(config.theme, "akari");
+test('THEME="retro" → 正常反映', () => {
+  const config = loadConfig({ THEME: "retro" });
+  assert.equal(config.theme, "retro");
 });
 
-test('THEME="Sumi" (大文字小文字違い) → warnして"wa"', () => {
+test('THEME="Sumi" (大文字小文字違い) → warnして"material"', () => {
   withCapturedWarn((calls) => {
     const config = loadConfig({ THEME: "Sumi", NAV_ENABLED: "false" });
-    assert.equal(config.theme, "wa");
+    assert.equal(config.theme, "material");
     assert.ok(calls.some((c) => c.includes("THEME")));
   });
 });
 
-test('THEME="sepia" (許可リスト外) → warnして"wa"', () => {
+test('THEME="sepia" (許可リスト外) → warnして"material"', () => {
   withCapturedWarn((calls) => {
     const config = loadConfig({ THEME: "sepia", NAV_ENABLED: "false" });
-    assert.equal(config.theme, "wa");
+    assert.equal(config.theme, "material");
     assert.ok(calls.some((c) => c.includes("THEME")));
   });
 });
@@ -159,7 +159,7 @@ test("STYLE_DIR設定済み(_pkg-src/styles) → そのまま反映されパス�
     const config = loadConfig({
       STYLE_DIR: "../outside/styles",
       NAV_ENABLED: "false",
-      THEME: "wa",
+      THEME: "material",
     });
     assert.equal(config.styleDir, "../outside/styles");
     assert.ok(!calls.some((c) => c.includes("STYLE_DIR")));
@@ -179,7 +179,7 @@ test("回帰テスト: 旧4キーのみの設定オブジェクトで新規キ�
   assert.equal(config.siteName, "");
   assert.equal(config.customDomain, "");
   assert.equal(config.ogDefaultImage, "");
-  assert.equal(config.theme, "wa");
+  assert.equal(config.theme, "material");
   assert.equal(config.styleDir, "styles");
 });
 
@@ -202,7 +202,7 @@ test("NAV_ENABLED・THEME・LANGを省略(未設定・空文字)してもwarnは
     const empty = loadConfig({ NAV_ENABLED: "", THEME: "  ", LANG: "" });
     for (const config of [unset, empty]) {
       assert.equal(config.navEnabled, false);
-      assert.equal(config.theme, "wa");
+      assert.equal(config.theme, "material");
       assert.equal(config.lang, "ja");
     }
     assert.deepEqual(calls, []);
@@ -256,14 +256,14 @@ test("ROOT_MD: ./ や \\ を含む書き方も、リンクから解決したパ�
 });
 
 test("parseConfigText: コメント・空行・未知のキーを読み飛ばし、値の前後の空白を取る", () => {
-  const values = parseConfigText("\uFEFF# comment\r\nTHEME = akari \r\n\nUNKNOWN=x\nSITE_NAME=A=B\nNAV_ENABLED=true");
-  assert.deepEqual(values, { THEME: "akari", SITE_NAME: "A=B", NAV_ENABLED: "true" });
+  const values = parseConfigText("\uFEFF# comment\r\nTHEME = retro \r\n\nUNKNOWN=x\nSITE_NAME=A=B\nNAV_ENABLED=true");
+  assert.deepEqual(values, { THEME: "retro", SITE_NAME: "A=B", NAV_ENABLED: "true" });
 });
 
 test("withConfigFileDefaults: 環境変数を優先し、OSのLANG(言語タグでない)は設定ファイルの値にする", () => {
-  const file = { THEME: "akari", LANG: "en", NAV_ENABLED: "true" };
-  const env = withConfigFileDefaults({ THEME: "yuki", LANG: "ja_JP.UTF-8" }, file);
-  assert.equal(env.THEME, "yuki");
+  const file = { THEME: "retro", LANG: "en", NAV_ENABLED: "true" };
+  const env = withConfigFileDefaults({ THEME: "y2k", LANG: "ja_JP.UTF-8" }, file);
+  assert.equal(env.THEME, "y2k");
   assert.equal(env.LANG, "en");
   assert.equal(env.NAV_ENABLED, "true");
   assert.equal(withConfigFileDefaults({ LANG: "ja" }, file).LANG, "ja", "言語タグなら環境変数を優先");
@@ -278,6 +278,6 @@ test("CONFIG_FILE_KEYS はワークフローの Load config が受け付ける�
   assert.deepEqual(m[1].split("|").sort(), [...CONFIG_FILE_KEYS].sort());
 });
 
-test('THEME="tsuki"(月) → 正常反映', () => {
-  assert.equal(loadConfig({ THEME: "tsuki" }).theme, "tsuki");
+test('THEME="glass"(月) → 正常反映', () => {
+  assert.equal(loadConfig({ THEME: "glass" }).theme, "glass");
 });

@@ -181,7 +181,7 @@ describe("pageTemplate", () => {
     // リファクタリング前の pageTemplate が出力していた <style> ブロックの中身
     // (v1でハードコードされていた配色+構造CSS)を baseCss として渡すことで、
     // 出力構造(タグの並び・空行の有無)がリファクタリング前と一致することを確認する。
-    // ※ styles/base.css・styles/wa.css を用いたバイト単位の最終確認は T-011 のE2Eで行う。
+    // ※ styles/base.css・styles/material.css を用いたバイト単位の最終確認は T-011 のE2Eで行う。
     const legacyStyleBlock = `  :root {
     color-scheme: light dark;
   }

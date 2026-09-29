@@ -13,17 +13,17 @@
 ## 使い方
 
 1. `.github/docs-pages.config` の `THEME` に、下表の中から好きなテーマ名
-   (`wa` / `sakura` / `tsuki` / `akari` / `yuki` / `clay` / `grainy` / `glass` / `neumorphism` / `material` / `frosted` / `liquid` / `retro` / `y2k` / `pixel` / `nineties` / `none`)を指定する
+   (`material` / `clay` / `glass` / `neumorphism` / `frosted` / `retro` / `y2k` / `pixel` / `nineties` / `none`)を指定する
 
    ```
-   THEME=akari
+   THEME=retro
    ```
 
-   （パッケージ初期状態のままなら `wa`(和)が使われます）
+   （パッケージ初期状態のままなら `material`(マテリアル)が使われます）
 2. コミットして `TRIGGER_BRANCH` に指定したブランチに push すると、
    次回のビルドから新しいテーマが反映されます
 
-`THEME` を指定しなかった場合は `wa`(和)が使われます。`THEME=none` を
+`THEME` を指定しなかった場合は `material`(マテリアル)が使われます。`THEME=none` を
 指定した場合は、配色・装飾が一切適用されず、ブラウザの既定の見た目
 (黒文字・白背景など)がそのまま使われます。
 
@@ -31,18 +31,11 @@
 
 | THEME値 | ファイル | 特徴 |
 |---|---|---|
-| `wa`（既定） | `wa.css` | 和。墨絵と江戸がテーマの標準スタイル。和紙の地に墨の筆跡と朱の落款。ライト/ダーク自動切替 |
-| `sakura` | `sakura.css` | 桜。和・桜・墨を合わせたスタイル。ライト/ダーク自動切替 |
-| `tsuki` | `tsuki.css` | 月。満月の夜がテーマ。夜空に光の輪をまとった満月、月明かりの金色。常にダーク表示 |
-| `akari` | `akari.css` | 灯。暗闇に灯る灯籠がテーマ。夜の闇の地に、揺らぐ炎の灯り(黄・橙・紅)。常にダーク表示 |
-| `yuki` | `yuki.css` | 雪。雪の夜の静けさがテーマ。夜の地に雪の白と銀鼠、雪輪の印とちらつく雪。常にダーク表示 |
+| `material`（既定） | `material.css` | マテリアル。Material Design 3 風の標準スタイル。紫系の配色、角丸のカードと影、トーンのついたナビの選択。ライト/ダーク自動切替 |
 | `clay` | `clay.css` | クレイ。Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。パステルの地に紫と桃色 |
-| `grainy` | `grainy.css` | グレイン。Grainy Gradient。鮮やかな色が溶け合うグラデーションに、フィルムのようなざらつき |
 | `glass` | `glass.css` | グラス。Glassmorphism。色とりどりの光の地に、すりガラスのような半透明のカード |
 | `neumorphism` | `neumorphism.css` | ニューモーフィズム。Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする |
-| `material` | `material.css` | マテリアル。Material Design 3 風。紫系の配色、角丸のカードと影、トーンのついたナビの選択 |
 | `frosted` | `frosted.css` | フロスト。Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青 |
-| `liquid` | `liquid.css` | リキッド。Liquid UI。しずくのような形のカード、揺れる印、水色から紫へ流れるグラデーション |
 | `retro` | `retro.css` | レトロフューチャー。Retrofuturism。80年代の夕焼けの空と光るグリッド、ネオンの差し色。常にダーク表示 |
 | `y2k` | `y2k.css` | Y2K。Y2K UI。パステルの虹色ときらめく星、クロームの見出し、つやのあるボタン |
 | `pixel` | `pixel.css` | ピクセル。Pixel art。8ビットゲームのような太い枠と市松模様、ドットの影の見出し |

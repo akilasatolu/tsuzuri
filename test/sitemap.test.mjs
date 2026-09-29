@@ -21,7 +21,7 @@ function baseOpts(overrides = {}) {
     siteName: "tsuzuri",
     siteOrigin: "https://example.com",
     customDomain: null,
-    theme: "wa",
+    theme: "material",
     ...overrides,
   };
 }
@@ -34,7 +34,7 @@ test("新規フィールド(lang/siteName/siteOrigin/customDomain/theme)が正�
   assert.equal(result.siteName, "tsuzuri");
   assert.equal(result.siteOrigin, "https://example.com");
   assert.equal(result.customDomain, "docs.example.com");
-  assert.equal(result.theme, "wa");
+  assert.equal(result.theme, "material");
 });
 
 test("pages[].title / pages[].description が正しく出力される (meta優先)", () => {
@@ -55,12 +55,12 @@ test("meta.titleが無い場合はrelをフォールバックとして使う", (
 
 test("meta.themeがあればpages[].themeにそのまま反映される", () => {
   const visitedMd = new Map([
-    ["docs/special.md", { content: "本文", meta: { theme: "sakura" } }],
+    ["docs/special.md", { content: "本文", meta: { theme: "clay" } }],
     ["docs/custom.md", { content: "本文", meta: { theme: "styles/custom.css" } }],
   ]);
   const result = buildSitemap(baseOpts({ visitedMd }));
   assert.deepEqual(result.pages, [
-    { rel: "docs/special.md", title: "docs/special.md", description: null, theme: "sakura" },
+    { rel: "docs/special.md", title: "docs/special.md", description: null, theme: "clay" },
     { rel: "docs/custom.md", title: "docs/custom.md", description: null, theme: "styles/custom.css" },
   ]);
 });
@@ -85,8 +85,8 @@ test("customDomain未設定時はnullに統一される(null明示渡し)", () =
 });
 
 test("themeフィールドがconfig.loadConfig()で解決された最終テーマ名(noneを含む)と一致する", () => {
-  const resultWa = buildSitemap(baseOpts({ theme: "wa" }));
-  assert.equal(resultWa.theme, "wa");
+  const resultWa = buildSitemap(baseOpts({ theme: "material" }));
+  assert.equal(resultWa.theme, "material");
 
   const resultNone = buildSitemap(baseOpts({ theme: "none" }));
   assert.equal(resultNone.theme, "none");
