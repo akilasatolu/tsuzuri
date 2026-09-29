@@ -45,7 +45,7 @@ test("全キー設定済みで正しく反映される", () => {
     SITE_NAME: "My Site",
     CUSTOM_DOMAIN: "docs.example.com",
     OGP_DEFAULT_IMAGE: "og.png",
-    THEME: "sumi",
+    THEME: "akari",
     STYLE_DIR: "_pkg-src/styles",
   });
   assert.equal(config.rootMd, "docs/index.md");
@@ -59,7 +59,7 @@ test("全キー設定済みで正しく反映される", () => {
   assert.equal(config.siteName, "My Site");
   assert.equal(config.customDomain, "docs.example.com");
   assert.equal(config.ogDefaultImage, "og.png");
-  assert.equal(config.theme, "sumi");
+  assert.equal(config.theme, "akari");
   assert.equal(config.styleDir, "_pkg-src/styles");
 });
 
@@ -116,9 +116,9 @@ test('LANG="" → "ja" にフォールバック', () => {
   assert.equal(config.lang, "ja");
 });
 
-test('THEME="sumi" → 正常反映', () => {
-  const config = loadConfig({ THEME: "sumi" });
-  assert.equal(config.theme, "sumi");
+test('THEME="akari" → 正常反映', () => {
+  const config = loadConfig({ THEME: "akari" });
+  assert.equal(config.theme, "akari");
 });
 
 test('THEME="Sumi" (大文字小文字違い) → warnして"wa"', () => {
@@ -256,12 +256,12 @@ test("ROOT_MD: ./ や \\ を含む書き方も、リンクから解決したパ�
 });
 
 test("parseConfigText: コメント・空行・未知のキーを読み飛ばし、値の前後の空白を取る", () => {
-  const values = parseConfigText("\uFEFF# comment\r\nTHEME = sumi \r\n\nUNKNOWN=x\nSITE_NAME=A=B\nNAV_ENABLED=true");
-  assert.deepEqual(values, { THEME: "sumi", SITE_NAME: "A=B", NAV_ENABLED: "true" });
+  const values = parseConfigText("\uFEFF# comment\r\nTHEME = akari \r\n\nUNKNOWN=x\nSITE_NAME=A=B\nNAV_ENABLED=true");
+  assert.deepEqual(values, { THEME: "akari", SITE_NAME: "A=B", NAV_ENABLED: "true" });
 });
 
 test("withConfigFileDefaults: 環境変数を優先し、OSのLANG(言語タグでない)は設定ファイルの値にする", () => {
-  const file = { THEME: "sumi", LANG: "en", NAV_ENABLED: "true" };
+  const file = { THEME: "akari", LANG: "en", NAV_ENABLED: "true" };
   const env = withConfigFileDefaults({ THEME: "ai", LANG: "ja_JP.UTF-8" }, file);
   assert.equal(env.THEME, "ai");
   assert.equal(env.LANG, "en");

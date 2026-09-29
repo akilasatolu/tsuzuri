@@ -16,6 +16,17 @@
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-09-30
+
+### Added
+
+- ネオン街をテーマにした組み込みテーマ「灯(`akari`)」。夜の街の暗い地に、桃色・水色・黄色のネオンの灯り。
+  見出し・リンク・今いるページのナビがネオン管のように光る。常にダーク表示。
+
+### Removed
+
+- 組み込みテーマ「墨(`sumi`)」を削除した。
+
 ## [1.9.0] - 2026-09-30
 
 ### Added
@@ -261,7 +272,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.10.0...HEAD
+[1.10.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.6.0...v1.7.0

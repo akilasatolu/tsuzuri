@@ -79,11 +79,11 @@ test("promptAnswers: 全てデフォルト値で応答すると既定値が返�
   });
 });
 
-test("promptAnswers: THEME番号入力(3)でsumiが選ばれる", async () => {
+test("promptAnswers: THEME番号入力(3)でakariが選ばれる", async () => {
   const rl = fakeRl(["", "", "3", "", "", ""]);
   const answers = await promptAnswers(rl);
-  assert.equal(answers.theme, "sumi");
-  assert.equal(THEME_CHOICES[2].key, "sumi");
+  assert.equal(answers.theme, "akari");
+  assert.equal(THEME_CHOICES[2].key, "akari");
 });
 
 test("promptAnswers: STYLE_FILEひな形作成をyで応答するとtrueになる", async () => {
@@ -236,13 +236,13 @@ test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=
   assert.ok(config.includes(`STYLE_FILE=${VENDOR_DIR}/styles/custom.css`));
 });
 
-test("buildDocsPagesConfig: THEME=sumiが反映される", () => {
+test("buildDocsPagesConfig: THEME=akariが反映される", () => {
   const config = buildDocsPagesConfig({
     triggerBranch: "main",
     rootMd: "README.md",
-    theme: "sumi",
+    theme: "akari",
   });
-  assert.ok(config.includes("THEME=sumi"));
+  assert.ok(config.includes("THEME=akari"));
 });
 
 test("buildStyleCssTemplate: コメントのみの空ひな形である", () => {
@@ -560,7 +560,7 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
 
 test("THEME_CHOICES: 宙(sora)があり、無地(muji)は無い", () => {
   const keys = THEME_CHOICES.map((c) => c.key);
-  assert.deepEqual(keys, ["wa", "sora", "sumi", "ai", "shu", "none"]);
+  assert.deepEqual(keys, ["wa", "sora", "akari", "ai", "shu", "none"]);
   assert.ok(buildDocsPagesConfig({}).includes("sora(宙)"));
 });
 
@@ -698,12 +698,12 @@ test("parseCliArgs: 引数なし・init だけなら対話モード", () => {
 
 test("parseCliArgs: --yes や値の指定があれば対話なし。値は answersFromArgs で回答になる", () => {
   assert.equal(parseCliArgs(["-y"]).nonInteractive, true);
-  const args = parseCliArgs(["init", "--branch", "docs", "--root", "index.md", "--theme", "sumi", "--style"]);
+  const args = parseCliArgs(["init", "--branch", "docs", "--root", "index.md", "--theme", "akari", "--style"]);
   assert.equal(args.nonInteractive, true);
   assert.deepEqual(answersFromArgs(args), {
     triggerBranch: "docs",
     rootMd: "index.md",
-    theme: "sumi",
+    theme: "akari",
     navEnabled: true,
     siteName: "",
     createStyleFile: true,
@@ -759,7 +759,7 @@ test("parseCliArgs: -v / -h / --update / --force", () => {
 });
 
 test("HELP_TEXT: 主なオプションとテーマ名を説明している", () => {
-  for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--style", "--force", "--version", "sumi"]) {
+  for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--style", "--force", "--version", "akari"]) {
     assert.ok(HELP_TEXT.includes(word), word);
   }
 });
@@ -984,7 +984,7 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     mkdirSync(join(dir, ".github"));
     writeFileSync(
       join(dir, ".github/docs-pages.config"),
-      "# comment\r\nSITE_NAME = Bob's \"docs\"  \r\nOGP_DEFAULT_IMAGE=https://x.example/a.png?w=1&h=2\r\n\r\nNODE_OPTIONS=--require x\nTHEME=sumi  # 暗い配色\nLANG=en"
+      "# comment\r\nSITE_NAME = Bob's \"docs\"  \r\nOGP_DEFAULT_IMAGE=https://x.example/a.png?w=1&h=2\r\n\r\nNODE_OPTIONS=--require x\nTHEME=akari  # 暗い配色\nLANG=en"
     );
     const envFile = join(dir, "github.env");
     const result = spawnSync("bash", ["-e", "load.sh"], { cwd: dir, encoding: "utf8", env: { ...process.env, GITHUB_ENV: envFile } });
@@ -993,7 +993,7 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     const env = readFileSync(envFile, "utf8");
     assert.match(env, /^SITE_NAME=Bob's "docs"$/m);
     assert.match(env, /^OGP_DEFAULT_IMAGE=https:\/\/x\.example\/a\.png\?w=1&h=2$/m);
-    assert.match(env, /^THEME=sumi {2}# 暗い配色$/m, "行の途中の#はコメントにならない(ドキュメントどおり)");
+    assert.match(env, /^THEME=akari {2}# 暗い配色$/m, "行の途中の#はコメントにならない(ドキュメントどおり)");
     assert.match(env, /^LANG=en$/m, "末尾に改行の無い最後の行も読む");
     assert.doesNotMatch(env, /NODE_OPTIONS|\r/);
   } finally {
