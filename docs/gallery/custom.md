@@ -6,7 +6,7 @@ description: THEME=noneと独自CSS(STYLE_FILE)だけで作った、このサイ
 # 独自CSSの例(このサイト)
 
 組み込みテーマを使わず(`THEME=none`)、`STYLE_FILE`の独自CSSだけで作った見た目です。
-このサイト全体がこの見た目になっています。Tsuzuriのロゴと同じ紺と炎の橙を軸に、ロゴの形(中心の点から周りの点へ線がつながる)を地紋にした、
+このサイト全体がこの見た目になっています。Tsuzuriのロゴと同じ紺と炎の橙を軸に、細い線の方眼を地紋にした、
 丸みのあるカードのデザインです。見出しの印や特徴のカードの丸は、ロゴの中心のように灯った点にしています。
 
 使っているCSSは[custom.css](https://github.com/akilasatolu/tsuzuri/blob/docs/.github/tsuzuri/styles/custom.css)です。

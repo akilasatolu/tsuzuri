@@ -2,7 +2,7 @@
  * Tsuzuri サイト用の独自スタイル(STYLE_FILE)
  *
  * THEME=none(基礎CSSのみ)の上に、Tsuzuri のロゴと同じ見た目を作る。
- *   - 紺(夜の地)・白(ページ)・炎の橙(入口に灯る光)の配色。ロゴの「中心から線でつながるページ」を地紋にする
+ *   - 紺(夜の地)・白(ページ)・炎の橙(入口に灯る光)の配色。地紋は細い線の方眼
  *   - 丸みのあるカード・やわらかい影。ライト/ダークモードの両方に対応(OSの設定に追従)
  *
  * テーマの見本ページ(docs/gallery/*.md)は、それぞれのテーマの見た目をそのまま見せるため、
@@ -25,8 +25,8 @@
   --gradient: linear-gradient(135deg, #0f172a 0%, #1e3a6e 100%);                 /* 紺(塗り) */
   --gradient-text: linear-gradient(135deg, #0f172a 0%, #1e3a6e 70%, #c2410c 100%); /* 見出しの文字 */
   --gradient-flame: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #dc2626 100%); /* 炎 */
-  /* 中心の点から周りの点へ線がつながる地紋(ロゴの形)。色は画像の中に書くので、ライト/ダークで別の画像にする */
-  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg stroke='%230f172a' stroke-opacity='0.07' stroke-width='1.2'%3E%3Cline x1='24' y1='30' x2='70' y2='52'/%3E%3Cline x1='70' y1='52' x2='98' y2='20'/%3E%3Cline x1='70' y1='52' x2='84' y2='96'/%3E%3Cline x1='70' y1='52' x2='36' y2='88'/%3E%3C/g%3E%3Cg fill='%230f172a' fill-opacity='0.07'%3E%3Ccircle cx='24' cy='30' r='3'/%3E%3Ccircle cx='98' cy='20' r='2.5'/%3E%3Ccircle cx='84' cy='96' r='3.5'/%3E%3Ccircle cx='36' cy='88' r='2.5'/%3E%3C/g%3E%3Ccircle cx='70' cy='52' r='4' fill='%23f97316' fill-opacity='0.11'/%3E%3C/svg%3E");
+  /* 方眼の地紋(細い線のマス目)の線の色 */
+  --grid: rgba(15, 23, 42, 0.06);
   --code-bg: #fff1e6;
   --code-fg: #c2410c;
   --pre-bg: #0f172a;           /* ロゴの紺 */
@@ -61,7 +61,7 @@
     --gradient: linear-gradient(135deg, #1e3a6e 0%, #2e4f8a 100%);
     --gradient-text: linear-gradient(135deg, #ffffff 0%, #e2e8f0 55%, #fdba74 100%);
     --gradient-flame: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #dc2626 100%);
-    --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg stroke='%23cbd5e1' stroke-opacity='0.06' stroke-width='1.2'%3E%3Cline x1='24' y1='30' x2='70' y2='52'/%3E%3Cline x1='70' y1='52' x2='98' y2='20'/%3E%3Cline x1='70' y1='52' x2='84' y2='96'/%3E%3Cline x1='70' y1='52' x2='36' y2='88'/%3E%3C/g%3E%3Cg fill='%23cbd5e1' fill-opacity='0.06'%3E%3Ccircle cx='24' cy='30' r='3'/%3E%3Ccircle cx='98' cy='20' r='2.5'/%3E%3Ccircle cx='84' cy='96' r='3.5'/%3E%3Ccircle cx='36' cy='88' r='2.5'/%3E%3C/g%3E%3Ccircle cx='70' cy='52' r='4' fill='%23f97316' fill-opacity='0.10'/%3E%3C/svg%3E");
+    --grid: rgba(203, 213, 225, 0.06);
     --code-bg: #2a1c14;
     --code-fg: #fdba74;
     --pre-bg: #070c17;
@@ -89,7 +89,7 @@
   --gradient: linear-gradient(135deg, #1e3a6e 0%, #2e4f8a 100%);
   --gradient-text: linear-gradient(135deg, #ffffff 0%, #e2e8f0 55%, #fdba74 100%);
   --gradient-flame: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #dc2626 100%);
-  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg stroke='%23cbd5e1' stroke-opacity='0.06' stroke-width='1.2'%3E%3Cline x1='24' y1='30' x2='70' y2='52'/%3E%3Cline x1='70' y1='52' x2='98' y2='20'/%3E%3Cline x1='70' y1='52' x2='84' y2='96'/%3E%3Cline x1='70' y1='52' x2='36' y2='88'/%3E%3C/g%3E%3Cg fill='%23cbd5e1' fill-opacity='0.06'%3E%3Ccircle cx='24' cy='30' r='3'/%3E%3Ccircle cx='98' cy='20' r='2.5'/%3E%3Ccircle cx='84' cy='96' r='3.5'/%3E%3Ccircle cx='36' cy='88' r='2.5'/%3E%3C/g%3E%3Ccircle cx='70' cy='52' r='4' fill='%23f97316' fill-opacity='0.10'/%3E%3C/svg%3E");
+  --grid: rgba(203, 213, 225, 0.06);
   --code-bg: #2a1c14;
   --code-fg: #fdba74;
   --pre-bg: #070c17;
@@ -106,10 +106,12 @@
 body {
   line-height: 1.8;
   letter-spacing: 0.02em;
-  /* ロゴの形の地紋 */
+  /* 方眼の地紋 */
   background-color: var(--bg);
-  background-image: var(--pattern);
-  background-size: 120px 120px;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
   -webkit-font-smoothing: antialiased;
 }
 ::selection { background: color-mix(in srgb, var(--accent-2) 30%, transparent); }
