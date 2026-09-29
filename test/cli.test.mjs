@@ -79,11 +79,11 @@ test("promptAnswers: 全てデフォルト値で応答すると既定値が返�
   });
 });
 
-test("promptAnswers: THEME番号入力(3)でakariが選ばれる", async () => {
-  const rl = fakeRl(["", "", "3", "", "", ""]);
+test("promptAnswers: THEME番号入力(4)でakariが選ばれる", async () => {
+  const rl = fakeRl(["", "", "4", "", "", ""]);
   const answers = await promptAnswers(rl);
   assert.equal(answers.theme, "akari");
-  assert.equal(THEME_CHOICES[2].key, "akari");
+  assert.equal(THEME_CHOICES[3].key, "akari");
 });
 
 test("promptAnswers: STYLE_FILEひな形作成をyで応答するとtrueになる", async () => {
@@ -560,7 +560,7 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
 
 test("THEME_CHOICES: 宙(sora)があり、無地(muji)は無い", () => {
   const keys = THEME_CHOICES.map((c) => c.key);
-  assert.deepEqual(keys, ["wa", "sora", "akari", "umi", "kabuki", "none"]);
+  assert.deepEqual(keys, ["wa", "sakura", "sora", "akari", "umi", "none"]);
   assert.ok(buildDocsPagesConfig({}).includes("sora(宙)"));
 });
 

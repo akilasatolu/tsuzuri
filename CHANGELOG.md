@@ -16,6 +16,24 @@
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-09-30
+
+### Added
+
+- 和・桜・墨を合わせた組み込みテーマ「桜(`sakura`)」。和紙の地に墨色の文字と明朝体の見出し、差し色は桜色で、
+  見出しの印やページの隅に桜の花びらを淡く散らす。ダーク表示は夜桜。
+
+### Changed
+
+- 既定のテーマ「和(`wa`)」のデザインを、浮世絵をテーマにした江戸らしいデザインに作り直した。刷り紙の生成りの地に
+  ベロ藍と江戸の紅を差し色にし、h1 の下に青海波の帯、h2 は錦絵の題箋のような枠。ページの上に霞の帯を淡く引く。
+- 灯(`akari`)のデザインを、暗闇に灯る灯籠のイメージに作り直した。夜の闇の地に、灯籠の琥珀色の灯りをにじませ、
+  見出しの印は小さな灯籠の形。
+
+### Removed
+
+- 組み込みテーマ「歌舞伎(`kabuki`)」を削除した。
+
 ## [1.12.0] - 2026-09-30
 
 ### Added
@@ -299,7 +317,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.12.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.13.0...HEAD
+[1.13.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.11.0...v1.12.0
 [1.11.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.9.0...v1.10.0
