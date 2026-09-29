@@ -13,7 +13,7 @@ OSの設定に関わらず常にダーク表示。墨色の地に温かみのあ
 1ページだけ使う場合は、そのページのfrontmatterに`theme: sumi`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 無地(muji)](muji.md) ・ [ギャラリー一覧](../gallery.md) ・ [藍(ai) →](ai.md)
+[← 宙(sora)](sora.md) ・ [ギャラリー一覧](../gallery.md) ・ [藍(ai) →](ai.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 無地(muji)](muji.md) ・ [ギャラリー一覧](../gallery.md) ・ [藍(ai) →](ai.md)
+[← 宙(sora)](sora.md) ・ [ギャラリー一覧](../gallery.md) ・ [藍(ai) →](ai.md)

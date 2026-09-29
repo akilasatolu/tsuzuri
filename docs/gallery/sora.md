@@ -1,16 +1,16 @@
 ---
-title: 無地(muji)
-theme: muji
+title: 宙(sora)
+theme: sora
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「無地(muji)」の見本ページ
+description: Tsuzuriの組み込みテーマ「宙(sora)」の見本ページ
 ---
 
-# 無地(muji)
+# 宙(sora)
 
-色を使わない白と黒だけの最小構成。見出し・ナビ・コードは等幅フォント、本文は読みやすいゴシック体。技術文書・README集向け。
+宇宙がテーマ。星をちりばめた夜空の地に、星の光の水色と星雲の紫の差し色。常にダーク表示。星は控えめにして読みやすさを優先。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=muji`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: muji`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=sora`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: sora`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
 [← 和(wa)](wa.md) ・ [ギャラリー一覧](../gallery.md) ・ [墨(sumi) →](sumi.md)

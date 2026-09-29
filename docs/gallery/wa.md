@@ -13,7 +13,7 @@ description: Tsuzuriの組み込みテーマ「和(wa)」の見本ページ
 1ページだけ使う場合は、そのページのfrontmatterに`theme: wa`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[ギャラリー一覧](../gallery.md) ・ [無地(muji) →](muji.md)
+[ギャラリー一覧](../gallery.md) ・ [宙(sora) →](sora.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[ギャラリー一覧](../gallery.md) ・ [無地(muji) →](muji.md)
+[ギャラリー一覧](../gallery.md) ・ [宙(sora) →](sora.md)
