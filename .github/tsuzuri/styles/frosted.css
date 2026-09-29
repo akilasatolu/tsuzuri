@@ -1,0 +1,173 @@
+/*
+ * frosted.css (フロスト)
+ * Frosted Glass Effect(フロストガラス)のスタイル。冬の窓のように白く曇った厚いすりガラスのカード。
+ * 背景を強くぼかし、ガラスの表面に細かな霜のざらつきを重ねる。冷たく澄んだ氷の青を差し色にする。
+ * ライト/ダーク表示に対応する。
+ */
+:root {
+  color-scheme: light dark;
+  --fg: #1b2a33;
+  --muted: #56707c;
+  --bg: #e6f2f7;
+  --heading: #10222c;
+  --accent: #0e7490;
+  --accent-2: #2563eb;
+  --border: rgba(255, 255, 255, 0.7);
+  --page-bg: radial-gradient(circle at 20% 25%, #9ad7e8 0%, transparent 40%), radial-gradient(circle at 80% 30%, #c3d9ff 0%, transparent 42%), radial-gradient(circle at 60% 85%, #d7f1ee 0%, transparent 45%), linear-gradient(160deg, #eaf5fa, #dbe9f5);
+  --card-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.10'/%3E%3C/svg%3E"), rgba(255, 255, 255, 0.62);
+  --card-border: 1px solid rgba(255, 255, 255, 0.85);
+  --card-filter: blur(32px) saturate(120%);
+  --card-shadow: 0 10px 40px rgba(14, 116, 144, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --radius-lg: 22px;
+  --radius: 14px;
+  --pill: 999px;
+  --heading-weight: 700;
+  --el-bg: rgba(255, 255, 255, 0.55);
+  --el-shadow: 0 4px 14px rgba(14, 116, 144, 0.10), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+  --inset-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+  --hr: linear-gradient(90deg, transparent, rgba(14, 116, 144, 0.5), transparent);
+  --code-bg: rgba(255, 255, 255, 0.7);
+  --pre-bg: rgba(255, 255, 255, 0.65);
+  --th-bg: rgba(255, 255, 255, 0.7);
+  --th-fg: #0e7490;
+  --hover-bg: rgba(255, 255, 255, 0.55);
+  --current-bg: rgba(255, 255, 255, 0.85);
+  --current-fg: #0e7490;
+  --current-shadow: inset 0 0 0 1px #ffffff, 0 4px 12px rgba(14, 116, 144, 0.15);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --heading-font: var(--font);
+  --content-width: 840px;
+}
+
+/* ダーク表示: OS がダークモードのとき(ライト表示に切り替えたときを除く)と、ダーク表示に切り替えたとき */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --fg: #dde9ef;
+    --muted: #93aab5;
+    --bg: #0c1720;
+    --heading: #f0f7fa;
+    --accent: #67d4ea;
+    --accent-2: #93b4ff;
+    --border: rgba(255, 255, 255, 0.12);
+    --page-bg: radial-gradient(circle at 20% 25%, #0e4a5c 0%, transparent 40%), radial-gradient(circle at 80% 30%, #1e3a6e 0%, transparent 42%), radial-gradient(circle at 60% 85%, #134e4a 0%, transparent 45%), linear-gradient(160deg, #0b141c, #0d1a26);
+    --card-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.10'/%3E%3C/svg%3E"), rgba(20, 34, 46, 0.55);
+    --card-border: 1px solid rgba(255, 255, 255, 0.14);
+    --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --el-bg: rgba(255, 255, 255, 0.06);
+    --el-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+    --inset-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+    --hr: linear-gradient(90deg, transparent, rgba(103, 212, 234, 0.5), transparent);
+    --code-bg: rgba(255, 255, 255, 0.08);
+    --pre-bg: rgba(6, 12, 18, 0.55);
+    --th-bg: rgba(255, 255, 255, 0.08);
+    --th-fg: #a5e8f5;
+    --hover-bg: rgba(255, 255, 255, 0.07);
+    --current-bg: rgba(255, 255, 255, 0.14);
+    --current-fg: #ffffff;
+    --current-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fg: #dde9ef;
+  --muted: #93aab5;
+  --bg: #0c1720;
+  --heading: #f0f7fa;
+  --accent: #67d4ea;
+  --accent-2: #93b4ff;
+  --border: rgba(255, 255, 255, 0.12);
+  --page-bg: radial-gradient(circle at 20% 25%, #0e4a5c 0%, transparent 40%), radial-gradient(circle at 80% 30%, #1e3a6e 0%, transparent 42%), radial-gradient(circle at 60% 85%, #134e4a 0%, transparent 45%), linear-gradient(160deg, #0b141c, #0d1a26);
+  --card-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.10'/%3E%3C/svg%3E"), rgba(20, 34, 46, 0.55);
+  --card-border: 1px solid rgba(255, 255, 255, 0.14);
+  --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --el-bg: rgba(255, 255, 255, 0.06);
+  --el-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+  --inset-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+  --hr: linear-gradient(90deg, transparent, rgba(103, 212, 234, 0.5), transparent);
+  --code-bg: rgba(255, 255, 255, 0.08);
+  --pre-bg: rgba(6, 12, 18, 0.55);
+  --th-bg: rgba(255, 255, 255, 0.08);
+  --th-fg: #a5e8f5;
+  --hover-bg: rgba(255, 255, 255, 0.07);
+  --current-bg: rgba(255, 255, 255, 0.14);
+  --current-fg: #ffffff;
+  --current-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+/* ページの地と、本文・ナビのカード */
+body { line-height: 1.75; background: var(--page-bg); background-attachment: fixed; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+main {
+  margin: 24px auto 48px;
+  padding: 40px 44px;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: var(--card-filter);
+  backdrop-filter: var(--card-filter);
+}
+body > nav {
+  margin: 16px 16px 0;
+  padding: 16px 20px;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: var(--card-filter);
+  backdrop-filter: var(--card-filter);
+}
+@media (max-width: 640px) {
+  main { margin: 12px; padding: 28px 20px; }
+}
+@media (min-width: 960px) {
+  body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }
+  body > nav { top: 16px; height: calc(100vh - 32px); margin: 16px 0 16px 16px; padding: 28px 20px; border: var(--card-border); }
+  body:has(> nav) > main { width: auto; margin: 16px 24px 48px; max-width: var(--content-width); justify-self: center; }
+}
+
+/* 見出し */
+main :is(h1, h2, h3, h4) { font-family: var(--heading-font); font-weight: var(--heading-weight); line-height: 1.35; letter-spacing: 0.01em; color: var(--heading); }
+main h1 { margin: 0 0 1em; font-size: 2.2em; }
+main h2 { margin: 2.2em 0 0.7em; font-size: 1.5em; }
+main h3 { margin: 1.8em 0 0.5em; font-size: 1.2em; color: var(--accent); }
+main h4 { margin: 1.5em 0 0.4em; font-size: 1em; color: var(--muted); }
+
+/* リンク */
+main a { color: var(--accent); font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.2em; text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+main a:hover { color: var(--accent-2); text-decoration-color: var(--accent-2); }
+
+/* 本文の部品(角を丸く、テーマの質感で) */
+main strong { color: var(--heading); }
+main blockquote { margin: 1.4em 0; padding: 0.8em 1.2em; color: var(--muted); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
+main hr { margin: 2.5em 0; height: 3px; border: 0; border-radius: 3px; background: var(--hr); }
+main kbd { padding: 0.15em 0.5em; font-size: 0.85em; background: var(--el-bg); border: 0; border-radius: 6px; box-shadow: var(--el-shadow); }
+main img { border-radius: var(--radius); }
+main code { padding: 2px 6px; background: var(--code-bg); border-radius: 6px; }
+main pre { padding: 16px 20px; background: var(--pre-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); line-height: 1.6; }
+main pre code { background: none; padding: 0; }
+main table { border-collapse: separate; border-spacing: 0; overflow: hidden; font-size: 0.95em; background: var(--el-bg); border-radius: var(--radius); box-shadow: var(--el-shadow); }
+main th, main td { border: 0; border-bottom: 1px solid var(--border); padding: 10px 14px; }
+main tr:last-child td { border-bottom: 0; }
+main th { text-align: left; color: var(--th-fg); background: var(--th-bg); }
+
+/* 注意書き・目次・前後のページ */
+.markdown-alert { border: 0; border-radius: var(--radius); background: color-mix(in srgb, var(--alert-color) 12%, var(--el-bg)); box-shadow: var(--el-shadow); }
+.tsuzuri-toc { background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
+.tsuzuri-toc > p { color: var(--accent); }
+.tsuzuri-pager { border-top: 0; }
+main .tsuzuri-pager a { color: var(--heading); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--el-shadow); transition: transform 0.15s; }
+main .tsuzuri-pager a:hover { transform: translateY(-2px); color: var(--accent); }
+.tsuzuri-pager span { color: var(--accent); opacity: 1; }
+.tsuzuri-updated { opacity: 1; color: var(--muted); }
+
+/* ナビ */
+.tsuzuri-nav-head > p { font-weight: 800; color: var(--heading); }
+body > nav a { margin: 2px 0; padding: 6px 12px; color: var(--fg); border-radius: var(--pill); }
+body > nav a:hover { color: var(--accent); background: var(--hover-bg); text-decoration: none; }
+body > nav a[aria-current="page"] { color: var(--current-fg); background: var(--current-bg); box-shadow: var(--current-shadow); font-weight: 700; }
+body > nav ul ul { border-left: 2px solid var(--border); }
+.tsuzuri-search input { padding: 9px 16px; background: var(--el-bg); border: 0; border-radius: var(--pill); box-shadow: var(--inset-shadow); }
+.tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }

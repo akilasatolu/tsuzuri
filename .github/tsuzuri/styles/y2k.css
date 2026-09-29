@@ -1,0 +1,182 @@
+/*
+ * y2k.css (Y2K)
+ * Y2K UI のスタイル。2000年ごろのデジタルの明るい未来感。パステルの虹色の地にきらめく星、
+ * クロームのように光る見出し、つやのあるぷっくりしたボタン。差し色はホットピンクとライム。
+ * ライト/ダーク表示に対応する。
+ */
+:root {
+  color-scheme: light dark;
+  --fg: #27213a;
+  --muted: #6a6384;
+  --bg: #f3ecff;
+  --heading: #27213a;
+  --accent: #e6007e;
+  --accent-2: #6b3cff;
+  --border: #e3d9fb;
+  --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M40 20 l3 9 l9 3 l-9 3 l-3 9 l-3 -9 l-9 -3 l9 -3 z'/%3E%3Cpath d='M180 60 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2 z'/%3E%3Cpath d='M120 170 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 z'/%3E%3Cpath d='M210 200 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 z'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #ffd6f2 0%, #e2d4ff 30%, #cdeeff 60%, #dcffe4 100%);
+  --card-bg: rgba(255, 255, 255, 0.82);
+  --card-border: 2px solid rgba(255, 255, 255, 0.95);
+  --card-filter: blur(6px);
+  --card-shadow: 0 12px 36px rgba(107, 60, 255, 0.18), inset 0 2px 0 #ffffff;
+  --radius-lg: 28px;
+  --radius: 18px;
+  --pill: 999px;
+  --heading-weight: 900;
+  --el-bg: rgba(255, 255, 255, 0.85);
+  --el-shadow: 0 6px 16px rgba(230, 0, 126, 0.12), inset 0 2px 0 #ffffff;
+  --inset-shadow: inset 0 0 0 2px rgba(107, 60, 255, 0.12);
+  --hr: linear-gradient(90deg, #ff6ec7, #a78bfa, #67e8f9, #a3e635);
+  --code-bg: #f5eaff;
+  --pre-bg: #faf6ff;
+  --th-bg: linear-gradient(180deg, #ff7ad0, #e6007e);
+  --th-fg: #ffffff;
+  --hover-bg: #f7ecff;
+  --current-bg: linear-gradient(180deg, #ff9ad8 0%, #e6007e 55%, #b8006b 100%);
+  --current-fg: #ffffff;
+  --current-shadow: 0 6px 14px rgba(230, 0, 126, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.6);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --heading-font: var(--font);
+  --content-width: 840px;
+}
+
+/* ダーク表示: OS がダークモードのとき(ライト表示に切り替えたときを除く)と、ダーク表示に切り替えたとき */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --fg: #f1ecff;
+    --muted: #b3a9d6;
+    --bg: #0d0a1a;
+    --heading: #ffffff;
+    --accent: #ff5cc3;
+    --accent-2: #b8ff3b;
+    --border: #342a58;
+    --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M40 20 l3 9 l9 3 l-9 3 l-3 9 l-3 -9 l-9 -3 l9 -3 z'/%3E%3Cpath d='M180 60 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2 z'/%3E%3Cpath d='M120 170 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 z'/%3E%3Cpath d='M210 200 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 z'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #2a0a3d 0%, #10123a 45%, #062a3a 100%);
+    --card-bg: rgba(18, 14, 38, 0.84);
+    --card-border: 2px solid rgba(255, 255, 255, 0.14);
+    --card-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    --el-bg: rgba(255, 255, 255, 0.06);
+    --el-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    --inset-shadow: inset 0 0 0 2px rgba(255, 92, 195, 0.18);
+    --hr: linear-gradient(90deg, #ff5cc3, #a78bfa, #22d3ee, #b8ff3b);
+    --code-bg: rgba(255, 92, 195, 0.14);
+    --pre-bg: rgba(6, 4, 14, 0.85);
+    --th-bg: linear-gradient(180deg, #ff5cc3, #c2007a);
+    --hover-bg: rgba(255, 255, 255, 0.08);
+    --current-bg: linear-gradient(180deg, #ff8ad4 0%, #e6007e 55%, #99005a 100%);
+    --current-shadow: 0 6px 14px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.45);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fg: #f1ecff;
+  --muted: #b3a9d6;
+  --bg: #0d0a1a;
+  --heading: #ffffff;
+  --accent: #ff5cc3;
+  --accent-2: #b8ff3b;
+  --border: #342a58;
+  --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M40 20 l3 9 l9 3 l-9 3 l-3 9 l-3 -9 l-9 -3 l9 -3 z'/%3E%3Cpath d='M180 60 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2 z'/%3E%3Cpath d='M120 170 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 z'/%3E%3Cpath d='M210 200 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 z'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #2a0a3d 0%, #10123a 45%, #062a3a 100%);
+  --card-bg: rgba(18, 14, 38, 0.84);
+  --card-border: 2px solid rgba(255, 255, 255, 0.14);
+  --card-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  --el-bg: rgba(255, 255, 255, 0.06);
+  --el-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --inset-shadow: inset 0 0 0 2px rgba(255, 92, 195, 0.18);
+  --hr: linear-gradient(90deg, #ff5cc3, #a78bfa, #22d3ee, #b8ff3b);
+  --code-bg: rgba(255, 92, 195, 0.14);
+  --pre-bg: rgba(6, 4, 14, 0.85);
+  --th-bg: linear-gradient(180deg, #ff5cc3, #c2007a);
+  --hover-bg: rgba(255, 255, 255, 0.08);
+  --current-bg: linear-gradient(180deg, #ff8ad4 0%, #e6007e 55%, #99005a 100%);
+  --current-shadow: 0 6px 14px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* ページの地と、本文・ナビのカード */
+body { line-height: 1.75; background: var(--page-bg); background-attachment: fixed; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+main {
+  margin: 24px auto 48px;
+  padding: 40px 44px;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: var(--card-filter);
+  backdrop-filter: var(--card-filter);
+}
+body > nav {
+  margin: 16px 16px 0;
+  padding: 16px 20px;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: var(--card-filter);
+  backdrop-filter: var(--card-filter);
+}
+@media (max-width: 640px) {
+  main { margin: 12px; padding: 28px 20px; }
+}
+@media (min-width: 960px) {
+  body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }
+  body > nav { top: 16px; height: calc(100vh - 32px); margin: 16px 0 16px 16px; padding: 28px 20px; border: var(--card-border); }
+  body:has(> nav) > main { width: auto; margin: 16px 24px 48px; max-width: var(--content-width); justify-self: center; }
+}
+
+/* 見出し */
+main :is(h1, h2, h3, h4) { font-family: var(--heading-font); font-weight: var(--heading-weight); line-height: 1.35; letter-spacing: 0.01em; color: var(--heading); }
+main h1 { margin: 0 0 1em; font-size: 2.2em; }
+main h2 { margin: 2.2em 0 0.7em; font-size: 1.5em; }
+main h3 { margin: 1.8em 0 0.5em; font-size: 1.2em; color: var(--accent); }
+main h4 { margin: 1.5em 0 0.4em; font-size: 1em; color: var(--muted); }
+
+/* リンク */
+main a { color: var(--accent); font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.2em; text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+main a:hover { color: var(--accent-2); text-decoration-color: var(--accent-2); }
+
+/* 本文の部品(角を丸く、テーマの質感で) */
+main strong { color: var(--heading); }
+main blockquote { margin: 1.4em 0; padding: 0.8em 1.2em; color: var(--muted); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
+main hr { margin: 2.5em 0; height: 3px; border: 0; border-radius: 3px; background: var(--hr); }
+main kbd { padding: 0.15em 0.5em; font-size: 0.85em; background: var(--el-bg); border: 0; border-radius: 6px; box-shadow: var(--el-shadow); }
+main img { border-radius: var(--radius); }
+main code { padding: 2px 6px; background: var(--code-bg); border-radius: 6px; }
+main pre { padding: 16px 20px; background: var(--pre-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); line-height: 1.6; }
+main pre code { background: none; padding: 0; }
+main table { border-collapse: separate; border-spacing: 0; overflow: hidden; font-size: 0.95em; background: var(--el-bg); border-radius: var(--radius); box-shadow: var(--el-shadow); }
+main th, main td { border: 0; border-bottom: 1px solid var(--border); padding: 10px 14px; }
+main tr:last-child td { border-bottom: 0; }
+main th { text-align: left; color: var(--th-fg); background: var(--th-bg); }
+
+/* 注意書き・目次・前後のページ */
+.markdown-alert { border: 0; border-radius: var(--radius); background: color-mix(in srgb, var(--alert-color) 12%, var(--el-bg)); box-shadow: var(--el-shadow); }
+.tsuzuri-toc { background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
+.tsuzuri-toc > p { color: var(--accent); }
+.tsuzuri-pager { border-top: 0; }
+main .tsuzuri-pager a { color: var(--heading); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--el-shadow); transition: transform 0.15s; }
+main .tsuzuri-pager a:hover { transform: translateY(-2px); color: var(--accent); }
+.tsuzuri-pager span { color: var(--accent); opacity: 1; }
+.tsuzuri-updated { opacity: 1; color: var(--muted); }
+
+/* ナビ */
+.tsuzuri-nav-head > p { font-weight: 800; color: var(--heading); }
+body > nav a { margin: 2px 0; padding: 6px 12px; color: var(--fg); border-radius: var(--pill); }
+body > nav a:hover { color: var(--accent); background: var(--hover-bg); text-decoration: none; }
+body > nav a[aria-current="page"] { color: var(--current-fg); background: var(--current-bg); box-shadow: var(--current-shadow); font-weight: 700; }
+body > nav ul ul { border-left: 2px solid var(--border); }
+.tsuzuri-search input { padding: 9px 16px; background: var(--el-bg); border: 0; border-radius: var(--pill); box-shadow: var(--inset-shadow); }
+.tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
+
+/* 見出し: クロームのように光る文字 */
+main h1 {
+  width: fit-content;
+  font-style: italic;
+  background: linear-gradient(180deg, #eef0ff 0%, #a9abc6 42%, #3d3e5a 50%, #8f91b0 64%, #e6e8ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 1.5px #5b2ee6;
+  filter: drop-shadow(3px 3px 0 rgba(230, 0, 126, 0.45));
+}
+main h2::before { content: "✦"; margin-right: 0.4em; color: var(--accent); }
