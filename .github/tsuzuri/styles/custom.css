@@ -2,7 +2,7 @@
  * Tsuzuri サイト用の独自スタイル(STYLE_FILE)
  *
  * THEME=none(基礎CSSのみ)の上に、ポップで親しみやすい和の見た目を作る。
- *   - 丸みのあるカード・やわらかい影・藍と朱(Tsuzuri のアイコンの色)・青海波の地紋
+ *   - 丸みのあるカード・やわらかい影・藍と朱(Tsuzuri のアイコンの色)・七宝(しっぽう)の地紋
  *   - ライト/ダークモードの両方に対応(OSの設定に追従)
  *
  * テーマの見本ページ(docs/gallery/*.md)は、それぞれのテーマの見た目をそのまま見せるため、
@@ -25,7 +25,8 @@
   --tint: #e3edf0;             /* 藍白(藍の淡い色) */
   --gradient: linear-gradient(135deg, #16394a 0%, #1d4e64 45%, #2f7a92 100%);   /* 藍 → 浅葱 */
   --gradient-shu: linear-gradient(135deg, #b33823 0%, #d4572e 100%);            /* 朱 */
-  --wave: color-mix(in srgb, #1d4e64 5%, var(--bg));                            /* 青海波の線 */
+  /* 七宝(円がつながる柄。縁が続く意味)の地紋。線の色は画像の中に書くので、ライト/ダークで別の画像にする */
+  --shippo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg fill='none' stroke='%231d4e64' stroke-opacity='0.13' stroke-width='1.2'%3E%3Ccircle cx='0' cy='0' r='22'/%3E%3Ccircle cx='44' cy='0' r='22'/%3E%3Ccircle cx='0' cy='44' r='22'/%3E%3Ccircle cx='44' cy='44' r='22'/%3E%3Ccircle cx='22' cy='22' r='22'/%3E%3C/g%3E%3C/svg%3E");
   --code-bg: #f3e6dc;
   --code-fg: #a2321f;
   --pre-bg: #172a33;           /* 藍墨 */
@@ -59,7 +60,7 @@
     --tint: #1f3a46;
     --gradient: linear-gradient(135deg, #2f7a92 0%, #6fa8c2 100%);
     --gradient-shu: linear-gradient(135deg, #d4572e 0%, #e8794f 100%);
-    --wave: color-mix(in srgb, #6fa8c2 6%, var(--bg));
+    --shippo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg fill='none' stroke='%236fa8c2' stroke-opacity='0.09' stroke-width='1.2'%3E%3Ccircle cx='0' cy='0' r='22'/%3E%3Ccircle cx='44' cy='0' r='22'/%3E%3Ccircle cx='0' cy='44' r='22'/%3E%3Ccircle cx='44' cy='44' r='22'/%3E%3Ccircle cx='22' cy='22' r='22'/%3E%3C/g%3E%3C/svg%3E");
     --code-bg: #2a2a2c;
     --code-fg: #f0a07e;
     --pre-bg: #0b1418;
@@ -86,7 +87,7 @@
   --tint: #1f3a46;
   --gradient: linear-gradient(135deg, #2f7a92 0%, #6fa8c2 100%);
   --gradient-shu: linear-gradient(135deg, #d4572e 0%, #e8794f 100%);
-  --wave: color-mix(in srgb, #6fa8c2 6%, var(--bg));
+  --shippo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg fill='none' stroke='%236fa8c2' stroke-opacity='0.09' stroke-width='1.2'%3E%3Ccircle cx='0' cy='0' r='22'/%3E%3Ccircle cx='44' cy='0' r='22'/%3E%3Ccircle cx='0' cy='44' r='22'/%3E%3Ccircle cx='44' cy='44' r='22'/%3E%3Ccircle cx='22' cy='22' r='22'/%3E%3C/g%3E%3C/svg%3E");
   --code-bg: #2a2a2c;
   --code-fg: #f0a07e;
   --pre-bg: #0b1418;
@@ -103,15 +104,10 @@
 body {
   line-height: 1.8;
   letter-spacing: 0.02em;
-  /* 青海波の地紋 */
+  /* 七宝の地紋 */
   background-color: var(--bg);
-  background-image:
-    radial-gradient(circle at 100% 150%, var(--bg) 24%, var(--wave) 24%, var(--wave) 28%, var(--bg) 28%, var(--bg) 36%, var(--wave) 36%, var(--wave) 40%, transparent 40%, transparent),
-    radial-gradient(circle at 0 150%, var(--bg) 24%, var(--wave) 24%, var(--wave) 28%, var(--bg) 28%, var(--bg) 36%, var(--wave) 36%, var(--wave) 40%, transparent 40%, transparent),
-    radial-gradient(circle at 50% 100%, var(--wave) 10%, var(--bg) 10%, var(--bg) 23%, var(--wave) 23%, var(--wave) 30%, var(--bg) 30%, var(--bg) 43%, var(--wave) 43%, var(--wave) 50%, var(--bg) 50%, var(--bg) 63%, var(--wave) 63%, var(--wave) 71%, transparent 71%, transparent),
-    radial-gradient(circle at 100% 50%, var(--wave) 5%, var(--bg) 5%, var(--bg) 15%, var(--wave) 15%, var(--wave) 20%, var(--bg) 20%, var(--bg) 29%, var(--wave) 29%, var(--wave) 34%, var(--bg) 34%, var(--bg) 44%, var(--wave) 44%, var(--wave) 49%, transparent 49%, transparent),
-    radial-gradient(circle at 0 50%, var(--wave) 5%, var(--bg) 5%, var(--bg) 15%, var(--wave) 15%, var(--wave) 20%, var(--bg) 20%, var(--bg) 29%, var(--wave) 29%, var(--wave) 34%, var(--bg) 34%, var(--bg) 44%, var(--wave) 44%, var(--wave) 49%, transparent 49%, transparent);
-  background-size: 80px 40px;
+  background-image: var(--shippo);
+  background-size: 44px 44px;
   -webkit-font-smoothing: antialiased;
 }
 ::selection { background: color-mix(in srgb, var(--accent-2) 30%, transparent); }

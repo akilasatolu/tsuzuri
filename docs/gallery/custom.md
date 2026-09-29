@@ -6,7 +6,7 @@ description: THEME=noneと独自CSS(STYLE_FILE)だけで作った、このサイ
 # 独自CSSの例(このサイト)
 
 組み込みテーマを使わず(`THEME=none`)、`STYLE_FILE`の独自CSSだけで作った見た目です。
-このサイト全体がこの見た目になっています。Tsuzuriのロゴと同じ藍と朱を軸に、生成りの地に青海波の地紋を合わせた、
+このサイト全体がこの見た目になっています。Tsuzuriのロゴと同じ藍と朱を軸に、生成りの地に七宝(円がつながる柄。縁が続く意味)の地紋を合わせた、
 丸みのあるカードの和風のデザインです。
 
 使っているCSSは[custom.css](https://github.com/akilasatolu/tsuzuri/blob/docs/.github/tsuzuri/styles/custom.css)です。
