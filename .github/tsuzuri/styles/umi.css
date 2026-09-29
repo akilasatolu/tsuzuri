@@ -1,104 +1,104 @@
 /*
  * umi.css (海)
- * 江戸らしい海をテーマにしたスタイル。藍染めの藍と浅葱色(あさぎいろ)、胡粉(ごふん)の白を使い、
- * 北斎の浮世絵のような渦を巻く波頭と、波の上を飛ぶ千鳥(波千鳥)を見出しまわりに描く。
- * ページの下のほうには、うねる波の帯を淡く引く。ダーク表示は夜の海。ライト/ダーク表示に対応する。
+ * 葛飾北斎の「神奈川沖浪裏」の海をイメージしたスタイル。古い版画の刷り紙のような地に、北斎の「ベロ藍」を主役にし、
+ * 淡い藍と胡粉の白を添える。ページの右下に、爪のようなしぶきを立てる大波と遠くの富士を淡く描き、
+ * h1 の下と区切り線に砕ける波頭、h2 に小さな波頭の印を付ける。ダーク表示は夜の海。ライト/ダーク表示に対応する。
  */
 :root {
   color-scheme: light dark;
-  --fg: #1b2a36;             /* 墨がかった藍 */
-  --muted: #56666f;
-  --bg: #f4f5f1;             /* 胡粉の白 */
-  --surface: #e9eeec;
-  --border: #cfd9d8;
-  --accent: #1f3f66;         /* 藍染めの藍 */
-  --asagi: #2f8aa0;          /* 浅葱色 */
-  --accent-soft: #e0ebee;
-  --code-bg: #e8eeec;
+  --fg: #1c2433;             /* 墨がかった藍 */
+  --muted: #5b6270;
+  --bg: #f2ead8;             /* 古い版画の刷り紙 */
+  --surface: #e9dfc9;
+  --border: #d8cbb0;
+  --accent: #1b3f73;         /* 北斎のベロ藍 */
+  --asagi: #3f6f9e;          /* 淡い藍(見出し h3 など) */
+  --accent-soft: #e2e2d6;
+  --code-bg: #ebe2cd;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
   --heading-font: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", "BIZ UDPMincho", serif;
   --content-width: 820px;
   /* 絵柄(画像の中に色を書くので、ライト/ダークで別の画像にする)
-     - 波頭: 北斎のように渦を巻いて砕ける波。しぶきの白い点つき
-     - 千鳥: 波の上を飛ぶ千鳥
-     - 波の帯: ページの下に引く、うねる波 */
-  --nami: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='16' viewBox='0 0 48 16'%3E%3Cpath d='M0 14 Q12 14 16 8 Q19 2 25 3 Q21 5 22 9 Q25 14 48 14' fill='none' stroke='%231f3f66' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='27' cy='5' r='1.3' fill='%232f8aa0'/%3E%3Ccircle cx='30' cy='7.5' r='1' fill='%232f8aa0'/%3E%3C/svg%3E");
-  --chidori: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='16' viewBox='0 0 24 16'%3E%3Cpath d='M2 11 Q7 3 12 8 Q16 3 22 5 Q17 8 13 11 Q7 15 2 11 Z' fill='%231f3f66'/%3E%3Ccircle cx='17.5' cy='5.8' r='0.9' fill='%23f4f5f1'/%3E%3C/svg%3E");
-  --uneri: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' viewBox='0 0 120 40'%3E%3Cpath d='M0 26 Q30 8 60 26 T120 26' fill='none' stroke='%232f8aa0' stroke-opacity='0.18' stroke-width='2'/%3E%3Cpath d='M0 36 Q30 18 60 36 T120 36' fill='none' stroke='%231f3f66' stroke-opacity='0.14' stroke-width='2'/%3E%3C/svg%3E");
+     - 波頭: 巻き上がって砕ける波と、爪のようなしぶき
+     - 小さな波頭: h2 の印
+     - 大波: ページの右下の、神奈川沖浪裏のような大波と遠くの富士 */
+  --nami: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='18' viewBox='0 0 56 18'%3E%3Cpath d='M0 16 C10 16 14 12 17 7 C20 2 26 1 30 3 C27 4 25 6 26 9 C27 13 33 16 56 16' fill='none' stroke='%231b3f73' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M30 3 l3 -2 M31 5 l4 -1.5 M31 7.5 l3.5 0.5' stroke='%237ea7c9' stroke-width='1.3' stroke-linecap='round'/%3E%3Ccircle cx='36' cy='3' r='1' fill='%23fbf7ee' stroke='%237ea7c9' stroke-width='0.6'/%3E%3C/svg%3E");
+  --crest: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='18' viewBox='0 0 26 18'%3E%3Cpath d='M1 16 C6 16 8 12 10 8 C12 3 17 1 21 3 C18 4 16 7 17 10 C18 13 21 15 25 16 Z' fill='%231b3f73'/%3E%3Cpath d='M21 3 l2.5 -2 M22 5 l3 -1' stroke='%237ea7c9' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");
+  --great-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='240' viewBox='0 0 460 240'%3E%3Cg opacity='0.13'%3E%3Cpath d='M150 240 L205 170 L260 240 Z' fill='%238aa4bf'/%3E%3Cpath d='M193 185 L205 170 L217 185 L211 182 L205 187 L199 182 Z' fill='%23fbf7ee'/%3E%3Cpath d='M0 240 L0 200 C40 170 90 158 130 170 C175 184 205 150 215 110 C225 66 270 36 318 42 C360 48 388 76 380 104 C368 90 346 84 330 92 C348 102 352 124 336 136 C318 150 290 138 286 118 C278 150 292 186 330 208 C370 230 420 232 460 228 L460 240 Z' fill='%231b3f73'/%3E%3Cpath d='M318 42 C350 44 378 64 382 92' fill='none' stroke='%23fbf7ee' stroke-width='4'/%3E%3Cpath d='M300 44 l-6 -12 M318 42 l-2 -14 M336 46 l4 -13 M352 54 l9 -10 M366 66 l12 -6 M376 80 l13 -2' stroke='%237ea7c9' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='292' cy='28' r='3' fill='%23fbf7ee'/%3E%3Ccircle cx='314' cy='24' r='3' fill='%23fbf7ee'/%3E%3Ccircle cx='342' cy='30' r='3' fill='%23fbf7ee'/%3E%3Ccircle cx='364' cy='40' r='3' fill='%23fbf7ee'/%3E%3Ccircle cx='386' cy='58' r='3' fill='%23fbf7ee'/%3E%3Cpath d='M0 226 C60 212 110 214 160 226 C210 238 260 222 300 214' fill='none' stroke='%237ea7c9' stroke-width='3'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* ダーク表示(夜の海): 深い藍の地に、月明かりの白波と明るい浅葱。OS がダークモードのとき(ライト表示に
-   切り替えたときを除く)と、ダーク表示に切り替えたとき */
+/* ダーク表示(夜の海): OS がダークモードのとき(ライト表示に切り替えたときを除く)と、ダーク表示に切り替えたとき */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --fg: #e6ecef;
-    --muted: #9aabb4;
-    --bg: #0d1826;
-    --surface: #15233a;
-    --border: #253754;
-    --accent: #8db8e8;
-    --asagi: #6cc7d9;
-    --accent-soft: #182c47;
-    --code-bg: #122033;
-    --nami: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='16' viewBox='0 0 48 16'%3E%3Cpath d='M0 14 Q12 14 16 8 Q19 2 25 3 Q21 5 22 9 Q25 14 48 14' fill='none' stroke='%238db8e8' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='27' cy='5' r='1.3' fill='%236cc7d9'/%3E%3Ccircle cx='30' cy='7.5' r='1' fill='%236cc7d9'/%3E%3C/svg%3E");
-    --chidori: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='16' viewBox='0 0 24 16'%3E%3Cpath d='M2 11 Q7 3 12 8 Q16 3 22 5 Q17 8 13 11 Q7 15 2 11 Z' fill='%23e6ecef'/%3E%3Ccircle cx='17.5' cy='5.8' r='0.9' fill='%230d1826'/%3E%3C/svg%3E");
-    --uneri: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' viewBox='0 0 120 40'%3E%3Cpath d='M0 26 Q30 8 60 26 T120 26' fill='none' stroke='%236cc7d9' stroke-opacity='0.16' stroke-width='2'/%3E%3Cpath d='M0 36 Q30 18 60 36 T120 36' fill='none' stroke='%238db8e8' stroke-opacity='0.12' stroke-width='2'/%3E%3C/svg%3E");
+    --fg: #e7ecef;
+    --muted: #9aabb6;
+    --bg: #0e1726;
+    --surface: #16223a;
+    --border: #26375a;
+    --accent: #9cc0e6;
+    --asagi: #7ea7c9;
+    --accent-soft: #19294a;
+    --code-bg: #132036;
+    --nami: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='18' viewBox='0 0 56 18'%3E%3Cpath d='M0 16 C10 16 14 12 17 7 C20 2 26 1 30 3 C27 4 25 6 26 9 C27 13 33 16 56 16' fill='none' stroke='%239cc0e6' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M30 3 l3 -2 M31 5 l4 -1.5 M31 7.5 l3.5 0.5' stroke='%235d86ad' stroke-width='1.3' stroke-linecap='round'/%3E%3Ccircle cx='36' cy='3' r='1' fill='%23e9eef3' stroke='%235d86ad' stroke-width='0.6'/%3E%3C/svg%3E");
+    --crest: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='18' viewBox='0 0 26 18'%3E%3Cpath d='M1 16 C6 16 8 12 10 8 C12 3 17 1 21 3 C18 4 16 7 17 10 C18 13 21 15 25 16 Z' fill='%239cc0e6'/%3E%3Cpath d='M21 3 l2.5 -2 M22 5 l3 -1' stroke='%235d86ad' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");
+    --great-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='240' viewBox='0 0 460 240'%3E%3Cg opacity='0.16'%3E%3Cpath d='M150 240 L205 170 L260 240 Z' fill='%234d6480'/%3E%3Cpath d='M193 185 L205 170 L217 185 L211 182 L205 187 L199 182 Z' fill='%23e9eef3'/%3E%3Cpath d='M0 240 L0 200 C40 170 90 158 130 170 C175 184 205 150 215 110 C225 66 270 36 318 42 C360 48 388 76 380 104 C368 90 346 84 330 92 C348 102 352 124 336 136 C318 150 290 138 286 118 C278 150 292 186 330 208 C370 230 420 232 460 228 L460 240 Z' fill='%239cc0e6'/%3E%3Cpath d='M318 42 C350 44 378 64 382 92' fill='none' stroke='%23e9eef3' stroke-width='4'/%3E%3Cpath d='M300 44 l-6 -12 M318 42 l-2 -14 M336 46 l4 -13 M352 54 l9 -10 M366 66 l12 -6 M376 80 l13 -2' stroke='%235d86ad' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='292' cy='28' r='3' fill='%23e9eef3'/%3E%3Ccircle cx='314' cy='24' r='3' fill='%23e9eef3'/%3E%3Ccircle cx='342' cy='30' r='3' fill='%23e9eef3'/%3E%3Ccircle cx='364' cy='40' r='3' fill='%23e9eef3'/%3E%3Ccircle cx='386' cy='58' r='3' fill='%23e9eef3'/%3E%3Cpath d='M0 226 C60 212 110 214 160 226 C210 238 260 222 300 214' fill='none' stroke='%235d86ad' stroke-width='3'/%3E%3C/g%3E%3C/svg%3E");
   }
 }
 :root[data-theme="dark"] {
-  --fg: #e6ecef;
-  --muted: #9aabb4;
-  --bg: #0d1826;
-  --surface: #15233a;
-  --border: #253754;
-  --accent: #8db8e8;
-  --asagi: #6cc7d9;
-  --accent-soft: #182c47;
-  --code-bg: #122033;
-  --nami: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='16' viewBox='0 0 48 16'%3E%3Cpath d='M0 14 Q12 14 16 8 Q19 2 25 3 Q21 5 22 9 Q25 14 48 14' fill='none' stroke='%238db8e8' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='27' cy='5' r='1.3' fill='%236cc7d9'/%3E%3Ccircle cx='30' cy='7.5' r='1' fill='%236cc7d9'/%3E%3C/svg%3E");
-  --chidori: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='16' viewBox='0 0 24 16'%3E%3Cpath d='M2 11 Q7 3 12 8 Q16 3 22 5 Q17 8 13 11 Q7 15 2 11 Z' fill='%23e6ecef'/%3E%3Ccircle cx='17.5' cy='5.8' r='0.9' fill='%230d1826'/%3E%3C/svg%3E");
-  --uneri: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' viewBox='0 0 120 40'%3E%3Cpath d='M0 26 Q30 8 60 26 T120 26' fill='none' stroke='%236cc7d9' stroke-opacity='0.16' stroke-width='2'/%3E%3Cpath d='M0 36 Q30 18 60 36 T120 36' fill='none' stroke='%238db8e8' stroke-opacity='0.12' stroke-width='2'/%3E%3C/svg%3E");
+  --fg: #e7ecef;
+  --muted: #9aabb6;
+  --bg: #0e1726;
+  --surface: #16223a;
+  --border: #26375a;
+  --accent: #9cc0e6;
+  --asagi: #7ea7c9;
+  --accent-soft: #19294a;
+  --code-bg: #132036;
+  --nami: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='18' viewBox='0 0 56 18'%3E%3Cpath d='M0 16 C10 16 14 12 17 7 C20 2 26 1 30 3 C27 4 25 6 26 9 C27 13 33 16 56 16' fill='none' stroke='%239cc0e6' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M30 3 l3 -2 M31 5 l4 -1.5 M31 7.5 l3.5 0.5' stroke='%235d86ad' stroke-width='1.3' stroke-linecap='round'/%3E%3Ccircle cx='36' cy='3' r='1' fill='%23e9eef3' stroke='%235d86ad' stroke-width='0.6'/%3E%3C/svg%3E");
+  --crest: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='18' viewBox='0 0 26 18'%3E%3Cpath d='M1 16 C6 16 8 12 10 8 C12 3 17 1 21 3 C18 4 16 7 17 10 C18 13 21 15 25 16 Z' fill='%239cc0e6'/%3E%3Cpath d='M21 3 l2.5 -2 M22 5 l3 -1' stroke='%235d86ad' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");
+  --great-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='240' viewBox='0 0 460 240'%3E%3Cg opacity='0.16'%3E%3Cpath d='M150 240 L205 170 L260 240 Z' fill='%234d6480'/%3E%3Cpath d='M193 185 L205 170 L217 185 L211 182 L205 187 L199 182 Z' fill='%23e9eef3'/%3E%3Cpath d='M0 240 L0 200 C40 170 90 158 130 170 C175 184 205 150 215 110 C225 66 270 36 318 42 C360 48 388 76 380 104 C368 90 346 84 330 92 C348 102 352 124 336 136 C318 150 290 138 286 118 C278 150 292 186 330 208 C370 230 420 232 460 228 L460 240 Z' fill='%239cc0e6'/%3E%3Cpath d='M318 42 C350 44 378 64 382 92' fill='none' stroke='%23e9eef3' stroke-width='4'/%3E%3Cpath d='M300 44 l-6 -12 M318 42 l-2 -14 M336 46 l4 -13 M352 54 l9 -10 M366 66 l12 -6 M376 80 l13 -2' stroke='%235d86ad' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='292' cy='28' r='3' fill='%23e9eef3'/%3E%3Ccircle cx='314' cy='24' r='3' fill='%23e9eef3'/%3E%3Ccircle cx='342' cy='30' r='3' fill='%23e9eef3'/%3E%3Ccircle cx='364' cy='40' r='3' fill='%23e9eef3'/%3E%3Ccircle cx='386' cy='58' r='3' fill='%23e9eef3'/%3E%3Cpath d='M0 226 C60 212 110 214 160 226 C210 238 260 222 300 214' fill='none' stroke='%235d86ad' stroke-width='3'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* 胡粉の白の地。ページの下のほうに、うねる波の帯を淡く引く */
+/* 刷り紙の地。右下に大波と富士(スクロールしても同じ位置に見える) */
 body {
   line-height: 1.85;
   letter-spacing: 0.02em;
   background-color: var(--bg);
-  background-image: var(--uneri), var(--uneri);
-  background-size: 120px 40px, 180px 60px;
-  background-position: left bottom, 40px calc(100% - 26px);
-  background-repeat: repeat-x, repeat-x;
+  background-image: var(--great-wave);
+  background-position: right -20px bottom -10px;
+  background-size: 460px 240px;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   min-height: 100vh;
 }
 
-/* 見出し: 明朝体の藍。h1 の下に渦を巻く波頭の帯、h2 に千鳥の印、h3 は浅葱色 */
+/* 見出し: 明朝体のベロ藍。h1 の下に砕ける波頭の帯、h2 に小さな波頭の印、h3 は淡い藍 */
 main :is(h1, h2, h3, h4) { font-family: var(--heading-font); font-weight: 700; line-height: 1.45; letter-spacing: 0.05em; color: var(--accent); }
 main h1 { margin: 0 0 1.3em; font-size: 2em; }
-main h1::after { content: ""; display: block; height: 16px; margin-top: 0.35em; background: var(--nami) repeat-x left center; }
+main h1::after { content: ""; display: block; height: 18px; margin-top: 0.35em; background: var(--nami) repeat-x left center; }
 main h2 { margin: 2.4em 0 0.8em; padding-bottom: 0.3em; font-size: 1.4em; border-bottom: 1px solid var(--border); }
-main h2::before { content: ""; display: inline-block; width: 24px; height: 16px; margin-right: 0.5em; vertical-align: -0.05em; background: var(--chidori) no-repeat center; }
+main h2::before { content: ""; display: inline-block; width: 26px; height: 18px; margin-right: 0.5em; vertical-align: -0.1em; background: var(--crest) no-repeat center; }
 main h3 { margin: 2em 0 0.6em; font-size: 1.15em; color: var(--asagi); }
 main h4 { margin: 1.6em 0 0.4em; font-size: 1em; color: var(--muted); }
 
-/* リンク: 藍。カーソルを当てると浅葱色 */
+/* リンク: ベロ藍 */
 main a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); text-underline-offset: 0.2em; }
 main a:hover { color: var(--asagi); text-decoration-color: var(--asagi); }
 
-main strong { color: var(--fg); background: linear-gradient(transparent 65%, color-mix(in srgb, var(--asagi) 22%, transparent) 65%); }
-main blockquote { margin: 1.4em 0; padding: 0.5em 1.2em; color: var(--muted); background: var(--accent-soft); border-left: 4px solid var(--asagi); }
-/* 区切り線: 波頭の帯 */
-main hr { margin: 2.5em 0; height: 16px; border: 0; background: var(--nami) repeat-x left center; opacity: 0.55; }
+main strong { color: var(--fg); background: linear-gradient(transparent 65%, color-mix(in srgb, var(--asagi) 20%, transparent) 65%); }
+main blockquote { margin: 1.4em 0; padding: 0.5em 1.2em; color: var(--muted); background: var(--accent-soft); border-left: 4px solid var(--accent); }
+/* 区切り線: 砕ける波頭の帯 */
+main hr { margin: 2.5em 0; height: 18px; border: 0; background: var(--nami) repeat-x left center; opacity: 0.6; }
 main kbd { padding: 0.1em 0.45em; font-size: 0.85em; background: var(--bg); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 3px; }
-main img { border-radius: 4px; }
+main img { border-radius: 2px; }
 
-/* コード・表: 表の見出し行は藍染め */
+/* コード・表: 表の見出し行はベロ藍 */
 main pre { border: 1px solid var(--border); border-top: 3px solid var(--accent); border-radius: 2px; line-height: 1.6; }
-main table { font-size: 0.95em; }
+main table { font-size: 0.95em; background: color-mix(in srgb, var(--bg) 85%, transparent); }
 main th { text-align: left; font-family: var(--heading-font); font-weight: 700; color: var(--bg); background: var(--accent); border-color: var(--accent); }
 main th, main td { border-color: var(--border); padding: 8px 12px; }
-main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--accent-soft) 60%, transparent); }
+main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface) 60%, transparent); }
 
 /* ナビ・目次・前後のページ */
 body > nav a { padding: 4px 10px; color: var(--fg); border-radius: 2px; }
@@ -107,5 +107,5 @@ body > nav a[aria-current="page"] { color: var(--bg); background: var(--accent);
 .tsuzuri-nav-head > p { font-family: var(--heading-font); font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
 .tsuzuri-toc { background: var(--surface); border-color: var(--border); border-radius: 2px; }
 .tsuzuri-toc > p { color: var(--asagi); }
-main .tsuzuri-pager a { border-radius: 2px; }
-main .tsuzuri-pager a:hover { border-color: var(--asagi); background: var(--surface); }
+main .tsuzuri-pager a { border-radius: 2px; background: color-mix(in srgb, var(--bg) 85%, transparent); }
+main .tsuzuri-pager a:hover { border-color: var(--accent); background: var(--surface); }

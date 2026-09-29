@@ -1,125 +1,128 @@
 /*
  * wa.css (和・既定)
- * 浮世絵をテーマにした、江戸らしい標準スタイル。錦絵の刷り紙のような生成りの地に、北斎の「ベロ藍」と
- * 江戸の紅を差し色にする。見出しは明朝体で、h1 の下に青海波(せいがいは)の帯、h2 は錦絵の題箋(だいせん)の
- * ような枠に入れる。ページの上には霞(かすみ)のたなびく帯を淡く引く。
- * 飾りは見出しまわりに絞り、本文は落ち着いた地で読みやすくしている。ライト/ダーク表示に対応する。
+ * 墨絵と江戸をテーマにした標準スタイル。和紙の地に墨一色を基本にし、差し色は江戸の朱を落款(はんこ)として
+ * 少しだけ使う。見出しは明朝体で、h1 の下に筆で払った墨の線と朱の落款、h2 の左に縦の筆跡を入れる。
+ * 飾りは筆跡と落款に絞り、シンプルで読みやすく、それでいて印象に残る紙面にする。ライト/ダーク表示に対応する。
  */
 :root {
   color-scheme: light dark;
-  --fg: #2a2520;             /* 墨 */
-  --muted: #6a5f55;
-  --bg: #f7f0e1;             /* 刷り紙の生成り */
-  --surface: #efe5d1;        /* 一段濃い生成り(表の見出し・目次など) */
-  --border: #dfd1b8;
-  --accent: #1f4f7a;         /* ベロ藍(北斎の藍) */
-  --beni: #b8342b;           /* 江戸の紅 */
-  --ochre: #b8892f;          /* 黄土 */
-  --accent-soft: #e3e8ea;    /* 淡い藍(今いるページ・引用の背景など) */
-  --wave: color-mix(in srgb, var(--accent) 55%, var(--bg));
-  --kasumi: rgba(184, 52, 43, 0.045);
-  --code-bg: #efe6d4;
+  --fg: #1f1d1a;             /* 墨 */
+  --muted: #69635a;          /* 薄墨 */
+  --bg: #f7f3ea;             /* 和紙 */
+  --surface: #eee8dc;        /* 一段濃い和紙(表・目次・コードなど) */
+  --border: #ddd4c4;
+  --ink: #1f1d1a;            /* 筆跡の墨 */
+  --ink-fade: rgba(31, 29, 26, 0); /* 筆がかすれて消えるところ */
+  --shu: #b8342a;            /* 江戸の朱(落款) */
+  --accent: #1f1d1a;         /* リンクは墨の文字に朱の下線 */
+  --code-bg: #efe9dd;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
   --heading-font: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", "BIZ UDPMincho", serif;
-  --content-width: 820px;
+  --content-width: 800px;
+  --wash: rgba(31, 29, 26, 0.05); /* 墨のにじみ */
 }
 
-/* ダーク表示(江戸の夜): 藍の夜空に、生成りの文字と明るくした藍・紅。OS がダークモードのとき(ライト表示に
-   切り替えたときを除く)と、ダーク表示に切り替えたとき */
+/* ダーク表示(墨の夜): 墨の地に、和紙色の文字と薄墨の筆跡。OS がダークモードのとき(ライト表示に切り替えたときを
+   除く)と、ダーク表示に切り替えたとき */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --fg: #efe6d4;
-    --muted: #aa9f8f;
-    --bg: #11161f;
-    --surface: #1a2130;
-    --border: #2c3547;
-    --accent: #7fa9d6;
-    --beni: #e57264;
-    --ochre: #d6ae5c;
-    --accent-soft: #1d2a3d;
-    --kasumi: rgba(229, 114, 100, 0.04);
-    --code-bg: #182030;
+    --fg: #ece6da;
+    --muted: #a39c90;
+    --bg: #171614;
+    --surface: #211f1c;
+    --border: #36332e;
+    --ink: #ece6da;
+    --ink-fade: rgba(236, 230, 218, 0);
+    --shu: #e0765e;
+    --accent: #ece6da;
+    --code-bg: #1f1d1a;
+    --wash: rgba(236, 230, 218, 0.035);
   }
 }
 :root[data-theme="dark"] {
-  --fg: #efe6d4;
-  --muted: #aa9f8f;
-  --bg: #11161f;
-  --surface: #1a2130;
-  --border: #2c3547;
-  --accent: #7fa9d6;
-  --beni: #e57264;
-  --ochre: #d6ae5c;
-  --accent-soft: #1d2a3d;
-  --kasumi: rgba(229, 114, 100, 0.04);
-  --code-bg: #182030;
+  --fg: #ece6da;
+  --muted: #a39c90;
+  --bg: #171614;
+  --surface: #211f1c;
+  --border: #36332e;
+  --ink: #ece6da;
+  --ink-fade: rgba(236, 230, 218, 0);
+  --shu: #e0765e;
+  --accent: #ece6da;
+  --code-bg: #1f1d1a;
+  --wash: rgba(236, 230, 218, 0.035);
 }
 
-/* 刷り紙の地に、浮世絵の霞(角の丸い横長の帯)をページの上のほうへ淡く引く */
+/* 和紙の地。右上と左下に、墨がにじんだような淡いぼかし */
 body {
-  line-height: 1.85;
-  letter-spacing: 0.02em;
+  line-height: 1.9;
+  letter-spacing: 0.03em;
   background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 38% 22px at 30% 38px, var(--kasumi) 55%, transparent 80%),
-    radial-gradient(ellipse 30% 18px at 82% 92px, var(--kasumi) 55%, transparent 80%),
-    radial-gradient(ellipse 26% 16px at 62% 16px, var(--kasumi) 55%, transparent 80%);
+    radial-gradient(ellipse 40% 26% at 100% 0%, var(--wash), transparent 70%),
+    radial-gradient(ellipse 45% 22% at 0% 100%, var(--wash), transparent 70%);
   background-repeat: no-repeat;
+  background-attachment: fixed;
   min-height: 100vh;
 }
 
-/* 見出し: 明朝体 */
-main :is(h1, h2, h3, h4) { font-family: var(--heading-font); font-weight: 700; line-height: 1.45; letter-spacing: 0.05em; }
-main h1 { margin: 0 0 1.3em; font-size: 2em; color: var(--fg); }
-/* h1 の下: 青海波(せいがいは)の帯 */
+/* 見出し: 明朝体の墨 */
+main :is(h1, h2, h3, h4) { font-family: var(--heading-font); font-weight: 600; line-height: 1.5; letter-spacing: 0.08em; color: var(--fg); }
+main h1 { margin: 0 0 1.4em; font-size: 2.1em; }
+/* h1 の下: 筆で払った墨の線(左が濃く、右へかすれる)と、その先に朱の落款 */
 main h1::after {
   content: "";
   display: block;
+  width: 9em;
   height: 14px;
   margin-top: 0.4em;
   background:
-    radial-gradient(circle at 50% 100%, transparent 5px, var(--wave) 5px 6.5px, transparent 6.5px 9px, var(--wave) 9px 10.5px, transparent 10.5px) 0 0 / 24px 14px repeat-x,
-    radial-gradient(circle at 50% 100%, transparent 5px, var(--wave) 5px 6.5px, transparent 6.5px 9px, var(--wave) 9px 10.5px, transparent 10.5px) 12px 7px / 24px 14px repeat-x;
-  border-bottom: 2px solid var(--accent);
+    linear-gradient(var(--shu), var(--shu)) right center / 12px 12px no-repeat,
+    linear-gradient(90deg, var(--ink) 0%, var(--ink) 35%, color-mix(in srgb, var(--ink) 55%, transparent) 70%, var(--ink-fade) 88%) left center / calc(100% - 20px) 5px no-repeat;
+  border-radius: 1px;
 }
-/* h2: 錦絵の題箋(だいせん)のような枠。左に紅の短冊 */
-main h2 {
-  margin: 2.4em 0 0.9em;
-  padding: 0.35em 0.8em;
-  font-size: 1.4em;
-  color: var(--accent);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-left: 6px solid var(--beni);
-  box-shadow: inset 0 0 0 3px var(--bg), inset 0 0 0 4px var(--border);
+/* h2: 左に縦の筆跡 */
+main h2 { position: relative; margin: 2.6em 0 0.9em; padding-left: 0.9em; font-size: 1.45em; }
+main h2::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  bottom: 0.15em;
+  width: 5px;
+  border-radius: 3px 2px 4px 1px / 40% 50% 60% 50%;
+  background: linear-gradient(180deg, var(--ink) 0%, var(--ink) 65%, var(--ink-fade) 100%);
 }
-main h3 { margin: 2em 0 0.6em; font-size: 1.18em; color: var(--beni); }
-main h3::before { content: "◆"; margin-right: 0.4em; font-size: 0.7em; color: var(--ochre); vertical-align: 0.15em; }
+/* h3: 朱の小さな角印 */
+main h3 { margin: 2em 0 0.6em; font-size: 1.18em; }
+main h3::before { content: ""; display: inline-block; width: 0.5em; height: 0.5em; margin-right: 0.55em; vertical-align: 0.12em; background: var(--shu); }
 main h4 { margin: 1.6em 0 0.4em; font-size: 1.02em; color: var(--muted); }
 
-/* リンク: ベロ藍。カーソルを当てると紅 */
-main a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); text-underline-offset: 0.2em; }
-main a:hover { color: var(--beni); text-decoration-color: var(--beni); }
+/* リンク: 墨の文字に朱の下線。カーソルを当てると朱 */
+main a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--shu) 70%, transparent); text-decoration-thickness: 1.5px; text-underline-offset: 0.25em; }
+main a:hover { color: var(--shu); text-decoration-color: var(--shu); }
 
-main strong { color: var(--fg); background: linear-gradient(transparent 65%, color-mix(in srgb, var(--ochre) 28%, transparent) 65%); }
-main blockquote { margin: 1.4em 0; padding: 0.5em 1.2em; color: var(--muted); background: var(--accent-soft); border-left: 4px solid var(--accent); }
-main hr { margin: 2.5em 0; height: 6px; border: 0; background: repeating-linear-gradient(90deg, var(--accent) 0 12px, transparent 12px 18px, var(--beni) 18px 24px, transparent 24px 30px); opacity: 0.5; }
+main strong { color: var(--fg); background: linear-gradient(transparent 68%, color-mix(in srgb, var(--ink) 12%, transparent) 68%); }
+main blockquote { margin: 1.5em 0; padding: 0.2em 1.3em; color: var(--muted); border-left: 2px solid var(--border); font-family: var(--heading-font); }
+/* 区切り線: 中央に向かって濃くなる、ひと筆の線 */
+main hr { margin: 3em auto; width: 40%; height: 3px; border: 0; border-radius: 2px; background: linear-gradient(90deg, var(--ink-fade), var(--ink) 50%, var(--ink-fade)); opacity: 0.55; }
 main kbd { padding: 0.1em 0.45em; font-size: 0.85em; background: var(--bg); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 3px; }
+main img { border-radius: 2px; }
 
-/* コード・表: 表の見出し行はベロ藍 */
-main pre { border: 1px solid var(--border); border-radius: 2px; line-height: 1.6; box-shadow: inset 0 0 0 3px var(--code-bg), inset 0 0 0 4px var(--border); }
+/* コード・表: 表の見出し行は墨 */
+main pre { border: 0; border-left: 3px solid var(--ink); border-radius: 0; line-height: 1.65; }
 main table { font-size: 0.95em; }
-main th { text-align: left; font-family: var(--heading-font); font-weight: 700; color: var(--bg); background: var(--accent); border-color: var(--accent); }
-main th, main td { border-color: var(--border); padding: 8px 12px; }
-main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface) 60%, transparent); }
+main th { text-align: left; font-family: var(--heading-font); font-weight: 600; letter-spacing: 0.06em; color: var(--bg); background: var(--ink); border-color: var(--ink); }
+main th, main td { border-left: 0; border-right: 0; border-color: var(--border); padding: 9px 12px; }
+main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface) 55%, transparent); }
 
 /* ナビ・目次・前後のページ */
-body > nav a { padding: 4px 10px; color: var(--fg); border-radius: 2px; }
-body > nav a:hover { color: var(--accent); background: var(--surface); text-decoration: none; }
-body > nav a[aria-current="page"] { color: var(--bg); background: var(--accent); font-weight: 600; box-shadow: inset 4px 0 0 var(--beni); }
-.tsuzuri-nav-head > p { font-family: var(--heading-font); font-weight: 700; font-size: 1.15em; letter-spacing: 0.08em; color: var(--accent); }
-.tsuzuri-toc { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; box-shadow: inset 0 0 0 3px var(--bg), inset 0 0 0 4px var(--border); }
-.tsuzuri-toc > p { color: var(--beni); }
-main .tsuzuri-pager a { border-radius: 2px; }
-main .tsuzuri-pager a:hover { border-color: var(--accent); background: var(--surface); }
+body > nav a { padding: 4px 10px; color: var(--fg); border-radius: 0; }
+body > nav a:hover { background: var(--surface); text-decoration: none; }
+body > nav a[aria-current="page"] { color: var(--bg); background: var(--ink); font-weight: 600; box-shadow: inset 4px 0 0 var(--shu); }
+.tsuzuri-nav-head > p { font-family: var(--heading-font); font-size: 1.15em; letter-spacing: 0.12em; }
+.tsuzuri-toc { background: transparent; border: 0; border-left: 2px solid var(--border); border-radius: 0; }
+.tsuzuri-toc > p { font-family: var(--heading-font); letter-spacing: 0.08em; }
+main .tsuzuri-pager a { border-radius: 0; }
+main .tsuzuri-pager a:hover { border-color: var(--ink); background: var(--surface); }
