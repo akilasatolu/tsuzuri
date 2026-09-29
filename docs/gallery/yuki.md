@@ -1,19 +1,19 @@
 ---
-title: 装飾なし(none)
-theme: none
+title: 雪(yuki)
+theme: yuki
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「装飾なし(none)」の見本ページ
+description: Tsuzuriの組み込みテーマ「雪(yuki)」の見本ページ
 ---
 
-# 装飾なし(none)
+# 雪(yuki)
 
-テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。
+雪の夜の静けさがテーマ。白・銀鼠・淡い藍。h2の印は雪輪、h1の下に細い銀の線、ページ全体にちらつく雪をまばらに散らす。ライト/ダークモードを自動で切り替える。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=none`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: none`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=yuki`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: yuki`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 金(kin)](kin.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 藤(fuji)](fuji.md) ・ [ギャラリー一覧](../gallery.md) ・ [金(kin) →](kin.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 金(kin)](kin.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 藤(fuji)](fuji.md) ・ [ギャラリー一覧](../gallery.md) ・ [金(kin) →](kin.md)

@@ -1,19 +1,19 @@
 ---
-title: 装飾なし(none)
-theme: none
+title: 金(kin)
+theme: kin
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「装飾なし(none)」の見本ページ
+description: Tsuzuriの組み込みテーマ「金(kin)」の見本ページ
 ---
 
-# 装飾なし(none)
+# 金(kin)
 
-テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。
+金屏風と金箔がテーマ。黒漆の地に金。ページの右上に金箔を散らし、h1の下と区切り線に雲取りの金の帯、h2の印は金の菱。常にダーク表示。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=none`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: none`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=kin`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: kin`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 金(kin)](kin.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 雪(yuki)](yuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 金(kin)](kin.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 雪(yuki)](yuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)

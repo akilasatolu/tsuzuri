@@ -13,7 +13,7 @@ description: Tsuzuriの組み込みテーマ「灯(akari)」の見本ページ
 1ページだけ使う場合は、そのページのfrontmatterに`theme: akari`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 月(tsuki)](tsuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [海(umi) →](umi.md)
+[← 月(tsuki)](tsuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [竹(take) →](take.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 月(tsuki)](tsuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [海(umi) →](umi.md)
+[← 月(tsuki)](tsuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [竹(take) →](take.md)

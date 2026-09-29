@@ -1,19 +1,19 @@
 ---
-title: 装飾なし(none)
-theme: none
+title: 竹(take)
+theme: take
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「装飾なし(none)」の見本ページ
+description: Tsuzuriの組み込みテーマ「竹(take)」の見本ページ
 ---
 
-# 装飾なし(none)
+# 竹(take)
 
-テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。
+竹林がテーマ。淡い若竹色がかった地に、深緑と若竹色。h1の下に節のある竹の帯、h2の左に節のある竹の幹、ページの右上に竹の葉の影。ライト/ダークモードを自動で切り替える。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=none`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: none`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=take`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: take`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 金(kin)](kin.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [紅葉(momiji) →](momiji.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 金(kin)](kin.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [紅葉(momiji) →](momiji.md)

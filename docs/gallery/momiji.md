@@ -1,19 +1,19 @@
 ---
-title: 装飾なし(none)
-theme: none
+title: 紅葉(momiji)
+theme: momiji
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「装飾なし(none)」の見本ページ
+description: Tsuzuriの組み込みテーマ「紅葉(momiji)」の見本ページ
 ---
 
-# 装飾なし(none)
+# 紅葉(momiji)
 
-テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。
+秋の庭園がテーマ。生成りの地に紅葉の紅・橙・黄金。h2の印は紅葉の葉、h1の下に紅から黄金へ移る帯、ページの右上に散る紅葉。ライト/ダークモードを自動で切り替える。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=none`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: none`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=momiji`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: momiji`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 金(kin)](kin.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 竹(take)](take.md) ・ [ギャラリー一覧](../gallery.md) ・ [藤(fuji) →](fuji.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 金(kin)](kin.md) ・ [ギャラリー一覧](../gallery.md) ・ [独自CSSの例 →](custom.md)
+[← 竹(take)](take.md) ・ [ギャラリー一覧](../gallery.md) ・ [藤(fuji) →](fuji.md)

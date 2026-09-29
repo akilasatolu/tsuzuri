@@ -1,19 +1,19 @@
 ---
-title: 海(umi)
-theme: umi
+title: 藤(fuji)
+theme: fuji
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「海(umi)」の見本ページ
+description: Tsuzuriの組み込みテーマ「藤(fuji)」の見本ページ
 ---
 
-# 海(umi)
+# 藤(fuji)
 
-葛飾北斎の海がテーマ。古い版画の刷り紙の地に北斎のベロ藍。ページの右下に爪のようなしぶきを立てる大波と遠くの富士、見出しの下に砕ける波頭。ライト/ダークモードを自動で切り替える。
+藤棚がテーマ。淡い地に藤色と江戸紫のやわらかな紫。ページの上から藤の房が垂れ下がり、h1の下に藤の房の帯、h2の印は藤の房。ライト/ダークモードを自動で切り替える。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=umi`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: umi`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=fuji`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: fuji`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← 紅葉(momiji)](momiji.md) ・ [ギャラリー一覧](../gallery.md) ・ [雪(yuki) →](yuki.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← 紅葉(momiji)](momiji.md) ・ [ギャラリー一覧](../gallery.md) ・ [雪(yuki) →](yuki.md)

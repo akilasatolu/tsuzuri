@@ -64,7 +64,7 @@ Tsuzuriは元々「READMEをそのままGitHub Pagesにする」ことを目的�
   本文の最初の段落から自動で作られます)
 - `FAVICON_FILE`でブランドのfaviconを設定し、`CUSTOM_DOMAIN`で独自ドメインを割り当てる
   (詳細は[configuration.md](./configuration.md)、[deployment.md](./deployment.md))
-- `THEME`を`umi`(海)や`sakura`(桜)のようなブランドカラーに近いテーマに変更する。さらに作り込みたい
+- `THEME`を`take`(竹)や`sakura`(桜)のようなブランドカラーに近いテーマに変更する。さらに作り込みたい
   場合は、このサイトのように`THEME=none`と独自CSSで見た目を作る(詳細は[theming.md](./theming.md))
 - 「お知らせ」の過去記事のように、ナビに並べるほどではないページは`nav: false`にする
 
