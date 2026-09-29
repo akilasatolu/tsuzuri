@@ -1,16 +1,16 @@
 ---
-title: 藍(ai)
-theme: ai
+title: 海(umi)
+theme: umi
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「藍(ai)」の見本ページ
+description: Tsuzuriの組み込みテーマ「海(umi)」の見本ページ
 ---
 
-# 藍(ai)
+# 海(umi)
 
-深い藍色を基調にした落ち着いた配色。藍色の見出し(下線・左の帯)と、藍白の見出し行・行の色分けの表で、マニュアル・仕様書向け。
+海がテーマ。明るい浅瀬の地に、海の青と浅瀬の青緑。h1の下と区切り線に波の線。ダーク表示では深い海の底になる。ライト/ダークモードを自動で切り替える。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=ai`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: ai`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=umi`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: umi`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
 [← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [歌舞伎(kabuki) →](kabuki.md)

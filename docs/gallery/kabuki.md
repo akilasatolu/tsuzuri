@@ -13,7 +13,7 @@ description: Tsuzuriの組み込みテーマ「歌舞伎(kabuki)」の見本ペ�
 1ページだけ使う場合は、そのページのfrontmatterに`theme: kabuki`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 藍(ai)](ai.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← 海(umi)](umi.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 藍(ai)](ai.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← 海(umi)](umi.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
