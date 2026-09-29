@@ -16,6 +16,23 @@
 
 ## [Unreleased]
 
+## [1.19.0] - 2026-09-30
+
+### Added
+
+- モダンなデザインの組み込みテーマを11個追加した。
+  - クレイ(`clay`): Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。パステルの地に紫と桃色。
+  - グレイン(`grainy`): Grainy Gradient。鮮やかな色が溶け合うグラデーションに、フィルムのようなざらつき。
+  - グラス(`glass`): Glassmorphism。色とりどりの光の地に、すりガラスのような半透明のカード。
+  - ニューモーフィズム(`neumorphism`): Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。
+  - マテリアル(`material`): Material Design 3 風。紫系の配色、角丸のカードと影、トーンのついたナビの選択。
+  - フロスト(`frosted`): Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青。
+  - リキッド(`liquid`): Liquid UI。しずくのような形のカード、揺れる印、水色から紫へ流れるグラデーション。
+  - レトロフューチャー(`retro`): Retrofuturism。80年代の夕焼けの空と光るグリッド、ネオンの差し色。常にダーク表示。
+  - Y2K(`y2k`): Y2K UI。パステルの虹色ときらめく星、クロームの見出し、つやのあるボタン。
+  - ピクセル(`pixel`): Pixel art。8ビットゲームのような太い枠と市松模様、ドットの影の見出し。
+  - 90年代(`nineties`): 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。
+
 ## [1.18.0] - 2026-09-30
 
 ### Changed
@@ -372,7 +389,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.18.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.19.0...HEAD
+[1.19.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.18.0...v1.19.0
 [1.18.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.17.0...v1.18.0
 [1.17.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.16.0...v1.17.0
 [1.16.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.15.0...v1.16.0

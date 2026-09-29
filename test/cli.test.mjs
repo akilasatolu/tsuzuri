@@ -560,7 +560,7 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
 
 test("THEME_CHOICES: 組み込みテーマの一覧", () => {
   const keys = THEME_CHOICES.map((c) => c.key);
-  assert.deepEqual(keys, ["wa", "sakura", "tsuki", "akari", "yuki", "none"]);
+  assert.deepEqual(keys, ["wa", "sakura", "tsuki", "akari", "yuki", "clay", "grainy", "glass", "neumorphism", "material", "frosted", "liquid", "retro", "y2k", "pixel", "nineties", "none"]);
   assert.ok(buildDocsPagesConfig({}).includes("tsuki(月)"));
 });
 

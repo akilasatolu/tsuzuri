@@ -48,6 +48,17 @@ export const THEME_CHOICES = [
   { key: "tsuki", label: "月(満月の夜がテーマ。夜空に満月と光の輪、月明かりの金色。常にダーク表示)" },
   { key: "akari", label: "灯(暗闇に灯る灯籠がテーマ。夜の闇に揺らぐ炎の灯り。常にダーク表示)" },
   { key: "yuki", label: "雪(雪の夜の静けさがテーマ。夜の地に雪の白と銀鼠、雪輪とちらつく雪。常にダーク表示)" },
+  { key: "clay", label: "クレイ(Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。パステルの地に紫と桃色)" },
+  { key: "grainy", label: "グレイン(Grainy Gradient。鮮やかな色が溶け合うグラデーションに、フィルムのようなざらつき)" },
+  { key: "glass", label: "グラス(Glassmorphism。色とりどりの光の地に、すりガラスのような半透明のカード)" },
+  { key: "neumorphism", label: "ニューモーフィズム(Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする)" },
+  { key: "material", label: "マテリアル(Material Design 3 風。紫系の配色、角丸のカードと影、トーンのついたナビの選択)" },
+  { key: "frosted", label: "フロスト(Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青)" },
+  { key: "liquid", label: "リキッド(Liquid UI。しずくのような形のカード、揺れる印、水色から紫へ流れるグラデーション)" },
+  { key: "retro", label: "レトロフューチャー(Retrofuturism。80年代の夕焼けの空と光るグリッド、ネオンの差し色。常にダーク表示)" },
+  { key: "y2k", label: "Y2K(Y2K UI。パステルの虹色ときらめく星、クロームの見出し、つやのあるボタン)" },
+  { key: "pixel", label: "ピクセル(Pixel art。8ビットゲームのような太い枠と市松模様、ドットの影の見出し)" },
+  { key: "nineties", label: "90年代(90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ)" },
   { key: "none", label: "装飾なし" },
 ];
 
@@ -236,6 +247,7 @@ ROOT_MD=${rootMd}
 OUT_DIR=_site
 
 # テーマ: wa(和) / sakura(桜) / tsuki(月) / akari(灯) / yuki(雪) / none(装飾なし)
+# モダン: clay(クレイ) / grainy(グレイン) / glass(グラス) / neumorphism(ニューモーフィズム) / material(マテリアル) / frosted(フロスト) / liquid(リキッド) / retro(レトロフューチャー) / y2k(Y2K) / pixel(ピクセル) / nineties(90年代)
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 
