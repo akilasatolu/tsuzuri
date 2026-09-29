@@ -16,6 +16,8 @@
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-09-29
+
 ### Changed
 
 - 組み込みの5つのテーマ(和・無地・墨・藍・朱)のデザインを、それぞれの特徴を強めつつ実用的に作り直した。
@@ -248,7 +250,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.4.0...v1.5.0
