@@ -1,5 +1,4 @@
 ---
-nav: false
 title: 和(wa)
 theme: wa
 styleFile: .github/tsuzuri/styles/plain.css

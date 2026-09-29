@@ -1,5 +1,4 @@
 ---
-nav: false
 title: 朱(shu)
 theme: shu
 styleFile: .github/tsuzuri/styles/plain.css

@@ -22,11 +22,9 @@ Tsuzuriの組み込みテーマの見た目を、実際に生成されたペー�
 このサイト全体は、`THEME=none`と独自CSS(`STYLE_FILE`)で作っています。テーマの各ページは、
 frontmatterの`theme`でそのページのテーマを指定し、`styleFile`で中身が空のCSSを指定して
 サイトの独自CSSを当てないようにしています(組み込みテーマだけの見た目になります)。
-見本のページはナビに並べないよう、`nav: false`も指定しています。
 
 ```yaml
 ---
-nav: false
 theme: wa
 styleFile: .github/tsuzuri/styles/plain.css
 ---

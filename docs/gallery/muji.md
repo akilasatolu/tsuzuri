@@ -1,5 +1,4 @@
 ---
-nav: false
 title: 無地(muji)
 theme: muji
 styleFile: .github/tsuzuri/styles/plain.css

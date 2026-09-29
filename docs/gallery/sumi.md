@@ -1,5 +1,4 @@
 ---
-nav: false
 title: 墨(sumi)
 theme: sumi
 styleFile: .github/tsuzuri/styles/plain.css
