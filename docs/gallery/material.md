@@ -1,19 +1,19 @@
 ---
-title: 雪(yuki)
-theme: yuki
+title: マテリアル(material)
+theme: material
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「雪(yuki)」の見本ページ
+description: Tsuzuriの組み込みテーマ「マテリアル(material)」の見本ページ
 ---
 
-# 雪(yuki)
+# マテリアル(material)
 
-雪の夜の静けさがテーマ。夜の地に、雪の白と銀鼠、淡い藍。h2の印は雪輪、h1の下に細い銀の線、ページ全体にちらつく雪をまばらに散らす。常にダーク表示。
+Material Design 3 風。紫系の配色、角丸のカードと影、トーンのついたナビの選択。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=yuki`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: yuki`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=material`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: material`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [クレイ(clay) →](clay.md)
+[← ニューモーフィズム(neumorphism)](neumorphism.md) ・ [ギャラリー一覧](../gallery.md) ・ [フロスト(frosted) →](frosted.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [クレイ(clay) →](clay.md)
+[← ニューモーフィズム(neumorphism)](neumorphism.md) ・ [ギャラリー一覧](../gallery.md) ・ [フロスト(frosted) →](frosted.md)

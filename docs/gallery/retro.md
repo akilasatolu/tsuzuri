@@ -1,19 +1,19 @@
 ---
-title: 雪(yuki)
-theme: yuki
+title: レトロフューチャー(retro)
+theme: retro
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「雪(yuki)」の見本ページ
+description: Tsuzuriの組み込みテーマ「レトロフューチャー(retro)」の見本ページ
 ---
 
-# 雪(yuki)
+# レトロフューチャー(retro)
 
-雪の夜の静けさがテーマ。夜の地に、雪の白と銀鼠、淡い藍。h2の印は雪輪、h1の下に細い銀の線、ページ全体にちらつく雪をまばらに散らす。常にダーク表示。
+Retrofuturism。80年代の夕焼けの空と光るグリッド、ネオンの差し色。常にダーク表示。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=yuki`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: yuki`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=retro`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: retro`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [クレイ(clay) →](clay.md)
+[← リキッド(liquid)](liquid.md) ・ [ギャラリー一覧](../gallery.md) ・ [Y2K(y2k) →](y2k.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [クレイ(clay) →](clay.md)
+[← リキッド(liquid)](liquid.md) ・ [ギャラリー一覧](../gallery.md) ・ [Y2K(y2k) →](y2k.md)

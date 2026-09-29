@@ -16,6 +16,17 @@ Tsuzuriの組み込みテーマの見た目を、実際に生成されたペー�
 | [月(tsuki)](gallery/tsuki.md) | `THEME=tsuki` | 満月の夜がテーマ。深い夜空の右上に光の輪をまとった満月、まばらな星。差し色は月明かりの金色と月白で、h2の印は小さな満月。常にダーク表示。 |
 | [灯(akari)](gallery/akari.md) | `THEME=akari` | 暗闇に灯る灯籠がテーマ。夜の闇の地に、灯籠の炎の灯り(芯の淡い黄から橙・紅へ)を淡くにじませる。見出しの印は小さな灯籠の形で、炎が揺らぐようにかすかに明滅する。常にダーク表示。 |
 | [雪(yuki)](gallery/yuki.md) | `THEME=yuki` | 雪の夜の静けさがテーマ。夜の地に、雪の白と銀鼠、淡い藍。h2の印は雪輪、h1の下に細い銀の線、ページ全体にちらつく雪をまばらに散らす。常にダーク表示。 |
+| [クレイ(clay)](gallery/clay.md) | `THEME=clay` | Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。パステルの地に紫と桃色。 |
+| [グレイン(grainy)](gallery/grainy.md) | `THEME=grainy` | Grainy Gradient。鮮やかな色が溶け合うグラデーションに、フィルムのようなざらつき。 |
+| [グラス(glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism。色とりどりの光の地に、すりガラスのような半透明のカード。 |
+| [ニューモーフィズム(neumorphism)](gallery/neumorphism.md) | `THEME=neumorphism` | Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。 |
+| [マテリアル(material)](gallery/material.md) | `THEME=material` | Material Design 3 風。紫系の配色、角丸のカードと影、トーンのついたナビの選択。 |
+| [フロスト(frosted)](gallery/frosted.md) | `THEME=frosted` | Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青。 |
+| [リキッド(liquid)](gallery/liquid.md) | `THEME=liquid` | Liquid UI。しずくのような形のカード、揺れる印、水色から紫へ流れるグラデーション。 |
+| [レトロフューチャー(retro)](gallery/retro.md) | `THEME=retro` | Retrofuturism。80年代の夕焼けの空と光るグリッド、ネオンの差し色。常にダーク表示。 |
+| [Y2K(y2k)](gallery/y2k.md) | `THEME=y2k` | Y2K UI。パステルの虹色ときらめく星、クロームの見出し、つやのあるボタン。 |
+| [ピクセル(pixel)](gallery/pixel.md) | `THEME=pixel` | Pixel art。8ビットゲームのような太い枠と市松模様、ドットの影の見出し。 |
+| [90年代(nineties)](gallery/nineties.md) | `THEME=nineties` | 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。 |
 | [装飾なし(none)](gallery/none.md) | `THEME=none` | テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。 |
 | [独自CSSの例(このサイト)](gallery/custom.md) | `THEME=none`+`STYLE_FILE` | テーマを使わず、独自CSSだけで作ったこのサイト自身の見た目。 |
 

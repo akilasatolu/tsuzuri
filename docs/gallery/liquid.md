@@ -1,19 +1,19 @@
 ---
-title: 雪(yuki)
-theme: yuki
+title: リキッド(liquid)
+theme: liquid
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「雪(yuki)」の見本ページ
+description: Tsuzuriの組み込みテーマ「リキッド(liquid)」の見本ページ
 ---
 
-# 雪(yuki)
+# リキッド(liquid)
 
-雪の夜の静けさがテーマ。夜の地に、雪の白と銀鼠、淡い藍。h2の印は雪輪、h1の下に細い銀の線、ページ全体にちらつく雪をまばらに散らす。常にダーク表示。
+Liquid UI。しずくのような形のカード、揺れる印、水色から紫へ流れるグラデーション。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=yuki`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: yuki`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=liquid`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: liquid`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [クレイ(clay) →](clay.md)
+[← フロスト(frosted)](frosted.md) ・ [ギャラリー一覧](../gallery.md) ・ [レトロフューチャー(retro) →](retro.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [クレイ(clay) →](clay.md)
+[← フロスト(frosted)](frosted.md) ・ [ギャラリー一覧](../gallery.md) ・ [レトロフューチャー(retro) →](retro.md)

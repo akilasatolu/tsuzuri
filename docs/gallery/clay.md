@@ -1,19 +1,19 @@
 ---
-title: 雪(yuki)
-theme: yuki
+title: クレイ(clay)
+theme: clay
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「雪(yuki)」の見本ページ
+description: Tsuzuriの組み込みテーマ「クレイ(clay)」の見本ページ
 ---
 
-# 雪(yuki)
+# クレイ(clay)
 
-雪の夜の静けさがテーマ。夜の地に、雪の白と銀鼠、淡い藍。h2の印は雪輪、h1の下に細い銀の線、ページ全体にちらつく雪をまばらに散らす。常にダーク表示。
+Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。パステルの地に紫と桃色。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=yuki`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: yuki`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=clay`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: clay`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [クレイ(clay) →](clay.md)
+[← 雪(yuki)](yuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [グレイン(grainy) →](grainy.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [クレイ(clay) →](clay.md)
+[← 雪(yuki)](yuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [グレイン(grainy) →](grainy.md)
