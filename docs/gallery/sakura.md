@@ -1,19 +1,19 @@
 ---
-title: 歌舞伎(kabuki)
-theme: kabuki
+title: 桜(sakura)
+theme: sakura
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「歌舞伎(kabuki)」の見本ページ
+description: Tsuzuriの組み込みテーマ「桜(sakura)」の見本ページ
 ---
 
-# 歌舞伎(kabuki)
+# 桜(sakura)
 
-歌舞伎がテーマ。定式幕の黒・柿色・萌葱色と、隈取の紅。明朝体の太い見出しに、定式幕の三色の帯と縦縞。表の見出し行は黒。ライト/ダークモードを自動で切り替える。
+和・桜・墨を合わせたスタイル。和紙の地に墨色の文字と明朝体の見出し、差し色は桜色。見出しの印やページの隅に桜の花びらを淡く散らす。ダーク表示は夜桜。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=kabuki`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: kabuki`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=sakura`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: sakura`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 海(umi)](umi.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← 和(wa)](wa.md) ・ [ギャラリー一覧](../gallery.md) ・ [宙(sora) →](sora.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 海(umi)](umi.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← 和(wa)](wa.md) ・ [ギャラリー一覧](../gallery.md) ・ [宙(sora) →](sora.md)

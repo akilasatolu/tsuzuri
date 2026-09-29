@@ -13,7 +13,7 @@ description: Tsuzuriの組み込みテーマ「海(umi)」の見本ページ
 1ページだけ使う場合は、そのページのfrontmatterに`theme: umi`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [歌舞伎(kabuki) →](kabuki.md)
+[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [歌舞伎(kabuki) →](kabuki.md)
+[← 灯(akari)](akari.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)

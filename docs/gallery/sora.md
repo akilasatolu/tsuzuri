@@ -13,7 +13,7 @@ description: Tsuzuriの組み込みテーマ「宙(sora)」の見本ページ
 1ページだけ使う場合は、そのページのfrontmatterに`theme: sora`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 和(wa)](wa.md) ・ [ギャラリー一覧](../gallery.md) ・ [灯(akari) →](akari.md)
+[← 桜(sakura)](sakura.md) ・ [ギャラリー一覧](../gallery.md) ・ [灯(akari) →](akari.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 和(wa)](wa.md) ・ [ギャラリー一覧](../gallery.md) ・ [灯(akari) →](akari.md)
+[← 桜(sakura)](sakura.md) ・ [ギャラリー一覧](../gallery.md) ・ [灯(akari) →](akari.md)

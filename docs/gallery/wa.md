@@ -7,13 +7,13 @@ description: Tsuzuriの組み込みテーマ「和(wa)」の見本ページ
 
 # 和(wa)
 
-生成り地に墨色の文字、朱色の控えめなリンク。見出しは明朝体で、和紙のような落ち着いた紙面。ライト/ダークモードを自動で切り替える標準スタイル(既定)。
+浮世絵がテーマの、江戸らしい標準スタイル(既定)。刷り紙の生成りの地に、北斎のベロ藍と江戸の紅。h1の下に青海波の帯、h2は錦絵の題箋のような枠。ページの上に霞の帯を淡く引く。ライト/ダークモードを自動で切り替える。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=wa`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: wa`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[ギャラリー一覧](../gallery.md) ・ [宙(sora) →](sora.md)
+[ギャラリー一覧](../gallery.md) ・ [桜(sakura) →](sakura.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[ギャラリー一覧](../gallery.md) ・ [宙(sora) →](sora.md)
+[ギャラリー一覧](../gallery.md) ・ [桜(sakura) →](sakura.md)
