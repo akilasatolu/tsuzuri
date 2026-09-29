@@ -1,106 +1,115 @@
 /*
  * akari.css (灯)
- * ネオン街をテーマにしたスタイル。夜の街の暗い地に、ネオンサインのような桃色・水色・黄色の灯りをともす。
- * 見出しやリンクはネオン管のように淡く光らせるが、本文は落ち着いた白で読みやすさを保つ。
+ * 暗闇に灯る灯籠をイメージしたスタイル。夜の闇のような温かい黒の地に、灯籠の和紙越しの灯り
+ * (琥珀色・橙色)を、遠くにともる灯籠のように淡くにじませる。
+ * 見出しの印は小さな灯籠の形で、ほのかに光る。本文は和紙のような温かい白で読みやすさを保つ。
  * 常にダーク表示にする(OSの設定に関わらない)。
  */
 :root {
   color-scheme: dark;
-  --fg: #ece7f5;
-  --muted: #a79fbd;
-  --bg: #0e0b16;             /* 夜の街 */
-  --surface: #17122a;        /* 一段明るい面(コード・表の見出し・目次など) */
-  --border: #2e2548;
-  --accent: #ff4fae;         /* ネオンの桃色 */
-  --accent-2: #33e1ea;       /* ネオンの水色 */
-  --accent-3: #ffe45c;       /* ネオンの黄色 */
-  --accent-soft: #2a1233;
-  --glow-pink: 0 0 4px rgba(255, 79, 174, 0.9), 0 0 14px rgba(255, 79, 174, 0.55), 0 0 28px rgba(255, 79, 174, 0.3);
-  --glow-cyan: 0 0 4px rgba(51, 225, 234, 0.85), 0 0 12px rgba(51, 225, 234, 0.45);
-  --code-bg: #120e21;
+  --fg: #efe4d2;             /* 灯りに照らされた和紙 */
+  --muted: #a8998a;
+  --bg: #0f0c0a;             /* 夜の闇 */
+  --surface: #1a1511;        /* 灯りがわずかに届く面(コード・表の見出し・目次など) */
+  --border: #3a2d22;
+  --accent: #f2a950;         /* 灯籠の灯り(琥珀色) */
+  --accent-2: #e07b35;       /* 火の橙色 */
+  --wood: #6b4527;           /* 灯籠の木枠 */
+  --accent-soft: #2a1d12;
+  --glow: 0 0 6px rgba(242, 169, 80, 0.55), 0 0 18px rgba(242, 169, 80, 0.3);
+  --code-bg: #16110d;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
-  --content-width: 840px;
-  /* 暗い地で見分けやすい、ネオンの色のコード */
-  --hl-keyword: #ff6fbf;
-  --hl-string: #7ff0c4;
-  --hl-number: #ffe45c;
-  --hl-title: #33e1ea;
-  --hl-attr: #c79bff;
-  --hl-comment: #7c7494;
-  /* 注意書きの色もネオンの色に */
-  --alert-note: #33e1ea;
-  --alert-tip: #7ff0c4;
-  --alert-important: #c79bff;
-  --alert-warning: #ffe45c;
-  --alert-caution: #ff5f7e;
+  --heading-font: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", "BIZ UDPMincho", serif;
+  --content-width: 820px;
+  /* 灯りに照らされたような、温かい色のコード */
+  --hl-keyword: #f2a950;
+  --hl-string: #d8c38f;
+  --hl-number: #f08a5d;
+  --hl-title: #f6dcb0;
+  --hl-attr: #c9a27a;
+  --hl-comment: #7d6f62;
+  /* 注意書きの色も温かい灯りの色に */
+  --alert-note: #d8b27a;
+  --alert-tip: #b7c27a;
+  --alert-important: #d99a7a;
+  --alert-warning: #f2a950;
+  --alert-caution: #ef7a5a;
 }
 
-/* 夜の街: 下のほうに街の灯りのにじみ、上のほうに淡い桃色の空 */
+/* 夜の闇に、遠くにともる灯籠の灯りをいくつか淡くにじませる */
 body {
-  line-height: 1.8;
+  line-height: 1.85;
+  letter-spacing: 0.02em;
   -webkit-font-smoothing: antialiased;
   background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 70% 35% at 50% 105%, rgba(255, 79, 174, 0.16), transparent 70%),
-    radial-gradient(ellipse 45% 30% at 10% 100%, rgba(51, 225, 234, 0.12), transparent 70%),
-    radial-gradient(ellipse 60% 30% at 90% -5%, rgba(155, 80, 255, 0.14), transparent 70%);
+    radial-gradient(circle 180px at 92% 12%, rgba(242, 169, 80, 0.14), transparent 70%),
+    radial-gradient(circle 120px at 6% 88%, rgba(224, 123, 53, 0.12), transparent 70%),
+    radial-gradient(circle 90px at 70% 96%, rgba(242, 169, 80, 0.08), transparent 70%),
+    radial-gradient(circle 60px at 30% 4%, rgba(242, 169, 80, 0.06), transparent 70%);
   background-repeat: no-repeat;
   background-attachment: fixed;
   min-height: 100vh;
 }
 
-/* 見出し: h1 はネオンサインのように桃色に光る。h2 は水色のネオン管の下線、h3 は黄色 */
-main :is(h1, h2, h3, h4) { font-weight: 800; line-height: 1.4; letter-spacing: 0.03em; }
-main h1 { margin: 0 0 1.2em; font-size: 2.1em; color: #ffe6f4; text-shadow: var(--glow-pink); }
-main h2 { margin: 2.4em 0 0.8em; padding-bottom: 0.4em; font-size: 1.4em; color: #f4f0ff; }
-main h2::after {
+/* 見出し: 明朝体。h1 は灯りに照らされたようにほのかに光り、下に灯りのにじむ線。
+   h2 は小さな灯籠の印、h3 は琥珀色 */
+main :is(h1, h2, h3, h4) { font-family: var(--heading-font); font-weight: 600; line-height: 1.45; letter-spacing: 0.05em; }
+main h1 { margin: 0 0 1.3em; font-size: 2em; color: #fbeed8; text-shadow: 0 0 18px rgba(242, 169, 80, 0.35); }
+main h1::after {
   content: "";
   display: block;
+  width: 8em;
   height: 2px;
-  margin-top: 0.4em;
-  border-radius: 2px;
-  background: var(--accent-2);
-  box-shadow: var(--glow-cyan);
+  margin-top: 0.45em;
+  background: linear-gradient(90deg, var(--accent), rgba(242, 169, 80, 0));
+  box-shadow: 0 0 10px rgba(242, 169, 80, 0.45);
 }
-main h3 { margin: 2em 0 0.6em; font-size: 1.15em; color: var(--accent-3); text-shadow: 0 0 10px rgba(255, 228, 92, 0.35); }
-main h4 { margin: 1.6em 0 0.4em; font-size: 1em; color: var(--muted); }
+main h2 { margin: 2.4em 0 0.8em; padding-bottom: 0.35em; font-size: 1.45em; color: #f6e9d4; border-bottom: 1px solid var(--border); }
+/* 小さな灯籠: 灯りのともった火袋(丸みのある四角)と、上下の木枠 */
+main h2::before {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 0.8em;
+  margin-right: 0.6em;
+  vertical-align: -0.05em;
+  border-radius: 40% 40% 40% 40% / 30% 30% 30% 30%;
+  background: radial-gradient(circle at 50% 55%, #ffe2a8 0%, var(--accent) 45%, var(--accent-2) 100%);
+  box-shadow: 0 -3px 0 -1px var(--wood), 0 3px 0 -1px var(--wood), var(--glow);
+}
+main h3 { margin: 2em 0 0.6em; font-size: 1.18em; color: var(--accent); }
+main h4 { margin: 1.6em 0 0.4em; font-size: 1.02em; color: var(--muted); }
 
-/* リンク: 桃色のネオン。カーソルを当てると光る */
-main a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent); text-underline-offset: 0.2em; }
-main a:hover { color: #ffb3dc; text-decoration-color: var(--accent); text-shadow: var(--glow-pink); }
+/* リンク: 琥珀色。カーソルを当てると灯りがともるように光る */
+main a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); text-underline-offset: 0.2em; }
+main a:hover { color: #ffd08a; text-decoration-color: var(--accent); text-shadow: 0 0 10px rgba(242, 169, 80, 0.6); }
 main :is(h1, h2, h3, h4) a.tsuzuri-anchor { text-shadow: none; }
 
-main strong { color: #fff; }
-main blockquote { margin: 1.4em 0; padding: 0.6em 1.2em; color: var(--muted); background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; box-shadow: -3px 0 12px -4px rgba(255, 79, 174, 0.6); }
-main hr { margin: 2.5em 0; height: 2px; border: 0; background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent); box-shadow: 0 0 8px rgba(255, 79, 174, 0.4); }
-main kbd { padding: 0.1em 0.45em; font-size: 0.85em; color: var(--accent-2); background: var(--surface); border: 1px solid var(--accent-2); border-radius: 4px; box-shadow: 0 0 6px rgba(51, 225, 234, 0.35); }
-main img { border-radius: 6px; }
+main strong { color: #fff4e2; }
+main blockquote { margin: 1.4em 0; padding: 0.6em 1.2em; color: var(--muted); background: var(--surface); border-left: 3px solid var(--wood); border-radius: 0 6px 6px 0; }
+main hr { margin: 2.5em auto; width: 60%; height: 1px; border: 0; background: linear-gradient(90deg, transparent, var(--accent), transparent); box-shadow: 0 0 8px rgba(242, 169, 80, 0.35); }
+main kbd { padding: 0.1em 0.45em; font-size: 0.85em; background: var(--surface); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; }
+main img { border-radius: 4px; }
 
-/* コード・表: ネオン管の枠 */
-main pre { border: 1px solid color-mix(in srgb, var(--accent-2) 45%, transparent); border-radius: 10px; line-height: 1.6; box-shadow: 0 0 16px -4px rgba(51, 225, 234, 0.35); }
-main code { color: #ffd0ea; }
+/* コード・表: 灯籠の木枠のような縁 */
+main pre { border: 1px solid var(--border); border-top: 2px solid var(--wood); border-radius: 4px; line-height: 1.6; }
+main code { color: #f6c98a; }
 main pre code { color: inherit; }
 main table { font-size: 0.95em; }
-main th { text-align: left; color: var(--accent-2); background: var(--surface); border-color: var(--border); text-shadow: 0 0 8px rgba(51, 225, 234, 0.4); }
+main th { text-align: left; font-family: var(--heading-font); font-weight: 600; color: var(--accent); background: var(--surface); border-color: var(--border); border-bottom: 2px solid var(--wood); }
 main th, main td { border-color: var(--border); padding: 8px 12px; }
-main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface) 60%, transparent); }
-main tbody tr:hover td { background: var(--accent-soft); }
+main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface) 55%, transparent); }
 
-/* ナビ・目次・前後のページ */
-body > nav { background: #0a0811; border-color: var(--border); }
-body > nav a { padding: 4px 10px; color: var(--fg); border-radius: 6px; }
+/* ナビ・目次・前後のページ: 今いるページは灯りがともったように */
+body > nav { background: #0b0907; border-color: var(--border); }
+body > nav a { padding: 4px 10px; color: var(--fg); border-radius: 4px; }
 body > nav a:hover { color: var(--accent); background: var(--accent-soft); text-decoration: none; }
-body > nav a[aria-current="page"] { color: #fff; background: color-mix(in srgb, var(--accent) 25%, transparent); border: 1px solid var(--accent); box-shadow: var(--glow-pink); font-weight: 700; }
-.tsuzuri-nav-head > p { color: #ffe6f4; font-weight: 800; letter-spacing: 0.06em; text-shadow: var(--glow-pink); }
-.tsuzuri-toc { background: var(--surface); border-color: color-mix(in srgb, var(--accent-2) 40%, transparent); }
-.tsuzuri-toc > p { color: var(--accent-2); }
+body > nav a[aria-current="page"] { color: #fbeed8; background: linear-gradient(90deg, rgba(242, 169, 80, 0.22), rgba(242, 169, 80, 0.04)); box-shadow: inset 3px 0 0 var(--accent); font-weight: 600; }
+.tsuzuri-nav-head > p { font-family: var(--heading-font); color: #fbeed8; letter-spacing: 0.08em; text-shadow: 0 0 14px rgba(242, 169, 80, 0.4); }
+.tsuzuri-toc { background: var(--surface); border-color: var(--border); }
+.tsuzuri-toc > p { color: var(--accent); }
 main .tsuzuri-pager a { background: var(--surface); border-color: var(--border); }
-main .tsuzuri-pager a:hover { border-color: var(--accent); box-shadow: var(--glow-pink); text-shadow: none; }
+main .tsuzuri-pager a:hover { border-color: var(--accent); box-shadow: 0 0 14px rgba(242, 169, 80, 0.25); text-shadow: none; }
 .tsuzuri-search input { background: var(--surface); }
-.tsuzuri-search input:focus { outline-color: var(--accent-2); box-shadow: var(--glow-cyan); }
-
-/* 動きを減らす設定の人には、光のにじみも控えめにする */
-@media (prefers-reduced-motion: reduce) {
-  main h1, main a:hover, .tsuzuri-nav-head > p { text-shadow: none; }
-}
