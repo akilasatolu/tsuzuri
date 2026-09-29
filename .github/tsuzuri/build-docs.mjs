@@ -178,7 +178,7 @@ async function main() {
   // どちらも読み込みに失敗した場合(ファイル不在等)は console.warn した上で、
   // サイト全体のTHEME(themeCss)にフォールバックする(既存のfail-open方針を踏襲)。
   // 同じ指定が複数ページで使われるケースに備え、指定ごとに読み込み結果をキャッシュする。
-  const pageThemeCssCache = new Map(); // "builtin:wa" | "path:styles/custom.css" -> css文字列
+  const pageThemeCssCache = new Map(); // "builtin:material" | "path:styles/custom.css" -> css文字列
   function resolveThemeCssForPage(rel, rawThemeSpec) {
     if (typeof rawThemeSpec !== "string") return themeCss;
     const spec = rawThemeSpec.trim();
