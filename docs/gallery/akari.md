@@ -1,16 +1,16 @@
 ---
-title: 墨(sumi)
-theme: sumi
+title: 灯(akari)
+theme: akari
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「墨(sumi)」の見本ページ
+description: Tsuzuriの組み込みテーマ「灯(akari)」の見本ページ
 ---
 
-# 墨(sumi)
+# 灯(akari)
 
-OSの設定に関わらず常にダーク表示。墨色の地に温かみのある白い文字と、淡い青の差し色。夜間や長く読む資料向け。
+ネオン街がテーマ。夜の街の暗い地に、桃色・水色・黄色のネオンの灯り。見出しやリンクはネオン管のように光り、本文は読みやすい白。常にダーク表示。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=sumi`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: sumi`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=akari`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: akari`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
 [← 宙(sora)](sora.md) ・ [ギャラリー一覧](../gallery.md) ・ [藍(ai) →](ai.md)
