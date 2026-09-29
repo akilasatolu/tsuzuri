@@ -43,11 +43,11 @@ export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.ym
 
 // THEME選択肢(番号選択、1始まり)。
 export const THEME_CHOICES = [
-  { key: "wa", label: "和(推奨。生成り地に墨色の文字、朱色の控えめなリンク)" },
-  { key: "muji", label: "無地(装飾を極力削った最小構成)" },
-  { key: "sumi", label: "墨(ダークモード向け)" },
-  { key: "ai", label: "藍(深い藍色を基調にした落ち着いた配色)" },
-  { key: "shu", label: "朱(朱色を効かせた力強い配色)" },
+  { key: "wa", label: "和(推奨。生成り地に墨色の文字、朱色の控えめなリンク、明朝体の見出し)" },
+  { key: "muji", label: "無地(白と黒だけの最小構成。等幅フォントの見出し。技術文書向け)" },
+  { key: "sumi", label: "墨(常にダーク表示。墨色の地に淡い青の差し色)" },
+  { key: "ai", label: "藍(藍色の見出しと表。マニュアル・仕様書向け)" },
+  { key: "shu", label: "朱(朱色の太い見出しと帯。製品紹介・告知向け)" },
   { key: "none", label: "装飾なし" },
 ];
 
