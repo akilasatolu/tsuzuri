@@ -1,16 +1,16 @@
 ---
-title: 宙(sora)
-theme: sora
+title: 月(tsuki)
+theme: tsuki
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「宙(sora)」の見本ページ
+description: Tsuzuriの組み込みテーマ「月(tsuki)」の見本ページ
 ---
 
-# 宙(sora)
+# 月(tsuki)
 
 満月の夜がテーマ。深い夜空の右上に光の輪をまとった満月、まばらな星。差し色は月明かりの金色と月白で、h2の印は小さな満月。常にダーク表示。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=sora`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: sora`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=tsuki`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: tsuki`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
 [← 桜(sakura)](sakura.md) ・ [ギャラリー一覧](../gallery.md) ・ [灯(akari) →](akari.md)

@@ -7,13 +7,13 @@ description: Tsuzuriの組み込みテーマ「灯(akari)」の見本ページ
 
 # 灯(akari)
 
-暗闇に灯る灯籠がテーマ。夜の闇の地に、灯籠の琥珀色の灯りを淡くにじませる。見出しの印は小さな灯籠の形。常にダーク表示。
+暗闇に灯る灯籠がテーマ。夜の闇の地に、灯籠の炎の灯り(芯の淡い黄から橙・紅へ)を淡くにじませる。見出しの印は小さな灯籠の形で、炎が揺らぐようにかすかに明滅する。常にダーク表示。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=akari`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: akari`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 宙(sora)](sora.md) ・ [ギャラリー一覧](../gallery.md) ・ [海(umi) →](umi.md)
+[← 月(tsuki)](tsuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [海(umi) →](umi.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 宙(sora)](sora.md) ・ [ギャラリー一覧](../gallery.md) ・ [海(umi) →](umi.md)
+[← 月(tsuki)](tsuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [海(umi) →](umi.md)

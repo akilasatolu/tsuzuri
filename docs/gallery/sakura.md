@@ -13,7 +13,7 @@ description: Tsuzuriの組み込みテーマ「桜(sakura)」の見本ページ
 1ページだけ使う場合は、そのページのfrontmatterに`theme: sakura`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 和(wa)](wa.md) ・ [ギャラリー一覧](../gallery.md) ・ [宙(sora) →](sora.md)
+[← 和(wa)](wa.md) ・ [ギャラリー一覧](../gallery.md) ・ [月(tsuki) →](tsuki.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 和(wa)](wa.md) ・ [ギャラリー一覧](../gallery.md) ・ [宙(sora) →](sora.md)
+[← 和(wa)](wa.md) ・ [ギャラリー一覧](../gallery.md) ・ [月(tsuki) →](tsuki.md)
