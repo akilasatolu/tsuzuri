@@ -36,7 +36,7 @@ description: Tsuzuriの組み込みテーマ「装飾なし(none)」の見本ペ
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `wa` | 組み込みテーマ名 |
+| `THEME` | `material` | 組み込みテーマ名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANG` | `ja` | `<html lang>`の値 |
 

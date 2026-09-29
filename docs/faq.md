@@ -48,7 +48,7 @@ Markdown内でリンクした先のファイルが実際には存在しない場
 見た目が期待通りにならない場合は、以下を順番に確認してください。
 
 1. `THEME`のスペルミス。存在しないテーマ名(例: `sepia`)を指定すると警告のうえ
-   自動的に`wa`にフォールバックします([configuration.md](./configuration.md))。
+   自動的に`material`にフォールバックします([configuration.md](./configuration.md))。
 2. `STYLE_FILE`に指定したパスに、実際にファイルが存在しているか。存在しない場合は
    警告は出ず(ビルドのログに`Custom style file not used`と出るだけで)、独自CSSは反映されません。
 3. 3層カスケード(基礎CSS→THEME→STYLE_FILE)の優先順位。`STYLE_FILE`は最後に

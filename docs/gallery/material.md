@@ -13,7 +13,7 @@ Material Design 3 風。紫系の配色、角丸のカードと影、トーン�
 1ページだけ使う場合は、そのページのfrontmatterに`theme: material`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← ニューモーフィズム(neumorphism)](neumorphism.md) ・ [ギャラリー一覧](../gallery.md) ・ [フロスト(frosted) →](frosted.md)
+[ギャラリー一覧](../gallery.md) ・ [クレイ(clay) →](clay.md)
 
 ## 見出しレベル2
 
@@ -36,7 +36,7 @@ Material Design 3 風。紫系の配色、角丸のカードと影、トーン�
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `wa` | 組み込みテーマ名 |
+| `THEME` | `material` | 組み込みテーマ名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANG` | `ja` | `<html lang>`の値 |
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← ニューモーフィズム(neumorphism)](neumorphism.md) ・ [ギャラリー一覧](../gallery.md) ・ [フロスト(frosted) →](frosted.md)
+[ギャラリー一覧](../gallery.md) ・ [クレイ(clay) →](clay.md)

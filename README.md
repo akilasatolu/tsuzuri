@@ -97,8 +97,8 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 ## スタイルのカスタマイズ
 
 見た目を変えたい場合、CSSを自分で書く必要は必ずしもありません。
-`.github/docs-pages.config`の`THEME`に、和(`wa`・既定)/桜(`sakura`)/月(`tsuki`)/灯(`akari`)/
-雪(`yuki`)/装飾なし(`none`)、グラス(`glass`)やピクセル(`pixel`)などのモダンなテーマのいずれかを指定するだけで、配色や
+`.github/docs-pages.config`の`THEME`に、マテリアル(`material`・既定)/クレイ(`clay`)/グラス(`glass`)/
+ピクセル(`pixel`)/装飾なし(`none`)などのテーマのいずれかを指定するだけで、配色や
 リンクの下線の有無などの見た目がまとめて切り替わります。詳しくは
 [テーマ・スタイル(Theming)](docs/theming.md)を参照してください。
 

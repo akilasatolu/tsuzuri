@@ -76,10 +76,10 @@ HTMLには反映されません**。出力HTMLの`<html lang="...">`は、常に
 このページだけ、`.github/docs-pages.config`の`THEME`(サイト全体のテーマ)とは
 違うテーマを使いたい場合に指定します。指定できる値は次の2種類です。
 
-- **組み込みテーマ名**: `wa` / `sakura` / `tsuki` / `akari` / `yuki` / `clay` / `grainy` / `glass` / `neumorphism` / `material` / `frosted` / `liquid` / `retro` / `y2k` / `pixel` / `nineties` / `none`
+- **組み込みテーマ名**: `material` / `clay` / `glass` / `neumorphism` / `frosted` / `retro` / `y2k` / `pixel` / `nineties` / `none`
   (意味は[テーマ・スタイル(Theming)](theming.md)を参照。`none`を指定すると、
   このページだけテーマ層を適用しません)
-- **独自CSSファイルのパス**: 上記17個のいずれにも一致しない値は、
+- **独自CSSファイルのパス**: 上記10個のいずれにも一致しない値は、
   「リポジトリルートからの相対パス」で指定した独自CSSファイルとして扱われます。
   ファイル自体は自分で用意し、パスを含めてそのまま書いてください。
   リポジトリの外(`../`で始まるパスや絶対パス、リポジトリ外を指すシンボリックリンク)は
@@ -87,7 +87,7 @@ HTMLには反映されません**。出力HTMLの`<html lang="...">`は、常に
 
 ```markdown
 ---
-theme: sakura
+theme: retro
 ---
 ```
 
@@ -117,7 +117,7 @@ CSSが欠落している、独自パスのファイルが存在しない、な�
 
 ```markdown
 ---
-theme: wa
+theme: material
 styleFile: .github/tsuzuri/styles/plain.css
 ---
 ```

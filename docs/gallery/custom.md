@@ -35,7 +35,7 @@ description: THEME=noneと独自CSS(STYLE_FILE)だけで作った、このサイ
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `wa` | 組み込みテーマ名 |
+| `THEME` | `material` | 組み込みテーマ名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANG` | `ja` | `<html lang>`の値 |
 

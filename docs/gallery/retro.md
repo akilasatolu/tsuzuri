@@ -13,7 +13,7 @@ Retrofuturism。80年代の夕焼けの空と光るグリッド、ネオンの�
 1ページだけ使う場合は、そのページのfrontmatterに`theme: retro`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← リキッド(liquid)](liquid.md) ・ [ギャラリー一覧](../gallery.md) ・ [Y2K(y2k) →](y2k.md)
+[← フロスト(frosted)](frosted.md) ・ [ギャラリー一覧](../gallery.md) ・ [Y2K(y2k) →](y2k.md)
 
 ## 見出しレベル2
 
@@ -36,7 +36,7 @@ Retrofuturism。80年代の夕焼けの空と光るグリッド、ネオンの�
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `wa` | 組み込みテーマ名 |
+| `THEME` | `material` | 組み込みテーマ名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANG` | `ja` | `<html lang>`の値 |
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← リキッド(liquid)](liquid.md) ・ [ギャラリー一覧](../gallery.md) ・ [Y2K(y2k) →](y2k.md)
+[← フロスト(frosted)](frosted.md) ・ [ギャラリー一覧](../gallery.md) ・ [Y2K(y2k) →](y2k.md)

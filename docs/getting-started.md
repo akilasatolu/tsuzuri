@@ -101,7 +101,7 @@ npx github:akilasatolu/tsuzuri#v1 preview
    node .github/tsuzuri/build-docs.mjs
    ```
 
-   試しに設定を変えたいときは、`THEME=akari node .github/tsuzuri/build-docs.mjs`のように
+   試しに設定を変えたいときは、`THEME=retro node .github/tsuzuri/build-docs.mjs`のように
    環境変数で渡すと、そのキーだけ設定ファイルより優先されます。
 
    > [!NOTE]

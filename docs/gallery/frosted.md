@@ -13,7 +13,7 @@ Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつ�
 1ページだけ使う場合は、そのページのfrontmatterに`theme: frosted`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← マテリアル(material)](material.md) ・ [ギャラリー一覧](../gallery.md) ・ [リキッド(liquid) →](liquid.md)
+[← ニューモーフィズム(neumorphism)](neumorphism.md) ・ [ギャラリー一覧](../gallery.md) ・ [レトロフューチャー(retro) →](retro.md)
 
 ## 見出しレベル2
 
@@ -36,7 +36,7 @@ Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつ�
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `wa` | 組み込みテーマ名 |
+| `THEME` | `material` | 組み込みテーマ名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANG` | `ja` | `<html lang>`の値 |
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← マテリアル(material)](material.md) ・ [ギャラリー一覧](../gallery.md) ・ [リキッド(liquid) →](liquid.md)
+[← ニューモーフィズム(neumorphism)](neumorphism.md) ・ [ギャラリー一覧](../gallery.md) ・ [レトロフューチャー(retro) →](retro.md)

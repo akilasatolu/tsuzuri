@@ -13,7 +13,7 @@ Glassmorphism。色とりどりの光の地に、すりガラスのような半�
 1ページだけ使う場合は、そのページのfrontmatterに`theme: glass`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← グレイン(grainy)](grainy.md) ・ [ギャラリー一覧](../gallery.md) ・ [ニューモーフィズム(neumorphism) →](neumorphism.md)
+[← クレイ(clay)](clay.md) ・ [ギャラリー一覧](../gallery.md) ・ [ニューモーフィズム(neumorphism) →](neumorphism.md)
 
 ## 見出しレベル2
 
@@ -36,7 +36,7 @@ Glassmorphism。色とりどりの光の地に、すりガラスのような半�
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `wa` | 組み込みテーマ名 |
+| `THEME` | `material` | 組み込みテーマ名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANG` | `ja` | `<html lang>`の値 |
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← グレイン(grainy)](grainy.md) ・ [ギャラリー一覧](../gallery.md) ・ [ニューモーフィズム(neumorphism) →](neumorphism.md)
+[← クレイ(clay)](clay.md) ・ [ギャラリー一覧](../gallery.md) ・ [ニューモーフィズム(neumorphism) →](neumorphism.md)

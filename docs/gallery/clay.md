@@ -13,7 +13,7 @@ Claymorphism。粘土のようにふっくら丸く立体的なカードと部�
 1ページだけ使う場合は、そのページのfrontmatterに`theme: clay`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← 雪(yuki)](yuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [グレイン(grainy) →](grainy.md)
+[← マテリアル(material)](material.md) ・ [ギャラリー一覧](../gallery.md) ・ [グラス(glass) →](glass.md)
 
 ## 見出しレベル2
 
@@ -36,7 +36,7 @@ Claymorphism。粘土のようにふっくら丸く立体的なカードと部�
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `wa` | 組み込みテーマ名 |
+| `THEME` | `material` | 組み込みテーマ名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANG` | `ja` | `<html lang>`の値 |
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 雪(yuki)](yuki.md) ・ [ギャラリー一覧](../gallery.md) ・ [グレイン(grainy) →](grainy.md)
+[← マテリアル(material)](material.md) ・ [ギャラリー一覧](../gallery.md) ・ [グラス(glass) →](glass.md)
