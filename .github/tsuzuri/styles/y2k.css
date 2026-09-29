@@ -1,39 +1,39 @@
 /*
  * y2k.css (Y2K)
- * Y2K UI のスタイル。2000年ごろのデジタルの明るい未来感。パステルの虹色の地にきらめく星、
- * クロームのように光る見出し、つやのあるぷっくりしたボタン。差し色はホットピンクとライム。
+ * Y2K UI のスタイル。2000年ごろのデジタルの明るい未来感。パステルの地にシャボン玉ときらめく星、
+ * 虹色に光るホログラムの縁のカード、ぷっくり丸い見出し、水色のつやのあるアクア風ボタン。差し色はホットピンク。
  * ライト/ダーク表示に対応する。
  */
 :root {
   color-scheme: light dark;
-  --fg: #27213a;
-  --muted: #6a6384;
-  --bg: #f3ecff;
-  --heading: #27213a;
-  --accent: #e6007e;
+  --fg: #2a2340;
+  --muted: #6b6488;
+  --bg: #f4edff;
+  --heading: #2a2340;
+  --accent: #d4007a;
   --accent-2: #6b3cff;
-  --border: #e3d9fb;
-  --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M40 20 l3 9 l9 3 l-9 3 l-3 9 l-3 -9 l-9 -3 l9 -3 z'/%3E%3Cpath d='M180 60 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2 z'/%3E%3Cpath d='M120 170 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 z'/%3E%3Cpath d='M210 200 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 z'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #ffd6f2 0%, #e2d4ff 30%, #cdeeff 60%, #dcffe4 100%);
-  --card-bg: rgba(255, 255, 255, 0.82);
-  --card-border: 2px solid rgba(255, 255, 255, 0.95);
+  --border: #e7dcfb;
+  --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1.5' opacity='0.85'%3E%3Ccircle cx='60' cy='70' r='22'/%3E%3Ccircle cx='290' cy='120' r='12'/%3E%3Ccircle cx='170' cy='290' r='30'/%3E%3C/g%3E%3Cg fill='%23ffffff' opacity='0.9'%3E%3Ccircle cx='52' cy='62' r='5'/%3E%3Ccircle cx='286' cy='116' r='3'/%3E%3Ccircle cx='160' cy='280' r='7'/%3E%3Cpath d='M230 40 l3 10 l10 3 l-10 3 l-3 10 l-3 -10 l-10 -3 l10 -3 z'/%3E%3Cpath d='M320 250 l2 7 l7 2 l-7 2 l-2 7 l-2 -7 l-7 -2 l7 -2 z'/%3E%3Cpath d='M100 200 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2 z'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 360px 360px, radial-gradient(ellipse 60% 50% at 0% 0%, #ffd1ef 0%, transparent 70%), radial-gradient(ellipse 60% 50% at 100% 20%, #cfe6ff 0%, transparent 70%), radial-gradient(ellipse 70% 50% at 50% 100%, #d8ffe9 0%, transparent 70%), #efe6ff;
+  --card-bg: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)) padding-box, linear-gradient(135deg, #ff9ad8, #c4a5ff 25%, #8fd8ff 50%, #9ef0c2 75%, #ffe58a) border-box;
+  --card-border: 3px solid transparent;
   --card-filter: blur(6px);
-  --card-shadow: 0 12px 36px rgba(107, 60, 255, 0.18), inset 0 2px 0 #ffffff;
-  --radius-lg: 28px;
+  --card-shadow: 0 14px 40px rgba(107, 60, 255, 0.18);
+  --radius-lg: 30px;
   --radius: 18px;
   --pill: 999px;
   --heading-weight: 900;
-  --el-bg: rgba(255, 255, 255, 0.85);
-  --el-shadow: 0 6px 16px rgba(230, 0, 126, 0.12), inset 0 2px 0 #ffffff;
-  --inset-shadow: inset 0 0 0 2px rgba(107, 60, 255, 0.12);
-  --hr: linear-gradient(90deg, #ff6ec7, #a78bfa, #67e8f9, #a3e635);
-  --code-bg: #f5eaff;
-  --pre-bg: #faf6ff;
-  --th-bg: linear-gradient(180deg, #ff7ad0, #e6007e);
+  --el-bg: #fbf7ff;
+  --el-shadow: 0 4px 14px rgba(107, 60, 255, 0.12), inset 0 0 0 1.5px #efe4ff;
+  --inset-shadow: inset 0 0 0 1.5px #eadfff, inset 0 3px 8px rgba(107, 60, 255, 0.06);
+  --hr: linear-gradient(135deg, #ff9ad8, #c4a5ff 25%, #8fd8ff 50%, #9ef0c2 75%, #ffe58a);
+  --code-bg: #f3e9ff;
+  --pre-bg: #fbf7ff;
+  --th-bg: linear-gradient(180deg, #ffd4ee 0%, #ff7ccb 45%, #f0379f 52%, #ff78c6 100%);
   --th-fg: #ffffff;
-  --hover-bg: #f7ecff;
-  --current-bg: linear-gradient(180deg, #ff9ad8 0%, #e6007e 55%, #b8006b 100%);
-  --current-fg: #ffffff;
-  --current-shadow: 0 6px 14px rgba(230, 0, 126, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.6);
+  --hover-bg: #f3ebff;
+  --current-bg: linear-gradient(180deg, #dff8ff 0%, #7fdcff 45%, #22b6ec 52%, #58d4ff 100%);
+  --current-fg: #063b57;
+  --current-shadow: 0 4px 10px rgba(34, 182, 236, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -2px 4px rgba(0, 90, 140, 0.25);
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
   --heading-font: var(--font);
@@ -45,51 +45,41 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --fg: #f1ecff;
-    --muted: #b3a9d6;
-    --bg: #0d0a1a;
+    --muted: #b5abd8;
+    --bg: #0f0b22;
     --heading: #ffffff;
-    --accent: #ff5cc3;
-    --accent-2: #b8ff3b;
-    --border: #342a58;
-    --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M40 20 l3 9 l9 3 l-9 3 l-3 9 l-3 -9 l-9 -3 l9 -3 z'/%3E%3Cpath d='M180 60 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2 z'/%3E%3Cpath d='M120 170 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 z'/%3E%3Cpath d='M210 200 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 z'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #2a0a3d 0%, #10123a 45%, #062a3a 100%);
-    --card-bg: rgba(18, 14, 38, 0.84);
-    --card-border: 2px solid rgba(255, 255, 255, 0.14);
-    --card-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    --el-bg: rgba(255, 255, 255, 0.06);
-    --el-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    --inset-shadow: inset 0 0 0 2px rgba(255, 92, 195, 0.18);
-    --hr: linear-gradient(90deg, #ff5cc3, #a78bfa, #22d3ee, #b8ff3b);
-    --code-bg: rgba(255, 92, 195, 0.14);
-    --pre-bg: rgba(6, 4, 14, 0.85);
-    --th-bg: linear-gradient(180deg, #ff5cc3, #c2007a);
+    --accent: #ff6fcf;
+    --accent-2: #b89bff;
+    --border: #352c5c;
+    --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1.5' opacity='0.85'%3E%3Ccircle cx='60' cy='70' r='22'/%3E%3Ccircle cx='290' cy='120' r='12'/%3E%3Ccircle cx='170' cy='290' r='30'/%3E%3C/g%3E%3Cg fill='%23ffffff' opacity='0.9'%3E%3Ccircle cx='52' cy='62' r='5'/%3E%3Ccircle cx='286' cy='116' r='3'/%3E%3Ccircle cx='160' cy='280' r='7'/%3E%3Cpath d='M230 40 l3 10 l10 3 l-10 3 l-3 10 l-3 -10 l-10 -3 l10 -3 z'/%3E%3Cpath d='M320 250 l2 7 l7 2 l-7 2 l-2 7 l-2 -7 l-7 -2 l7 -2 z'/%3E%3Cpath d='M100 200 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2 z'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 360px 360px, radial-gradient(ellipse 60% 50% at 0% 0%, #4a1250 0%, transparent 70%), radial-gradient(ellipse 60% 50% at 100% 20%, #14305e 0%, transparent 70%), radial-gradient(ellipse 70% 50% at 50% 100%, #0d3b3a 0%, transparent 70%), #120d28;
+    --card-bg: linear-gradient(rgba(22, 17, 44, 0.9), rgba(22, 17, 44, 0.9)) padding-box, linear-gradient(135deg, #ff9ad8, #c4a5ff 25%, #8fd8ff 50%, #9ef0c2 75%, #ffe58a) border-box;
+    --card-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+    --el-bg: rgba(255, 255, 255, 0.05);
+    --el-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1.5px rgba(196, 165, 255, 0.2);
+    --inset-shadow: inset 0 0 0 1.5px rgba(196, 165, 255, 0.22);
+    --code-bg: rgba(255, 111, 207, 0.14);
+    --pre-bg: rgba(8, 5, 18, 0.85);
     --hover-bg: rgba(255, 255, 255, 0.08);
-    --current-bg: linear-gradient(180deg, #ff8ad4 0%, #e6007e 55%, #99005a 100%);
-    --current-shadow: 0 6px 14px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.45);
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
   --fg: #f1ecff;
-  --muted: #b3a9d6;
-  --bg: #0d0a1a;
+  --muted: #b5abd8;
+  --bg: #0f0b22;
   --heading: #ffffff;
-  --accent: #ff5cc3;
-  --accent-2: #b8ff3b;
-  --border: #342a58;
-  --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M40 20 l3 9 l9 3 l-9 3 l-3 9 l-3 -9 l-9 -3 l9 -3 z'/%3E%3Cpath d='M180 60 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2 z'/%3E%3Cpath d='M120 170 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 z'/%3E%3Cpath d='M210 200 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 z'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #2a0a3d 0%, #10123a 45%, #062a3a 100%);
-  --card-bg: rgba(18, 14, 38, 0.84);
-  --card-border: 2px solid rgba(255, 255, 255, 0.14);
-  --card-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  --el-bg: rgba(255, 255, 255, 0.06);
-  --el-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  --inset-shadow: inset 0 0 0 2px rgba(255, 92, 195, 0.18);
-  --hr: linear-gradient(90deg, #ff5cc3, #a78bfa, #22d3ee, #b8ff3b);
-  --code-bg: rgba(255, 92, 195, 0.14);
-  --pre-bg: rgba(6, 4, 14, 0.85);
-  --th-bg: linear-gradient(180deg, #ff5cc3, #c2007a);
+  --accent: #ff6fcf;
+  --accent-2: #b89bff;
+  --border: #352c5c;
+  --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1.5' opacity='0.85'%3E%3Ccircle cx='60' cy='70' r='22'/%3E%3Ccircle cx='290' cy='120' r='12'/%3E%3Ccircle cx='170' cy='290' r='30'/%3E%3C/g%3E%3Cg fill='%23ffffff' opacity='0.9'%3E%3Ccircle cx='52' cy='62' r='5'/%3E%3Ccircle cx='286' cy='116' r='3'/%3E%3Ccircle cx='160' cy='280' r='7'/%3E%3Cpath d='M230 40 l3 10 l10 3 l-10 3 l-3 10 l-3 -10 l-10 -3 l10 -3 z'/%3E%3Cpath d='M320 250 l2 7 l7 2 l-7 2 l-2 7 l-2 -7 l-7 -2 l7 -2 z'/%3E%3Cpath d='M100 200 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2 l6 -2 z'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 360px 360px, radial-gradient(ellipse 60% 50% at 0% 0%, #4a1250 0%, transparent 70%), radial-gradient(ellipse 60% 50% at 100% 20%, #14305e 0%, transparent 70%), radial-gradient(ellipse 70% 50% at 50% 100%, #0d3b3a 0%, transparent 70%), #120d28;
+  --card-bg: linear-gradient(rgba(22, 17, 44, 0.9), rgba(22, 17, 44, 0.9)) padding-box, linear-gradient(135deg, #ff9ad8, #c4a5ff 25%, #8fd8ff 50%, #9ef0c2 75%, #ffe58a) border-box;
+  --card-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+  --el-bg: rgba(255, 255, 255, 0.05);
+  --el-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1.5px rgba(196, 165, 255, 0.2);
+  --inset-shadow: inset 0 0 0 1.5px rgba(196, 165, 255, 0.22);
+  --code-bg: rgba(255, 111, 207, 0.14);
+  --pre-bg: rgba(8, 5, 18, 0.85);
   --hover-bg: rgba(255, 255, 255, 0.08);
-  --current-bg: linear-gradient(180deg, #ff8ad4 0%, #e6007e 55%, #99005a 100%);
-  --current-shadow: 0 6px 14px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.45);
 }
 
 /* ページの地と、本文・ナビのカード */
@@ -168,15 +158,35 @@ body > nav ul ul { border-left: 2px solid var(--border); }
 .tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
 .tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
 
-/* 見出し: クロームのように光る文字 */
+/* 見出し: h1 は丸くて太い虹色の文字に白いふち、h2 はきらめく星の印、h3 は紫 */
 main h1 {
   width: fit-content;
-  font-style: italic;
-  background: linear-gradient(180deg, #eef0ff 0%, #a9abc6 42%, #3d3e5a 50%, #8f91b0 64%, #e6e8ff 100%);
+  font-size: 2.5em;
+  letter-spacing: 0.02em;
+  background: linear-gradient(90deg, #ff4fb0, #a35cff 45%, #1fb6ff);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  -webkit-text-stroke: 1.5px #5b2ee6;
-  filter: drop-shadow(3px 3px 0 rgba(230, 0, 126, 0.45));
+  filter: drop-shadow(0 2px 0 #ffffff) drop-shadow(0 4px 10px rgba(107, 60, 255, 0.3));
 }
-main h2::before { content: "✦"; margin-right: 0.4em; color: var(--accent); }
+main h1::after { content: " ✧"; -webkit-text-fill-color: #ff9ad8; }
+main h2::before {
+  content: "✦";
+  margin-right: 0.35em;
+  background: linear-gradient(135deg, #ff4fb0, #a35cff, #1fb6ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+main h3 { color: var(--accent-2); }
+main strong { background: linear-gradient(transparent 60%, rgba(255, 154, 216, 0.45) 60%); }
+main hr { height: 4px; border-radius: 4px; }
+main th { text-shadow: 0 1px 1px rgba(160, 0, 90, 0.35); }
+.tsuzuri-nav-head > p {
+  font-family: var(--heading-font);
+  background: linear-gradient(90deg, #ff4fb0, #a35cff, #1fb6ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+main .tsuzuri-pager a:hover { box-shadow: 0 6px 18px rgba(255, 79, 176, 0.25), inset 0 0 0 2px #ff9ad8; }

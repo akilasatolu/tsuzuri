@@ -1,8 +1,9 @@
 /*
  * pixel.css (ピクセル)
  * Pixel art website(ドット絵)のスタイル。8ビットゲームのような、角の欠けた太い枠と市松模様の地。
- * 文字は等幅、見出しはドットの影付き、画像はぼかさずドットのまま拡大する。差し色は懐かしいゲーム機の色。
- * ライト/ダーク表示に対応する。
+ * 文字は等幅。h1 はドットの影、h2 はゲームのステージ名のような札、h3 と今いるページにはRPGのメニューの▶カーソル。
+ * 画像はぼかさずドットのまま拡大する。ダーク表示はRPGの会話ウィンドウ(黒の地に白い枠)。差し色は懐かしいゲーム機の色。
+ * ライト/ダーク表示に対応する。カーソルの点滅は、動きを減らす設定の人には止める。
  */
 :root {
   color-scheme: light dark;
@@ -10,30 +11,33 @@
   --muted: #5d5f73;
   --bg: #f4f0dc;
   --heading: #1a1c2c;
-  --accent: #1d6fd8;
+  --accent: #1d5fc4;
   --accent-2: #e5004d;
   --border: #1a1c2c;
-  --page-bg: repeating-conic-gradient(#efe9cf 0% 25%, #f4f0dc 0% 50%) 0 0 / 16px 16px;
+  --page-bg: repeating-conic-gradient(#e9e2c3 0% 25%, #f1ecd4 0% 50%) 0 0 / 16px 16px;
   --card-bg: #fffdf2;
   --card-border: 0;
   --card-filter: none;
-  --card-shadow: 0 -4px 0 0 #1a1c2c, 0 4px 0 0 #1a1c2c, -4px 0 0 0 #1a1c2c, 4px 0 0 0 #1a1c2c, 0 0 0 4px transparent, 8px 8px 0 4px rgba(26, 28, 44, 0.25);
+  --card-shadow: 0 -4px 0 0 #1a1c2c, 0 4px 0 0 #1a1c2c, -4px 0 0 0 #1a1c2c, 4px 0 0 0 #1a1c2c, 8px 8px 0 4px rgba(26, 28, 44, 0.25);
   --radius-lg: 0;
   --radius: 0;
   --pill: 0;
   --heading-weight: 700;
   --el-bg: #f7f2de;
-  --el-shadow: 0 -4px 0 0 #1a1c2c, 0 4px 0 0 #1a1c2c, -4px 0 0 0 #1a1c2c, 4px 0 0 0 #1a1c2c, 0 0 0 4px transparent;
+  --el-shadow: 0 -3px 0 0 #1a1c2c, 0 3px 0 0 #1a1c2c, -3px 0 0 0 #1a1c2c, 3px 0 0 0 #1a1c2c;
   --inset-shadow: inset 0 0 0 3px #1a1c2c;
   --hr: repeating-linear-gradient(90deg, #1a1c2c 0 8px, transparent 8px 16px);
-  --code-bg: #e6f1ff;
+  --code-bg: #e3edff;
   --pre-bg: #1a1c2c;
-  --th-bg: #29adff;
-  --th-fg: #1a1c2c;
+  --th-bg: #1a1c2c;
+  --th-fg: #ffec27;
   --hover-bg: #ffec27;
   --current-bg: #e5004d;
   --current-fg: #fffdf2;
-  --current-shadow: 0 -4px 0 0 #1a1c2c, 0 4px 0 0 #1a1c2c, -4px 0 0 0 #1a1c2c, 4px 0 0 0 #1a1c2c, 0 0 0 4px transparent;
+  --current-shadow: 0 -3px 0 0 #1a1c2c, 0 3px 0 0 #1a1c2c, -3px 0 0 0 #1a1c2c, 3px 0 0 0 #1a1c2c;
+  --plate-bg: #1d5fc4;
+  --plate-fg: #fffdf2;
+  --cursor: #e5004d;
   --hl-keyword: #ff77a8;
   --hl-string: #00e436;
   --hl-number: #ffec27;
@@ -56,21 +60,24 @@
     --accent: #29adff;
     --accent-2: #ff77a8;
     --border: #000000;
-    --page-bg: repeating-conic-gradient(#1a2749 0% 25%, #1d2b53 0% 50%) 0 0 / 16px 16px;
-    --card-bg: #11182e;
-    --card-shadow: 0 -4px 0 0 #000000, 0 4px 0 0 #000000, -4px 0 0 0 #000000, 4px 0 0 0 #000000, 0 0 0 4px transparent, 8px 8px 0 4px rgba(0, 0, 0, 0.45);
-    --el-bg: #1a2440;
-    --el-shadow: 0 -4px 0 0 #000000, 0 4px 0 0 #000000, -4px 0 0 0 #000000, 4px 0 0 0 #000000, 0 0 0 4px transparent;
-    --inset-shadow: inset 0 0 0 3px #000000;
+    --page-bg: repeating-conic-gradient(#18244a 0% 25%, #1d2b53 0% 50%) 0 0 / 16px 16px;
+    --card-bg: #0c1226;
+    --card-shadow: 0 -4px 0 0 #fff1e8, 0 4px 0 0 #fff1e8, -4px 0 0 0 #fff1e8, 4px 0 0 0 #fff1e8, 0 0 0 8px #000000, 10px 10px 0 8px rgba(0, 0, 0, 0.45);
+    --el-bg: #141c38;
+    --el-shadow: 0 -3px 0 0 #5f6a8f, 0 3px 0 0 #5f6a8f, -3px 0 0 0 #5f6a8f, 3px 0 0 0 #5f6a8f;
+    --inset-shadow: inset 0 0 0 3px #5f6a8f;
     --hr: repeating-linear-gradient(90deg, #29adff 0 8px, transparent 8px 16px);
-    --code-bg: #243661;
+    --code-bg: #22325e;
     --pre-bg: #000000;
-    --th-bg: #7e2553;
-    --th-fg: #fff1e8;
-    --hover-bg: #243661;
+    --th-bg: #000000;
+    --th-fg: #ffec27;
+    --hover-bg: #22325e;
     --current-bg: #ff004d;
     --current-fg: #fff1e8;
-    --current-shadow: 0 -4px 0 0 #000000, 0 4px 0 0 #000000, -4px 0 0 0 #000000, 4px 0 0 0 #000000, 0 0 0 4px transparent;
+    --current-shadow: 0 -3px 0 0 #000000, 0 3px 0 0 #000000, -3px 0 0 0 #000000, 3px 0 0 0 #000000;
+    --plate-bg: #ff004d;
+    --plate-fg: #fff1e8;
+    --cursor: #ffec27;
   }
 }
 :root[data-theme="dark"] {
@@ -82,21 +89,24 @@
   --accent: #29adff;
   --accent-2: #ff77a8;
   --border: #000000;
-  --page-bg: repeating-conic-gradient(#1a2749 0% 25%, #1d2b53 0% 50%) 0 0 / 16px 16px;
-  --card-bg: #11182e;
-  --card-shadow: 0 -4px 0 0 #000000, 0 4px 0 0 #000000, -4px 0 0 0 #000000, 4px 0 0 0 #000000, 0 0 0 4px transparent, 8px 8px 0 4px rgba(0, 0, 0, 0.45);
-  --el-bg: #1a2440;
-  --el-shadow: 0 -4px 0 0 #000000, 0 4px 0 0 #000000, -4px 0 0 0 #000000, 4px 0 0 0 #000000, 0 0 0 4px transparent;
-  --inset-shadow: inset 0 0 0 3px #000000;
+  --page-bg: repeating-conic-gradient(#18244a 0% 25%, #1d2b53 0% 50%) 0 0 / 16px 16px;
+  --card-bg: #0c1226;
+  --card-shadow: 0 -4px 0 0 #fff1e8, 0 4px 0 0 #fff1e8, -4px 0 0 0 #fff1e8, 4px 0 0 0 #fff1e8, 0 0 0 8px #000000, 10px 10px 0 8px rgba(0, 0, 0, 0.45);
+  --el-bg: #141c38;
+  --el-shadow: 0 -3px 0 0 #5f6a8f, 0 3px 0 0 #5f6a8f, -3px 0 0 0 #5f6a8f, 3px 0 0 0 #5f6a8f;
+  --inset-shadow: inset 0 0 0 3px #5f6a8f;
   --hr: repeating-linear-gradient(90deg, #29adff 0 8px, transparent 8px 16px);
-  --code-bg: #243661;
+  --code-bg: #22325e;
   --pre-bg: #000000;
-  --th-bg: #7e2553;
-  --th-fg: #fff1e8;
-  --hover-bg: #243661;
+  --th-bg: #000000;
+  --th-fg: #ffec27;
+  --hover-bg: #22325e;
   --current-bg: #ff004d;
   --current-fg: #fff1e8;
-  --current-shadow: 0 -4px 0 0 #000000, 0 4px 0 0 #000000, -4px 0 0 0 #000000, 4px 0 0 0 #000000, 0 0 0 4px transparent;
+  --current-shadow: 0 -3px 0 0 #000000, 0 3px 0 0 #000000, -3px 0 0 0 #000000, 3px 0 0 0 #000000;
+  --plate-bg: #ff004d;
+  --plate-fg: #fff1e8;
+  --cursor: #ffec27;
 }
 
 /* ページの地と、本文・ナビのカード */
@@ -175,12 +185,26 @@ body > nav ul ul { border-left: 2px solid var(--border); }
 .tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
 .tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
 
-/* ドット絵: 見出しはドットの影、印は四角いドット、画像はぼかさない */
-main :is(h1, h2, h3) { text-shadow: 3px 3px 0 color-mix(in srgb, var(--accent-2) 55%, transparent); letter-spacing: 0.04em; }
-main h2::before { content: ""; display: inline-block; width: 0.55em; height: 0.55em; margin-right: 0.5em; background: var(--accent-2); box-shadow: 0.2em 0.2em 0 var(--accent); }
+/* ドット絵: h1 はぼかさないドットの影、h2 はステージ名の札、h3 は▶カーソル、画像はぼかさない */
+main :is(h1, h2, h3, h4) { letter-spacing: 0.04em; }
+main h1 { font-size: 2em; text-shadow: 3px 3px 0 var(--accent-2), 6px 6px 0 color-mix(in srgb, var(--heading) 25%, transparent); }
+main h2 {
+  width: fit-content;
+  margin-left: 4px;
+  padding: 4px 14px;
+  font-size: 1.3em;
+  color: var(--plate-fg);
+  background: var(--plate-bg);
+  box-shadow: 0 -4px 0 0 var(--border), 0 4px 0 0 var(--border), -4px 0 0 0 var(--border), 4px 0 0 0 var(--border), 6px 6px 0 2px color-mix(in srgb, var(--heading) 30%, transparent);
+}
+main h2 a.tsuzuri-anchor { color: inherit; }
+main h3::before, body > nav a[aria-current="page"]::before { content: "▶"; margin-right: 0.4em; color: var(--cursor); animation: tsuzuri-pixel-blink 1s steps(1) infinite; }
+body > nav a[aria-current="page"]::before { color: inherit; }
+main h3 { color: var(--accent); }
 main img { image-rendering: pixelated; }
 main pre { color: #f1f0e6; }
 main a { text-decoration-thickness: 3px; text-decoration-color: var(--accent); }
 main a:hover { color: var(--bg); background: var(--accent); text-decoration: none; }
 body > nav a:hover { color: #1a1c2c; }
 main .tsuzuri-pager a:hover { transform: translate(-2px, -2px); }
+@keyframes tsuzuri-pixel-blink { 50% { opacity: 0; } }
