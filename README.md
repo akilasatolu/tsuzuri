@@ -28,8 +28,8 @@ Webサイトとして公開できます。ページ数が増えても、README�
 だけで自動的にサイトへ反映されるので、ナビゲーションを手作業で作り直す必要
 はありません。
 
-**ブランディングについての注意**: ロゴの円(印章部分・藍色)と十字ステッチ
-(和綴じの糸目・朱色)の配色は、Tsuzuri自身のブランディングです。利用者が
+**ブランディングについての注意**: ロゴ(紺の地に、炎の橙に灯る中心から白いページへ線が
+つながる形)の配色は、Tsuzuri自身のブランディングです。利用者が
 生成するページ側のfavicon(`FAVICON_FILE`設定キーで指定するもの)とは無関係
 なので混同しないでください。
 
@@ -49,7 +49,7 @@ https://akilasatolu.github.io/tsuzuri/
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>テーマと独自CSS</h3>
-<p>和・桜・月・灯・雪の和風のテーマと、グラス・クレイ・ピクセルなどモダンな11のテーマに、独自CSSを重ねて自由に調整できます。このサイトも独自CSSで作っています。</p>
+<p>マテリアル・クレイ・グラス・ピクセルなど9つのテーマに、独自CSSを重ねて自由に調整できます。このサイトも独自CSSで作っています。</p>
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">探</span><span class="tsuzuri-sep">】</span>ナビ・検索・目次</h3>

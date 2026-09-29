@@ -1,101 +1,103 @@
 /*
  * Tsuzuri サイト用の独自スタイル(STYLE_FILE)
  *
- * THEME=none(基礎CSSのみ)の上に、ポップで親しみやすい和の見た目を作る。
- *   - 丸みのあるカード・やわらかい影・藍と朱(Tsuzuri のアイコンの色)・七宝(しっぽう)の地紋
- *   - ライト/ダークモードの両方に対応(OSの設定に追従)
+ * THEME=none(基礎CSSのみ)の上に、Tsuzuri のロゴと同じ見た目を作る。
+ *   - 紺(夜の地)・白(ページ)・炎の橙(入口に灯る光)の配色。ロゴの「中心から線でつながるページ」を地紋にする
+ *   - 丸みのあるカード・やわらかい影。ライト/ダークモードの両方に対応(OSの設定に追従)
  *
  * テーマの見本ページ(docs/gallery/*.md)は、それぞれのテーマの見た目をそのまま見せるため、
  * frontmatter の styleFile で中身が空の plain.css を指定して、このスタイルを当てないようにしている。
  */
 
 :root {
-  /* Tsuzuri のアイコンと同じ藍(#1D4E64)と朱(#B33823)を軸に、生成り・山吹・若竹を添えた和の配色 */
+  /* ロゴの紺(#0F172A)・線の銀(#CBD5E1)・炎の橙(#F97316)と芯の淡い黄(#FDE68A)を軸にした配色 */
   color-scheme: light;
-  --fg: #2a2d34;               /* 墨 */
-  --fg-soft: #5f6670;          /* 鈍色 */
-  --bg: #f4efe3;               /* 生成り */
-  --surface: #fffdf8;          /* 白練 */
-  --surface-2: #ece6d6;        /* 砂色 */
-  --border: #e2d9c4;
-  --accent: #1d4e64;           /* 藍 */
-  --accent-2: #b33823;         /* 朱 */
-  --accent-3: #e0a526;         /* 山吹 */
-  --accent-4: #5b8a5a;         /* 若竹 */
-  --tint: #e3edf0;             /* 藍白(藍の淡い色) */
-  --gradient: linear-gradient(135deg, #16394a 0%, #1d4e64 45%, #2f7a92 100%);   /* 藍 → 浅葱 */
-  --gradient-shu: linear-gradient(135deg, #b33823 0%, #d4572e 100%);            /* 朱 */
-  /* 七宝(円がつながる柄。縁が続く意味)の地紋。線の色は画像の中に書くので、ライト/ダークで別の画像にする */
-  --shippo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg fill='none' stroke='%231d4e64' stroke-opacity='0.13' stroke-width='1.2'%3E%3Ccircle cx='0' cy='0' r='22'/%3E%3Ccircle cx='44' cy='0' r='22'/%3E%3Ccircle cx='0' cy='44' r='22'/%3E%3Ccircle cx='44' cy='44' r='22'/%3E%3Ccircle cx='22' cy='22' r='22'/%3E%3C/g%3E%3C/svg%3E");
-  --code-bg: #f3e6dc;
-  --code-fg: #a2321f;
-  --pre-bg: #172a33;           /* 藍墨 */
-  --pre-fg: #eef3f2;
-  --shadow: 0 1px 2px rgba(42, 45, 52, 0.06), 0 8px 24px rgba(29, 78, 100, 0.08);
-  --shadow-lg: 0 2px 4px rgba(42, 45, 52, 0.06), 0 16px 40px rgba(29, 78, 100, 0.14);
-  --font: "Hiragino Maru Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI", "Meiryo", system-ui,
-    -apple-system, "Segoe UI", sans-serif;
+  --fg: #1e293b;
+  --fg-soft: #64748b;
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --surface-2: #eef1f6;
+  --border: #e2e7ef;
+  --accent: #1e3a6e;           /* 紺(リンク・表の見出しなど) */
+  --accent-2: #ea580c;         /* 炎の橙 */
+  --accent-3: #fdba74;         /* 灯りの淡い橙(強調のマーカー) */
+  --tint: #eef2f9;
+  --gradient: linear-gradient(135deg, #0f172a 0%, #1e3a6e 100%);                 /* 紺(塗り) */
+  --gradient-text: linear-gradient(135deg, #0f172a 0%, #1e3a6e 70%, #c2410c 100%); /* 見出しの文字 */
+  --gradient-flame: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #dc2626 100%); /* 炎 */
+  /* 中心の点から周りの点へ線がつながる地紋(ロゴの形)。色は画像の中に書くので、ライト/ダークで別の画像にする */
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg stroke='%230f172a' stroke-opacity='0.07' stroke-width='1.2'%3E%3Cline x1='24' y1='30' x2='70' y2='52'/%3E%3Cline x1='70' y1='52' x2='98' y2='20'/%3E%3Cline x1='70' y1='52' x2='84' y2='96'/%3E%3Cline x1='70' y1='52' x2='36' y2='88'/%3E%3C/g%3E%3Cg fill='%230f172a' fill-opacity='0.07'%3E%3Ccircle cx='24' cy='30' r='3'/%3E%3Ccircle cx='98' cy='20' r='2.5'/%3E%3Ccircle cx='84' cy='96' r='3.5'/%3E%3Ccircle cx='36' cy='88' r='2.5'/%3E%3C/g%3E%3Ccircle cx='70' cy='52' r='4' fill='%23f97316' fill-opacity='0.11'/%3E%3C/svg%3E");
+  --code-bg: #fff1e6;
+  --code-fg: #c2410c;
+  --pre-bg: #0f172a;           /* ロゴの紺 */
+  --pre-fg: #e2e8f0;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 2px 4px rgba(15, 23, 42, 0.06), 0 16px 40px rgba(15, 23, 42, 0.14);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "BIZ UDPGothic", "Yu Gothic UI", Meiryo, system-ui, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   --content-width: 880px;
-  --alert-note: #2f6f8a;       /* 縹 */
-  --alert-tip: #4f8a55;        /* 若竹 */
-  --alert-important: #7a4f8c;  /* 江戸紫 */
-  --alert-warning: #c98a12;    /* 山吹 */
-  --alert-caution: #b33823;    /* 朱 */
+  --alert-note: #2563eb;
+  --alert-tip: #16a34a;
+  --alert-important: #7c3aed;
+  --alert-warning: #d97706;
+  --alert-caution: #dc2626;
 }
 
 /* ダーク表示: OS がダークモードのとき(ナビのボタンでライト表示を選んだときを除く)と、ダーク表示を選んだとき */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --fg: #e8e4da;
-    --fg-soft: #a9b0b4;
-    --bg: #111c22;             /* 藍墨 */
-    --surface: #182830;
-    --surface-2: #213640;
-    --border: #2c434e;
-    --accent: #6fa8c2;         /* アイコンのダークモードの藍 */
-    --accent-2: #e8794f;       /* アイコンのダークモードの朱 */
-    --accent-3: #e6b847;
-    --tint: #1f3a46;
-    --gradient: linear-gradient(135deg, #2f7a92 0%, #6fa8c2 100%);
-    --gradient-shu: linear-gradient(135deg, #d4572e 0%, #e8794f 100%);
-    --shippo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg fill='none' stroke='%236fa8c2' stroke-opacity='0.09' stroke-width='1.2'%3E%3Ccircle cx='0' cy='0' r='22'/%3E%3Ccircle cx='44' cy='0' r='22'/%3E%3Ccircle cx='0' cy='44' r='22'/%3E%3Ccircle cx='44' cy='44' r='22'/%3E%3Ccircle cx='22' cy='22' r='22'/%3E%3C/g%3E%3C/svg%3E");
-    --code-bg: #2a2a2c;
-    --code-fg: #f0a07e;
-    --pre-bg: #0b1418;
-    --alert-note: #6fa8c2;
-    --alert-tip: #7fb87f;
-    --alert-important: #b48fc7;
-    --alert-warning: #e6b847;
-    --alert-caution: #e8794f;
+    --fg: #e2e8f0;
+    --fg-soft: #94a3b8;
+    --bg: #0b1120;
+    --surface: #0f172a;        /* ロゴの紺 */
+    --surface-2: #1b2539;
+    --border: #243049;
+    --accent: #fdba74;         /* 灯りの淡い橙 */
+    --accent-2: #fb923c;       /* 炎の橙 */
+    --accent-3: #f97316;
+    --tint: #16213a;
+    --gradient: linear-gradient(135deg, #1e3a6e 0%, #2e4f8a 100%);
+    --gradient-text: linear-gradient(135deg, #ffffff 0%, #e2e8f0 55%, #fdba74 100%);
+    --gradient-flame: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #dc2626 100%);
+    --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg stroke='%23cbd5e1' stroke-opacity='0.06' stroke-width='1.2'%3E%3Cline x1='24' y1='30' x2='70' y2='52'/%3E%3Cline x1='70' y1='52' x2='98' y2='20'/%3E%3Cline x1='70' y1='52' x2='84' y2='96'/%3E%3Cline x1='70' y1='52' x2='36' y2='88'/%3E%3C/g%3E%3Cg fill='%23cbd5e1' fill-opacity='0.06'%3E%3Ccircle cx='24' cy='30' r='3'/%3E%3Ccircle cx='98' cy='20' r='2.5'/%3E%3Ccircle cx='84' cy='96' r='3.5'/%3E%3Ccircle cx='36' cy='88' r='2.5'/%3E%3C/g%3E%3Ccircle cx='70' cy='52' r='4' fill='%23f97316' fill-opacity='0.10'/%3E%3C/svg%3E");
+    --code-bg: #2a1c14;
+    --code-fg: #fdba74;
+    --pre-bg: #070c17;
+    --alert-note: #60a5fa;
+    --alert-tip: #4ade80;
+    --alert-important: #a78bfa;
+    --alert-warning: #fbbf24;
+    --alert-caution: #f87171;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
     --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.4);
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --fg: #e8e4da;
-  --fg-soft: #a9b0b4;
-  --bg: #111c22;       /* 藍墨 */
-  --surface: #182830;
-  --surface-2: #213640;
-  --border: #2c434e;
-  --accent: #6fa8c2;     /* アイコンのダークモードの藍 */
-  --accent-2: #e8794f;     /* アイコンのダークモードの朱 */
-  --accent-3: #e6b847;
-  --tint: #1f3a46;
-  --gradient: linear-gradient(135deg, #2f7a92 0%, #6fa8c2 100%);
-  --gradient-shu: linear-gradient(135deg, #d4572e 0%, #e8794f 100%);
-  --shippo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg fill='none' stroke='%236fa8c2' stroke-opacity='0.09' stroke-width='1.2'%3E%3Ccircle cx='0' cy='0' r='22'/%3E%3Ccircle cx='44' cy='0' r='22'/%3E%3Ccircle cx='0' cy='44' r='22'/%3E%3Ccircle cx='44' cy='44' r='22'/%3E%3Ccircle cx='22' cy='22' r='22'/%3E%3C/g%3E%3C/svg%3E");
-  --code-bg: #2a2a2c;
-  --code-fg: #f0a07e;
-  --pre-bg: #0b1418;
-  --alert-note: #6fa8c2;
-  --alert-tip: #7fb87f;
-  --alert-important: #b48fc7;
-  --alert-warning: #e6b847;
-  --alert-caution: #e8794f;
+  --fg: #e2e8f0;
+  --fg-soft: #94a3b8;
+  --bg: #0b1120;
+  --surface: #0f172a;        /* ロゴの紺 */
+  --surface-2: #1b2539;
+  --border: #243049;
+  --accent: #fdba74;         /* 灯りの淡い橙 */
+  --accent-2: #fb923c;       /* 炎の橙 */
+  --accent-3: #f97316;
+  --tint: #16213a;
+  --gradient: linear-gradient(135deg, #1e3a6e 0%, #2e4f8a 100%);
+  --gradient-text: linear-gradient(135deg, #ffffff 0%, #e2e8f0 55%, #fdba74 100%);
+  --gradient-flame: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #dc2626 100%);
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg stroke='%23cbd5e1' stroke-opacity='0.06' stroke-width='1.2'%3E%3Cline x1='24' y1='30' x2='70' y2='52'/%3E%3Cline x1='70' y1='52' x2='98' y2='20'/%3E%3Cline x1='70' y1='52' x2='84' y2='96'/%3E%3Cline x1='70' y1='52' x2='36' y2='88'/%3E%3C/g%3E%3Cg fill='%23cbd5e1' fill-opacity='0.06'%3E%3Ccircle cx='24' cy='30' r='3'/%3E%3Ccircle cx='98' cy='20' r='2.5'/%3E%3Ccircle cx='84' cy='96' r='3.5'/%3E%3Ccircle cx='36' cy='88' r='2.5'/%3E%3C/g%3E%3Ccircle cx='70' cy='52' r='4' fill='%23f97316' fill-opacity='0.10'/%3E%3C/svg%3E");
+  --code-bg: #2a1c14;
+  --code-fg: #fdba74;
+  --pre-bg: #070c17;
+  --alert-note: #60a5fa;
+  --alert-tip: #4ade80;
+  --alert-important: #a78bfa;
+  --alert-warning: #fbbf24;
+  --alert-caution: #f87171;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
   --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.4);
 }
@@ -104,10 +106,10 @@
 body {
   line-height: 1.8;
   letter-spacing: 0.02em;
-  /* 七宝の地紋 */
+  /* ロゴの形の地紋 */
   background-color: var(--bg);
-  background-image: var(--shippo);
-  background-size: 44px 44px;
+  background-image: var(--pattern);
+  background-size: 120px 120px;
   -webkit-font-smoothing: antialiased;
 }
 ::selection { background: color-mix(in srgb, var(--accent-2) 30%, transparent); }
@@ -134,7 +136,7 @@ main h1 {
   line-height: 1.3;
   font-weight: 800;
   letter-spacing: 0.01em;
-  background: var(--gradient);
+  background: var(--gradient-text);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -146,7 +148,7 @@ main h1::after {
   height: 6px;
   margin-top: 14px;
   border-radius: 999px;
-  background: var(--gradient-shu);
+  background: var(--gradient-flame);
 }
 main h2 {
   display: flex;
@@ -156,13 +158,15 @@ main h2 {
   font-size: 1.45rem;
   font-weight: 800;
 }
+/* h2 の印は、ロゴの中心と同じ灯った点(橙に淡い黄の芯と光の輪) */
 main h2::before {
   content: "";
   flex: none;
-  width: 12px;
-  height: 28px;
-  border-radius: 999px;
-  background: var(--gradient-shu);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 56%, #fde68a 0 30%, #f97316 34% 100%);
+  box-shadow: 0 0 0 5px color-mix(in srgb, #f97316 22%, transparent);
 }
 main h3 { margin: 32px 0 12px; font-size: 1.15rem; font-weight: 700; }
 main h3::before { content: "● "; color: var(--accent-2); font-size: 0.7em; vertical-align: 0.15em; }
@@ -187,7 +191,7 @@ main a:hover {
 }
 main a:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 2px; }
 main strong { color: var(--fg); background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent-3) 45%, transparent) 62%); }
-main hr { height: 4px; margin: 40px 0; border: 0; border-radius: 999px; background: var(--gradient-shu); opacity: 0.4; }
+main hr { height: 4px; margin: 40px 0; border: 0; border-radius: 999px; background: var(--gradient-flame); opacity: 0.4; }
 main img { border-radius: 16px; }
 main ul, main ol { padding-left: 1.4em; }
 main li { margin: 4px 0; }
@@ -219,14 +223,14 @@ main pre:not(.mermaid) {
   box-shadow: var(--shadow);
   line-height: 1.6;
   /* コードの色分け(highlight.js)。暗い背景に合わせた明るい色 */
-  --hl-keyword: #f08a67;   /* 朱 */
-  --hl-string: #9fcf95;    /* 若竹 */
-  --hl-number: #e8c15a;    /* 山吹 */
-  --hl-title: #8cc3dc;     /* 浅葱 */
-  --hl-attr: #d6b3dd;      /* 藤 */
-  --hl-comment: #8a9aa2;
+  --hl-keyword: #fb923c;   /* 炎の橙 */
+  --hl-string: #86efac;
+  --hl-number: #fde68a;    /* 芯の淡い黄 */
+  --hl-title: #93c5fd;
+  --hl-attr: #f0abfc;
+  --hl-comment: #94a3b8;
 }
-/* ウィンドウ風の3つの丸 */
+/* ウィンドウ風の3つの丸(炎の色) */
 main pre:not(.mermaid)::before {
   content: "";
   position: absolute;
@@ -235,8 +239,8 @@ main pre:not(.mermaid)::before {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #d4572e;
-  box-shadow: 20px 0 0 #e0a526, 40px 0 0 #6aa06a;
+  background: #dc2626;
+  box-shadow: 20px 0 0 #f97316, 40px 0 0 #fde68a;
 }
 main pre code { color: inherit; background: none; padding: 0; border-radius: 0; font-size: 0.88em; }
 
@@ -331,7 +335,7 @@ body > nav {
 .tsuzuri-nav-head > p {
   font-size: 1.25rem;
   font-weight: 800;
-  background: var(--gradient);
+  background: var(--gradient-text);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -340,7 +344,7 @@ body > nav {
   padding: 6px 16px;
   color: #fff;
   font-weight: 700;
-  background: var(--gradient-shu);
+  background: var(--gradient-flame);
   border: 0;
   border-radius: 999px;
   box-shadow: var(--shadow);
@@ -399,14 +403,14 @@ body > nav ul ul { border-left: 2px solid var(--border); }
   padding: 40px 24px 32px;
   text-align: center;
   background:
-    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--accent-2) 12%, transparent) 0, transparent 40%),
-    radial-gradient(circle at 88% 82%, color-mix(in srgb, var(--accent) 14%, transparent) 0, transparent 45%),
+    radial-gradient(circle at 50% 22%, color-mix(in srgb, #f97316 16%, transparent) 0, transparent 38%),
+    radial-gradient(circle at 88% 88%, color-mix(in srgb, var(--accent) 10%, transparent) 0, transparent 45%),
     var(--tint);
   border-radius: 24px;
 }
 .tsuzuri-hero img[alt="Tsuzuri logo"] {
-  border-radius: 0;
-  filter: drop-shadow(0 6px 12px color-mix(in srgb, var(--accent) 25%, transparent));
+  border-radius: 16px;
+  filter: drop-shadow(0 8px 20px color-mix(in srgb, #f97316 30%, transparent));
 }
 .tsuzuri-hero h1 {
   margin: 8px auto 12px;
@@ -447,7 +451,7 @@ main a.tsuzuri-button:hover {
 main a.tsuzuri-button-primary,
 main a.tsuzuri-button-primary:hover {
   color: #fff;
-  background: var(--gradient-shu);
+  background: var(--gradient-flame);
   border-color: transparent;
 }
 .tsuzuri-hero p:has(> a > img) { margin: 0; }
@@ -470,7 +474,7 @@ main a.tsuzuri-button-primary:hover {
   transition: transform 0.15s, box-shadow 0.15s;
 }
 .tsuzuri-feature:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-/* 落款(はんこ)風の一文字(見出しの先頭に置き、見出しの上に表示する) */
+/* 見出しの先頭の一文字(見出しの上に、ロゴの中心のような灯った丸として表示する) */
 .tsuzuri-feature-mark {
   display: grid;
   place-items: center;
@@ -481,11 +485,11 @@ main a.tsuzuri-button-primary:hover {
   font-size: 1.3rem;
   line-height: 1;
   font-weight: 800;
-  background: var(--gradient-shu);
-  border-radius: 12px;
-  transform: rotate(-4deg);
+  background: var(--gradient-flame);
+  border-radius: 50%;
+  box-shadow: 0 0 0 6px color-mix(in srgb, #f97316 18%, transparent);
 }
-.tsuzuri-feature:nth-child(even) .tsuzuri-feature-mark { background: var(--gradient); transform: rotate(3deg); }
+.tsuzuri-feature:nth-child(even) .tsuzuri-feature-mark { background: var(--gradient); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 14%, transparent); }
 main .tsuzuri-feature h3 { margin: 0 0 6px; font-size: 1.05rem; }
 main .tsuzuri-feature h3::before { content: none; }
 .tsuzuri-feature p:last-child { margin: 0; color: var(--fg-soft); font-size: 0.93em; line-height: 1.7; }
