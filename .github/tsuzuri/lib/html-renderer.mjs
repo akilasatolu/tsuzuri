@@ -63,14 +63,11 @@ export function renderNav(
   search = null,
   navLabel = "サイト内ページ",
 ) {
-  // ディレクトリは <details> で折りたためるようにする(JavaScript は不要)。最初から開いておくのは、
-  // いちばん上の階層のディレクトリと、今のページがあるディレクトリだけ(ページが多いときにナビが長くならないように)。
-  const containsCurrent = (node) =>
-    node.children.some((c) => (c.type === "page" ? c.rel === currentRel : containsCurrent(c)));
+  // ディレクトリは <details> で折りたためるようにする(JavaScript は不要)。
+  // どのページを見ていても全ページへのリンクが見えるよう、最初はすべて開いておく。
   function renderNode(node, depth) {
     if (node.type === "dir") {
-      const open = depth === 0 || containsCurrent(node) ? " open" : "";
-      return `<li><details${open}><summary>${escapeHtml(node.name)}</summary>${renderList(node.children, depth + 1)}</details></li>`;
+      return `<li><details open><summary>${escapeHtml(node.name)}</summary>${renderList(node.children, depth + 1)}</details></li>`;
     }
     const href = pageHref(node.rel, basePath);
     const currentAttr = node.rel === currentRel ? ' aria-current="page"' : "";
