@@ -1,39 +1,39 @@
 /*
  * retro.css (レトロフューチャー)
- * Retrofuturism(レトロフューチャリズム)のスタイル。80年代が思い描いた未来。夕焼けのグラデーションの空と、
- * 地平線に広がる光るグリッド。見出しは夕焼け色の文字、差し色はネオンの水色と桃色。
- * 常にダーク表示にする(OSの設定に関わらない)。
+ * Retrofuturism(レトロフューチャー)のスタイル。80年代の人が思い描いた未来。星の夜空と地平線に沈む縞模様の夕日、
+ * 奥へ流れる光るグリッドの地。h1 はクローム(上が空色、下が夕焼け色)の文字、差し色はネオンの水色と桃色。
+ * 常にダーク表示にする(OSの設定に関わらない)。グリッドの動きは、動きを減らす設定の人には止める。
  */
 :root {
   color-scheme: dark;
   --fg: #ece6ff;
-  --muted: #a79ccf;
-  --bg: #110a28;
+  --muted: #a99fd2;
+  --bg: #0b0620;
   --heading: #fff4ff;
   --accent: #3ee8ff;
   --accent-2: #ff4fc8;
-  --border: #3a2a6e;
-  --page-bg: linear-gradient(0deg, rgba(255, 79, 200, 0.55) 1px, transparent 1px) 0 100% / 100% 34px, linear-gradient(90deg, rgba(62, 232, 255, 0.35) 1px, transparent 1px) 0 100% / 60px 100%, linear-gradient(180deg, #110a28 0%, #2a0f4d 45%, #6b1d6e 70%, #ff7a59 88%, #ffc36b 100%);
-  --card-bg: rgba(17, 10, 40, 0.84);
-  --card-border: 1px solid rgba(255, 79, 200, 0.45);
-  --card-filter: blur(4px);
-  --card-shadow: 0 0 24px rgba(255, 79, 200, 0.25), 0 0 60px rgba(62, 232, 255, 0.10);
-  --radius-lg: 8px;
-  --radius: 6px;
-  --pill: 4px;
+  --border: #34256a;
+  --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='20' cy='30' r='1.1' opacity='0.9'/%3E%3Ccircle cx='140' cy='70' r='0.8' opacity='0.6'/%3E%3Ccircle cx='250' cy='25' r='1.3' opacity='0.8'/%3E%3Ccircle cx='300' cy='140' r='0.7' opacity='0.5'/%3E%3Ccircle cx='80' cy='170' r='0.9' opacity='0.7'/%3E%3Ccircle cx='200' cy='210' r='0.6' opacity='0.5'/%3E%3Ccircle cx='40' cy='280' r='0.8' opacity='0.4'/%3E%3Ccircle cx='270' cy='290' r='1' opacity='0.6'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 320px 320px, linear-gradient(180deg, #07031a 0%, #150a38 38%, #3b0f5c 56%, #7a1c6c 64%, #1a0833 64.4%, #0b0620 100%);
+  --card-bg: linear-gradient(180deg, rgba(20, 10, 48, 0.8), rgba(11, 6, 32, 0.86));
+  --card-border: 1px solid rgba(255, 79, 200, 0.4);
+  --card-filter: blur(6px);
+  --card-shadow: 0 0 0 1px rgba(62, 232, 255, 0.08), 0 0 28px rgba(255, 79, 200, 0.22), inset 0 2px 0 rgba(255, 79, 200, 0.55);
+  --radius-lg: 6px;
+  --radius: 4px;
+  --pill: 3px;
   --heading-weight: 800;
-  --el-bg: rgba(255, 255, 255, 0.04);
-  --el-shadow: 0 0 0 1px rgba(62, 232, 255, 0.35);
-  --inset-shadow: inset 0 0 0 1px rgba(255, 79, 200, 0.30);
-  --hr: linear-gradient(90deg, #3ee8ff, #ff4fc8, #ffb35c);
+  --el-bg: rgba(62, 232, 255, 0.05);
+  --el-shadow: 0 0 0 1px rgba(62, 232, 255, 0.3);
+  --inset-shadow: inset 0 0 0 1px rgba(255, 79, 200, 0.3);
+  --hr: linear-gradient(90deg, transparent, #3ee8ff 20%, #ff4fc8 50%, #ffb35c 80%, transparent);
   --code-bg: rgba(62, 232, 255, 0.10);
-  --pre-bg: rgba(5, 2, 16, 0.85);
-  --th-bg: linear-gradient(90deg, #6b1d6e, #ff4fc8);
-  --th-fg: #ffffff;
+  --pre-bg: rgba(4, 2, 14, 0.9);
+  --th-bg: rgba(255, 79, 200, 0.14);
+  --th-fg: #ff8fdc;
   --hover-bg: rgba(62, 232, 255, 0.10);
-  --current-bg: linear-gradient(90deg, #ff4fc8, #ff7a59);
-  --current-fg: #110a28;
-  --current-shadow: 0 0 14px rgba(255, 79, 200, 0.55);
+  --current-bg: linear-gradient(90deg, rgba(255, 79, 200, 0.28), rgba(255, 122, 89, 0.08));
+  --current-fg: #ffffff;
+  --current-shadow: inset 3px 0 0 #ff4fc8, 0 0 16px rgba(255, 79, 200, 0.25);
   --hl-keyword: #ff4fc8;
   --hl-string: #ffc36b;
   --hl-number: #ff7a59;
@@ -42,7 +42,7 @@
   --hl-comment: #7d6fa8;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
-  --heading-font: var(--font);
+  --heading-font: "Avenir Next", "Futura", "Century Gothic", "Trebuchet MS", "Hiragino Sans", "Noto Sans JP", sans-serif;
   --content-width: 840px;
 }
 
@@ -122,8 +122,63 @@ body > nav ul ul { border-left: 2px solid var(--border); }
 .tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
 .tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
 
-/* 見出し: 夕焼け色の文字と、ネオンの光 */
-main :is(h1, h2) { text-transform: uppercase; letter-spacing: 0.08em; }
-main h1 { width: fit-content; background: linear-gradient(180deg, #ffe08a, #ff7a59 45%, #ff4fc8); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 10px rgba(255, 79, 200, 0.45)); }
-main h2 { color: #3ee8ff; text-shadow: 0 0 10px rgba(62, 232, 255, 0.55); }
-main h3 { color: #ff4fc8; }
+/* 地平線に沈む縞模様の夕日と、奥へ流れる光るグリッド(ページの後ろに固定) */
+body::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  right: 10vw;
+  top: calc(64vh - 34vmin);
+  width: 40vmin;
+  height: 40vmin;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffe66d 0%, #ffb35c 35%, #ff5f8f 65%, #d63fb8 100%);
+  -webkit-mask: linear-gradient(180deg, #000 0 50%, transparent 50% 54%, #000 54% 62%, transparent 62% 67%, #000 67% 74%, transparent 74% 80%, #000 80% 85%, transparent 85%);
+  mask: linear-gradient(180deg, #000 0 50%, transparent 50% 54%, #000 54% 62%, transparent 62% 67%, #000 67% 74%, transparent 74% 80%, #000 80% 85%, transparent 85%);
+  filter: drop-shadow(0 0 24px rgba(255, 95, 143, 0.55));
+  pointer-events: none;
+}
+body::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  left: -50vw;
+  right: -50vw;
+  bottom: 0;
+  height: 36vh;
+  background:
+    linear-gradient(180deg, #0b0620 0%, transparent 30%),
+    linear-gradient(0deg, rgba(255, 79, 200, 0.85) 2px, transparent 2px) 0 0 / 100% 48px,
+    linear-gradient(90deg, rgba(62, 232, 255, 0.6) 2px, transparent 2px) 0 0 / 64px 100%,
+    #12072c;
+  transform: perspective(260px) rotateX(58deg);
+  transform-origin: 50% 100%;
+  animation: tsuzuri-retro-grid 2.4s linear infinite;
+  pointer-events: none;
+}
+@keyframes tsuzuri-retro-grid {
+  from { background-position: 0 0, 0 0, 0 0, 0 0; }
+  to { background-position: 0 0, 0 48px, 0 0, 0 0; }
+}
+
+/* 見出し: h1 はクロームの文字(地平線で空色と夕焼け色に分かれる)、h2 はネオンの水色、h3 は桃色 */
+main :is(h1, h2) { text-transform: uppercase; letter-spacing: 0.06em; }
+main h1 {
+  width: fit-content;
+  font-size: 2.5em;
+  font-style: italic;
+  font-weight: 900;
+  background: linear-gradient(180deg, #f2fbff 0%, #8fe3ff 46%, #1b1036 49%, #1b1036 51%, #ffb3ec 54%, #ff4fc8 78%, #ff9a5c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 0 #2a0f4d) drop-shadow(0 0 14px rgba(255, 79, 200, 0.5));
+}
+main h2 { padding-bottom: 0.3em; color: #3ee8ff; text-shadow: 0 0 8px rgba(62, 232, 255, 0.7), 0 0 22px rgba(62, 232, 255, 0.3); border-bottom: 1px solid rgba(62, 232, 255, 0.35); }
+main h3 { color: #ff6fd6; text-shadow: 0 0 10px rgba(255, 79, 200, 0.45); }
+main a { color: #3ee8ff; text-decoration-color: rgba(62, 232, 255, 0.45); }
+main a:hover { color: #ff8fdc; text-shadow: 0 0 10px rgba(255, 79, 200, 0.6); }
+main :is(h1, h2, h3, h4) a.tsuzuri-anchor { text-shadow: none; }
+main th { letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid rgba(255, 79, 200, 0.5); }
+main pre { box-shadow: inset 0 0 0 1px rgba(62, 232, 255, 0.25), 0 0 18px rgba(62, 232, 255, 0.08); }
+.tsuzuri-nav-head > p { font-family: var(--heading-font); font-style: italic; letter-spacing: 0.1em; text-transform: uppercase; color: #ff8fdc; text-shadow: 0 0 12px rgba(255, 79, 200, 0.6); }

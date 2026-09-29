@@ -36,9 +36,9 @@
 | `glass` | `glass.css` | グラス。Glassmorphism。色とりどりの光の地に、すりガラスのような半透明のカード |
 | `neumorphism` | `neumorphism.css` | ニューモーフィズム。Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする |
 | `frosted` | `frosted.css` | フロスト。Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青 |
-| `retro` | `retro.css` | レトロフューチャー。Retrofuturism。80年代の夕焼けの空と光るグリッド、ネオンの差し色。常にダーク表示 |
-| `y2k` | `y2k.css` | Y2K。Y2K UI。パステルの虹色ときらめく星、クロームの見出し、つやのあるボタン |
-| `pixel` | `pixel.css` | ピクセル。Pixel art。8ビットゲームのような太い枠と市松模様、ドットの影の見出し |
+| `retro` | `retro.css` | レトロフューチャー。Retrofuturism。星の夜空と地平線に沈む縞模様の夕日、奥へ流れる光るグリッド、クロームの見出し。常にダーク表示 |
+| `y2k` | `y2k.css` | Y2K。Y2K UI。パステルの地にシャボン玉と星、虹色に光る縁のカード、アクア風のつやのあるボタン |
+| `pixel` | `pixel.css` | ピクセル。Pixel art。8ビットゲームのような太い枠と市松模様、ステージ名の札の見出しと▶カーソル |
 | `nineties` | `nineties.css` | 90年代。90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ |
 | `none` | （なし） | 配色・装飾を一切適用しない。ブラウザの既定の見た目になる |
 
