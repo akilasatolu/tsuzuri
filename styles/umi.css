@@ -1,108 +1,111 @@
 /*
  * umi.css (海)
- * 海をテーマにしたスタイル。ライト表示は明るい浅瀬、ダーク表示は深い海の底。
- * 見出しの下や区切り線に波の線を引き、差し色は海の青と、珊瑚の色を少しだけ使う。
- * 明るく爽やかで、長く読んでも疲れにくい配色にしている。ライト/ダーク表示に対応する。
+ * 江戸らしい海をテーマにしたスタイル。藍染めの藍と浅葱色(あさぎいろ)、胡粉(ごふん)の白を使い、
+ * 北斎の浮世絵のような渦を巻く波頭と、波の上を飛ぶ千鳥(波千鳥)を見出しまわりに描く。
+ * ページの下のほうには、うねる波の帯を淡く引く。ダーク表示は夜の海。ライト/ダーク表示に対応する。
  */
 :root {
   color-scheme: light dark;
-  --fg: #12303f;             /* 深い海 */
-  --muted: #4f6b78;
-  --bg: #f4fafc;             /* 浅瀬 */
-  --bg-deep: #e3f1f6;        /* 下にいくほど深くなる海の色 */
-  --surface: #ffffff;
-  --border: #cfe3ea;
-  --accent: #0a6c96;         /* 海の青 */
-  --accent-2: #14958d;       /* 浅瀬の青緑 */
-  --coral: #e0735a;          /* 珊瑚 */
-  --accent-soft: #e0f0f6;
-  --code-bg: #eaf4f7;
+  --fg: #1b2a36;             /* 墨がかった藍 */
+  --muted: #56666f;
+  --bg: #f4f5f1;             /* 胡粉の白 */
+  --surface: #e9eeec;
+  --border: #cfd9d8;
+  --accent: #1f3f66;         /* 藍染めの藍 */
+  --asagi: #2f8aa0;          /* 浅葱色 */
+  --accent-soft: #e0ebee;
+  --code-bg: #e8eeec;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
-  --content-width: 840px;
-  /* 波の線(見出しの下・区切り線)。色は画像の中に書くので、ライト/ダークで別の画像にする */
-  --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%230a6c96' stroke-width='2'/%3E%3C/svg%3E");
-  --wave-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%2314958d' stroke-width='1.5' stroke-opacity='0.6'/%3E%3C/svg%3E");
+  --heading-font: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", "BIZ UDPMincho", serif;
+  --content-width: 820px;
+  /* 絵柄(画像の中に色を書くので、ライト/ダークで別の画像にする)
+     - 波頭: 北斎のように渦を巻いて砕ける波。しぶきの白い点つき
+     - 千鳥: 波の上を飛ぶ千鳥
+     - 波の帯: ページの下に引く、うねる波 */
+  --nami: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='16' viewBox='0 0 48 16'%3E%3Cpath d='M0 14 Q12 14 16 8 Q19 2 25 3 Q21 5 22 9 Q25 14 48 14' fill='none' stroke='%231f3f66' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='27' cy='5' r='1.3' fill='%232f8aa0'/%3E%3Ccircle cx='30' cy='7.5' r='1' fill='%232f8aa0'/%3E%3C/svg%3E");
+  --chidori: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='16' viewBox='0 0 24 16'%3E%3Cpath d='M2 11 Q7 3 12 8 Q16 3 22 5 Q17 8 13 11 Q7 15 2 11 Z' fill='%231f3f66'/%3E%3Ccircle cx='17.5' cy='5.8' r='0.9' fill='%23f4f5f1'/%3E%3C/svg%3E");
+  --uneri: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' viewBox='0 0 120 40'%3E%3Cpath d='M0 26 Q30 8 60 26 T120 26' fill='none' stroke='%232f8aa0' stroke-opacity='0.18' stroke-width='2'/%3E%3Cpath d='M0 36 Q30 18 60 36 T120 36' fill='none' stroke='%231f3f66' stroke-opacity='0.14' stroke-width='2'/%3E%3C/svg%3E");
 }
 
-/* ダーク表示: 深い海の底に、夜光虫のような青緑の光。OS がダークモードのとき(ライト表示に切り替えたときを除く)と、
-   ダーク表示に切り替えたとき */
+/* ダーク表示(夜の海): 深い藍の地に、月明かりの白波と明るい浅葱。OS がダークモードのとき(ライト表示に
+   切り替えたときを除く)と、ダーク表示に切り替えたとき */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --fg: #d9eef5;
-    --muted: #8fb1bf;
-    --bg: #071a26;
-    --bg-deep: #03101a;
-    --surface: #0c2433;
-    --border: #1c3d4f;
-    --accent: #5cc3ef;
-    --accent-2: #45d6c6;
-    --coral: #f2917b;
-    --accent-soft: #0f2f42;
-    --code-bg: #0a2130;
-    --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%235cc3ef' stroke-width='2'/%3E%3C/svg%3E");
-    --wave-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%2345d6c6' stroke-width='1.5' stroke-opacity='0.6'/%3E%3C/svg%3E");
+    --fg: #e6ecef;
+    --muted: #9aabb4;
+    --bg: #0d1826;
+    --surface: #15233a;
+    --border: #253754;
+    --accent: #8db8e8;
+    --asagi: #6cc7d9;
+    --accent-soft: #182c47;
+    --code-bg: #122033;
+    --nami: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='16' viewBox='0 0 48 16'%3E%3Cpath d='M0 14 Q12 14 16 8 Q19 2 25 3 Q21 5 22 9 Q25 14 48 14' fill='none' stroke='%238db8e8' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='27' cy='5' r='1.3' fill='%236cc7d9'/%3E%3Ccircle cx='30' cy='7.5' r='1' fill='%236cc7d9'/%3E%3C/svg%3E");
+    --chidori: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='16' viewBox='0 0 24 16'%3E%3Cpath d='M2 11 Q7 3 12 8 Q16 3 22 5 Q17 8 13 11 Q7 15 2 11 Z' fill='%23e6ecef'/%3E%3Ccircle cx='17.5' cy='5.8' r='0.9' fill='%230d1826'/%3E%3C/svg%3E");
+    --uneri: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' viewBox='0 0 120 40'%3E%3Cpath d='M0 26 Q30 8 60 26 T120 26' fill='none' stroke='%236cc7d9' stroke-opacity='0.16' stroke-width='2'/%3E%3Cpath d='M0 36 Q30 18 60 36 T120 36' fill='none' stroke='%238db8e8' stroke-opacity='0.12' stroke-width='2'/%3E%3C/svg%3E");
   }
 }
 :root[data-theme="dark"] {
-  --fg: #d9eef5;
-  --muted: #8fb1bf;
-  --bg: #071a26;
-  --bg-deep: #03101a;
-  --surface: #0c2433;
-  --border: #1c3d4f;
-  --accent: #5cc3ef;
-  --accent-2: #45d6c6;
-  --coral: #f2917b;
-  --accent-soft: #0f2f42;
-  --code-bg: #0a2130;
-  --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%235cc3ef' stroke-width='2'/%3E%3C/svg%3E");
-  --wave-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q 6 0 12 4 T 24 4' fill='none' stroke='%2345d6c6' stroke-width='1.5' stroke-opacity='0.6'/%3E%3C/svg%3E");
+  --fg: #e6ecef;
+  --muted: #9aabb4;
+  --bg: #0d1826;
+  --surface: #15233a;
+  --border: #253754;
+  --accent: #8db8e8;
+  --asagi: #6cc7d9;
+  --accent-soft: #182c47;
+  --code-bg: #122033;
+  --nami: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='16' viewBox='0 0 48 16'%3E%3Cpath d='M0 14 Q12 14 16 8 Q19 2 25 3 Q21 5 22 9 Q25 14 48 14' fill='none' stroke='%238db8e8' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='27' cy='5' r='1.3' fill='%236cc7d9'/%3E%3Ccircle cx='30' cy='7.5' r='1' fill='%236cc7d9'/%3E%3C/svg%3E");
+  --chidori: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='16' viewBox='0 0 24 16'%3E%3Cpath d='M2 11 Q7 3 12 8 Q16 3 22 5 Q17 8 13 11 Q7 15 2 11 Z' fill='%23e6ecef'/%3E%3Ccircle cx='17.5' cy='5.8' r='0.9' fill='%230d1826'/%3E%3C/svg%3E");
+  --uneri: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' viewBox='0 0 120 40'%3E%3Cpath d='M0 26 Q30 8 60 26 T120 26' fill='none' stroke='%236cc7d9' stroke-opacity='0.16' stroke-width='2'/%3E%3Cpath d='M0 36 Q30 18 60 36 T120 36' fill='none' stroke='%238db8e8' stroke-opacity='0.12' stroke-width='2'/%3E%3C/svg%3E");
 }
 
-/* 海: 上は明るい水面、下にいくほど深い色 */
+/* 胡粉の白の地。ページの下のほうに、うねる波の帯を淡く引く */
 body {
-  line-height: 1.8;
+  line-height: 1.85;
+  letter-spacing: 0.02em;
   background-color: var(--bg);
-  background-image: linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
-  background-repeat: no-repeat;
+  background-image: var(--uneri), var(--uneri);
+  background-size: 120px 40px, 180px 60px;
+  background-position: left bottom, 40px calc(100% - 26px);
+  background-repeat: repeat-x, repeat-x;
   min-height: 100vh;
 }
 
-/* 見出し: 海の青。h1 の下に波の線、h2 は青緑の小さな波の印、h3 は浅瀬の青緑 */
-main :is(h1, h2, h3, h4) { color: var(--fg); font-weight: 700; line-height: 1.45; }
-main h1 { margin: 0 0 1.2em; font-size: 2em; color: var(--accent); }
-main h1::after { content: ""; display: block; height: 8px; margin-top: 0.4em; background: var(--wave) repeat-x left center; }
+/* 見出し: 明朝体の藍。h1 の下に渦を巻く波頭の帯、h2 に千鳥の印、h3 は浅葱色 */
+main :is(h1, h2, h3, h4) { font-family: var(--heading-font); font-weight: 700; line-height: 1.45; letter-spacing: 0.05em; color: var(--accent); }
+main h1 { margin: 0 0 1.3em; font-size: 2em; }
+main h1::after { content: ""; display: block; height: 16px; margin-top: 0.35em; background: var(--nami) repeat-x left center; }
 main h2 { margin: 2.4em 0 0.8em; padding-bottom: 0.3em; font-size: 1.4em; border-bottom: 1px solid var(--border); }
-main h2::before { content: ""; display: inline-block; width: 24px; height: 8px; margin-right: 0.5em; vertical-align: 0.2em; background: var(--wave) no-repeat center; }
-main h3 { margin: 2em 0 0.6em; font-size: 1.15em; color: var(--accent-2); }
+main h2::before { content: ""; display: inline-block; width: 24px; height: 16px; margin-right: 0.5em; vertical-align: -0.05em; background: var(--chidori) no-repeat center; }
+main h3 { margin: 2em 0 0.6em; font-size: 1.15em; color: var(--asagi); }
 main h4 { margin: 1.6em 0 0.4em; font-size: 1em; color: var(--muted); }
 
-/* リンク: 海の青。カーソルを当てると青緑 */
+/* リンク: 藍。カーソルを当てると浅葱色 */
 main a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); text-underline-offset: 0.2em; }
-main a:hover { color: var(--accent-2); text-decoration-color: var(--accent-2); }
+main a:hover { color: var(--asagi); text-decoration-color: var(--asagi); }
 
-main strong { color: var(--fg); background: linear-gradient(transparent 65%, color-mix(in srgb, var(--accent-2) 22%, transparent) 65%); }
-main blockquote { margin: 1.4em 0; padding: 0.6em 1.2em; color: var(--muted); background: var(--accent-soft); border-left: 4px solid var(--accent-2); border-radius: 0 10px 10px 0; }
-main hr { margin: 2.5em 0; height: 8px; border: 0; background: var(--wave-soft) repeat-x left center; }
-main kbd { padding: 0.1em 0.45em; font-size: 0.85em; background: var(--surface); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; }
-main img { border-radius: 8px; }
+main strong { color: var(--fg); background: linear-gradient(transparent 65%, color-mix(in srgb, var(--asagi) 22%, transparent) 65%); }
+main blockquote { margin: 1.4em 0; padding: 0.5em 1.2em; color: var(--muted); background: var(--accent-soft); border-left: 4px solid var(--asagi); }
+/* 区切り線: 波頭の帯 */
+main hr { margin: 2.5em 0; height: 16px; border: 0; background: var(--nami) repeat-x left center; opacity: 0.55; }
+main kbd { padding: 0.1em 0.45em; font-size: 0.85em; background: var(--bg); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 3px; }
+main img { border-radius: 4px; }
 
-/* コード・表 */
-main pre { border: 1px solid var(--border); border-radius: 10px; line-height: 1.6; }
-main code { color: color-mix(in srgb, var(--coral) 80%, var(--fg)); }
-main pre code { color: inherit; }
-main table { font-size: 0.95em; background: var(--surface); }
-main th { text-align: left; color: var(--bg); background: var(--accent); border-color: var(--accent); }
+/* コード・表: 表の見出し行は藍染め */
+main pre { border: 1px solid var(--border); border-top: 3px solid var(--accent); border-radius: 2px; line-height: 1.6; }
+main table { font-size: 0.95em; }
+main th { text-align: left; font-family: var(--heading-font); font-weight: 700; color: var(--bg); background: var(--accent); border-color: var(--accent); }
 main th, main td { border-color: var(--border); padding: 8px 12px; }
 main tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--accent-soft) 60%, transparent); }
 
 /* ナビ・目次・前後のページ */
-body > nav { background: color-mix(in srgb, var(--surface) 70%, transparent); }
-body > nav a { padding: 4px 10px; color: var(--fg); border-radius: 999px; }
-body > nav a:hover { color: var(--accent); background: var(--accent-soft); text-decoration: none; }
-body > nav a[aria-current="page"] { color: var(--bg); background: var(--accent); font-weight: 600; }
-.tsuzuri-nav-head > p { color: var(--accent); }
-.tsuzuri-toc { background: var(--surface); border-color: var(--border); border-radius: 12px; }
-main .tsuzuri-pager a { background: var(--surface); border-color: var(--border); border-radius: 12px; }
-main .tsuzuri-pager a:hover { border-color: var(--accent-2); }
+body > nav a { padding: 4px 10px; color: var(--fg); border-radius: 2px; }
+body > nav a:hover { color: var(--accent); background: var(--surface); text-decoration: none; }
+body > nav a[aria-current="page"] { color: var(--bg); background: var(--accent); font-weight: 600; box-shadow: inset 4px 0 0 var(--asagi); }
+.tsuzuri-nav-head > p { font-family: var(--heading-font); font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
+.tsuzuri-toc { background: var(--surface); border-color: var(--border); border-radius: 2px; }
+.tsuzuri-toc > p { color: var(--asagi); }
+main .tsuzuri-pager a { border-radius: 2px; }
+main .tsuzuri-pager a:hover { border-color: var(--asagi); background: var(--surface); }

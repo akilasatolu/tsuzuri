@@ -16,6 +16,15 @@
 
 ## [Unreleased]
 
+## [1.15.0] - 2026-09-30
+
+### Changed
+
+- 海(`umi`)のデザインを、江戸らしい海に作り直した。藍染めの藍と浅葱色、胡粉の白を使い、h1 の下と区切り線に
+  北斎のような渦を巻く波頭、h2 に千鳥の印、ページの下にうねる波の帯。ダーク表示は夜の海。
+- 宙(`sora`)のデザインを、満月の夜に作り直した。夜空の右上に光の輪をまとった満月を浮かべ、星をまばらに置く。
+  差し色は月明かりの金色と月白、h2 の印は小さな満月。
+
 ## [1.14.0] - 2026-09-30
 
 ### Changed
@@ -325,7 +334,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.14.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.15.0...HEAD
+[1.15.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.14.0...v1.15.0
 [1.14.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.11.0...v1.12.0

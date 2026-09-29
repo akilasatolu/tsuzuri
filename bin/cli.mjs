@@ -45,9 +45,9 @@ export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.ym
 export const THEME_CHOICES = [
   { key: "wa", label: "和(推奨。浮世絵がテーマの江戸らしいデザイン。生成りの地にベロ藍と紅、明朝体の見出し)" },
   { key: "sakura", label: "桜(和・桜・墨。和紙の地に墨色の文字、桜色の差し色と花びら)" },
-  { key: "sora", label: "宙(宇宙がテーマ。星をちりばめた夜空の地に、星の光と星雲の差し色。常にダーク表示)" },
+  { key: "sora", label: "宙(満月の夜がテーマ。夜空に満月と光の輪、月明かりの金色。常にダーク表示)" },
   { key: "akari", label: "灯(暗闇に灯る灯籠がテーマ。夜の闇に琥珀色の灯り。常にダーク表示)" },
-  { key: "umi", label: "海(海がテーマ。明るい浅瀬の地に波の線と海の青。ダークでは深い海の底)" },
+  { key: "umi", label: "海(江戸の海がテーマ。藍と浅葱色に、北斎のような波頭と千鳥)" },
   { key: "none", label: "装飾なし" },
 ];
 
