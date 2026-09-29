@@ -16,6 +16,19 @@
 
 ## [Unreleased]
 
+## [1.16.0] - 2026-09-30
+
+### Changed
+
+- 既定のテーマ「和(`wa`)」のデザインを、墨絵と江戸をテーマにしたシンプルなデザインに作り直した。和紙の地に墨一色を
+  基本にし、差し色は江戸の朱を落款として少しだけ使う。h1 の下に筆で払った墨の線と朱の落款、h2 の左に縦の筆跡、
+  h3 に朱の角印。ダーク表示は墨の夜。
+- 満月の夜をテーマにしたテーマ「宙(`sora`)」の名前を、「月(`tsuki`)」に変えた(`THEME=tsuki`)。
+- 灯(`akari`)の色を、黄色寄りの琥珀色から、灯籠の炎のような色(芯の淡い黄から橙・紅へ)にした。灯籠の印と見出しの光は、
+  炎が揺らぐようにかすかに明滅する(動きを減らす設定の人には動かさない)。
+- 海(`umi`)のデザインを、葛飾北斎の「神奈川沖浪裏」の海のイメージに作り直した。刷り紙の地にベロ藍を主役にし、
+  ページの右下に爪のようなしぶきを立てる大波と遠くの富士、見出しの下に砕ける波頭、h2 に小さな波頭の印。
+
 ## [1.15.0] - 2026-09-30
 
 ### Changed
@@ -334,7 +347,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.15.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.16.0...HEAD
+[1.16.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.14.0...v1.15.0
 [1.14.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.12.0...v1.13.0

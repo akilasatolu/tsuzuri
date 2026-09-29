@@ -43,11 +43,11 @@ export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.ym
 
 // THEME選択肢(番号選択、1始まり)。
 export const THEME_CHOICES = [
-  { key: "wa", label: "和(推奨。浮世絵がテーマの江戸らしいデザイン。生成りの地にベロ藍と紅、明朝体の見出し)" },
+  { key: "wa", label: "和(推奨。墨絵と江戸がテーマ。和紙の地に墨の筆跡と朱の落款、明朝体の見出し)" },
   { key: "sakura", label: "桜(和・桜・墨。和紙の地に墨色の文字、桜色の差し色と花びら)" },
-  { key: "sora", label: "宙(満月の夜がテーマ。夜空に満月と光の輪、月明かりの金色。常にダーク表示)" },
-  { key: "akari", label: "灯(暗闇に灯る灯籠がテーマ。夜の闇に琥珀色の灯り。常にダーク表示)" },
-  { key: "umi", label: "海(江戸の海がテーマ。藍と浅葱色に、北斎のような波頭と千鳥)" },
+  { key: "tsuki", label: "月(満月の夜がテーマ。夜空に満月と光の輪、月明かりの金色。常にダーク表示)" },
+  { key: "akari", label: "灯(暗闇に灯る灯籠がテーマ。夜の闇に揺らぐ炎の灯り。常にダーク表示)" },
+  { key: "umi", label: "海(葛飾北斎の海がテーマ。刷り紙の地にベロ藍、大波と富士)" },
   { key: "none", label: "装飾なし" },
 ];
 
@@ -235,7 +235,7 @@ ROOT_MD=${rootMd}
 # ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# テーマ: wa(和) / sakura(桜) / sora(宙) / akari(灯) / umi(海) / none(装飾なし)
+# テーマ: wa(和) / sakura(桜) / tsuki(月) / akari(灯) / umi(海) / none(装飾なし)
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 
