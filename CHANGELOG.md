@@ -16,6 +16,16 @@
 
 ## [Unreleased]
 
+## [1.18.0] - 2026-09-30
+
+### Changed
+
+- 雪(`yuki`)を、常にダーク表示にした(雪の夜の配色だけにした)。
+
+### Removed
+
+- 組み込みテーマ「竹(`take`)」「紅葉(`momiji`)」「藤(`fuji`)」「金(`kin`)」を削除した。
+
 ## [1.17.0] - 2026-09-30
 
 ### Added
@@ -362,7 +372,8 @@
 - リポジトリの外を指すパス(`../`・絶対パス・シンボリックリンク)は読み書きしない。
 - 生成ワークフローは設定ファイルから既知のキーだけを読み込み、Pagesへの書き込み権限は公開ジョブだけに付ける。
 
-[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.17.0...HEAD
+[Unreleased]: https://github.com/akilasatolu/tsuzuri/compare/v1.18.0...HEAD
+[1.18.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.17.0...v1.18.0
 [1.17.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.16.0...v1.17.0
 [1.16.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/akilasatolu/tsuzuri/compare/v1.14.0...v1.15.0

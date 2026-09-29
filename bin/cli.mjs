@@ -47,11 +47,7 @@ export const THEME_CHOICES = [
   { key: "sakura", label: "桜(和・桜・墨。和紙の地に墨色の文字、桜色の差し色と花びら)" },
   { key: "tsuki", label: "月(満月の夜がテーマ。夜空に満月と光の輪、月明かりの金色。常にダーク表示)" },
   { key: "akari", label: "灯(暗闇に灯る灯籠がテーマ。夜の闇に揺らぐ炎の灯り。常にダーク表示)" },
-  { key: "take", label: "竹(竹林がテーマ。淡い地に深緑と若竹色、節のある竹と竹の葉の影)" },
-  { key: "momiji", label: "紅葉(秋の庭園がテーマ。生成りの地に紅・橙・黄金、紅葉の葉)" },
-  { key: "fuji", label: "藤(藤棚がテーマ。淡い地に藤色と江戸紫、垂れ下がる藤の房)" },
-  { key: "yuki", label: "雪(雪の夜の静けさがテーマ。白・銀鼠・淡い藍、雪輪とちらつく雪)" },
-  { key: "kin", label: "金(金屏風と金箔がテーマ。黒漆の地に金、雲取りの帯。常にダーク表示)" },
+  { key: "yuki", label: "雪(雪の夜の静けさがテーマ。夜の地に雪の白と銀鼠、雪輪とちらつく雪。常にダーク表示)" },
   { key: "none", label: "装飾なし" },
 ];
 
@@ -239,7 +235,7 @@ ROOT_MD=${rootMd}
 # ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# テーマ: wa(和) / sakura(桜) / tsuki(月) / akari(灯) / take(竹) / momiji(紅葉) / fuji(藤) / yuki(雪) / kin(金) / none(装飾なし)
+# テーマ: wa(和) / sakura(桜) / tsuki(月) / akari(灯) / yuki(雪) / none(装飾なし)
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 
