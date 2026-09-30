@@ -7,7 +7,7 @@ description: Tsuzuriの組み込みテーマ「ターミナル(terminal)」の�
 
 # ターミナル(terminal)
 
-コマンドラインの画面のような、黒い画面に等幅の文字、プロンプト付きの見出しと点滅するカーソル。常にダーク表示。
+今どきのターミナルアプリのような、タイトルバー付きのウィンドウに Markdown の記号(## ・ - ・ >)が見える組み方、プロンプトと点滅するカーソル。常にダーク表示。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=terminal`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: terminal`と書きます
