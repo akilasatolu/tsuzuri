@@ -7,13 +7,13 @@ description: Tsuzuriの組み込みテーマ「ピクセル(pixel)」の見本�
 
 # ピクセル(pixel)
 
-Pixel art。8ビットゲームのような太い枠と市松模様、ステージ名の札の見出しと▶カーソル。
+Pixel art。ゲームのドット絵のUIのように、角の欠けた枠のウィンドウとボタン、HPゲージと▶カーソル。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=pixel`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: pixel`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← Y2K(y2k)](y2k.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)
+[← フロスト(frosted)](frosted.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← Y2K(y2k)](y2k.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)
+[← フロスト(frosted)](frosted.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)

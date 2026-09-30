@@ -49,7 +49,7 @@ https://akilasatolu.github.io/tsuzuri/
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>テーマと独自CSS</h3>
-<p>マテリアル・クレイ・グラス・ピクセルなど9つのテーマに、独自CSSを重ねて自由に調整できます。このサイトも独自CSSで作っています。</p>
+<p>マテリアル・クレイ・グラス・ピクセルなど7つのテーマに、独自CSSを重ねて自由に調整できます。このサイトも独自CSSで作っています。</p>
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">探</span><span class="tsuzuri-sep">】</span>ナビ・検索・目次</h3>
