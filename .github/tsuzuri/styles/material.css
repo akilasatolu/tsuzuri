@@ -1,20 +1,20 @@
 /*
  * material.css (マテリアル)
  * Material Design 3(マテリアルデザイン)風のスタイル。色の役割(プライマリ・セカンダリコンテナなど)に沿った
- * 紫系の配色、角丸のカードと影(エレベーション)、トーンのついたナビの選択。見出しは太さを抑えた大きめの文字。
+ * 青系の配色、角丸のカードと影(エレベーション)、トーンのついたナビの選択。見出しは太さを抑えた大きめの文字。
  * ライト/ダーク表示に対応する。
  */
 :root {
   color-scheme: light dark;
-  --fg: #1d1b20;
-  --muted: #49454f;
-  --bg: #fef7ff;
-  --heading: #1d1b20;
-  --accent: #6750a4;
-  --accent-2: #7d5260;
-  --border: #e7e0ec;
-  --page-bg: #fef7ff;
-  --card-bg: #fffbfe;
+  --fg: #1a1c1e;
+  --muted: #43474e;
+  --bg: #f8f9ff;
+  --heading: #1a1c1e;
+  --accent: #0061a4;
+  --accent-2: #6b5778;
+  --border: #dfe2eb;
+  --page-bg: #f8f9ff;
+  --card-bg: #ffffff;
   --card-border: 0;
   --card-filter: none;
   --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px 2px rgba(0, 0, 0, 0.15);
@@ -22,17 +22,17 @@
   --radius: 12px;
   --pill: 100px;
   --heading-weight: 500;
-  --el-bg: #f7f2fa;
+  --el-bg: #f1f4fa;
   --el-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
   --inset-shadow: none;
-  --hr: #cac4d0;
-  --code-bg: #f3edf7;
-  --pre-bg: #f3edf7;
-  --th-bg: #eaddff;
-  --th-fg: #21005d;
-  --hover-bg: rgba(103, 80, 164, 0.08);
-  --current-bg: #e8def8;
-  --current-fg: #1d192b;
+  --hr: #c3c7cf;
+  --code-bg: #eceef4;
+  --pre-bg: #eceef4;
+  --th-bg: #d1e4ff;
+  --th-fg: #001d36;
+  --hover-bg: rgba(0, 97, 164, 0.08);
+  --current-bg: #d1e4ff;
+  --current-fg: #001d36;
   --current-shadow: none;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
@@ -44,50 +44,50 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --fg: #e6e0e9;
-    --muted: #cac4d0;
-    --bg: #141218;
-    --heading: #e6e0e9;
-    --accent: #d0bcff;
-    --accent-2: #efb8c8;
-    --border: #49454f;
-    --page-bg: #141218;
-    --card-bg: #1d1b20;
+    --fg: #e2e2e6;
+    --muted: #c3c7cf;
+    --bg: #111318;
+    --heading: #e2e2e6;
+    --accent: #9ecaff;
+    --accent-2: #d7bee4;
+    --border: #43474e;
+    --page-bg: #111318;
+    --card-bg: #1a1c20;
     --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 6px 2px rgba(0, 0, 0, 0.3);
-    --el-bg: #211f26;
+    --el-bg: #1e2025;
     --el-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 3px 1px rgba(0, 0, 0, 0.3);
-    --hr: #49454f;
-    --code-bg: #2b2930;
-    --pre-bg: #2b2930;
-    --th-bg: #4f378b;
-    --th-fg: #eaddff;
-    --hover-bg: rgba(208, 188, 255, 0.08);
-    --current-bg: #4a4458;
-    --current-fg: #e8def8;
+    --hr: #43474e;
+    --code-bg: #282a2f;
+    --pre-bg: #282a2f;
+    --th-bg: #00497d;
+    --th-fg: #d1e4ff;
+    --hover-bg: rgba(158, 202, 255, 0.08);
+    --current-bg: #00497d;
+    --current-fg: #d1e4ff;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --fg: #e6e0e9;
-  --muted: #cac4d0;
-  --bg: #141218;
-  --heading: #e6e0e9;
-  --accent: #d0bcff;
-  --accent-2: #efb8c8;
-  --border: #49454f;
-  --page-bg: #141218;
-  --card-bg: #1d1b20;
+  --fg: #e2e2e6;
+  --muted: #c3c7cf;
+  --bg: #111318;
+  --heading: #e2e2e6;
+  --accent: #9ecaff;
+  --accent-2: #d7bee4;
+  --border: #43474e;
+  --page-bg: #111318;
+  --card-bg: #1a1c20;
   --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 6px 2px rgba(0, 0, 0, 0.3);
-  --el-bg: #211f26;
+  --el-bg: #1e2025;
   --el-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 3px 1px rgba(0, 0, 0, 0.3);
-  --hr: #49454f;
-  --code-bg: #2b2930;
-  --pre-bg: #2b2930;
-  --th-bg: #4f378b;
-  --th-fg: #eaddff;
-  --hover-bg: rgba(208, 188, 255, 0.08);
-  --current-bg: #4a4458;
-  --current-fg: #e8def8;
+  --hr: #43474e;
+  --code-bg: #282a2f;
+  --pre-bg: #282a2f;
+  --th-bg: #00497d;
+  --th-fg: #d1e4ff;
+  --hover-bg: rgba(158, 202, 255, 0.08);
+  --current-bg: #00497d;
+  --current-fg: #d1e4ff;
 }
 
 /* ページの地と、本文・ナビのカード */

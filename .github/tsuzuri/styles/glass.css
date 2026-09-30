@@ -1,6 +1,6 @@
 /*
  * glass.css (グラス)
- * Glassmorphism(グラスモーフィズム)のスタイル。色とりどりのにじんだ光の地の上に、すりガラスのような
+ * Glassmorphism(グラスモーフィズム)のスタイル。落ち着いた淡い単色の地の上に、すりガラスのような
  * 半透明のカード(背景をぼかして透かす)を重ねる。縁には細い光のふち取り。
  * ライト/ダーク表示に対応する。
  */
@@ -13,9 +13,9 @@
   --accent: #3b5bdb;
   --accent-2: #d6336c;
   --border: rgba(255, 255, 255, 0.55);
-  --page-bg: radial-gradient(circle at 15% 20%, #ff9ecd 0%, transparent 38%), radial-gradient(circle at 85% 15%, #8ec5ff 0%, transparent 40%), radial-gradient(circle at 75% 85%, #b8f2c9 0%, transparent 40%), radial-gradient(circle at 20% 90%, #ffd6a5 0%, transparent 35%), #eef1ff;
-  --card-bg: rgba(255, 255, 255, 0.45);
-  --card-border: 1px solid rgba(255, 255, 255, 0.65);
+  --page-bg: linear-gradient(160deg, #eef2f8 0%, #e1e7f1 100%);
+  --card-bg: rgba(255, 255, 255, 0.55);
+  --card-border: 1px solid rgba(255, 255, 255, 0.8);
   --card-filter: blur(20px) saturate(160%);
   --card-shadow: 0 8px 32px rgba(31, 38, 135, 0.16);
   --radius-lg: 24px;
@@ -51,7 +51,7 @@
     --accent: #91a7ff;
     --accent-2: #f783ac;
     --border: rgba(255, 255, 255, 0.12);
-    --page-bg: radial-gradient(circle at 15% 20%, #6d28d9 0%, transparent 38%), radial-gradient(circle at 85% 15%, #0e7490 0%, transparent 40%), radial-gradient(circle at 75% 85%, #be185d 0%, transparent 40%), radial-gradient(circle at 20% 90%, #1d4ed8 0%, transparent 35%), #0b1020;
+    --page-bg: linear-gradient(160deg, #0e1320 0%, #171e30 100%);
     --card-bg: rgba(20, 24, 44, 0.45);
     --card-border: 1px solid rgba(255, 255, 255, 0.14);
     --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -78,7 +78,7 @@
   --accent: #91a7ff;
   --accent-2: #f783ac;
   --border: rgba(255, 255, 255, 0.12);
-  --page-bg: radial-gradient(circle at 15% 20%, #6d28d9 0%, transparent 38%), radial-gradient(circle at 85% 15%, #0e7490 0%, transparent 40%), radial-gradient(circle at 75% 85%, #be185d 0%, transparent 40%), radial-gradient(circle at 20% 90%, #1d4ed8 0%, transparent 35%), #0b1020;
+  --page-bg: linear-gradient(160deg, #0e1320 0%, #171e30 100%);
   --card-bg: rgba(20, 24, 44, 0.45);
   --card-border: 1px solid rgba(255, 255, 255, 0.14);
   --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
