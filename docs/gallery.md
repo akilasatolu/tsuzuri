@@ -12,8 +12,7 @@ Tsuzuriの組み込みテーマの見た目を、実際に生成されたペー�
 | テーマ | 設定値 | 特徴 |
 |---|---|---|
 | [マテリアル(material)](gallery/material.md) | `THEME=material` | Material Design 3 風の標準スタイル(既定)。青系の配色、角丸のカードと影、トーンのついたナビの選択。ライト/ダークモードを自動で切り替える。 |
-| [クレイ(clay)](gallery/clay.md) | `THEME=clay` | Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。ミントから桃色へ移る淡い地に、青緑とコーラル。 |
-| [グラス(glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism。落ち着いた淡い単色の地に、すりガラスのような半透明のカード。 |
+| [グラス(glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism。丸い色の形を置いた淡い地に、形がぼやけて透けるすりガラスのような半透明のカード。 |
 | [ニューモーフィズム(neumorphism)](gallery/neumorphism.md) | `THEME=neumorphism` | Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。 |
 | [フロスト(frosted)](gallery/frosted.md) | `THEME=frosted` | Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青。 |
 | [90年代(nineties)](gallery/nineties.md) | `THEME=nineties` | 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。 |

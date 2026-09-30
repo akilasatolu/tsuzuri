@@ -7,13 +7,13 @@ description: Tsuzuriの組み込みテーマ「グラス(glass)」の見本ペ�
 
 # グラス(glass)
 
-Glassmorphism。落ち着いた淡い単色の地に、すりガラスのような半透明のカード。
+Glassmorphism。丸い色の形を置いた淡い地に、形がぼやけて透けるすりガラスのような半透明のカード。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=glass`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: glass`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← クレイ(clay)](clay.md) ・ [ギャラリー一覧](../gallery.md) ・ [ニューモーフィズム(neumorphism) →](neumorphism.md)
+[← マテリアル(material)](material.md) ・ [ギャラリー一覧](../gallery.md) ・ [ニューモーフィズム(neumorphism) →](neumorphism.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← クレイ(clay)](clay.md) ・ [ギャラリー一覧](../gallery.md) ・ [ニューモーフィズム(neumorphism) →](neumorphism.md)
+[← マテリアル(material)](material.md) ・ [ギャラリー一覧](../gallery.md) ・ [ニューモーフィズム(neumorphism) →](neumorphism.md)
