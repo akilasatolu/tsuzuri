@@ -12,7 +12,7 @@ Tsuzuriの組み込みテーマの見た目を、実際に生成されたペー�
 | テーマ | 設定値 | 特徴 |
 |---|---|---|
 | [マテリアル(material)](gallery/material.md) | `THEME=material` | Material Design 3 風の標準スタイル(既定)。青系の配色、角丸のカードと影、トーンのついたナビの選択。ライト/ダークモードを自動で切り替える。 |
-| [グラス(glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism。斜めに流れるカラーグラデーションの地に、色がそのまま透ける薄い透明なガラスのカード。 |
+| [グラス(glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism。ゆっくり揺れて流れるオーロラの地に、色がそのまま透ける薄い透明なガラスのカード。 |
 | [ニューモーフィズム(neumorphism)](gallery/neumorphism.md) | `THEME=neumorphism` | Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。 |
 | [エディトリアル(editorial)](gallery/editorial.md) | `THEME=editorial` | 雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色。 |
 | [ミニマル(minimal)](gallery/minimal.md) | `THEME=minimal` | Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青。 |
