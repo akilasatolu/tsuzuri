@@ -137,11 +137,24 @@ body { font-size: 15px; line-height: 1.7; }
 
 /* ---- ウィンドウ: 上にタイトルバー(赤・黄・緑の丸と、中央のタイトル) ---- */
 /* はみ出しを隠す要素なので、タイトルバーは枠線ではなく、上の余白に背景として描く */
-main, body > nav { position: relative; background: linear-gradient(#161b22, #161b22) top / 100% 34px no-repeat, var(--card-bg); }
-main { padding-top: 70px; }
-body > nav { padding-top: 50px; }
-@media (min-width: 960px) { body > nav { padding-top: 56px; } }
-main::before, body > nav::before {
+main { position: relative; padding-top: 70px; background: linear-gradient(#161b22, #161b22) top / 100% 34px no-repeat, var(--card-bg); }
+/* ナビはスクロールするので、タイトルバーを一つの帯として上に貼り付け(スクロールしても動かない)、丸も帯の背景に描く */
+body > nav { padding-top: 0; }
+body > nav::before {
+  content: "";
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 34px;
+  margin: 0 -20px 16px;
+  background:
+    radial-gradient(circle at 20px 17px, #ff5f57 0 5.5px, transparent 6px),
+    radial-gradient(circle at 38px 17px, #febc2e 0 5.5px, transparent 6px),
+    radial-gradient(circle at 56px 17px, #28c840 0 5.5px, transparent 6px),
+    #161b22;
+}
+main::before {
   content: "";
   position: absolute;
   top: 12px;
