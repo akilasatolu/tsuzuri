@@ -1,37 +1,37 @@
 /*
  * glass.css (グラス)
- * Glassmorphism(グラスモーフィズム)のスタイル。落ち着いた淡い地にいくつかの丸い色の形を置き、その上に
- * すりガラスのような半透明のカード(背景をぼかして透かす)を重ねる。形がカード越しにぼやけて見えるので、ガラスだとわかる。縁には細い光のふち取り。
- * ライト/ダーク表示に対応する。
+ * Glassmorphism(グラスモーフィズム)のスタイル。斜めに流れるカラーグラデーションの地に、透明なガラスのカードを重ねる。
+ * カードは色がそのまま透けるほど薄く、縁には光が当たったような細いハイライト。
+ * ライト表示は薄紫→水色→ミント→淡い黄、ダーク表示は深い紫→藍→深い青緑→深い赤茶。
  */
 :root {
   color-scheme: light dark;
   --fg: #1e2238;
   --muted: #565d7a;
-  --bg: #eef1ff;
+  --bg: #f5f6fb;
   --heading: #161a2e;
   --accent: #3b5bdb;
   --accent-2: #d6336c;
   --border: rgba(255, 255, 255, 0.55);
-  --page-bg: radial-gradient(circle at 22% 30%, #9ec2ff 0 170px, transparent 172px), radial-gradient(circle at 78% 75%, #c3b4fd 0 220px, transparent 222px), radial-gradient(circle at 68% 16%, #98e2d6 0 110px, transparent 112px), linear-gradient(160deg, #eef2f8 0%, #e1e7f1 100%);
-  --card-bg: rgba(255, 255, 255, 0.42);
-  --card-border: 1px solid rgba(255, 255, 255, 0.75);
-  --card-filter: blur(24px) saturate(170%);
-  --card-shadow: 0 8px 32px rgba(31, 38, 135, 0.16);
+  --page-bg: linear-gradient(135deg, #c4b5fd 0%, #93c5fd 32%, #99f6e4 64%, #fde68a 100%);
+  --card-bg: rgba(255, 255, 255, 0.18);
+  --card-border: 1px solid rgba(255, 255, 255, 0.6);
+  --card-filter: blur(12px) saturate(170%);
+  --card-shadow: 0 8px 32px rgba(31, 38, 135, 0.14), inset 1px 1px 0 rgba(255, 255, 255, 0.7), inset -1px -1px 0 rgba(255, 255, 255, 0.15);
   --radius-lg: 24px;
   --radius: 14px;
   --pill: 999px;
   --heading-weight: 700;
-  --el-bg: rgba(255, 255, 255, 0.45);
-  --el-shadow: 0 4px 16px rgba(31, 38, 135, 0.10), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
-  --inset-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  --el-bg: rgba(255, 255, 255, 0.22);
+  --el-shadow: 0 4px 16px rgba(31, 38, 135, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  --inset-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
   --hr: linear-gradient(90deg, transparent, rgba(59, 91, 219, 0.6), transparent);
-  --code-bg: rgba(255, 255, 255, 0.55);
-  --pre-bg: rgba(255, 255, 255, 0.55);
-  --th-bg: rgba(255, 255, 255, 0.6);
+  --code-bg: rgba(255, 255, 255, 0.4);
+  --pre-bg: rgba(255, 255, 255, 0.3);
+  --th-bg: rgba(255, 255, 255, 0.35);
   --th-fg: #3b5bdb;
-  --hover-bg: rgba(255, 255, 255, 0.5);
-  --current-bg: rgba(255, 255, 255, 0.75);
+  --hover-bg: rgba(255, 255, 255, 0.3);
+  --current-bg: rgba(255, 255, 255, 0.55);
   --current-fg: #3b5bdb;
   --current-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 4px 12px rgba(31, 38, 135, 0.12);
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
@@ -46,21 +46,21 @@
     color-scheme: dark;
     --fg: #e6e9f7;
     --muted: #9ea5c4;
-    --bg: #0b1020;
+    --bg: #07091a;
     --heading: #f5f7ff;
     --accent: #91a7ff;
     --accent-2: #f783ac;
     --border: rgba(255, 255, 255, 0.12);
-    --page-bg: radial-gradient(circle at 22% 30%, #27457f 0 170px, transparent 172px), radial-gradient(circle at 78% 75%, #45347e 0 220px, transparent 222px), radial-gradient(circle at 68% 16%, #1c5a5a 0 110px, transparent 112px), linear-gradient(160deg, #0e1320 0%, #171e30 100%);
-    --card-bg: rgba(20, 24, 44, 0.45);
-    --card-border: 1px solid rgba(255, 255, 255, 0.14);
-    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    --el-bg: rgba(255, 255, 255, 0.06);
+    --page-bg: linear-gradient(135deg, #2e1065 0%, #1e3a8a 38%, #134e4a 70%, #4c1d1d 100%);
+    --card-bg: rgba(16, 20, 44, 0.12);
+    --card-border: 1px solid rgba(255, 255, 255, 0.16);
+    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 1px 1px 0 rgba(255, 255, 255, 0.25), inset -1px -1px 0 rgba(255, 255, 255, 0.04);
+    --el-bg: rgba(255, 255, 255, 0.04);
     --el-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.10);
     --inset-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
     --hr: linear-gradient(90deg, transparent, rgba(145, 167, 255, 0.6), transparent);
     --code-bg: rgba(255, 255, 255, 0.08);
-    --pre-bg: rgba(8, 10, 24, 0.55);
+    --pre-bg: rgba(6, 8, 22, 0.3);
     --th-bg: rgba(255, 255, 255, 0.08);
     --th-fg: #bac8ff;
     --hover-bg: rgba(255, 255, 255, 0.08);
@@ -73,21 +73,21 @@
   color-scheme: dark;
   --fg: #e6e9f7;
   --muted: #9ea5c4;
-  --bg: #0b1020;
+  --bg: #07091a;
   --heading: #f5f7ff;
   --accent: #91a7ff;
   --accent-2: #f783ac;
   --border: rgba(255, 255, 255, 0.12);
-  --page-bg: radial-gradient(circle at 22% 30%, #27457f 0 170px, transparent 172px), radial-gradient(circle at 78% 75%, #45347e 0 220px, transparent 222px), radial-gradient(circle at 68% 16%, #1c5a5a 0 110px, transparent 112px), linear-gradient(160deg, #0e1320 0%, #171e30 100%);
-  --card-bg: rgba(20, 24, 44, 0.45);
-  --card-border: 1px solid rgba(255, 255, 255, 0.14);
-  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --el-bg: rgba(255, 255, 255, 0.06);
+  --page-bg: linear-gradient(135deg, #2e1065 0%, #1e3a8a 38%, #134e4a 70%, #4c1d1d 100%);
+  --card-bg: rgba(16, 20, 44, 0.12);
+  --card-border: 1px solid rgba(255, 255, 255, 0.16);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 1px 1px 0 rgba(255, 255, 255, 0.25), inset -1px -1px 0 rgba(255, 255, 255, 0.04);
+  --el-bg: rgba(255, 255, 255, 0.04);
   --el-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.10);
   --inset-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
   --hr: linear-gradient(90deg, transparent, rgba(145, 167, 255, 0.6), transparent);
   --code-bg: rgba(255, 255, 255, 0.08);
-  --pre-bg: rgba(8, 10, 24, 0.55);
+  --pre-bg: rgba(6, 8, 22, 0.3);
   --th-bg: rgba(255, 255, 255, 0.08);
   --th-fg: #bac8ff;
   --hover-bg: rgba(255, 255, 255, 0.08);
