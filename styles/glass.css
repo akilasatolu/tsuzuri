@@ -13,7 +13,7 @@
   --accent: #3b5bdb;
   --accent-2: #d6336c;
   --border: rgba(255, 255, 255, 0.55);
-  --page-bg: linear-gradient(135deg, #c4b5fd 0%, #93c5fd 32%, #99f6e4 64%, #fde68a 100%);
+  --page-bg: linear-gradient(135deg, #c4b5fd 0%, #93c5fd 32%, #99f6e4 64%, #fde68a 100%) #d9d4fb;
   --card-bg: rgba(255, 255, 255, 0.18);
   --card-border: 1px solid rgba(255, 255, 255, 0.6);
   --card-filter: blur(12px) saturate(170%);
@@ -51,7 +51,7 @@
     --accent: #91a7ff;
     --accent-2: #f783ac;
     --border: rgba(255, 255, 255, 0.12);
-    --page-bg: linear-gradient(135deg, #2e1065 0%, #1e3a8a 38%, #134e4a 70%, #4c1d1d 100%);
+    --page-bg: linear-gradient(135deg, #2e1065 0%, #1e3a8a 38%, #134e4a 70%, #4c1d1d 100%) #1b1f4a;
     --card-bg: rgba(16, 20, 44, 0.12);
     --card-border: 1px solid rgba(255, 255, 255, 0.16);
     --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 1px 1px 0 rgba(255, 255, 255, 0.25), inset -1px -1px 0 rgba(255, 255, 255, 0.04);
@@ -78,7 +78,7 @@
   --accent: #91a7ff;
   --accent-2: #f783ac;
   --border: rgba(255, 255, 255, 0.12);
-  --page-bg: linear-gradient(135deg, #2e1065 0%, #1e3a8a 38%, #134e4a 70%, #4c1d1d 100%);
+  --page-bg: linear-gradient(135deg, #2e1065 0%, #1e3a8a 38%, #134e4a 70%, #4c1d1d 100%) #1b1f4a;
   --card-bg: rgba(16, 20, 44, 0.12);
   --card-border: 1px solid rgba(255, 255, 255, 0.16);
   --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 1px 1px 0 rgba(255, 255, 255, 0.25), inset -1px -1px 0 rgba(255, 255, 255, 0.04);

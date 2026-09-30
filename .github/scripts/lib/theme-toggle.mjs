@@ -6,7 +6,7 @@
  *   - THEME_HEAD_SCRIPT: <head> に入れる短いスクリプト。前に選んだ表示(localStorage)を、ページが
  *     表示される前に <html data-theme="light|dark"> として反映する(一瞬だけ違う色で表示されるのを防ぐ)。
  *   - THEME_SCRIPT: tsuzuri-theme.js として出力する。ボタンを作り、押すと表示を切り替えて覚えておく。
- *     テーマにライト/ダークの違いが無い場合(月・灯・none など)は、ボタンを出さない。
+ *     テーマにライト/ダークの違いが無い場合(90年代・none など)は、ボタンを出さない。
  *
  * 選んでいないときは、これまでどおり OS の設定(prefers-color-scheme)に従う。
  * スクリプトをこのモジュール内の文字列として持っているのは、init が利用者リポジトリに
@@ -25,11 +25,13 @@ export const THEME_SCRIPT = `(() => {
   const ja = (root.lang || "").toLowerCase().startsWith("ja");
   const media = window.matchMedia("(prefers-color-scheme: dark)");
   const current = () => root.dataset.theme || (media.matches ? "dark" : "light");
-  // テーマにライト/ダークの違いがあるかを、実際に切り替えて背景色を比べて確かめる
+  // テーマにライト/ダークの違いがあるかを、実際に切り替えて背景を比べて確かめる。
+  // 背景がグラデーションや画像だけのテーマもあるので、背景色と背景画像の両方を比べる
   const saved = root.dataset.theme;
   const bgOf = (mode) => {
     root.dataset.theme = mode;
-    return getComputedStyle(document.body).backgroundColor;
+    const s = getComputedStyle(document.body);
+    return s.backgroundColor + "|" + s.backgroundImage;
   };
   const differs = bgOf("light") !== bgOf("dark");
   if (saved) root.dataset.theme = saved;
