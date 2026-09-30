@@ -46,6 +46,11 @@ export const THEME_CHOICES = [
   { key: "material", label: "マテリアル(推奨。Material Design 3 風。青系の配色、角丸のカードと影、トーンのついたナビの選択)" },
   { key: "glass", label: "グラス(Glassmorphism。斜めに流れるカラーグラデーションの地に、色がそのまま透ける薄い透明なガラスのカード)" },
   { key: "neumorphism", label: "ニューモーフィズム(Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする)" },
+  { key: "editorial", label: "エディトリアル(雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色)" },
+  { key: "minimal", label: "ミニマル(Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青)" },
+  { key: "terminal", label: "ターミナル(コマンドラインの画面のような、黒い画面に等幅の文字、プロンプト付きの見出しと点滅するカーソル。常にダーク表示)" },
+  { key: "blueprint", label: "ブループリント(設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示)" },
+  { key: "notebook", label: "ノート(罫線ノートのページに、蛍光ペンの見出しと付箋のような引用。学習サイト向けのやさしい見た目)" },
   { key: "nineties", label: "90年代(90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ)" },
   { key: "none", label: "装飾なし" },
 ];
@@ -234,7 +239,7 @@ ROOT_MD=${rootMd}
 # ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# テーマ: material(マテリアル) / glass(グラス) / neumorphism(ニューモーフィズム) / nineties(90年代) / none(装飾なし)
+# テーマ: material(マテリアル) / glass(グラス) / neumorphism(ニューモーフィズム) / editorial(エディトリアル) / minimal(ミニマル) / terminal(ターミナル) / blueprint(ブループリント) / notebook(ノート) / nineties(90年代) / none(装飾なし)
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 
