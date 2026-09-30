@@ -1,19 +1,19 @@
 ---
-title: 90年代(nineties)
-theme: nineties
+title: ミニマル(minimal)
+theme: minimal
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「90年代(nineties)」の見本ページ
+description: Tsuzuriの組み込みテーマ「ミニマル(minimal)」の見本ページ
 ---
 
-# 90年代(nineties)
+# ミニマル(minimal)
 
-90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。
+Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=nineties`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: nineties`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=minimal`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: minimal`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← ノート(notebook)](notebook.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← エディトリアル(editorial)](editorial.md) ・ [ギャラリー一覧](../gallery.md) ・ [ターミナル(terminal) →](terminal.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← ノート(notebook)](notebook.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← エディトリアル(editorial)](editorial.md) ・ [ギャラリー一覧](../gallery.md) ・ [ターミナル(terminal) →](terminal.md)

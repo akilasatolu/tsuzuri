@@ -1,19 +1,19 @@
 ---
-title: 90年代(nineties)
-theme: nineties
+title: ブループリント(blueprint)
+theme: blueprint
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「90年代(nineties)」の見本ページ
+description: Tsuzuriの組み込みテーマ「ブループリント(blueprint)」の見本ページ
 ---
 
-# 90年代(nineties)
+# ブループリント(blueprint)
 
-90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。
+設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示。
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=nineties`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: nineties`と書きます
+このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=blueprint`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: blueprint`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← ノート(notebook)](notebook.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← ターミナル(terminal)](terminal.md) ・ [ギャラリー一覧](../gallery.md) ・ [ノート(notebook) →](notebook.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← ノート(notebook)](notebook.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← ターミナル(terminal)](terminal.md) ・ [ギャラリー一覧](../gallery.md) ・ [ノート(notebook) →](notebook.md)

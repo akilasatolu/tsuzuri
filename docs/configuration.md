@@ -57,9 +57,9 @@ GitHub Pagesへのアップロードで失敗するので、`OUT_DIR=_site`と�
 
 ### THEME
 組み込みのテーマ(配色+装飾のセット)を選択するキーです。
-選択できる値は`material`(マテリアル・既定)/`glass`(グラス)/`neumorphism`(ニューモーフィズム)/`nineties`(90年代)/`none`(装飾なし)の5個です。
+選択できる値は`material`(マテリアル・既定)/`glass`(グラス)/`neumorphism`(ニューモーフィズム)/`editorial`(エディトリアル)/`minimal`(ミニマル)/`terminal`(ターミナル)/`blueprint`(ブループリント)/`notebook`(ノート)/`nineties`(90年代)/`none`(装飾なし)の10個です。
 指定を省略した場合(キーが無い、または値が空)は、警告なしで
-`material`になります。上記5個以外の値(例: `sepia`のような存在しない名前)を指定した場合は、
+`material`になります。上記10個以外の値(例: `sepia`のような存在しない名前)を指定した場合は、
 警告(warn)を出したうえで`material`にフォールバックします。
 テーマごとの見た目は[theming.md](./theming.md)を参照してください。
 
