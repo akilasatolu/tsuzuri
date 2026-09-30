@@ -43,12 +43,11 @@ export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.ym
 
 // THEME選択肢(番号選択、1始まり)。
 export const THEME_CHOICES = [
-  { key: "material", label: "マテリアル(推奨。Material Design 3 風。紫系の配色、角丸のカードと影、トーンのついたナビの選択)" },
-  { key: "clay", label: "クレイ(Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。パステルの地に紫と桃色)" },
-  { key: "glass", label: "グラス(Glassmorphism。色とりどりの光の地に、すりガラスのような半透明のカード)" },
+  { key: "material", label: "マテリアル(推奨。Material Design 3 風。青系の配色、角丸のカードと影、トーンのついたナビの選択)" },
+  { key: "clay", label: "クレイ(Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。ミントから桃色へ移る淡い地に、青緑とコーラル)" },
+  { key: "glass", label: "グラス(Glassmorphism。落ち着いた淡い単色の地に、すりガラスのような半透明のカード)" },
   { key: "neumorphism", label: "ニューモーフィズム(Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする)" },
   { key: "frosted", label: "フロスト(Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青)" },
-  { key: "pixel", label: "ピクセル(Pixel art。ゲームのドット絵のUIのように、角の欠けた枠のウィンドウとボタン、HPゲージと▶カーソル)" },
   { key: "nineties", label: "90年代(90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ)" },
   { key: "none", label: "装飾なし" },
 ];
@@ -237,7 +236,7 @@ ROOT_MD=${rootMd}
 # ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# テーマ: material(マテリアル) / clay(クレイ) / glass(グラス) / neumorphism(ニューモーフィズム) / frosted(フロスト) / pixel(ピクセル) / nineties(90年代) / none(装飾なし)
+# テーマ: material(マテリアル) / clay(クレイ) / glass(グラス) / neumorphism(ニューモーフィズム) / frosted(フロスト) / nineties(90年代) / none(装飾なし)
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 
