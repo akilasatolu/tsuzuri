@@ -48,9 +48,7 @@ export const THEME_CHOICES = [
   { key: "glass", label: "グラス(Glassmorphism。色とりどりの光の地に、すりガラスのような半透明のカード)" },
   { key: "neumorphism", label: "ニューモーフィズム(Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする)" },
   { key: "frosted", label: "フロスト(Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青)" },
-  { key: "retro", label: "レトロフューチャー(Retrofuturism。星の夜空と地平線に沈む縞模様の夕日、奥へ流れる光るグリッド、クロームの見出し。常にダーク表示)" },
-  { key: "y2k", label: "Y2K(Y2K UI。パステルの地にシャボン玉と星、虹色に光る縁のカード、アクア風のつやのあるボタン)" },
-  { key: "pixel", label: "ピクセル(Pixel art。8ビットゲームのような太い枠と市松模様、ステージ名の札の見出しと▶カーソル)" },
+  { key: "pixel", label: "ピクセル(Pixel art。ゲームのドット絵のUIのように、角の欠けた枠のウィンドウとボタン、HPゲージと▶カーソル)" },
   { key: "nineties", label: "90年代(90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ)" },
   { key: "none", label: "装飾なし" },
 ];
@@ -239,7 +237,7 @@ ROOT_MD=${rootMd}
 # ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# テーマ: material(マテリアル) / clay(クレイ) / glass(グラス) / neumorphism(ニューモーフィズム) / frosted(フロスト) / retro(レトロフューチャー) / y2k(Y2K) / pixel(ピクセル) / nineties(90年代) / none(装飾なし)
+# テーマ: material(マテリアル) / clay(クレイ) / glass(グラス) / neumorphism(ニューモーフィズム) / frosted(フロスト) / pixel(ピクセル) / nineties(90年代) / none(装飾なし)
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 

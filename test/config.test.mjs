@@ -45,7 +45,7 @@ test("全キー設定済みで正しく反映される", () => {
     SITE_NAME: "My Site",
     CUSTOM_DOMAIN: "docs.example.com",
     OGP_DEFAULT_IMAGE: "og.png",
-    THEME: "retro",
+    THEME: "pixel",
     STYLE_DIR: "_pkg-src/styles",
   });
   assert.equal(config.rootMd, "docs/index.md");
@@ -59,7 +59,7 @@ test("全キー設定済みで正しく反映される", () => {
   assert.equal(config.siteName, "My Site");
   assert.equal(config.customDomain, "docs.example.com");
   assert.equal(config.ogDefaultImage, "og.png");
-  assert.equal(config.theme, "retro");
+  assert.equal(config.theme, "pixel");
   assert.equal(config.styleDir, "_pkg-src/styles");
 });
 
@@ -116,9 +116,9 @@ test('LANG="" → "ja" にフォールバック', () => {
   assert.equal(config.lang, "ja");
 });
 
-test('THEME="retro" → 正常反映', () => {
-  const config = loadConfig({ THEME: "retro" });
-  assert.equal(config.theme, "retro");
+test('THEME="pixel" → 正常反映', () => {
+  const config = loadConfig({ THEME: "pixel" });
+  assert.equal(config.theme, "pixel");
 });
 
 test('THEME="Sumi" (大文字小文字違い) → warnして"material"', () => {
@@ -256,14 +256,14 @@ test("ROOT_MD: ./ や \\ を含む書き方も、リンクから解決したパ�
 });
 
 test("parseConfigText: コメント・空行・未知のキーを読み飛ばし、値の前後の空白を取る", () => {
-  const values = parseConfigText("\uFEFF# comment\r\nTHEME = retro \r\n\nUNKNOWN=x\nSITE_NAME=A=B\nNAV_ENABLED=true");
-  assert.deepEqual(values, { THEME: "retro", SITE_NAME: "A=B", NAV_ENABLED: "true" });
+  const values = parseConfigText("\uFEFF# comment\r\nTHEME = pixel \r\n\nUNKNOWN=x\nSITE_NAME=A=B\nNAV_ENABLED=true");
+  assert.deepEqual(values, { THEME: "pixel", SITE_NAME: "A=B", NAV_ENABLED: "true" });
 });
 
 test("withConfigFileDefaults: 環境変数を優先し、OSのLANG(言語タグでない)は設定ファイルの値にする", () => {
-  const file = { THEME: "retro", LANG: "en", NAV_ENABLED: "true" };
-  const env = withConfigFileDefaults({ THEME: "y2k", LANG: "ja_JP.UTF-8" }, file);
-  assert.equal(env.THEME, "y2k");
+  const file = { THEME: "pixel", LANG: "en", NAV_ENABLED: "true" };
+  const env = withConfigFileDefaults({ THEME: "clay", LANG: "ja_JP.UTF-8" }, file);
+  assert.equal(env.THEME, "clay");
   assert.equal(env.LANG, "en");
   assert.equal(env.NAV_ENABLED, "true");
   assert.equal(withConfigFileDefaults({ LANG: "ja" }, file).LANG, "ja", "言語タグなら環境変数を優先");

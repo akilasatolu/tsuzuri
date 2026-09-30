@@ -66,7 +66,7 @@ function copyRealBaseAndThemeStyles(dir, themeFile = "material.css") {
 }
 
 // フィクスチャ専用の STYLE_DIR ("styles-fixture") を tmp dir にコピーする。
-// マーカーコメントのみの base.css / retro.css を持ち、T-012(styles/retro.css)の
+// マーカーコメントのみの base.css / pixel.css を持ち、T-012(styles/pixel.css)の
 // 完成有無に依存せずテーマカスケードの挙動を検証できる。
 function copyFixtureStyleDir(dir) {
   fs.cpSync(path.join(FIXTURE_SITE, "styles-fixture"), path.join(dir, "styles-fixture"), {
@@ -156,15 +156,15 @@ describe("build-docs.mjs :: main (E2E)", () => {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
 
-      const result = runBuild(dir, { THEME: "retro", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "pixel", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
 
       const indexHtml = readOut(dir, "index.html");
       const styleBlock = extractStyleBlock(indexHtml);
       assert.ok(styleBlock.includes("/*BASE_FIXTURE_MARKER*/"));
-      assert.ok(styleBlock.includes("/*RETRO_FIXTURE_MARKER*/"));
+      assert.ok(styleBlock.includes("/*PIXEL_FIXTURE_MARKER*/"));
       assert.ok(
-        styleBlock.indexOf("/*BASE_FIXTURE_MARKER*/") < styleBlock.indexOf("/*RETRO_FIXTURE_MARKER*/"),
+        styleBlock.indexOf("/*BASE_FIXTURE_MARKER*/") < styleBlock.indexOf("/*PIXEL_FIXTURE_MARKER*/"),
         "baseCss -> themeCss の順で連結されること"
       );
     } finally {
@@ -184,7 +184,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const indexHtml = readOut(dir, "index.html");
       const styleBlock = extractStyleBlock(indexHtml);
       assert.ok(styleBlock.includes("/*BASE_FIXTURE_MARKER*/"));
-      assert.ok(!styleBlock.includes("/*RETRO_FIXTURE_MARKER*/"));
+      assert.ok(!styleBlock.includes("/*PIXEL_FIXTURE_MARKER*/"));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -194,7 +194,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      // styles-fixture には base.css のみコピーし、retro.css を欠落させる
+      // styles-fixture には base.css のみコピーし、pixel.css を欠落させる
       const stylesDir = path.join(dir, "styles-fixture");
       fs.mkdirSync(stylesDir, { recursive: true });
       fs.copyFileSync(
@@ -202,14 +202,14 @@ describe("build-docs.mjs :: main (E2E)", () => {
         path.join(stylesDir, "base.css")
       );
 
-      const result = runBuild(dir, { THEME: "retro", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "pixel", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /retro\.css.*見つかりません/);
+      assert.match(result.stderr, /pixel\.css.*見つかりません/);
 
       const indexHtml = readOut(dir, "index.html");
       const styleBlock = extractStyleBlock(indexHtml);
       assert.ok(styleBlock.includes("/*BASE_FIXTURE_MARKER*/"));
-      assert.ok(!styleBlock.includes("/*RETRO_FIXTURE_MARKER*/"));
+      assert.ok(!styleBlock.includes("/*PIXEL_FIXTURE_MARKER*/"));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -369,10 +369,10 @@ describe("build-docs.mjs :: main (E2E)", () => {
     try {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
-      // docs/a.md だけ frontmatter で theme: retro を指定する。
+      // docs/a.md だけ frontmatter で theme: pixel を指定する。
       fs.writeFileSync(
         path.join(dir, "docs", "a.md"),
-        ["---", "theme: retro", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
+        ["---", "theme: pixel", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
       );
 
       // サイト全体は THEME=none(=デフォルトではテーマ層を適用しない)。
@@ -382,14 +382,14 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const indexStyle = extractStyleBlock(readOut(dir, "index.html"));
       assert.ok(indexStyle.includes("/*BASE_FIXTURE_MARKER*/"));
       assert.ok(
-        !indexStyle.includes("/*RETRO_FIXTURE_MARKER*/"),
+        !indexStyle.includes("/*PIXEL_FIXTURE_MARKER*/"),
         "frontmatter未指定のページはサイト全体のTHEME(none)のまま"
       );
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(aStyle.includes("/*BASE_FIXTURE_MARKER*/"));
       assert.ok(
-        aStyle.includes("/*RETRO_FIXTURE_MARKER*/"),
+        aStyle.includes("/*PIXEL_FIXTURE_MARKER*/"),
         "frontmatterでtheme: retroを指定したページだけ上書きされる"
       );
     } finally {
@@ -451,14 +451,14 @@ describe("build-docs.mjs :: main (E2E)", () => {
         ].join("\n")
       );
 
-      const result = runBuild(dir, { THEME: "retro", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "pixel", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
       assert.match(result.stderr, /no-such-file\.css.*見つかりません/);
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(
-        aStyle.includes("/*RETRO_FIXTURE_MARKER*/"),
-        "解決できないthemeはサイト全体のTHEME(retro)にフォールバックする"
+        aStyle.includes("/*PIXEL_FIXTURE_MARKER*/"),
+        "解決できないthemeはサイト全体のTHEME(pixel)にフォールバックする"
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -475,14 +475,14 @@ describe("build-docs.mjs :: main (E2E)", () => {
         ["---", "theme: none", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
       );
 
-      const result = runBuild(dir, { THEME: "retro", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "pixel", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
 
       const indexStyle = extractStyleBlock(readOut(dir, "index.html"));
-      assert.ok(indexStyle.includes("/*RETRO_FIXTURE_MARKER*/"));
+      assert.ok(indexStyle.includes("/*PIXEL_FIXTURE_MARKER*/"));
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
-      assert.ok(!aStyle.includes("/*RETRO_FIXTURE_MARKER*/"));
+      assert.ok(!aStyle.includes("/*PIXEL_FIXTURE_MARKER*/"));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -558,13 +558,13 @@ describe("build-docs.mjs :: main (E2E)", () => {
         ["---", "theme: ../secret.css", "---", "# Page A"].join("\n")
       );
 
-      const result = runBuild(dir, { THEME: "retro", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "pixel", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
       assert.match(result.stderr, /リポジトリの外/);
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(!aStyle.includes("SECRET_OUTSIDE_REPO"));
-      assert.ok(aStyle.includes("/*RETRO_FIXTURE_MARKER*/"));
+      assert.ok(aStyle.includes("/*PIXEL_FIXTURE_MARKER*/"));
     } finally {
       fs.rmSync(parent, { recursive: true, force: true });
     }
@@ -1338,10 +1338,10 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const vendored = path.join(dir, ".github", "tsuzuri", "styles");
       fs.mkdirSync(vendored, { recursive: true });
       fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(vendored, "base.css"));
-      fs.copyFileSync(path.join(REAL_STYLES_DIR, "retro.css"), path.join(vendored, "retro.css"));
+      fs.copyFileSync(path.join(REAL_STYLES_DIR, "pixel.css"), path.join(vendored, "pixel.css"));
       fs.writeFileSync(
         path.join(dir, ".github", "docs-pages.config"),
-        "# c\nTHEME=retro\nSITE_NAME=FromFile\nLANG=en\nNAV_ENABLED=true\n"
+        "# c\nTHEME=pixel\nSITE_NAME=FromFile\nLANG=en\nNAV_ENABLED=true\n"
       );
       let result = runBuild(dir, { LANG: "ja_JP.UTF-8" });
       assert.equal(result.status, 0, result.stderr);
@@ -1349,7 +1349,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       let html = readOut(dir, "index.html");
       assert.match(html, /<html lang="en">/);
       assert.match(html, /FromFile/);
-      assert.ok(extractStyleBlock(html).includes(fs.readFileSync(path.join(REAL_STYLES_DIR, "retro.css"), "utf-8").slice(0, 200)));
+      assert.ok(extractStyleBlock(html).includes(fs.readFileSync(path.join(REAL_STYLES_DIR, "pixel.css"), "utf-8").slice(0, 200)));
       result = runBuild(dir, { SITE_NAME: "FromEnv" });
       html = readOut(dir, "index.html");
       assert.match(html, /FromEnv/, "環境変数を優先する");

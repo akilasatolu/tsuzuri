@@ -82,8 +82,8 @@ test("promptAnswers: 全てデフォルト値で応答すると既定値が返�
 test("promptAnswers: THEME番号入力(6)でretroが選ばれる", async () => {
   const rl = fakeRl(["", "", "6", "", "", ""]);
   const answers = await promptAnswers(rl);
-  assert.equal(answers.theme, "retro");
-  assert.equal(THEME_CHOICES[5].key, "retro");
+  assert.equal(answers.theme, "pixel");
+  assert.equal(THEME_CHOICES[5].key, "pixel");
 });
 
 test("promptAnswers: STYLE_FILEひな形作成をyで応答するとtrueになる", async () => {
@@ -240,9 +240,9 @@ test("buildDocsPagesConfig: THEME=retroが反映される", () => {
   const config = buildDocsPagesConfig({
     triggerBranch: "main",
     rootMd: "README.md",
-    theme: "retro",
+    theme: "pixel",
   });
-  assert.ok(config.includes("THEME=retro"));
+  assert.ok(config.includes("THEME=pixel"));
 });
 
 test("buildStyleCssTemplate: コメントのみの空ひな形である", () => {
@@ -560,8 +560,8 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
 
 test("THEME_CHOICES: 組み込みテーマの一覧", () => {
   const keys = THEME_CHOICES.map((c) => c.key);
-  assert.deepEqual(keys, ["material", "clay", "glass", "neumorphism", "frosted", "retro", "y2k", "pixel", "nineties", "none"]);
-  assert.ok(buildDocsPagesConfig({}).includes("retro(レトロフューチャー)"));
+  assert.deepEqual(keys, ["material", "clay", "glass", "neumorphism", "frosted", "pixel", "nineties", "none"]);
+  assert.ok(buildDocsPagesConfig({}).includes("pixel(ピクセル)"));
 });
 
 test("runUpdate: 設定ファイルが無い(未init)リポジトリではエラーにして何も書き込まない", async () => {
@@ -698,12 +698,12 @@ test("parseCliArgs: 引数なし・init だけなら対話モード", () => {
 
 test("parseCliArgs: --yes や値の指定があれば対話なし。値は answersFromArgs で回答になる", () => {
   assert.equal(parseCliArgs(["-y"]).nonInteractive, true);
-  const args = parseCliArgs(["init", "--branch", "docs", "--root", "index.md", "--theme", "retro", "--style"]);
+  const args = parseCliArgs(["init", "--branch", "docs", "--root", "index.md", "--theme", "pixel", "--style"]);
   assert.equal(args.nonInteractive, true);
   assert.deepEqual(answersFromArgs(args), {
     triggerBranch: "docs",
     rootMd: "index.md",
-    theme: "retro",
+    theme: "pixel",
     navEnabled: true,
     siteName: "",
     createStyleFile: true,
@@ -759,7 +759,7 @@ test("parseCliArgs: -v / -h / --update / --force", () => {
 });
 
 test("HELP_TEXT: 主なオプションとテーマ名を説明している", () => {
-  for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--style", "--force", "--version", "retro"]) {
+  for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--style", "--force", "--version", "pixel"]) {
     assert.ok(HELP_TEXT.includes(word), word);
   }
 });
@@ -984,7 +984,7 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     mkdirSync(join(dir, ".github"));
     writeFileSync(
       join(dir, ".github/docs-pages.config"),
-      "# comment\r\nSITE_NAME = Bob's \"docs\"  \r\nOGP_DEFAULT_IMAGE=https://x.example/a.png?w=1&h=2\r\n\r\nNODE_OPTIONS=--require x\nTHEME=retro  # 暗い配色\nLANG=en"
+      "# comment\r\nSITE_NAME = Bob's \"docs\"  \r\nOGP_DEFAULT_IMAGE=https://x.example/a.png?w=1&h=2\r\n\r\nNODE_OPTIONS=--require x\nTHEME=pixel  # 暗い配色\nLANG=en"
     );
     const envFile = join(dir, "github.env");
     const result = spawnSync("bash", ["-e", "load.sh"], { cwd: dir, encoding: "utf8", env: { ...process.env, GITHUB_ENV: envFile } });
@@ -993,7 +993,7 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     const env = readFileSync(envFile, "utf8");
     assert.match(env, /^SITE_NAME=Bob's "docs"$/m);
     assert.match(env, /^OGP_DEFAULT_IMAGE=https:\/\/x\.example\/a\.png\?w=1&h=2$/m);
-    assert.match(env, /^THEME=retro {2}# 暗い配色$/m, "行の途中の#はコメントにならない(ドキュメントどおり)");
+    assert.match(env, /^THEME=pixel {2}# 暗い配色$/m, "行の途中の#はコメントにならない(ドキュメントどおり)");
     assert.match(env, /^LANG=en$/m, "末尾に改行の無い最後の行も読む");
     assert.doesNotMatch(env, /NODE_OPTIONS|\r/);
   } finally {
