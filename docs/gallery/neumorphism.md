@@ -13,7 +13,7 @@ Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこ
 1ページだけ使う場合は、そのページのfrontmatterに`theme: neumorphism`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← グラス(glass)](glass.md) ・ [ギャラリー一覧](../gallery.md) ・ [フロスト(frosted) →](frosted.md)
+[← グラス(glass)](glass.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← グラス(glass)](glass.md) ・ [ギャラリー一覧](../gallery.md) ・ [フロスト(frosted) →](frosted.md)
+[← グラス(glass)](glass.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)

@@ -12,9 +12,8 @@ Tsuzuriの組み込みテーマの見た目を、実際に生成されたペー�
 | テーマ | 設定値 | 特徴 |
 |---|---|---|
 | [マテリアル(material)](gallery/material.md) | `THEME=material` | Material Design 3 風の標準スタイル(既定)。青系の配色、角丸のカードと影、トーンのついたナビの選択。ライト/ダークモードを自動で切り替える。 |
-| [グラス(glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism。丸い色の形を置いた淡い地に、形がぼやけて透けるすりガラスのような半透明のカード。 |
+| [グラス(glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism。斜めに流れるカラーグラデーションの地に、色がそのまま透ける薄い透明なガラスのカード。 |
 | [ニューモーフィズム(neumorphism)](gallery/neumorphism.md) | `THEME=neumorphism` | Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。 |
-| [フロスト(frosted)](gallery/frosted.md) | `THEME=frosted` | Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青。 |
 | [90年代(nineties)](gallery/nineties.md) | `THEME=nineties` | 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。 |
 | [装飾なし(none)](gallery/none.md) | `THEME=none` | テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。 |
 | [独自CSSの例(このサイト)](gallery/custom.md) | `THEME=none`+`STYLE_FILE` | テーマを使わず、独自CSSだけで作ったこのサイト自身の見た目。 |
