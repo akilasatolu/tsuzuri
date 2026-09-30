@@ -150,7 +150,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("THEME=retro実行時、base.css相当とretro.css相当が正しい順序で<style>に含まれる", () => {
+  test("THEME=nineties実行時、base.css相当とnineties.css相当が正しい順序で<style>に含まれる", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
@@ -390,7 +390,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.ok(aStyle.includes("/*BASE_FIXTURE_MARKER*/"));
       assert.ok(
         aStyle.includes("/*NINETIES_FIXTURE_MARKER*/"),
-        "frontmatterでtheme: retroを指定したページだけ上書きされる"
+        "frontmatterでtheme: ninetiesを指定したページだけ上書きされる"
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });

@@ -79,11 +79,11 @@ test("promptAnswers: 全てデフォルト値で応答すると既定値が返�
   });
 });
 
-test("promptAnswers: THEME番号入力(6)でretroが選ばれる", async () => {
-  const rl = fakeRl(["", "", "6", "", "", ""]);
+test("promptAnswers: THEME番号入力(5)でninetiesが選ばれる", async () => {
+  const rl = fakeRl(["", "", "5", "", "", ""]);
   const answers = await promptAnswers(rl);
   assert.equal(answers.theme, "nineties");
-  assert.equal(THEME_CHOICES[5].key, "nineties");
+  assert.equal(THEME_CHOICES[4].key, "nineties");
 });
 
 test("promptAnswers: STYLE_FILEひな形作成をyで応答するとtrueになる", async () => {
@@ -236,7 +236,7 @@ test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=
   assert.ok(config.includes(`STYLE_FILE=${VENDOR_DIR}/styles/custom.css`));
 });
 
-test("buildDocsPagesConfig: THEME=retroが反映される", () => {
+test("buildDocsPagesConfig: THEME=ninetiesが反映される", () => {
   const config = buildDocsPagesConfig({
     triggerBranch: "main",
     rootMd: "README.md",
@@ -560,7 +560,7 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
 
 test("THEME_CHOICES: 組み込みテーマの一覧", () => {
   const keys = THEME_CHOICES.map((c) => c.key);
-  assert.deepEqual(keys, ["material", "clay", "glass", "neumorphism", "frosted", "nineties", "none"]);
+  assert.deepEqual(keys, ["material", "glass", "neumorphism", "frosted", "nineties", "none"]);
   assert.ok(buildDocsPagesConfig({}).includes("nineties(90年代)"));
 });
 
