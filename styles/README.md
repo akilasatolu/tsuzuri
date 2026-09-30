@@ -32,7 +32,7 @@
 | THEME値 | ファイル | 特徴 |
 |---|---|---|
 | `material`（既定） | `material.css` | マテリアル。Material Design 3 風の標準スタイル。青系の配色、角丸のカードと影、トーンのついたナビの選択。ライト/ダーク自動切替 |
-| `glass` | `glass.css` | グラス。Glassmorphism。斜めに流れるカラーグラデーションの地に、色がそのまま透ける薄い透明なガラスのカード |
+| `glass` | `glass.css` | グラス。Glassmorphism。ゆっくり揺れて流れるオーロラの地に、色がそのまま透ける薄い透明なガラスのカード |
 | `neumorphism` | `neumorphism.css` | ニューモーフィズム。Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする |
 | `editorial` | `editorial.css` | エディトリアル。雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色 |
 | `minimal` | `minimal.css` | ミニマル。Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青 |

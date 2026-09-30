@@ -44,7 +44,7 @@ export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.ym
 // THEME選択肢(番号選択、1始まり)。
 export const THEME_CHOICES = [
   { key: "material", label: "マテリアル(推奨。Material Design 3 風。青系の配色、角丸のカードと影、トーンのついたナビの選択)" },
-  { key: "glass", label: "グラス(Glassmorphism。斜めに流れるカラーグラデーションの地に、色がそのまま透ける薄い透明なガラスのカード)" },
+  { key: "glass", label: "グラス(Glassmorphism。ゆっくり揺れて流れるオーロラの地に、色がそのまま透ける薄い透明なガラスのカード)" },
   { key: "neumorphism", label: "ニューモーフィズム(Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする)" },
   { key: "editorial", label: "エディトリアル(雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色)" },
   { key: "minimal", label: "ミニマル(Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青)" },
