@@ -175,7 +175,7 @@ bin/cli.mjs                 セットアップCLI(init)。生成するワーク�
 .github/scripts/
   build-docs.mjs            ビルドのエントリーポイント
   lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap
-styles/*.css                テーマCSSの原本(base + material / glass / neumorphism / frosted / nineties)
+styles/*.css                テーマCSSの原本(base + material / glass / neumorphism / nineties)
 templates/.github/workflows/docs-pages.yml  initが生成するワークフローのひな形
 scripts/release-notes.mjs   CHANGELOGからGitHubのReleaseの本文を作る(release.ymlが使う。配布対象外)
 test/                       単体テスト・E2Eテスト(test/fixtures/ にフィクスチャ)

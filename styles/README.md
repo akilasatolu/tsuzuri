@@ -13,7 +13,7 @@
 ## 使い方
 
 1. `.github/docs-pages.config` の `THEME` に、下表の中から好きなテーマ名
-   (`material` / `glass` / `neumorphism` / `frosted` / `nineties` / `none`)を指定する
+   (`material` / `glass` / `neumorphism` / `nineties` / `none`)を指定する
 
    ```
    THEME=nineties
@@ -32,9 +32,8 @@
 | THEME値 | ファイル | 特徴 |
 |---|---|---|
 | `material`（既定） | `material.css` | マテリアル。Material Design 3 風の標準スタイル。青系の配色、角丸のカードと影、トーンのついたナビの選択。ライト/ダーク自動切替 |
-| `glass` | `glass.css` | グラス。Glassmorphism。丸い色の形を置いた淡い地に、形がぼやけて透けるすりガラスのような半透明のカード |
+| `glass` | `glass.css` | グラス。Glassmorphism。斜めに流れるカラーグラデーションの地に、色がそのまま透ける薄い透明なガラスのカード |
 | `neumorphism` | `neumorphism.css` | ニューモーフィズム。Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする |
-| `frosted` | `frosted.css` | フロスト。Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青 |
 | `nineties` | `nineties.css` | 90年代。90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ |
 | `none` | （なし） | 配色・装飾を一切適用しない。ブラウザの既定の見た目になる |
 

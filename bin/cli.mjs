@@ -44,9 +44,8 @@ export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.ym
 // THEME選択肢(番号選択、1始まり)。
 export const THEME_CHOICES = [
   { key: "material", label: "マテリアル(推奨。Material Design 3 風。青系の配色、角丸のカードと影、トーンのついたナビの選択)" },
-  { key: "glass", label: "グラス(Glassmorphism。丸い色の形を置いた淡い地に、形がぼやけて透けるすりガラスのような半透明のカード)" },
+  { key: "glass", label: "グラス(Glassmorphism。斜めに流れるカラーグラデーションの地に、色がそのまま透ける薄い透明なガラスのカード)" },
   { key: "neumorphism", label: "ニューモーフィズム(Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする)" },
-  { key: "frosted", label: "フロスト(Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青)" },
   { key: "nineties", label: "90年代(90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ)" },
   { key: "none", label: "装飾なし" },
 ];
@@ -235,7 +234,7 @@ ROOT_MD=${rootMd}
 # ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# テーマ: material(マテリアル) / glass(グラス) / neumorphism(ニューモーフィズム) / frosted(フロスト) / nineties(90年代) / none(装飾なし)
+# テーマ: material(マテリアル) / glass(グラス) / neumorphism(ニューモーフィズム) / nineties(90年代) / none(装飾なし)
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 
