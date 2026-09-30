@@ -7,7 +7,7 @@ description: Tsuzuriの組み込みテーマ「マテリアル(material)」の�
 
 # マテリアル(material)
 
-Material Design 3 風。紫系の配色、角丸のカードと影、トーンのついたナビの選択。
+Material Design 3 風。青系の配色、角丸のカードと影、トーンのついたナビの選択。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=material`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: material`と書きます

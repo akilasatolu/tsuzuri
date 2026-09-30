@@ -7,7 +7,7 @@ description: Tsuzuriの組み込みテーマ「グラス(glass)」の見本ペ�
 
 # グラス(glass)
 
-Glassmorphism。色とりどりの光の地に、すりガラスのような半透明のカード。
+Glassmorphism。落ち着いた淡い単色の地に、すりガラスのような半透明のカード。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=glass`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: glass`と書きます

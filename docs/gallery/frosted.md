@@ -13,7 +13,7 @@ Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつ�
 1ページだけ使う場合は、そのページのfrontmatterに`theme: frosted`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← ニューモーフィズム(neumorphism)](neumorphism.md) ・ [ギャラリー一覧](../gallery.md) ・ [ピクセル(pixel) →](pixel.md)
+[← ニューモーフィズム(neumorphism)](neumorphism.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← ニューモーフィズム(neumorphism)](neumorphism.md) ・ [ギャラリー一覧](../gallery.md) ・ [ピクセル(pixel) →](pixel.md)
+[← ニューモーフィズム(neumorphism)](neumorphism.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)

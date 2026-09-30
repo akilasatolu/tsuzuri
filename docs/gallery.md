@@ -11,12 +11,11 @@ Tsuzuriの組み込みテーマの見た目を、実際に生成されたペー�
 
 | テーマ | 設定値 | 特徴 |
 |---|---|---|
-| [マテリアル(material)](gallery/material.md) | `THEME=material` | Material Design 3 風の標準スタイル(既定)。紫系の配色、角丸のカードと影、トーンのついたナビの選択。ライト/ダークモードを自動で切り替える。 |
-| [クレイ(clay)](gallery/clay.md) | `THEME=clay` | Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。パステルの地に紫と桃色。 |
-| [グラス(glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism。色とりどりの光の地に、すりガラスのような半透明のカード。 |
+| [マテリアル(material)](gallery/material.md) | `THEME=material` | Material Design 3 風の標準スタイル(既定)。青系の配色、角丸のカードと影、トーンのついたナビの選択。ライト/ダークモードを自動で切り替える。 |
+| [クレイ(clay)](gallery/clay.md) | `THEME=clay` | Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。ミントから桃色へ移る淡い地に、青緑とコーラル。 |
+| [グラス(glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism。落ち着いた淡い単色の地に、すりガラスのような半透明のカード。 |
 | [ニューモーフィズム(neumorphism)](gallery/neumorphism.md) | `THEME=neumorphism` | Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。 |
 | [フロスト(frosted)](gallery/frosted.md) | `THEME=frosted` | Frosted Glass。白く曇った厚いすりガラスと細かな霜のざらつき、氷の青。 |
-| [ピクセル(pixel)](gallery/pixel.md) | `THEME=pixel` | Pixel art。ゲームのドット絵のUIのように、角の欠けた枠のウィンドウとボタン、HPゲージと▶カーソル。 |
 | [90年代(nineties)](gallery/nineties.md) | `THEME=nineties` | 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。 |
 | [装飾なし(none)](gallery/none.md) | `THEME=none` | テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。 |
 | [独自CSSの例(このサイト)](gallery/custom.md) | `THEME=none`+`STYLE_FILE` | テーマを使わず、独自CSSだけで作ったこのサイト自身の見た目。 |

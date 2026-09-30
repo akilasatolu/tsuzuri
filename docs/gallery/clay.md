@@ -7,7 +7,7 @@ description: Tsuzuriの組み込みテーマ「クレイ(clay)」の見本ペー
 
 # クレイ(clay)
 
-Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。パステルの地に紫と桃色。
+Claymorphism。粘土のようにふっくら丸く立体的なカードと部品。ミントから桃色へ移る淡い地に、青緑とコーラル。
 
 このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=clay`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: clay`と書きます
