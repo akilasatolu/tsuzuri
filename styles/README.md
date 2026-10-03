@@ -13,7 +13,7 @@
 ## 使い方
 
 1. `.github/docs-pages.config` の `THEME` に、下表の中から好きなテーマ名
-   (`material` / `glass` / `neumorphism` / `editorial` / `minimal` / `terminal` / `blueprint` / `notebook` / `nineties` / `none`)を指定する
+   (`material` / `glass` / `neumorphism` / `editorial` / `minimal` / `blueprint` / `nineties` / `none`)を指定する
 
    ```
    THEME=nineties
@@ -36,9 +36,7 @@
 | `neumorphism` | `neumorphism.css` | ニューモーフィズム。Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする |
 | `editorial` | `editorial.css` | エディトリアル。雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色 |
 | `minimal` | `minimal.css` | ミニマル。Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青 |
-| `terminal` | `terminal.css` | ターミナル。今どきのターミナルアプリのような、タイトルバー付きのウィンドウに Markdown の記号(## ・ - ・ >)が見える組み方、プロンプトと点滅するカーソル。常にダーク表示 |
 | `blueprint` | `blueprint.css` | ブループリント。設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示 |
-| `notebook` | `notebook.css` | ノート。罫線ノートのページに、蛍光ペンの見出しと付箋のような引用。学習サイト向けのやさしい見た目 |
 | `nineties` | `nineties.css` | 90年代。90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ |
 | `none` | （なし） | 配色・装飾を一切適用しない。ブラウザの既定の見た目になる |
 

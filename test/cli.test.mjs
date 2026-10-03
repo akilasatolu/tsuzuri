@@ -79,11 +79,11 @@ test("promptAnswers: 全てデフォルト値で応答すると既定値が返�
   });
 });
 
-test("promptAnswers: THEME番号入力(9)でninetiesが選ばれる", async () => {
-  const rl = fakeRl(["", "", "9", "", "", ""]);
+test("promptAnswers: THEME番号入力(7)でninetiesが選ばれる", async () => {
+  const rl = fakeRl(["", "", "7", "", "", ""]);
   const answers = await promptAnswers(rl);
   assert.equal(answers.theme, "nineties");
-  assert.equal(THEME_CHOICES[8].key, "nineties");
+  assert.equal(THEME_CHOICES[6].key, "nineties");
 });
 
 test("promptAnswers: STYLE_FILEひな形作成をyで応答するとtrueになる", async () => {
@@ -560,7 +560,7 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
 
 test("THEME_CHOICES: 組み込みテーマの一覧", () => {
   const keys = THEME_CHOICES.map((c) => c.key);
-  assert.deepEqual(keys, ["material", "glass", "neumorphism", "editorial", "minimal", "terminal", "blueprint", "notebook", "nineties", "none"]);
+  assert.deepEqual(keys, ["material", "glass", "neumorphism", "editorial", "minimal", "blueprint", "nineties", "none"]);
   assert.ok(buildDocsPagesConfig({}).includes("nineties(90年代)"));
 });
 
