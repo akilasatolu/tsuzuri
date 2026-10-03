@@ -13,7 +13,7 @@ Vercel や Linear のドキュメントのような、白・黒・グレーだ�
 1ページだけ使う場合は、そのページのfrontmatterに`theme: minimal`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← エディトリアル(editorial)](editorial.md) ・ [ギャラリー一覧](../gallery.md) ・ [ターミナル(terminal) →](terminal.md)
+[← エディトリアル(editorial)](editorial.md) ・ [ギャラリー一覧](../gallery.md) ・ [ブループリント(blueprint) →](blueprint.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← エディトリアル(editorial)](editorial.md) ・ [ギャラリー一覧](../gallery.md) ・ [ターミナル(terminal) →](terminal.md)
+[← エディトリアル(editorial)](editorial.md) ・ [ギャラリー一覧](../gallery.md) ・ [ブループリント(blueprint) →](blueprint.md)

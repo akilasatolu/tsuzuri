@@ -13,7 +13,7 @@ description: Tsuzuriの組み込みテーマ「90年代(nineties)」の見本ペ
 1ページだけ使う場合は、そのページのfrontmatterに`theme: nineties`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← ノート(notebook)](notebook.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← ブループリント(blueprint)](blueprint.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← ノート(notebook)](notebook.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)
+[← ブループリント(blueprint)](blueprint.md) ・ [ギャラリー一覧](../gallery.md) ・ [装飾なし(none) →](none.md)

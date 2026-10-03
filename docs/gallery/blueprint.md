@@ -13,7 +13,7 @@ description: Tsuzuriの組み込みテーマ「ブループリント(blueprint)�
 1ページだけ使う場合は、そのページのfrontmatterに`theme: blueprint`と書きます
 ([テーマ・スタイル](../theming.md)参照)。
 
-[← ターミナル(terminal)](terminal.md) ・ [ギャラリー一覧](../gallery.md) ・ [ノート(notebook) →](notebook.md)
+[← ミニマル(minimal)](minimal.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)
 
 ## 見出しレベル2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← ターミナル(terminal)](terminal.md) ・ [ギャラリー一覧](../gallery.md) ・ [ノート(notebook) →](notebook.md)
+[← ミニマル(minimal)](minimal.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)
