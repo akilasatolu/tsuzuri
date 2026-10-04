@@ -1,3 +1,307 @@
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--fg);
+    background: var(--bg);
+  }
+  main {
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: 40px 24px;
+    overflow-x: auto;
+  }
+  main img { max-width: 100%; height: auto; }
+
+  /* 「本文へスキップ」リンク(キーボードで選んだときだけ表示) */
+  .tsuzuri-skip {
+    position: absolute;
+    left: 8px;
+    top: -48px;
+    padding: 6px 12px;
+    background: var(--bg);
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    z-index: 10;
+  }
+  .tsuzuri-skip:focus { top: 8px; }
+  main pre { background: var(--code-bg); padding: 12px 16px; border-radius: 8px; overflow-x: auto; }
+  main code { background: var(--code-bg); padding: 2px 5px; border-radius: 4px; font-size: 0.9em; }
+  main pre code { background: none; padding: 0; }
+  main table { border-collapse: collapse; width: 100%; }
+
+  /* コードの色分け(言語名付きのコードブロックを highlight.js でビルド時に色分けしたもの)。
+     色はテーマのアクセント色・文字色から決める。独自CSSで --hl-* 変数を指定すれば個別に変えられる。 */
+  .hljs-comment, .hljs-quote { color: var(--hl-comment, var(--fg)); opacity: 0.6; font-style: italic; }
+  .hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-type, .hljs-meta {
+    color: var(--hl-keyword, var(--accent));
+    font-weight: 600;
+  }
+  .hljs-string, .hljs-regexp, .hljs-symbol, .hljs-template-tag, .hljs-addition {
+    color: var(--hl-string, color-mix(in srgb, var(--accent) 55%, var(--fg)));
+  }
+  .hljs-number, .hljs-literal, .hljs-bullet, .hljs-link {
+    color: var(--hl-number, color-mix(in srgb, var(--accent) 75%, var(--fg)));
+  }
+  .hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class {
+    color: var(--hl-title, var(--fg));
+    font-weight: 700;
+  }
+  .hljs-attr, .hljs-attribute, .hljs-variable, .hljs-property, .hljs-params {
+    color: var(--hl-attr, color-mix(in srgb, var(--accent) 35%, var(--fg)));
+  }
+  .hljs-deletion { color: var(--hl-deletion, var(--accent)); text-decoration: line-through; }
+  .hljs-emphasis { font-style: italic; }
+  .hljs-strong { font-weight: 700; }
+  main th, main td { border: 1px solid var(--border); padding: 6px 10px; }
+  main a { color: var(--accent); }
+
+  /* サイト内ナビゲーション(NAV_ENABLED=true のときだけ body 直下に出力される)。
+     広い画面では左側に固定したサイドバー、狭い画面では本文の上に「メニュー」ボタンを置き、
+     押すとページ一覧が開く(JavaScriptは使わず、チェックボックスとラベルで開閉する)。
+     色はテーマの変数を使うため、どのテーマでもそのまま馴染む。 */
+  body > nav {
+    font-size: 0.9em;
+    line-height: 1.5;
+    padding: 12px 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--border);
+  }
+  body > nav ul { list-style: none; margin: 0; padding: 0; }
+  body > nav ul ul { margin: 2px 0 4px 0.4em; padding-left: 0.8em; border-left: 1px solid var(--border); }
+  /* ディレクトリ(<details> で折りたためる見出し) */
+  body > nav summary { display: block; margin-top: 6px; font-weight: 600; opacity: 0.7; cursor: pointer; list-style: none; }
+  body > nav summary::-webkit-details-marker { display: none; }
+  body > nav summary::before { content: "▸"; display: inline-block; width: 1em; transition: transform 0.15s; }
+  body > nav details[open] > summary::before { transform: rotate(90deg); }
+  body > nav summary:focus-visible { outline: 2px solid var(--accent); }
+  body > nav a { display: block; padding: 3px 0; color: var(--accent); text-decoration: none; }
+  body > nav a:hover { text-decoration: underline; }
+  body > nav a[aria-current="page"] { color: var(--fg); font-weight: 700; }
+
+  .tsuzuri-nav-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+  /* ライト/ダークの切り替え(tsuzuri-theme.js がナビの見出しの横に置く。<html data-theme> で切り替える) */
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
+  .tsuzuri-theme-toggle {
+    margin-left: auto;
+    padding: 4px 10px;
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .tsuzuri-theme-toggle:focus-visible { outline: 2px solid var(--accent); }
+  .tsuzuri-theme-toggle + .tsuzuri-nav-label { margin-left: 0; }
+  .tsuzuri-nav-head > p { margin: 0; font-weight: 700; }
+  .tsuzuri-nav-label {
+    margin-left: auto;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+  /* チェックボックス本体は見えなくするが、キーボードで操作できるよう display:none にはしない */
+  .tsuzuri-nav-toggle { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .tsuzuri-nav-toggle:focus-visible + .tsuzuri-nav-head .tsuzuri-nav-label { outline: 2px solid var(--accent); }
+  body > nav > ul { display: none; margin-top: 8px; }
+  .tsuzuri-nav-toggle:checked ~ ul { display: block; }
+
+  /* 見出しへのリンク(#)。見出しにカーソルを当てたとき・キーボードで選んだときだけ表示する */
+  .tsuzuri-anchor {
+    margin-left: 0.4em;
+    font-weight: 400;
+    text-decoration: none;
+    opacity: 0;
+  }
+  :is(h2, h3, h4, h5, h6):hover > .tsuzuri-anchor, .tsuzuri-anchor:focus { opacity: 0.6; }
+
+  /* ページ内の目次(NAV_ENABLED=true で、見出しが3つ以上あるページ) */
+  .tsuzuri-toc {
+    margin: 16px 0 24px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9em;
+  }
+  .tsuzuri-toc > p { margin: 0 0 6px; font-weight: 700; }
+  .tsuzuri-toc ul { margin: 0; padding-left: 1.2em; }
+  .tsuzuri-toc li { margin: 2px 0; }
+
+  /* GitHub の注意書き(> [!NOTE] など) */
+  .markdown-alert {
+    margin: 16px 0;
+    padding: 8px 16px;
+    border-left: 4px solid var(--alert-color);
+    background: color-mix(in srgb, var(--alert-color) 8%, transparent);
+    border-radius: 0 6px 6px 0;
+  }
+  .markdown-alert > :last-child { margin-bottom: 8px; }
+  .markdown-alert-title { margin: 4px 0; font-weight: 700; color: var(--alert-color); }
+  .markdown-alert-note { --alert-color: var(--alert-note, #4493f8); }
+  .markdown-alert-tip { --alert-color: var(--alert-tip, #3fb950); }
+  .markdown-alert-important { --alert-color: var(--alert-important, #ab7df8); }
+  .markdown-alert-warning { --alert-color: var(--alert-warning, #d29922); }
+  .markdown-alert-caution { --alert-color: var(--alert-caution, #f85149); }
+
+  /* 脚注(本文の [^1] と、ページ末尾の脚注の一覧) */
+  .footnotes { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 0.9em; }
+  .footnotes .sr-only {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  [data-fn-ref] { text-decoration: none; }
+
+  /* コードブロックのコピーボタン(tsuzuri-copy.js が付ける)。カーソルを当てたとき・キーボードで選んだときに表示する */
+  .tsuzuri-code { position: relative; }
+  .tsuzuri-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 2px 10px;
+    font: inherit;
+    font-size: 0.8em;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .tsuzuri-code:hover .tsuzuri-copy, .tsuzuri-copy:focus-visible { opacity: 1; }
+  @media (hover: none) { .tsuzuri-copy { opacity: 1; } }
+
+  /* mermaid の図(描画前はコードのまま表示される) */
+  pre.mermaid { background: transparent; text-align: center; }
+
+  /* 最終更新日(LAST_UPDATED=true のとき) */
+  .tsuzuri-updated { margin-top: 32px; font-size: 0.85em; opacity: 0.7; }
+
+  /* サイト内検索(ナビの上部。検索欄と結果はスクリプトが作る) */
+  .tsuzuri-search { margin: 10px 0 4px; }
+  .tsuzuri-search input {
+    width: 100%;
+    padding: 6px 10px;
+    font: inherit;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+  body > nav .tsuzuri-search-results { margin: 6px 0 0; }
+  .tsuzuri-search-results:empty { display: none; }
+  .tsuzuri-search-results li { padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .tsuzuri-search-results small { display: block; opacity: 0.7; font-size: 0.85em; }
+
+  /* 本文末尾の「前のページ/次のページ」リンク(NAV_ENABLED=true のとき) */
+  .tsuzuri-pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  main .tsuzuri-pager a {
+    flex: 1 1 0;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+  }
+  main .tsuzuri-pager a:hover { border-color: var(--accent); }
+  .tsuzuri-pager span { display: block; font-size: 0.8em; color: var(--fg); opacity: 0.7; }
+  .tsuzuri-pager-next { margin-left: auto; text-align: right; }
+
+  /* OS で「視差効果を減らす」(動きを減らす)を選んでいる人には、動き(アニメーション・変化の演出)を付けない */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  }
+
+  @media (min-width: 960px) {
+    body:has(> nav) {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+    }
+    body > nav {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      max-height: none;
+      height: 100vh;
+      padding: 40px 24px;
+      border-bottom: none;
+      border-right: 1px solid var(--border);
+    }
+    body > nav > ul { display: block; }
+    .tsuzuri-nav-label { display: none; }
+    body:has(> nav) > main { width: 100%; }
+  }
+
+/* ---------- 言語の切り替え ここから(多言語サイトのときだけ出力される) ---------- */
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch {
+  display: inline-block; margin: 0; padding: 4px 10px;
+  font: inherit; line-height: 1.5; color: inherit;
+  background: transparent; border: 1px solid var(--border); border-radius: 6px; box-shadow: none;
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+}
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch:hover { text-decoration: none; }
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch:focus-visible { outline: 2px solid var(--accent); }
+/* ナビの見出しでは言語ボタンを右に寄せ、後ろの ☾・メニューはその隣に並べる */
+.tsuzuri-nav-head > :is(.tsuzuri-lang-switch, .tsuzuri-lang-menu) { margin-left: auto; }
+.tsuzuri-nav-head > :is(.tsuzuri-lang-switch, .tsuzuri-lang-menu) ~ :is(.tsuzuri-theme-toggle, .tsuzuri-nav-label) { margin-left: 0; }
+/* ボタンが増えて入りきらないときは折り返す(言語ボタンがあるときだけ) */
+.tsuzuri-nav-head:has(> .tsuzuri-lang-switch, > .tsuzuri-lang-menu) { flex-wrap: wrap; }
+/* ナビが無いページ: 本文の上に右寄せ */
+.tsuzuri-lang-bar { display: flex; justify-content: flex-end; margin: 0 0 16px; }
+/* 3言語以上のメニュー(<details>)。ナビのフォルダ用の <summary> の見た目を打ち消す */
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu > summary {
+  list-style: none; opacity: 1; margin: 0; font-weight: inherit; text-transform: none; letter-spacing: normal;
+}
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu > summary::-webkit-details-marker { display: none; }
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu > summary::before { content: none; }
+/* 一覧はボタンの下に「流れとして」開く(重ねて表示しない)。ナビの枠(max-height・overflow)で
+   切り取られず、狭い画面でもナビの中で普通にスクロールできる */
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu > ul {
+  position: static; display: block; margin: 4px 0 0; padding: 4px; list-style: none;
+  border: 1px solid var(--border); border-radius: 6px;
+}
+/* 一覧の項目: 本文(main)やナビのリスト・リンクの決まり(リストの印・下線・色・背景)を打ち消し、
+   ナビの中でも本文の上の欄でも同じ見た目にする */
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu li { display: block; margin: 0; padding: 0; }
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu li::before { content: none; }
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu li::marker { content: none; }
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu a {
+  display: block; margin: 0; padding: 3px 8px;
+  font: inherit; line-height: 1.5; color: inherit; text-decoration: none; white-space: nowrap;
+  background: none; border: 0; border-radius: 4px; box-shadow: none; transform: none;
+}
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu a:is(:hover, :visited) {
+  color: inherit; text-decoration: none; background: none; box-shadow: none; transform: none;
+}
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu a:hover { color: var(--accent); }
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu a:focus-visible { outline: 2px solid var(--accent); }
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu a[aria-current] { font-weight: 700; }
+/* 開いている間は見出しの行の高さが伸びるので、他のボタンは上にそろえる(下の @supports が使えないブラウザ向け) */
+.tsuzuri-nav-head:has(> .tsuzuri-lang-menu[open]) { align-items: flex-start; }
+/* <details> の中身を並べ替えられるブラウザでは、開いている間 <details> の箱をなくし、
+   ボタン(<summary>)はサイト名・☾・メニューと同じ1行目に残したまま、一覧(::details-content)だけを
+   最後の行に全幅で置く。1行目の並びと折り返しは閉じているときと同じ。一覧は重ねずに場所を取る */
+@supports selector(::details-content) {
+  .tsuzuri-nav-head:has(> .tsuzuri-lang-menu[open]) { align-items: center; }
+  .tsuzuri-nav-head > .tsuzuri-lang-menu[open] { display: contents; }
+  .tsuzuri-nav-head > .tsuzuri-lang-menu[open] > summary { margin-left: auto; }
+  .tsuzuri-nav-head > .tsuzuri-lang-menu[open]::details-content { order: 1; flex: 0 0 100%; min-width: 0; }
+  .tsuzuri-nav-head > .tsuzuri-lang-menu[open] > ul { margin-top: -4px; }
+}
+/* ---------- 言語の切り替え ここまで ---------- */
 /*
  * glass.css (グラス)
  * Glassmorphism(グラスモーフィズム)のスタイル。ゆっくり揺れて流れるオーロラの地に、透明なガラスのカードを重ねる。
@@ -227,3 +531,8 @@ body::after {
   50% { transform: translate3d(-3%, -3%, 0) skewX(-12deg) scaleY(0.9); }
   100% { transform: translate3d(-8%, 1%, 0) skewX(5deg) scaleY(1.2); }
 }
+
+/* ---------- 言語の切り替え ここから(ボタンの見た目は「メニュー」「ライト/ダーク」と同じ) ---------- */
+/* .tsuzuri-nav-label, .tsuzuri-theme-toggle の最終的な見た目を写したもの。テーマのボタンの見た目を変えるときは、このかたまりも一緒に直す */
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
+/* ---------- 言語の切り替え ここまで ---------- */

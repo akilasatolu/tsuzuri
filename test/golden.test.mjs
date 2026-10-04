@@ -7,18 +7,16 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 /**
- * ゴールデンテスト: 多言語対応の前のコードで作ったサイトの出力をまるごと保存しておき、
- * 今のコードの出力と1文字ずつ比べる(言語を1つだけ設定した人の出力が変わらないことの確かめ)。
+ * ゴールデンテスト: いくつかの設定で作ったサイトの出力をまるごと保存しておき(test/fixtures/golden/)、
+ * 今のコードの出力と1文字ずつ比べる。出力が「意図せず」変わったことに気づくためのテスト。
  *
  * 使い方:
- *   - 保存: UPDATE_GOLDEN=1 node --test test/golden.test.mjs
- *       保存は多言語対応の前のコード(T-001)でだけ行う。以後は保存し直さないこと。
- *       新しいコードで保存し直すと、変更後の出力どうしを比べることになり、比べる意味が無くなる。
- *   - 普段(npm test): 比較時の設定(LANGUAGES)でビルドして比べる(T-005 から常に有効)。
- *   - GOLDEN_COMPARE=saved node --test test/golden.test.mjs
- *       保存時の設定(LANG)でビルドして比べる。T-005 より前のタスクの確かめに使っていた。
- *       T-005 で LANG を廃止した(読まずに無視する)ので、今のコードではこの比べ方は一致しない
- *       (LANG=ja の設定も既定の en で作られるため)。
+ *   - 普段(npm test): 下の表の設定でビルドして、保存した出力と比べる。
+ *   - 保存し直す: UPDATE_GOLDEN=1 node --test test/golden.test.mjs
+ *       出力を「意図して」変えたとき(新しい機能・見た目の変更など)だけ行う。保存し直したら、
+ *       git diff test/fixtures/golden/ で差分が意図した変更だけであることを確かめ、
+ *       その差分をコードの変更と同じ PR に入れて、レビューでも確かめてもらう(CONTRIBUTING.md 参照)。
+ *       テストを通すためだけに保存し直さないこと(意図しない変化を見逃すことになる)。
  *
  * 補助の関数は、ほかのテストファイルと共有せずにこのファイルの中に持つ
  * (test/ の下の .js / .mjs は node --test がすべてテストとして実行するため)。
@@ -30,26 +28,19 @@ const SCRIPT_PATH = path.join(PROJECT_ROOT, ".github/scripts/build-docs.mjs");
 const REAL_STYLES_DIR = path.join(PROJECT_ROOT, "styles");
 const FIXTURE_SITE = path.join(TEST_DIR, "fixtures", "site-golden");
 const GOLDEN_DIR = path.join(TEST_DIR, "fixtures", "golden");
-const STYLES_BEFORE_DIR = path.join(GOLDEN_DIR, "styles-before");
 
 const THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "blueprint", "nineties"];
 
-// 設定の表。保存・2通りの比較(saved / 普段)が同じ表を使う。
-//   saved:   保存時(多言語対応の前のコード)の環境変数
-//   compare: 比較時(変更後のコード)の環境変数
+// 設定の表(name: 保存先のフォルダ名、env: ビルドするときの環境変数)。保存と比較が同じ表を使う。
 const ORIGIN_ENV = { SITE_ORIGIN: "https://example.github.io", BASE_PATH: "/repo" };
 const GOLDEN_CONFIGS = [
-  { name: "ja", saved: { LANG: "ja" }, compare: { LANGUAGES: "ja" } },
-  { name: "ja-nav", saved: { LANG: "ja", NAV_ENABLED: "true" }, compare: { LANGUAGES: "ja", NAV_ENABLED: "true" } },
-  { name: "en-nav", saved: { LANG: "en", NAV_ENABLED: "true" }, compare: { LANGUAGES: "en", NAV_ENABLED: "true" } },
-  { name: "default", saved: { LANG: "en" }, compare: {} },
-  { name: "origin", saved: { LANG: "ja", ...ORIGIN_ENV }, compare: { LANGUAGES: "ja", ...ORIGIN_ENV } },
-  { name: "fr", saved: { LANG: "fr" }, compare: { LANGUAGES: "fr" } },
-  ...THEMES.map((theme) => ({
-    name: `theme-${theme}`,
-    saved: { LANG: "ja", THEME: theme },
-    compare: { LANGUAGES: "ja", THEME: theme },
-  })),
+  { name: "ja", env: { LANGUAGES: "ja" } },
+  { name: "ja-nav", env: { LANGUAGES: "ja", NAV_ENABLED: "true" } },
+  { name: "en-nav", env: { LANGUAGES: "en", NAV_ENABLED: "true" } },
+  { name: "default", env: {} },
+  { name: "origin", env: { LANGUAGES: "ja", ...ORIGIN_ENV } },
+  { name: "fr", env: { LANGUAGES: "fr" } },
+  ...THEMES.map((theme) => ({ name: `theme-${theme}`, env: { LANGUAGES: "ja", THEME: theme } })),
 ];
 
 // 設定に関わる環境変数。子プロセスを起動する前にすべて消してから、指定した値だけを入れる。
@@ -74,20 +65,7 @@ const CONFIG_ENV_KEYS = [
   "LAST_UPDATED",
 ];
 
-// 言語の切り替えボタンの CSS のかたまりの目印(T-016 はこれと同じ文字で書く)
-const LANG_BLOCK_START = "/* ---------- 言語の切り替え ここから";
-const LANG_BLOCK_END = "/* ---------- 言語の切り替え ここまで ---------- */";
-const LANG_BLOCK_RE = /\n\/\* -{10} 言語の切り替え ここから[\s\S]*?\/\* -{10} 言語の切り替え ここまで -{10} \*\/\n/g;
-
-// CSS から「言語の切り替え」のかたまり(前の改行1つ+始まりの行〜終わりの行+後の改行1つ)をすべて取り除く。
-// 最短一致で1かたまりずつ取るので、かたまりの間にある CSS(テーマの本体など)は残る。
-function stripLangSwitchBlocks(css) {
-  return css.replace(LANG_BLOCK_RE, "");
-}
-
 const CSS_HASH_RE = /tsuzuri-[0-9a-f]{10}\.css/g;
-// 中身を比べないファイル(あることだけ確かめる)
-const EXISTENCE_ONLY = new Set(["tsuzuri-copy.js", "tsuzuri-theme.js"]);
 const BINARY_EXT = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico"]);
 
 // .js のファイルは保存するときに名前の後ろに .txt を足す(node --test と ESLint の対象にしないため)
@@ -139,8 +117,6 @@ function describeFirstDiff(expected, actual) {
  * 保存した出力(expectedDir)と今回の出力(actualDir)を比べ、違いの一覧(文字列の配列)を返す。
  * 空の配列なら一致。
  *   - CSS ファイル名のハッシュ部分は tsuzuri-HASH.css に置き換えてから、ファイル名と中身を比べる
- *   - tsuzuri-copy.js / tsuzuri-theme.js は、あることだけ確かめる
- *   - CSS は、今回の中身から「言語の切り替え」のかたまりを取り除いたものが保存した中身と一致すること
  */
 function compareOutputDirs(expectedDir, actualDir) {
   const problems = [];
@@ -156,16 +132,14 @@ function compareOutputDirs(expectedDir, actualDir) {
     const actualRel = actual.get(name);
     if (actualRel === undefined) continue;
     const baseName = path.posix.basename(actualRel);
-    if (EXISTENCE_ONLY.has(baseName)) continue;
     const expBuf = fs.readFileSync(path.join(expectedDir, expectedRel));
     const actBuf = fs.readFileSync(path.join(actualDir, actualRel));
     if (BINARY_EXT.has(path.posix.extname(baseName).toLowerCase())) {
       if (!expBuf.equals(actBuf)) problems.push(`中身が違うファイル: ${name}(バイナリ)`);
       continue;
     }
-    let exp = expBuf.toString("utf-8").replace(CSS_HASH_RE, "tsuzuri-HASH.css");
-    let act = actBuf.toString("utf-8").replace(CSS_HASH_RE, "tsuzuri-HASH.css");
-    if (baseName.endsWith(".css")) act = stripLangSwitchBlocks(act);
+    const exp = expBuf.toString("utf-8").replace(CSS_HASH_RE, "tsuzuri-HASH.css");
+    const act = actBuf.toString("utf-8").replace(CSS_HASH_RE, "tsuzuri-HASH.css");
     if (exp !== act) problems.push(`中身が違うファイル: ${name}: ${describeFirstDiff(exp, act)}`);
   }
   return problems;
@@ -217,23 +191,15 @@ function saveOutput(outDir, destDir) {
 }
 
 const UPDATE = process.env.UPDATE_GOLDEN === "1";
-const SAVED_MODE = process.env.GOLDEN_COMPARE === "saved";
 const COMPARE_SKIP = UPDATE ? "UPDATE_GOLDEN=1 で保存中のため比べない" : false;
 
 describe("ゴールデン: 保存", { skip: UPDATE ? false : "UPDATE_GOLDEN=1 のときだけ保存する" }, () => {
-  // 注意: 保存は多言語対応の前のコード(T-001)でだけ行う。以後は保存し直さない。
-  test("styles/ の今の中身を styles-before/ に写す", () => {
-    fs.rmSync(STYLES_BEFORE_DIR, { recursive: true, force: true });
-    fs.mkdirSync(STYLES_BEFORE_DIR, { recursive: true });
-    for (const file of ["base.css", ...THEMES.map((t) => `${t}.css`)]) {
-      fs.copyFileSync(path.join(REAL_STYLES_DIR, file), path.join(STYLES_BEFORE_DIR, file));
-    }
-  });
+  // 出力を意図して変えたときだけ保存し直す。保存したら git diff test/fixtures/golden/ で差分を確かめる
   for (const config of GOLDEN_CONFIGS) {
     test(`${config.name} の出力を保存する`, () => {
       const dir = makeTmpDir();
       try {
-        saveOutput(buildSite(dir, config.saved), path.join(GOLDEN_DIR, config.name));
+        saveOutput(buildSite(dir, config.env), path.join(GOLDEN_DIR, config.name));
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
       }
@@ -243,12 +209,12 @@ describe("ゴールデン: 保存", { skip: UPDATE ? false : "UPDATE_GOLDEN=1 �
 
 describe("ゴールデン: 保存した出力と比べる", { skip: COMPARE_SKIP }, () => {
   for (const config of GOLDEN_CONFIGS) {
-    test(`${config.name}(${SAVED_MODE ? "保存時の設定" : "比較時の設定"})`, () => {
+    test(config.name, () => {
       const expectedDir = path.join(GOLDEN_DIR, config.name);
       assert.ok(fs.existsSync(expectedDir), `保存した出力がありません: ${expectedDir}`);
       const dir = makeTmpDir();
       try {
-        const outDir = buildSite(dir, SAVED_MODE ? config.saved : config.compare);
+        const outDir = buildSite(dir, config.env);
         assertSameOutput(expectedDir, outDir, config.name);
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
@@ -257,7 +223,7 @@ describe("ゴールデン: 保存した出力と比べる", { skip: COMPARE_SKIP
   }
 });
 
-describe("ゴールデン: 廃止した LANG", { skip: COMPARE_SKIP || (SAVED_MODE ? "GOLDEN_COMPARE=saved では比べない" : false) }, () => {
+describe("ゴールデン: 廃止した LANG", { skip: COMPARE_SKIP }, () => {
   // 意図した変更の確かめ: 設定ファイルに LANG=ja だけを書いても読まれず、既定(en)の出力になる
   test("設定ファイルに LANG=ja だけを書くと default と同じ出力になり、廃止の警告が出る", () => {
     const dir = makeTmpDir();
@@ -272,36 +238,7 @@ describe("ゴールデン: 廃止した LANG", { skip: COMPARE_SKIP || (SAVED_MO
   });
 });
 
-describe("ゴールデン: ソースの CSS", { skip: UPDATE ? "UPDATE_GOLDEN=1 で保存中" : false }, () => {
-  for (const file of ["base.css", ...THEMES.map((t) => `${t}.css`)]) {
-    test(`styles/${file} は保存時の中身で始まり、言語の切り替えのかたまりを除くと一致する`, () => {
-      const before = fs.readFileSync(path.join(STYLES_BEFORE_DIR, file), "utf-8");
-      const now = fs.readFileSync(path.join(REAL_STYLES_DIR, file), "utf-8");
-      assert.ok(now.startsWith(before), `styles/${file} が保存時の中身で始まっていません`);
-      assert.equal(stripLangSwitchBlocks(now), before);
-    });
-  }
-});
-
 describe("ゴールデン: 比べ方の部品", () => {
-  const block = `${LANG_BLOCK_START}(説明) ---------- */\n.tsuzuri-lang { color: red; }\n${LANG_BLOCK_END}\n`;
-
-  test("stripLangSwitchBlocks: かたまりが0個なら何も変えない", () => {
-    const css = "body { margin: 0; }\n";
-    assert.equal(stripLangSwitchBlocks(css), css);
-  });
-
-  test("stripLangSwitchBlocks: かたまりが1個(base.css の後ろだけ)なら元に戻る", () => {
-    const base = "body { margin: 0; }\n";
-    assert.equal(stripLangSwitchBlocks(`${base}\n${block}`), base);
-  });
-
-  test("stripLangSwitchBlocks: かたまりが2個(base とテーマ)なら両方取り、間のテーマ本体は残す", () => {
-    const base = "body { margin: 0; }\n";
-    const theme = ":root { --c: blue; }\n";
-    assert.equal(stripLangSwitchBlocks(`${base}\n${block}${theme}\n${block}`), base + theme);
-  });
-
   describe("compareOutputDirs の失敗の文言", () => {
     const setup = () => {
       const root = makeTmpDir("golden-cmp-");
@@ -315,13 +252,11 @@ describe("ゴールデン: 比べ方の部品", () => {
       fs.writeFileSync(path.join(exp, "tsuzuri-search.js.txt"), "search();\n");
       fs.writeFileSync(path.join(act, "tsuzuri-search.js"), "search();\n");
       fs.writeFileSync(path.join(exp, "tsuzuri-0123456789.css"), "body{}\n");
-      fs.writeFileSync(path.join(act, "tsuzuri-abcdefabcd.css"), `body{}\n\n${block}`);
-      fs.writeFileSync(path.join(exp, "tsuzuri-copy.js.txt"), "old\n");
-      fs.writeFileSync(path.join(act, "tsuzuri-copy.js"), "new\n");
+      fs.writeFileSync(path.join(act, "tsuzuri-abcdefabcd.css"), "body{}\n");
       return { root, exp, act };
     };
 
-    test("同じなら違いは0件(ハッシュ・.js.txt・CSS のかたまり・copy.js の中身は無視)", () => {
+    test("同じなら違いは0件(CSS のハッシュと、保存したときの .js.txt の名前は無視)", () => {
       const { root, exp, act } = setup();
       try {
         // 今回の出力の HTML 側のハッシュも変える
@@ -380,10 +315,10 @@ describe("ゴールデン: 比べ方の部品", () => {
       }
     });
 
-    test("CSS がかたまり以外で違うと、CSS のファイル名が出る", () => {
+    test("CSS が違うと、CSS のファイル名が出る", () => {
       const { root, exp, act } = setup();
       try {
-        fs.writeFileSync(path.join(act, "tsuzuri-abcdefabcd.css"), `body{ }\n\n${block}`);
+        fs.writeFileSync(path.join(act, "tsuzuri-abcdefabcd.css"), "body{ }\n");
         const problems = compareOutputDirs(exp, act);
         assert.equal(problems.length, 1);
         assert.match(problems[0], /^中身が違うファイル: tsuzuri-HASH\.css:/);

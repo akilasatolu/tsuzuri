@@ -2,7 +2,14 @@
   const root = document.documentElement;
   const head = document.querySelector(".tsuzuri-nav-head");
   if (!head) return;
-  const ja = (root.lang || "").toLowerCase().startsWith("ja");
+  const S = {"en":{"toLight":"Switch to light mode","toDark":"Switch to dark mode"},"ja":{"toLight":"ライト表示に切り替える","toDark":"ダーク表示に切り替える"}};
+  const s = S[((table, tag) => {
+  const t = String(tag == null ? "" : tag).toLowerCase();
+  const keys = Object.keys(table);
+  const find = (want) => (want ? keys.find((k) => k.toLowerCase() === want) : undefined);
+  const hit = find(t) || find(t.split("-")[0]);
+  return hit === undefined ? "en" : hit;
+})(S, root.lang)];
   const media = window.matchMedia("(prefers-color-scheme: dark)");
   const current = () => root.dataset.theme || (media.matches ? "dark" : "light");
   // テーマにライト/ダークの違いがあるかを、実際に切り替えて背景を比べて確かめる。
@@ -24,9 +31,7 @@
   const render = () => {
     const dark = current() === "dark";
     button.textContent = dark ? "☀" : "☾";
-    const label = dark
-      ? ja ? "ライト表示に切り替える" : "Switch to light mode"
-      : ja ? "ダーク表示に切り替える" : "Switch to dark mode";
+    const label = dark ? s.toLight : s.toDark;
     button.setAttribute("aria-label", label);
     button.title = label;
   };

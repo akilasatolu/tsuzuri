@@ -1,8 +1,15 @@
 (() => {
-  const ja = (document.documentElement.lang || "").toLowerCase().startsWith("ja");
-  const label = ja ? "コピー" : "Copy";
-  const done = ja ? "コピーしました" : "Copied";
-  const failed = ja ? "コピーできませんでした" : "Copy failed";
+  const S = {"en":{"copy":"Copy","copied":"Copied","copyFailed":"Copy failed"},"ja":{"copy":"コピー","copied":"コピーしました","copyFailed":"コピーできませんでした"}};
+  const s = S[((table, tag) => {
+  const t = String(tag == null ? "" : tag).toLowerCase();
+  const keys = Object.keys(table);
+  const find = (want) => (want ? keys.find((k) => k.toLowerCase() === want) : undefined);
+  const hit = find(t) || find(t.split("-")[0]);
+  return hit === undefined ? "en" : hit;
+})(S, document.documentElement.lang)];
+  const label = s.copy;
+  const done = s.copied;
+  const failed = s.copyFailed;
   for (const code of document.querySelectorAll("main pre > code")) {
     const pre = code.parentElement;
     // ボタンが横スクロールで一緒に流れないよう、コードブロックを枠で包んでその右上に置く
