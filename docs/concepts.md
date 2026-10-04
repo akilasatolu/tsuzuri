@@ -147,7 +147,8 @@ a `404.md` at the root of the repository, its contents are used (images used in 
 too; this site's 404 page is also made with `404.md`). Otherwise the default content is used
 ("Page not found" and a link to the top page, in Japanese if the page language is Japanese and
 in English otherwise; on a [multilingual site](./i18n.md), a notice for each language that has
-a top page, with links to each top page). It's shown with the same navigation and theme as the
+a top page, with links to each top page, where only the notice in the URL's language is shown;
+see [Multilingual sites](./i18n.md#the-404-page)). It's shown with the same navigation and theme as the
 other pages, and isn't indexed by search engines (`noindex`).
 
 ## sitemap.xml and robots.txt (for search engines)
