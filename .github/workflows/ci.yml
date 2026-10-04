@@ -1,7 +1,7 @@
 name: CI
 
 # OSS本体自身の開発用CI(配布対象外)。
-# lint・test・ワークフローの静的チェック(actionlint)のみを行う。GitHub Pagesへのデプロイは一切行わないため、
+# lint・test・ワークフローの静的チェック(actionlint)・配布物の確認のみを行う。GitHub Pagesへのデプロイは一切行わないため、
 # pages/id-token権限は不要(contents: readのみで完結する)。
 # このワークフローはmainブランチ(tsuzuri本体の開発ブランチ)にのみ存在する。
 # このリポジトリ自身のPagesデプロイは、docsブランチ(tsuzuriで作ったユーザー向けサイト)
@@ -72,3 +72,16 @@ jobs:
           node-version: 24
       - name: Verify mermaid integrity
         run: node scripts/mermaid-integrity.mjs --check
+
+  # 利用者に配る中身(npm がまとめたパッケージ)で、init → 依存のインストール → ビルド → init --update が
+  # 通るか確かめる。作業フォルダで動く npm test では、package.json の files の漏れや、npm が外す
+  # ルートの package-lock.json に頼った作りに気づけないため(詳しくは scripts/check-package.mjs)。
+  package-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Check the packaged CLI
+        run: node scripts/check-package.mjs

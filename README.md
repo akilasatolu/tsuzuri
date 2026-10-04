@@ -177,9 +177,11 @@ bin/cli.mjs                 セットアップCLI(init)。生成するワーク�
   lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap / i18n
 styles/*.css                テーマCSSの原本(base + material / glass / neumorphism / editorial / minimal / blueprint / nineties)
 templates/.github/workflows/docs-pages.yml  initが生成するワークフローのひな形
+templates/tsuzuri/          initが利用者に配るビルド用の依存の package.json・package-lock.json(scripts/build-lockfiles.mjs で作る)
 scripts/release-notes.mjs   CHANGELOGからGitHubのReleaseの本文を作る(release.ymlが使う。配布対象外)
+scripts/check-package.mjs   配布物(npm pack)から init・ビルド・init --update が通るか確かめる(CIが使う。配布対象外)
 test/                       単体テスト・E2Eテスト(test/fixtures/ にフィクスチャ)
-.github/workflows/ci.yml    lint・testのみを行う開発用CI(Pagesへのデプロイはしない)
+.github/workflows/ci.yml    lint・test・配布物の確認を行う開発用CI(Pagesへのデプロイはしない)
 ```
 
 `init`は`.github/scripts/`と`styles/`の中身を、利用者リポジトリの`.github/tsuzuri/`配下へ

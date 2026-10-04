@@ -100,17 +100,14 @@ npm run lint
   破壊的変更を含むリリースでは新しいメジャー(`v2`)を作る
 
 1. `main`で`npm test`・`npm run lint`が通り、CIが成功していることを確認する
-2. 手元の検証用ディレクトリで、実際の利用と同じ流れを確認する(`npx`はパッケージをインストールして
-   シンボリックリンク経由でCLIを起動するため、`node bin/cli.mjs`の直接実行とは経路が異なる)。
-   作業ツリーを直接指定すると、npm がパッケージを作るときに外すファイル(`package.json`の`files`に無いもの、
-   ルートの`package-lock.json`)もそのまま見えてしまうので、`npm pack`で作ったファイルから実行する
-   - `npm pack --ignore-scripts`で作った`tsuzuri-X.Y.Z.tgz`を使い、
-     `npm exec --yes --package=<そのtgzの絶対パス> -- tsuzuri init`でファイルが生成されること
-     (`.github/tsuzuri/package.json`・`package-lock.json`も作られること)
-   - 生成されたワークフローの手順(設定の読み込み → `BASE_PATH`/`SITE_ORIGIN`の決定 →
-     `marked`のインストール → `.github/tsuzuri/build-docs.mjs`の実行)でビルドできること
-   - 設定ファイルを書き換えてから同じ方法で`init --update`を実行し、
-     設定ファイルが保持されること
+2. 実際の利用と同じ流れが通ることを確認する。CIの`package-check`ジョブが、`node scripts/check-package.mjs`で
+   次を自動で確かめる(手元でも同じコマンドで実行できる)
+   - `npm pack`で配布物と同じファイルを作り、そこから`npx`と同じ方法(`npm exec`)で`init`を実行して、
+     ワークフロー・設定ファイル・`.github/tsuzuri/`(`package.json`・`package-lock.json`を含む)が作られること
+     (作業ツリーを直接使うと、npm がパッケージから外すファイル(`package.json`の`files`に無いもの、
+     ルートの`package-lock.json`)も見えてしまい、配布物の漏れに気づけないため)
+   - 生成されたワークフローと同じく`npm ci --ignore-scripts`で依存を入れ、`STRICT_LINKS=true`でビルドできること
+   - 設定ファイルを書き換えてから`init --update`を実行し、設定ファイルが保持されること
 3. `CHANGELOG.md`の`[Unreleased]`を`[X.Y.Z] - YYYY-MM-DD`に改め、空の`[Unreleased]`を追加する
 4. `package.json`・`package-lock.json`の`version`を`X.Y.Z`にする(依存パッケージの`version`は変えない)
 5. コミットして`main`にpushし、`vX.Y.Z`のタグを付けてpushする
