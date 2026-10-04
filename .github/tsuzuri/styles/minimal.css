@@ -178,3 +178,8 @@ body > nav a { border-radius: 6px; }
 body > nav a[aria-current="page"] { font-weight: 600; }
 .tsuzuri-search input, .tsuzuri-nav-label, .tsuzuri-theme-toggle { border: 1px solid var(--border); box-shadow: none; }
 main .tsuzuri-pager a:hover { transform: none; border-color: var(--heading); }
+
+/* ---------- 言語の切り替え ここから(ボタンの見た目は「メニュー」「ライト/ダーク」と同じ) ---------- */
+/* .tsuzuri-nav-label, .tsuzuri-theme-toggle(後ろの行での上書きを含む) の最終的な見た目を写したもの。テーマのボタンの見た目を変えるときは、このかたまりも一緒に直す */
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch { color: var(--current-fg); background: var(--current-bg); border: 1px solid var(--border); border-radius: var(--pill); box-shadow: none; }
+/* ---------- 言語の切り替え ここまで ---------- */

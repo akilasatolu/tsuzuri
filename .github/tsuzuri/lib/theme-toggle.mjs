@@ -13,8 +13,12 @@
  * コピーするビルドスクリプト一式(lib/*.mjs)に自動的に含めるため(search.mjs と同じ)。
  */
 
+import { runtimeStrings, RUNTIME_PICK_SOURCE } from "./i18n.mjs";
+
 export const THEME_SCRIPT_NAME = "tsuzuri-theme.js";
 const STORAGE_KEY = "tsuzuri-theme";
+// スクリプトに埋め込む文言の表(言語ごとに toLight・toDark だけ。表に無い言語は英語)
+const STRINGS = JSON.stringify(runtimeStrings(["toLight", "toDark"]));
 
 export const THEME_HEAD_SCRIPT = `<script>try{const t=localStorage.getItem("${STORAGE_KEY}");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}</script>`;
 
@@ -22,7 +26,8 @@ export const THEME_SCRIPT = `(() => {
   const root = document.documentElement;
   const head = document.querySelector(".tsuzuri-nav-head");
   if (!head) return;
-  const ja = (root.lang || "").toLowerCase().startsWith("ja");
+  const S = ${STRINGS};
+  const s = S[(${RUNTIME_PICK_SOURCE})(S, root.lang)];
   const media = window.matchMedia("(prefers-color-scheme: dark)");
   const current = () => root.dataset.theme || (media.matches ? "dark" : "light");
   // テーマにライト/ダークの違いがあるかを、実際に切り替えて背景を比べて確かめる。
@@ -44,9 +49,7 @@ export const THEME_SCRIPT = `(() => {
   const render = () => {
     const dark = current() === "dark";
     button.textContent = dark ? "☀" : "☾";
-    const label = dark
-      ? ja ? "ライト表示に切り替える" : "Switch to light mode"
-      : ja ? "ダーク表示に切り替える" : "Switch to dark mode";
+    const label = dark ? s.toLight : s.toDark;
     button.setAttribute("aria-label", label);
     button.title = label;
   };

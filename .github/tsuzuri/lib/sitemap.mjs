@@ -23,6 +23,13 @@
  *
  * `customDomain` 未設定時の値は `null` に統一する (空文字ではない)。
  * 呼び出し側が `undefined` を渡した場合も `null` に正規化する。
+ *
+ * 多言語サイトの拡張:
+ *   `lang` には基本言語(LANGUAGES の先頭)を渡す。省略できる `languages`・
+ *   `langOf`・`trees` を受け取り、`languages` が2つ以上のときだけ戻り値に
+ *   `languages`・`pages[].lang`・`trees` を足す。1言語・省略時は今と同じ形を返す
+ *   (キーの並びも変えない)。追加するキーは既存のキーの後ろに固定の順で置くので、
+ *   JSON の文字列どうしで比べられる。
  */
 
 /**
@@ -44,6 +51,9 @@
  * @param {string} opts.siteOrigin - サイトのオリジン (例: "https://example.com")
  * @param {string|null} [opts.customDomain] - CNAME に書き出すカスタムドメイン (未設定時は null)
  * @param {string} opts.theme - config.loadConfig() で解決された最終テーマ名 ("none" を含む)
+ * @param {string[]} [opts.languages] - サイトの言語の一覧(先頭が基本言語)。2つ以上のときだけ言語の情報を足す
+ * @param {(rel: string) => string} [opts.langOf] - ページの言語を返す関数(省略時は `lang`)
+ * @param {Map<string, object>|Record<string, object>} [opts.trees] - 言語ごとのサイトツリー(無い言語は null)
  * @returns {object} sitemap.json に書き出すオブジェクト
  */
 export function buildSitemap(opts) {
@@ -64,7 +74,12 @@ export function buildSitemap(opts) {
     siteOrigin,
     customDomain,
     theme,
+    languages,
+    langOf,
+    trees,
   } = opts;
+
+  const multiLang = Array.isArray(languages) && languages.length >= 2;
 
   // 旧 `pages` 相当 (文字列配列)。後方互換のため `pageRels` として残す。
   const pageRels = [...visitedMd.keys()];
@@ -81,10 +96,11 @@ export function buildSitemap(opts) {
       // ページ単位のテーマ上書き(frontmatterの `theme` キー)。未指定時は null とし、
       // サイト全体の `theme`(このオブジェクトのトップレベル)が適用されていることを示す。
       theme: meta.theme ?? null,
+      ...(multiLang ? { lang: langOf ? langOf(rel) : lang } : {}),
     };
   });
 
-  return {
+  const result = {
     root,
     basePath,
     styleFile,
@@ -103,6 +119,19 @@ export function buildSitemap(opts) {
     customDomain: customDomain ?? null,
     theme,
   };
+  if (!multiLang) return result;
+
+  result.languages = [...languages];
+  result.trees = Object.fromEntries(
+    languages.map((tag) => [tag, treeOf(trees, tag)])
+  );
+  return result;
+}
+
+function treeOf(trees, tag) {
+  if (!trees) return null;
+  const t = trees instanceof Map ? trees.get(tag) : (Object.hasOwn(trees, tag) ? trees[tag] : undefined);
+  return t ?? null;
 }
 
 function escapeXml(s) {

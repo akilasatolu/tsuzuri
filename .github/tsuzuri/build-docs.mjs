@@ -70,6 +70,7 @@ import {
   pageTemplate,
   composeCss,
   defaultNotFoundMarkdown,
+  renderLangSwitch,
 } from "./lib/html-renderer.mjs";
 import { buildSitemap, buildSitemapXml } from "./lib/sitemap.mjs";
 import { buildSiteTree, flattenPages } from "./lib/site-tree.mjs";
@@ -79,6 +80,17 @@ import { parseFrontmatter } from "./lib/frontmatter.mjs";
 import { imageSizeOf } from "./lib/image-size.mjs";
 import { COPY_SCRIPT, COPY_SCRIPT_NAME } from "./lib/copy-button.mjs";
 import { THEME_SCRIPT, THEME_SCRIPT_NAME, THEME_HEAD_SCRIPT } from "./lib/theme-toggle.mjs";
+import {
+  uiStrings,
+  resolveUiLang,
+  formatUi,
+  createLangContext,
+  buildTranslationIndex,
+  languageName,
+} from "./lib/i18n.mjs";
+
+// 印の無いフォルダの入口の名前(ナビの木のフォルダの並び順に使う。今の site-tree と同じ3つ・同じ綴り)
+const PLAIN_DIR_INDEX_NAMES = ["README.md", "readme.md", "index.md"];
 
 // 出力先の目印のファイル名。これがあるディレクトリは Tsuzuri が前回出力したものなので、ビルドの前に
 // 空にしてよい(消したページ・画像が残らないように)。"." で始まるので公開サイトには含まれない。
@@ -117,9 +129,33 @@ function localBuildEnv(env, repoRoot) {
   return merged;
 }
 
+// 起点(ROOT_MD)の基本言語の印付きの版(README.en.md など)が、同じフォルダに実際のファイル名であるか
+function hasMarkedRootFile(rootMdAbs, rootMd, i18n) {
+  if (i18n.markerOf(rootMd) !== null) return false;
+  const dirAbs = path.dirname(rootMdAbs);
+  let names;
+  try {
+    names = fs.readdirSync(dirAbs);
+  } catch {
+    return false;
+  }
+  const isFile = (abs) => {
+    try {
+      return fs.statSync(abs).isFile();
+    } catch {
+      return false; // 壊れたシンボリックリンクなど
+    }
+  };
+  return names.some(
+    (name) => i18n.isVariantName(name, path.posix.basename(rootMd), i18n.base) && isFile(path.join(dirAbs, name))
+  );
+}
+
 async function main() {
   const REPO_ROOT = process.cwd();
   const config = loadConfig(localBuildEnv(process.env, REPO_ROOT));
+  // ページの言語・出力先・URL の先頭を決めるのは、この言語の決まりだけ
+  const i18n = createLangContext(config);
   const OUT_DIR = resolveInsideRepo(REPO_ROOT, config.outDir);
 
   // ---------- 0. OUT_DIR チェック(致命的) ----------
@@ -138,8 +174,14 @@ async function main() {
     console.error(`起点となる ${config.rootMd} がリポジトリの外を指しています。処理を中止します。`);
     process.exit(1);
   }
-  if (!fs.existsSync(rootMdAbs)) {
-    console.error(`起点となる ${config.rootMd} が見つかりません。処理を中止します。`);
+  // ROOT_MD が無くても、基本言語の印付きの版(README.en.md など。実際のファイル名で探す)があれば続ける
+  // (crawler が起点をそちらに置き換える)
+  if (!fs.existsSync(rootMdAbs) && !hasMarkedRootFile(rootMdAbs, config.rootMd, i18n)) {
+    const markedRoot =
+      i18n.markerOf(config.rootMd) === null ? config.rootMd.replace(/\.md$/i, "") + `.${i18n.base}.md` : "";
+    console.error(
+      `起点となる ${config.rootMd}${markedRoot ? `(または ${markedRoot})` : " "}が見つかりません。処理を中止します。`
+    );
     process.exit(1);
   }
 
@@ -226,15 +268,84 @@ async function main() {
   }
 
   // ---------- 4. crawlSite ----------
-  const { visitedMd, imageSet, fileSet, linkTargets, hierarchy, missing, rejected } = crawlSite({
+  const crawl = crawlSite({
     repoRoot: REPO_ROOT,
     rootRel: config.rootMd,
+    i18n,
   });
+  const { visitedMd, imageSet, fileSet, linkTargets, hierarchy, missing, rejected } = crawl;
+
+  // ---------- 4.1 翻訳の対応表 ----------
+  // 基本言語の印付きがあるため使わない印の無いファイル(shadowed)と、同じページの同じ言語版の
+  // 重複(excluded)は、ナビ・前後・検索・書き出し・sitemap・見出しの確認のどれにも出さない。
+  const tIndex = buildTranslationIndex(visitedMd.keys(), i18n);
+  // 使わなかったファイル → 代わりに使うファイル(リンク先・見出しの確認の置き換え用)
+  const replacedBy = new Map(crawl.shadowed);
+  for (const { rel, keptRel } of [...tIndex.shadowed, ...tIndex.excluded]) {
+    replacedBy.set(rel, keptRel);
+    visitedMd.delete(rel);
+    if (hierarchy[rel]) {
+      delete hierarchy[rel];
+      for (const node of Object.values(hierarchy)) node.children = node.children.filter((c) => c !== rel);
+    }
+  }
+  for (const { rel, keptRel } of tIndex.excluded) {
+    console.warn(`[build-docs] ${rel} は ${keptRel} と同じページの同じ言語版のため使いません。`);
+  }
+  /** 使わなかったファイルなら、代わりに使うファイル(置き換えが続くときは最後まで)。それ以外はそのまま */
+  function keptRelOf(rel) {
+    let cur = rel;
+    for (let i = 0; i < 4 && replacedBy.has(cur) && !visitedMd.has(cur); i++) cur = replacedBy.get(cur);
+    return cur;
+  }
+  // 置き換え後の起点(README.en.md があればそれ)。ROOT_MD の名前(config.rootMd)はログ・エラーの文言にだけ使う
+  const siteRootRel = keptRelOf(crawl.rootRel);
+  /** その言語のトップページ(基本言語は置き換え後の起点。他の言語は ROOT_MD のその言語の版)。無ければ null */
+  const rootOfLang = (tag) => (tag === i18n.base ? siteRootRel : tIndex.rootOf(tag));
+  const isLangRoot = (rel) => rel === rootOfLang(i18n.langOf(rel));
+  /** フォルダの入口を、tag → 基本言語 → 他の言語の順に探す。{ tag, rel } か null */
+  function dirIndexFor(dir, tag) {
+    for (const t of [tag, ...i18n.languages.filter((x) => x !== tag)]) {
+      const entry = tIndex.dirIndexOf(dir, t);
+      if (entry) return { tag: t, rel: entry.rel };
+    }
+    return null;
+  }
 
   console.log(`Markdown files mapped: ${visitedMd.size}`);
   console.log(`Image resources mapped: ${imageSet.size}`);
   console.log(`Other linked files mapped: ${fileSet.size}`);
   console.log(`Base path: "${config.basePath || "(none)"}"`);
+  console.log(`Languages: ${i18n.languages.join(",")} (base: ${i18n.base})`);
+  if (i18n.enabled) {
+    // 言語の URL の先頭(en/ など)と同じ名前の一番上のフォルダのページ(出力先が重なるおそれ)
+    const conflictDirs = [...new Set(crawl.prefixConflicts.map((rel) => rel.slice(0, rel.indexOf("/"))))];
+    for (const dir of conflictDirs) {
+      console.warn(
+        `[build-docs] 多言語のURL(/${dir.toLowerCase()}/)と同じ名前のフォルダ ${dir} のページがあります。出力先が重なるおそれがあります。`
+      );
+    }
+    const rels = [...visitedMd.keys()];
+    for (const tag of i18n.languages) {
+      const count = rels.filter((rel) => i18n.langOf(rel) === tag).length;
+      console.log(`  ${tag}: ${count} ${count === 1 ? "page" : "pages"}`);
+    }
+    const basePages = rels.filter((rel) => i18n.langOf(rel) === i18n.base);
+    for (const tag of i18n.languages.slice(1)) {
+      const untranslated = basePages.filter((rel) => !tIndex.alternatesOf(rel).has(tag));
+      if (untranslated.length) {
+        const more = untranslated.length > 10 ? ", …" : "";
+        console.log(`  Not translated into ${tag}: ${untranslated.length} (${untranslated.slice(0, 10).join(", ")}${more})`);
+      }
+      if (!tIndex.rootOf(tag)) {
+        const name = languageName(tag);
+        const rootName = config.rootMd.replace(/\.md$/i, "") + `.${tag}.md`;
+        console.warn(
+          `[build-docs] ${name}(${tag})のトップページ(${rootName})が見つかりません。翻訳の無いページの言語切り替えボタンには ${name} を出しません。`
+        );
+      }
+    }
+  }
   if (missing.length) {
     console.warn(`リンク先が見つからなかったファイル: ${missing.length} 件`);
     for (const m of missing) {
@@ -320,6 +431,12 @@ async function main() {
     config.siteOrigin && !config.basePath && "robots.txt",
     config.sitemapJson && "sitemap.json",
   ].filter(Boolean);
+  if (config.navEnabled) {
+    for (const tag of i18n.languages) {
+      const prefix = i18n.prefixOf(tag);
+      if (prefix) generatedFiles.push(`${prefix}/search-index.json`);
+    }
+  }
   generatedFiles.push(BUILD_MARKER);
   const writtenBy = new Map(generatedFiles.map((f) => [f, "(Tsuzuri が生成するファイル)"]));
   const collisions = [];
@@ -348,38 +465,80 @@ async function main() {
   }
 
   // ---------- 7. HTML 変換 ----------
+  // 画面の文言(メニュー・検索・前後のページ・注意書きなど)は lib/i18n.mjs の表から、ページの言語で取る。
   // marked はこのビルド専用のインスタンスを使う(脚注の拡張機能を組み込むため)。
-  const isJaLang = config.lang.toLowerCase().startsWith("ja");
-  const md = new Marked({ gfm: true, breaks: false });
-  md.use(
-    markedFootnote({
-      prefixId: "fn-",
-      description: isJaLang ? "脚注" : "Footnotes",
-      backRefLabel: isJaLang ? "本文の参照箇所 {0} に戻る" : "Back to reference {0}",
-    })
-  );
+  // 脚注の見出しなどの文言が言語で変わるので、文言の言語ごとに1つ作って覚えておく。
+  const markedByLang = new Map();
+  function markedFor(tag) {
+    const key = resolveUiLang(tag);
+    if (!markedByLang.has(key)) {
+      const strings = uiStrings(key);
+      const instance = new Marked({ gfm: true, breaks: false });
+      instance.use(
+        markedFootnote({
+          prefixId: "fn-",
+          description: strings.footnotes,
+          backRefLabel: strings.footnoteBack,
+        })
+      );
+      markedByLang.set(key, instance);
+    }
+    return markedByLang.get(key);
+  }
 
   // ナビゲーション・sitemap.json 用のサイトツリー(ディレクトリ階層)
-  const siteTree = buildSiteTree(visitedMd.entries(), {
-    rootMd: config.rootMd,
-    siteName: config.siteName,
-  });
-  const isJa = isJaLang;
-  const menuLabel = isJa ? "メニュー" : "Menu";
-
-  // 「前のページ/次のページ」リンク(NAV_ENABLED=true のとき)。順番はナビの表示順。
-  const pageOrder = flattenPages(siteTree);
-  const pageIndex = new Map(pageOrder.map((page, i) => [page.rel, i]));
-  // サイト内検索(NAV_ENABLED=true のとき)。索引とスクリプトは出力先の直下に置く。
-  const search = config.navEnabled
-    ? {
-        indexUrl: `${config.basePath}/search-index.json`,
-        scriptUrl: `${config.basePath}/tsuzuri-search.js`,
-        placeholder: isJa ? "サイト内を検索" : "Search this site",
-        empty: isJa ? "見つかりませんでした" : "No results",
-      }
-    : null;
-  const searchPages = []; // { title, url, html }(本文のみ。前後ページリンクは含めない)
+  // フォルダの入口か(フォルダの並び順に使う)。印の無い名前は今の site-tree と同じ3つ(この綴りのとおり)だけ、
+  // 印付きは README 型 readme.<tag>.md・index 型 index.<tag>.md を足す。印付きが無いサイトでは今と同じ並び
+  function isDirIndexRel(rel) {
+    const name = path.posix.basename(rel);
+    if (PLAIN_DIR_INDEX_NAMES.includes(name)) return true;
+    const tag = i18n.markerOf(rel);
+    if (tag === null) return false;
+    const { isReadme, isIndex } = i18n.dirIndexNames(i18n.langOf(rel));
+    return isReadme(name) || isIndex(name);
+  }
+  // 言語ごとの材料(1言語なら1件だけ): その言語のページだけのナビの木・前後の並び・検索・文言。
+  // 他の言語のページは、基本言語の版の見つかった順に並べ、基本言語の版の無いページは後ろに置く。
+  const allRels = [...visitedMd.keys()];
+  const foundIndex = new Map(allRels.map((rel, i) => [rel, i]));
+  const langSites = new Map();
+  for (const tag of i18n.languages) {
+    const prefix = i18n.prefixOf(tag);
+    const strings = uiStrings(tag);
+    let rels = allRels.filter((rel) => i18n.langOf(rel) === tag);
+    if (tag !== i18n.base) {
+      const sortKey = (rel) => {
+        const baseRel = tIndex.alternatesOf(rel).get(i18n.base);
+        return baseRel !== undefined ? foundIndex.get(baseRel) : allRels.length + foundIndex.get(rel);
+      };
+      rels = rels.map((rel) => [sortKey(rel), rel]).sort((a, b) => a[0] - b[0]).map(([, rel]) => rel);
+    }
+    const rootRel = rootOfLang(tag);
+    const tree = buildSiteTree(
+      rels.map((rel) => [rel, visitedMd.get(rel)]),
+      { rootMd: rootRel ?? "", siteName: config.siteName, isDirIndex: isDirIndexRel }
+    );
+    const order = flattenPages(tree);
+    const search = config.navEnabled
+      ? {
+          indexUrl: `${config.basePath}/${prefix ? `${encodeUrlPath(prefix)}/` : ""}search-index.json`,
+          scriptUrl: `${config.basePath}/tsuzuri-search.js`,
+          placeholder: strings.searchPlaceholder,
+          empty: strings.searchEmpty,
+        }
+      : null;
+    langSites.set(tag, {
+      tag,
+      prefix,
+      strings,
+      rootRel,
+      tree,
+      order,
+      orderIndex: new Map(order.map((page, i) => [page.rel, i])),
+      search,
+      searchPages: [], // { title, url, html }(本文のみ。前後ページリンクは含めない)
+    });
+  }
 
   // 最終更新日(LAST_UPDATED=true のとき)。git の履歴から各ページの最終コミット日を求める。
   // 履歴が浅い(shallow clone)と日付が正しく求まらないため、その場合は表示しない。
@@ -420,10 +579,6 @@ async function main() {
     return lastUpdatedCache.get(rel);
   }
 
-  const pagerLabels = isJa
-    ? { prev: "前のページ", next: "次のページ", nav: "前後のページ" }
-    : { prev: "Previous", next: "Next", nav: "Previous and next pages" };
-
   // og:image は絶対URLでないとSNS等が読み込まないため、リポジトリ内の画像を指す相対パスは
   // サイトの絶対URLに変換し、その画像も出力にコピーする(ogImageSet)。
   //   - frontmatter の ogImage はそのページのファイルからの相対パス("/"始まりはリポジトリルートから)
@@ -442,16 +597,31 @@ async function main() {
     return `${config.siteOrigin}${config.basePath}/${encodeUrlPath(outputRelOf(resolved.repoRel))}${resolved.rest}`;
   }
 
-  // サブディレクトリの README.md は、そのディレクトリの index.html としても出力する
-  // (`/docs/` のようなディレクトリのURLで開けるようにするため)。同じディレクトリに
-  // index.md がある場合はそちらを優先し、README.md からは index.html を作らない。
-  const dirIndexRels = new Map(); // dir -> README.md の rel
+  // サブディレクトリの README 型の入口(README.md・README.<言語>.md)は、そのディレクトリの index.html
+  // としても出力する(`/docs/` のようなディレクトリのURLで開けるようにするため)。同じディレクトリに
+  // index 型の入口(index.md・index.<言語>.md)がある場合はそちらを優先し、README からは index.html を
+  // 作らない。基本言語では型ごとに印付きを優先する(翻訳の対応表の dirIndexOf)。
+  const dirIndexRels = new Map(); // "言語\nフォルダ" -> README 型の入口の rel
   for (const rel of visitedMd.keys()) {
     const dir = path.posix.dirname(rel);
     if (dir === ".") continue;
-    if (/^readme\.md$/i.test(path.posix.basename(rel)) && !visitedMd.has(`${dir}/index.md`)) {
-      dirIndexRels.set(dir, rel);
-    }
+    const tag = i18n.langOf(rel);
+    const key = `${tag}\n${dir}`;
+    if (dirIndexRels.has(key)) continue;
+    const entry = tIndex.dirIndexOf(dir, tag);
+    if (entry?.kind === "readme") dirIndexRels.set(key, entry.rel);
+  }
+
+  // ---- URL を決める関数(ナビ・前後・canonical・sitemap・検索結果・書き出し先はすべてここから) ----
+  // ページの出力先の URL のパス(basePath より後ろ。パーセントエンコード済み)
+  function pageOutPath(rel) {
+    return encodeUrlPath(outputRelOf(i18n.outputHtmlRel(rel)));
+  }
+  const hrefFor = (rel) => `${config.basePath}/${pageOutPath(rel)}`;
+  // フォルダの URL(basePath より後ろ)
+  function dirUrlPath(dir, tag) {
+    const prefix = i18n.prefixOf(tag);
+    return `${prefix ? encodeUrlPath(prefix) + "/" : ""}${encodeUrlPath(outputRelOf(dir))}/`;
   }
 
 
@@ -493,18 +663,34 @@ async function main() {
   }
 
   // Markdown・生のHTMLのリンク先を、サイト上のURLに書き換える。
+  //   - サイト直下 → リンク元の言語のトップの URL(1言語では置き換え後の起点)
   //   - README.md / index.md のあるディレクトリ(末尾の "/" の有無を問わない) → サイトの "dir/"
+  //     (多言語では入口のある言語の "<prefix>/dir/"。リンク元の言語 → 基本言語 → 他の言語の順)
   //   - サイトに出さない実在のファイル・ディレクトリ → GitHub 上のURL
+  //   - 言語の印付きの Markdown → 印を取った出力先(pageOutPath)
   //   - それ以外 → toSiteAbsHref(.md → .html、basePath 付きの絶対パス)
   function siteHref(fromRel, href) {
     const resolved = resolveRepoRel(fromRel, href);
     if (!resolved.rejected) {
       const bare = resolved.repoRel.replace(/\/+$/, "");
       const target = linkTargets.get(bare);
-      if (target?.kind === "dir") return `${config.basePath}/${encodeUrlPath(outputRelOf(bare))}/${resolved.rest}`;
+      // サイト直下 → 置き換え後の起点の URL(1言語ではトップURL。今と同じ)
+      // 多言語では、リンク元の言語のトップ・その言語の入口のフォルダ(無ければ基本言語 → 他の言語)
+      const fromLang = visitedMd.has(fromRel) ? i18n.langOf(fromRel) : i18n.base;
+      if (bare === "" || bare === ".") {
+        return `${config.basePath}/${urlPathOf(rootOfLang(fromLang) ?? siteRootRel)}${resolved.rest}`;
+      }
+      if (target?.kind === "dir") {
+        const tag = dirIndexFor(bare, fromLang)?.tag ?? i18n.base;
+        return `${config.basePath}/${dirUrlPath(bare, tag)}${resolved.rest}`;
+      }
       if (target?.kind === "repo") {
         const url = repoUrlOf(bare, target.isDir);
         if (url) return `${url}${resolved.rest}`;
+      }
+      // 言語の印付きの Markdown(基本言語の印を含む)→ 印を取った出力先。印が無ければ今と同じ
+      if (isMarkdownPath(bare) && i18n.markerOf(bare) !== null) {
+        return `${config.basePath}/${pageOutPath(bare)}${resolved.rest}`;
       }
     }
     return toSiteAbsHref(fromRel, href, config.basePath);
@@ -512,12 +698,14 @@ async function main() {
 
   // ページの公開URLのうち basePath より後ろの部分(パーセントエンコード済み)。
   // canonical・og:url・sitemap.xml・検索結果で使う。
-  //   ROOT_MD → ""(トップURL)、ディレクトリの README.md → "dir/"、それ以外 → "dir/page.html"
+  //   起点 → ""(トップURL)、ディレクトリの README.md → "dir/"、それ以外 → "dir/page.html"
   function urlPathOf(rel) {
-    if (rel === config.rootMd) return "";
+    const tag = i18n.langOf(rel);
+    const prefix = i18n.prefixOf(tag);
+    if (isLangRoot(rel)) return prefix ? `${encodeUrlPath(prefix)}/` : "";
     const dir = path.posix.dirname(rel);
-    if (dirIndexRels.get(dir) === rel) return `${encodeUrlPath(outputRelOf(dir))}/`;
-    return encodeUrlPath(outputRelOf(rel.replace(/\.md$/i, ".html")));
+    if (dirIndexRels.get(`${tag}\n${dir}`) === rel) return dirUrlPath(dir, tag);
+    return pageOutPath(rel);
   }
 
   // 見出しへのリンク(page.md#見出し・#見出し)の確認用。描画しながらリンクを集め、
@@ -529,11 +717,11 @@ async function main() {
     const resolved = resolveRepoRel(fromRel, href);
     if (resolved.rejected) return null;
     const bare = resolved.repoRel.replace(/\/+$/, "");
-    if (bare === "" || bare === ".") return config.rootMd;
-    if (isMarkdownPath(bare)) return bare;
-    if (linkTargets.get(bare)?.kind === "dir") {
-      return ["README.md", "readme.md", "index.md"].map((name) => `${bare}/${name}`).find((r) => visitedMd.has(r)) ?? null;
-    }
+    const fromLang = visitedMd.has(fromRel) ? i18n.langOf(fromRel) : i18n.base;
+    if (bare === "" || bare === ".") return rootOfLang(fromLang) ?? siteRootRel;
+    // 使わなかったファイル(印の無い方・重複)へのリンクは、代わりに使うファイルの見出しで調べる
+    if (isMarkdownPath(bare)) return keptRelOf(bare);
+    if (linkTargets.get(bare)?.kind === "dir") return dirIndexFor(bare, fromLang)?.rel ?? null;
     return null;
   }
   function noteAnchor(fromRel, href) {
@@ -600,6 +788,11 @@ async function main() {
 
   // 1ページ分のHTMLを組み立てる。
   function renderPage(rel, content, meta, { canonical = true } = {}) {
+    // ページの言語(集めたページ以外の 404 などは基本言語)で、文言・ナビ・前後・検索を選ぶ
+    const pageLang = visitedMd.has(rel) ? i18n.langOf(rel) : i18n.base;
+    const site = langSites.get(pageLang);
+    const S = site.strings;
+    const md = markedFor(pageLang);
     // marked v13以降のレンダラーAPI: 各メソッドは引数としてトークン(オブジェクト)を1つ受け取る。
     // リンクの表示テキストや見出しはインライン要素(強調・コード等)を含みうるため、
     // this.parser.parseInline(tokens) でHTMLにする(this を使うためアロー関数にしない)。
@@ -628,7 +821,7 @@ async function main() {
     // GitHub の注意書き(> [!NOTE] など)を、種類ごとの枠として表示する。
     renderer.blockquote = function ({ tokens }) {
       const inner = this.parser.parse(tokens);
-      return renderAlert(inner, isJa) ?? `<blockquote>\n${inner}</blockquote>\n`;
+      return renderAlert(inner, S.alerts) ?? `<blockquote>\n${inner}</blockquote>\n`;
     };
     // コードブロックは、言語名が書かれていて highlight.js が対応している場合だけ、ビルド時に
     // 色分けしたHTMLにする(閲覧時にJavaScriptは不要)。言語の自動判定は誤判定を避けるため行わない。
@@ -665,7 +858,7 @@ async function main() {
       const anchor =
         depth >= 2
           ? `<a class="tsuzuri-anchor" href="#${escapeHtml(id)}" aria-label="${escapeHtml(
-              isJa ? `「${text}」へのリンク` : `Link to "${text}"`
+              formatUi(S.anchorLabel, { text })
             )}">#</a>`
           : "";
       return `<h${depth} id="${escapeHtml(id)}">${inner}${anchor}</h${depth}>\n`;
@@ -681,20 +874,20 @@ async function main() {
       (typeof meta.title === "string" && meta.title) ||
       firstH1 ||
       visitedMd.get(rel)?.h1 ||
-      (rel === config.rootMd && config.siteName) ||
+      (isLangRoot(rel) && config.siteName) ||
       rel;
-    if (search && visitedMd.has(rel)) {
-      searchPages.push({ title, url: `${config.basePath}/${urlPathOf(rel)}`, html: bodyHtml });
+    if (site.search && visitedMd.has(rel)) {
+      site.searchPages.push({ title, url: `${config.basePath}/${urlPathOf(rel)}`, html: bodyHtml });
     }
     // ページ内の目次(NAV_ENABLED=true で、h2・h3 が3つ以上あるページ。frontmatter の toc: false で消せる)
     if (config.navEnabled && String(meta.toc).trim() !== "false" && headings.length >= 3) {
-      const toc = renderToc(headings, isJa ? "目次" : "Contents");
+      const toc = renderToc(headings, S.toc);
       const h1End = bodyHtml.indexOf("</h1>");
       bodyHtml = h1End >= 0 ? bodyHtml.slice(0, h1End + 5) + "\n" + toc + bodyHtml.slice(h1End + 5) : toc + bodyHtml;
     }
     const updated = visitedMd.has(rel) ? lastUpdatedOf(rel) : "";
     if (updated) {
-      bodyHtml += `<p class="tsuzuri-updated">${isJa ? "最終更新" : "Last updated"}: <time datetime="${escapeHtml(
+      bodyHtml += `<p class="tsuzuri-updated">${S.lastUpdated}: <time datetime="${escapeHtml(
         updated
       )}">${escapeHtml(updated)}</time></p>\n`;
     }
@@ -703,13 +896,37 @@ async function main() {
       copyScriptUsed = true;
       bodyHtml += `<script src="${escapeHtml(`${config.basePath}/${COPY_SCRIPT_NAME}`)}" defer></script>\n`;
     }
-    if (config.navEnabled && pageIndex.has(rel)) {
-      const i = pageIndex.get(rel);
-      bodyHtml += renderPager(pageOrder[i - 1] ?? null, pageOrder[i + 1] ?? null, config.basePath, pagerLabels);
+    if (config.navEnabled && site.orderIndex.has(rel)) {
+      const i = site.orderIndex.get(rel);
+      const pagerLabels = { prev: S.pagerPrev, next: S.pagerNext, nav: S.pagerNav };
+      bodyHtml += renderPager(site.order[i - 1] ?? null, site.order[i + 1] ?? null, config.basePath, pagerLabels, {
+        hrefFor,
+      });
+    }
+
+    // 言語切り替え(多言語の、集めたページだけ。404 には出さない)。翻訳が無い言語はその言語のトップへ、
+    // トップも無い言語は出さない(renderLangSwitch が href の空の言語を除く)
+    const alts = i18n.enabled && visitedMd.has(rel) ? tIndex.alternatesOf(rel) : new Map();
+    let langSwitch = "";
+    if (alts.size > 0) {
+      const entries = i18n.languages.map((tag) => {
+        if (alts.has(tag)) return { tag, href: `${config.basePath}/${urlPathOf(alts.get(tag))}`, untranslated: false };
+        const root = rootOfLang(tag);
+        return { tag, href: root ? `${config.basePath}/${urlPathOf(root)}` : "", untranslated: true };
+      });
+      langSwitch = renderLangSwitch({
+        current: pageLang,
+        entries,
+        strings: S,
+        placement: config.navEnabled ? "nav" : "bar",
+      });
     }
 
     const navHtml = config.navEnabled
-      ? renderNav(siteTree, rel, config.basePath, config.siteName, menuLabel, search, isJa ? "サイト内ページ" : "Site pages")
+      ? renderNav(site.tree, rel, config.basePath, config.siteName, S.menu, site.search, S.navLabel, {
+          hrefFor,
+          langSwitchHtml: langSwitch,
+        })
       : "";
 
     // SEOメタタグは「出力すべき情報が何もない」場合は metaTagsHtml="" のままとし、
@@ -720,7 +937,7 @@ async function main() {
     const description = (typeof meta.description === "string" && meta.description) || autoDescription;
     const ogImage = meta.ogImage
       ? resolveOgImage(meta.ogImage, rel)
-      : resolveOgImage(config.ogDefaultImage, config.rootMd);
+      : resolveOgImage(config.ogDefaultImage, siteRootRel);
     const ogType = meta.ogType || "website";
     const canonicalUrl =
       canonical && config.siteOrigin
@@ -728,9 +945,22 @@ async function main() {
         : "";
     const noindex = meta.noindex === true;
 
+    // hreflang(多言語で SITE_ORIGIN があり、404・noindex でないページ)。noindex でない言語版が2つ以上のときだけ、
+    // languages の順に並べ、基本言語版があれば x-default にする
+    const alternates = [];
+    if (alts.size > 0 && config.siteOrigin && canonical && !noindex) {
+      const indexed = [...alts].filter(([, altRel]) => visitedMd.get(altRel)?.meta?.noindex !== true);
+      if (indexed.length >= 2) {
+        const urlOf = (altRel) => `${config.siteOrigin}${config.basePath}/${urlPathOf(altRel)}`;
+        for (const [tag, altRel] of indexed) alternates.push({ hreflang: tag, href: urlOf(altRel) });
+        const baseAlt = indexed.find(([tag]) => tag === i18n.base);
+        if (baseAlt) alternates.push({ hreflang: "x-default", href: urlOf(baseAlt[1]) });
+      }
+    }
+
     const siteName = config.siteName;
     const hasMetaTags = Boolean(
-      description || ogImage || canonicalUrl || noindex || faviconHref || siteName
+      description || ogImage || canonicalUrl || noindex || faviconHref || siteName || alternates.length > 0
     );
     const metaTagsHtml = hasMetaTags
       ? renderMetaTags({
@@ -742,6 +972,7 @@ async function main() {
           noindex,
           faviconHref,
           siteName,
+          alternates,
         })
       : "";
 
@@ -760,10 +991,11 @@ async function main() {
       headHtml: config.navEnabled
         ? `${THEME_HEAD_SCRIPT}\n<script src="${escapeHtml(`${config.basePath}/${THEME_SCRIPT_NAME}`)}" defer></script>`
         : "",
-      lang: config.lang,
+      lang: pageLang,
       navHtml,
       metaTagsHtml,
-      skipLabel: isJa ? "本文へスキップ" : "Skip to content",
+      skipLabel: S.skip,
+      langBarHtml: config.navEnabled ? "" : langSwitch,
     });
   }
 
@@ -783,31 +1015,58 @@ async function main() {
 
   for (const [rel, { content, meta }] of visitedMd.entries()) {
     const html = renderPage(rel, content, meta);
-    writeOut(rel.replace(/\.md$/i, ".html"), html, rel);
-    if (rel === config.rootMd) writeOut("index.html", html, rel);
+    const tag = i18n.langOf(rel);
+    const prefix = i18n.prefixOf(tag);
+    writeOut(i18n.outputHtmlRel(rel), html, rel);
+    if (isLangRoot(rel)) writeOut(prefix ? `${prefix}/index.html` : "index.html", html, rel);
     const dir = path.posix.dirname(rel);
-    if (dirIndexRels.get(dir) === rel) writeOut(`${dir}/index.html`, html, rel);
+    if (dirIndexRels.get(`${tag}\n${dir}`) === rel) writeOut(`${prefix ? `${prefix}/` : ""}${dir}/index.html`, html, rel);
   }
 
   // ---------- 7.5 404ページ ----------
   // GitHub Pages は存在しないURLへのアクセスに 404.html を返す。リポジトリ直下に 404.md が
   // あればそれを、無ければ既定の内容で作る(ナビ・テーマは通常のページと同じ)。
+  // 基本言語の印付き(404.en.md など)があれば、404.md より優先する(他のページと同じ決まり)。
   // 404.md がどこかからリンクされていて既に 404.html として出力済みなら何もしない。
-  if (!visitedMd.has("404.md")) {
-    const notFoundAbs = resolveInsideRepo(REPO_ROOT, "404.md");
-    const raw =
-      notFoundAbs && fs.existsSync(notFoundAbs)
-        ? fs.readFileSync(notFoundAbs, "utf-8")
-        : defaultNotFoundMarkdown(config.lang);
+  // 多言語で 404.md が無いときは、トップのある言語ごとの案内を並べる(基本言語が先頭)。
+  if (![...visitedMd.keys()].some((rel) => i18n.outputHtmlRel(rel) === "404.html")) {
+    let notFoundRel = "404.md";
+    let rootNames = [];
+    try {
+      rootNames = fs.readdirSync(REPO_ROOT);
+    } catch {
+      // 読めなければ 404.md だけを見る
+    }
+    const markedNotFound = rootNames
+      .filter((name) => i18n.isVariantName(name, "404.md", i18n.base))
+      .sort()
+      .find((name) => fs.statSync(path.join(REPO_ROOT, name), { throwIfNoEntry: false })?.isFile());
+    if (markedNotFound) notFoundRel = markedNotFound;
+    const notFoundAbs = resolveInsideRepo(REPO_ROOT, notFoundRel);
+    let raw;
+    if (notFoundAbs && fs.existsSync(notFoundAbs)) {
+      raw = fs.readFileSync(notFoundAbs, "utf-8");
+    } else if (i18n.enabled) {
+      const sections = i18n.languages
+        .filter((tag) => rootOfLang(tag))
+        .map((tag) => ({ tag, homeHref: i18n.prefixOf(tag) ? `/${i18n.prefixOf(tag)}/` : "/" }));
+      raw = defaultNotFoundMarkdown(i18n.base, { sections });
+    } else {
+      raw = defaultNotFoundMarkdown(i18n.base);
+    }
     const { meta, body } = parseFrontmatter(raw);
     // 404.md はクロールの対象外なので、中で使っている画像・ファイルはここで出力の対象に加える
     for (const href of extractLinks(body)) {
-      const resolved = resolveRepoRel("404.md", href);
+      const resolved = resolveRepoRel(notFoundRel, href);
       if (resolved.rejected) continue;
       if (isImagePath(resolved.repoRel)) imageSet.add(resolved.repoRel);
       else if (isLinkedFilePath(resolved.repoRel)) fileSet.add(resolved.repoRel);
     }
-    writeOut("404.html", renderPage("404.md", body, { ...meta, noindex: true }, { canonical: false }), "404.md");
+    writeOut(
+      "404.html",
+      renderPage(notFoundRel, body, { ...meta, noindex: true }, { canonical: false }),
+      notFoundRel
+    );
   }
 
   // ---------- 7.55 コードブロックのコピーボタンのスクリプト(コードブロックがあるページが読み込む) ----------
@@ -817,8 +1076,13 @@ async function main() {
   }
 
   // ---------- 7.6 サイト内検索の索引・スクリプト(NAV_ENABLED=true のとき) ----------
-  if (search) {
-    fs.writeFileSync(path.join(OUT_DIR, "search-index.json"), JSON.stringify(buildSearchIndex(searchPages)));
+  // 索引は言語ごと(基本言語は search-index.json、他は <prefix>/search-index.json)
+  if (config.navEnabled) {
+    for (const site of langSites.values()) {
+      const indexRel = `${site.prefix ? `${site.prefix}/` : ""}search-index.json`;
+      fs.mkdirSync(path.dirname(path.join(OUT_DIR, indexRel)), { recursive: true });
+      fs.writeFileSync(path.join(OUT_DIR, indexRel), JSON.stringify(buildSearchIndex(site.searchPages)));
+    }
     fs.writeFileSync(path.join(OUT_DIR, "tsuzuri-search.js"), SEARCH_SCRIPT);
     fs.writeFileSync(path.join(OUT_DIR, THEME_SCRIPT_NAME), THEME_SCRIPT);
   }
@@ -893,7 +1157,7 @@ async function main() {
   // 既定では書き出さない(リンクの問題はビルドログに出力済み)。
   if (config.sitemapJson) {
     const sitemap = buildSitemap({
-      root: config.rootMd,
+      root: siteRootRel,
       basePath: config.basePath,
       styleFile: config.styleFile,
       customStyleApplied: Boolean(customCss),
@@ -901,16 +1165,49 @@ async function main() {
       imageSet,
       fileSet,
       hierarchy,
-      tree: siteTree,
+      // tree は基本言語のナビの木(1言語では今と同じ)。多言語では言語ごとの木を trees にも入れる
+      tree: langSites.get(i18n.base).tree,
       missing,
       rejected,
-      lang: config.lang,
+      lang: i18n.base,
       siteName: config.siteName,
       siteOrigin: config.siteOrigin,
       customDomain: config.customDomain,
       theme: config.theme,
+      ...(i18n.enabled
+        ? {
+            languages: [...i18n.languages],
+            langOf: (rel) => i18n.langOf(rel),
+            trees: Object.fromEntries([...langSites].map(([tag, site]) => [tag, site.tree])),
+          }
+        : {}),
     });
     fs.writeFileSync(path.join(OUT_DIR, "sitemap.json"), JSON.stringify(sitemap, null, 2));
+  }
+
+  // ---------- 使わなかったファイル(情報。警告・STRICT_LINKS の対象にしない) ----------
+  // crawler の置き換えには、印の無いファイルが実在しないもの(c.md へのリンク → c.en.md)も入るので、
+  // 実在するものだけを出す
+  // 多言語では、翻訳集め・入口探しで印付きを選んだため読まなかった印の無いファイル(docs/a.md など)も出す
+  const notUsed = new Map();
+  const markedBasePairs = [...visitedMd.keys()]
+    .filter((rel) => i18n.markerOf(rel) === i18n.base)
+    .map((rel) => [i18n.baseRelOf(rel), rel]);
+  for (const [rel, keptRel] of [
+    ...crawl.shadowed,
+    ...tIndex.shadowed.map((e) => [e.rel, e.keptRel]),
+    ...markedBasePairs,
+  ]) {
+    if (notUsed.has(rel) || visitedMd.has(rel)) continue;
+    const abs = resolveInsideRepo(REPO_ROOT, rel);
+    if (abs && fs.existsSync(abs)) notUsed.set(rel, keptRel);
+  }
+  if (notUsed.size) {
+    console.log(
+      `Not used (a marked base-language file is used instead): ${[...notUsed]
+        .map(([rel, keptRel]) => `${rel} → ${keptRel}`)
+        .join(", ")}`
+    );
   }
 
   // ---------- STRICT_LINKS ----------
@@ -922,6 +1219,7 @@ async function main() {
       ...missingAssets.map((a) => `コピーできなかったファイル: ${a}`),
       ...collisions.map((c) => `出力先の重複: ${c}`),
       ...missingAnchors.map((a) => `見出しが見つかりません: ${a}`),
+      ...tIndex.excluded.map((e) => `翻訳の重複: ${e.rel}(${e.keptRel} を使用)`),
     ];
     if (problems.length) {
       console.error(`STRICT_LINKS=true のため、リンクの問題 ${problems.length} 件でビルドを失敗させます。`);
