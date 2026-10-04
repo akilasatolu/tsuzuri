@@ -352,7 +352,9 @@ test("コミットしてあるビルド用の lockfile の完成品が、本体�
   // 一致しないときは `node scripts/build-lockfiles.mjs` で作り直してコミットする。
   const built = buildBuildLockfiles();
   const committed = readBuildLockfiles();
-  const hint = `${BUILD_LOCKFILES_DIR}/ が古い。node scripts/build-lockfiles.mjs で作り直す`;
+  const hint =
+    `${BUILD_LOCKFILES_DIR}/ が古い。node scripts/build-lockfiles.mjs で作り直して同じPRにコミットする` +
+    "(Dependabot の更新PRの場合の手順は README.md の「依存パッケージの更新」)";
   assert.equal(committed.packageJson, built.packageJson, hint);
   assert.equal(committed.packageLock, built.packageLock, hint);
   const vendor = Object.fromEntries(buildVendorTargets().map((t) => [t.relPath, t.content]));

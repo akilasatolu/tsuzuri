@@ -212,9 +212,23 @@ npmでは、乗っ取られたアカウントから不正なコードを仕込�
 
 `marked`・`highlight.js`・`marked-footnote`は、利用者側のワークフローでも使うビルド用の依存です
 (`bin/cli.mjs`の`BUILD_DEPENDENCIES`)。`init`が生成する
-ワークフローは`package.json`の`devDependencies`にあるこれらの版をそのまま埋め込むため、更新PRを
-マージすれば、テストで使う版と利用者に配る版が一緒に更新されます。このためこれらの版は
+ワークフローは`package.json`の`devDependencies`にあるこれらの版をそのまま埋め込みます。このためこれらの版は
 `^`などの範囲ではなく`12.0.2`のような完全一致で書いてください(範囲指定だと`init`がエラーになります)。
+
+利用者には、これらの依存(とその依存)の版とハッシュを書いた`package.json`・`package-lock.json`の完成品
+(`templates/tsuzuri/`)を配ります。npm はパッケージを作るときにルートの`package-lock.json`を外すため、
+本体の lockfile から作った完成品をコミットしておき、`init`はそれをコピーします。そのため、
+これらの依存やその依存を更新するPR(Dependabotの`package.json`の更新PRなど)では、同じPRで完成品も
+作り直してください。作り直さないと、「コミットしてあるビルド用の lockfile の完成品が、本体の lockfile から
+作ったものと一致する」のテストが失敗します。
+
+1. 更新PRのブランチを手元に取り込む(例: `git fetch origin` のあと `git switch <PRのブランチ>`)
+2. `node scripts/build-lockfiles.mjs`を実行する(インストールは不要。本体の`package.json`・`package-lock.json`から作る)
+3. `templates/tsuzuri/`の差分が、更新した依存の版とハッシュだけであることを確かめる
+4. コミットして、PRのブランチにpushする(Dependabotは、人がpushしたPRを自動では作り直さなくなります。
+   作り直してほしいときは、PRに`@dependabot recreate`とコメントしてから、もう一度この手順を行います)
+
+この3つ以外の依存(ESLintなど開発用のもの)だけを更新するPRでは、完成品は変わらないので作り直しは不要です。
 
 `init`が生成するワークフローは、`templates/.github/workflows/docs-pages.yml`のひな形から作られます
 (`bin/cli.mjs`がプレースホルダーを置き換えて出力)。ひな形の中のGitHub Actionsも

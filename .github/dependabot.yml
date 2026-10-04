@@ -12,9 +12,9 @@ version: 2
 # PRは自動マージしない。マージの前に、変更内容とリリースノートを確認する(開発者向け README 参照)。
 updates:
   # OSS開発用の package.json(リポジトリルート、配布対象外)の依存関係を監視する。
-  # marked・highlight.js・marked-footnote の更新PRでは、利用者に配る lockfile の完成品
+  # marked・highlight.js・marked-footnote(とその依存)の更新PRでは、利用者に配る lockfile の完成品
   # (templates/tsuzuri/)も `node scripts/build-lockfiles.mjs` で作り直してPRに含める
-  # (作り直さないとテストが失敗する)。
+  # (作り直さないとテストが失敗する。手順は README.md の「依存パッケージの更新」)。
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
