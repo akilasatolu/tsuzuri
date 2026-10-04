@@ -199,6 +199,22 @@ With `true`, the workflow fetches the full git history before building (this tak
 longer for repositories with a long history). If the git history can't be read, the build
 continues without dates, with a warning.
 
+### EDIT_LINK
+Whether to add an "Edit this page on GitHub" link at the end of each page (v1.30.0 or later).
+`true` or `false`, and the default is `false` (no link).
+
+With `true`, the link opens the page's Markdown file in GitHub's editor, so readers can fix a typo
+or an outdated sentence on the spot and send the change (people without write access to the
+repository are guided through making a fork and a pull request by GitHub). On English pages the
+link reads "Edit this page on GitHub"; on Japanese pages, "このページを GitHub で編集". If
+`LAST_UPDATED=true`, it's shown on the same line as the last updated date. The 404 page doesn't
+get it.
+
+The link points to the branch that was built: on GitHub Actions, the branch that was pushed (the
+`TRIGGER_BRANCH`); locally, the current branch and git's `origin`. If the branch isn't known
+(building a tag, or no `origin`, for example), a warning is shown and no links are added. This
+site uses `EDIT_LINK=true`.
+
 ### SITEMAP_JSON
 Whether to output the debugging `sitemap.json` (the collected pages and images, the list of
 broken links and so on). `true` or `false`, and the default is `false` (not output). With
@@ -208,9 +224,9 @@ investigating (see "About sitemap.json" in [Concepts](./concepts.md) for details
 
 ## Backward compatibility
 
-The ten keys `LANGUAGES`, `NAV_ENABLED`, `FAVICON_FILE`, `SITE_NAME`, `CUSTOM_DOMAIN`,
-`OGP_DEFAULT_IMAGE`, `THEME`, `STRICT_LINKS`, `SITEMAP_JSON` and `LAST_UPDATED` are **all
-optional**. If you set none of them, all the defaults above apply, and the behavior is the same
+The eleven keys `LANGUAGES`, `NAV_ENABLED`, `FAVICON_FILE`, `SITE_NAME`, `CUSTOM_DOMAIN`,
+`OGP_DEFAULT_IMAGE`, `THEME`, `STRICT_LINKS`, `SITEMAP_JSON`, `LAST_UPDATED` and `EDIT_LINK` are
+**all optional**. If you set none of them, all the defaults above apply, and the behavior is the same
 as the versions before these keys were introduced. You can keep using an existing settings file
 (with only the original four keys) without anything breaking.
 
