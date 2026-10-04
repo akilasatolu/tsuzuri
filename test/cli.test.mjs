@@ -1153,3 +1153,137 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("生成ワークフローの Load config: 値が空の TRIGGER_BRANCH= は、空の値として取り込む", () => {
+  const dir = makeTmpDir();
+  try {
+    const m = buildDocsPagesYml().match(/- name: Load config\n {8}run: \|\n((?: {10}.*\n|\n)+?)(?= {6}[-#])/);
+    assert.ok(m, "Load config ステップを取り出せること");
+    writeFileSync(join(dir, "load.sh"), m[1].split("\n").map((line) => line.slice(10)).join("\n"));
+    mkdirSync(join(dir, ".github"));
+    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=  \nTHEME=material\n");
+    const envFile = join(dir, "github.env");
+    const result = spawnSync("bash", ["-e", "load.sh"], { cwd: dir, encoding: "utf8", env: { ...process.env, GITHUB_ENV: envFile } });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(readFileSync(envFile, "utf8"), /^TRIGGER_BRANCH=$/m);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// Check trigger branch ステップの run を取り出して動かす。
+// triggerBranch / defaultBranch が undefined のときは、その環境変数を渡さない(設定ファイルにキーが無い場合)。
+// テストを動かす側の環境に同じ名前の変数があっても結果が変わらないよう、先に2つとも外す。
+function runCheckTriggerBranch({ triggerBranch, defaultBranch, currentBranch, eventName = "push" }) {
+  const dir = makeTmpDir();
+  try {
+    const m = buildDocsPagesYml().match(
+      /- name: Check trigger branch\n(?: {8}.*\n)*? {8}run: \|\n((?: {10}.*\n|\n)+?)(?= {6}[-#])/
+    );
+    assert.ok(m, "Check trigger branch ステップを取り出せること");
+    const script = m[1].split("\n").map((line) => line.slice(10)).join("\n");
+    assert.ok(!script.includes("${{"), "式(${{ }})をシェルに直接埋め込まない");
+    writeFileSync(join(dir, "check.sh"), script);
+    const outputFile = join(dir, "github.output");
+    writeFileSync(outputFile, "");
+    const env = { ...process.env };
+    delete env.TRIGGER_BRANCH;
+    delete env.DEFAULT_BRANCH;
+    if (triggerBranch !== undefined) env.TRIGGER_BRANCH = triggerBranch;
+    if (defaultBranch !== undefined) env.DEFAULT_BRANCH = defaultBranch;
+    Object.assign(env, { CURRENT_BRANCH: currentBranch, EVENT_NAME: eventName, GITHUB_OUTPUT: outputFile });
+    const result = spawnSync("bash", ["-e", "check.sh"], { cwd: dir, encoding: "utf8", env });
+    return { status: result.status, stdout: result.stdout, stderr: result.stderr, output: readFileSync(outputFile, "utf8") };
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const DEFAULT_BRANCH_LOG = (branch) =>
+  `設定ファイルに TRIGGER_BRANCH が無い(または空の)ため、リポジトリの既定ブランチ ${branch} を使います`;
+
+test("生成ワークフローの Check trigger branch: リポジトリの既定ブランチを環境変数 DEFAULT_BRANCH で受け取る", () => {
+  assert.ok(buildDocsPagesYml().includes("          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}\n"));
+});
+
+test("生成ワークフローの Check trigger branch: TRIGGER_BRANCH が無い・空なら、リポジトリの既定ブランチへの push で公開する", () => {
+  // キーが無い。既定ブランチは main でも master でも、そのブランチへの push で公開する
+  for (const branch of ["main", "master"]) {
+    const r = runCheckTriggerBranch({ defaultBranch: branch, currentBranch: branch });
+    assert.equal(r.status, 0, r.stderr);
+    assert.equal(r.output, "should_deploy=true\n");
+    assert.ok(r.stdout.includes(DEFAULT_BRANCH_LOG(branch)), r.stdout);
+  }
+  // 値が空(TRIGGER_BRANCH=)でも同じ
+  const empty = runCheckTriggerBranch({ triggerBranch: "", defaultBranch: "main", currentBranch: "main" });
+  assert.equal(empty.status, 0, empty.stderr);
+  assert.equal(empty.output, "should_deploy=true\n");
+  assert.ok(empty.stdout.includes(DEFAULT_BRANCH_LOG("main")), empty.stdout);
+});
+
+test("生成ワークフローの Check trigger branch: TRIGGER_BRANCH が無いとき、既定ブランチ以外への push は公開しない(手動実行は公開する)", () => {
+  // 既定ブランチが master のリポジトリで main に push
+  let r = runCheckTriggerBranch({ defaultBranch: "master", currentBranch: "main" });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.output, "should_deploy=false\n");
+  assert.ok(r.stdout.includes(DEFAULT_BRANCH_LOG("master")), r.stdout);
+  assert.ok(r.stdout.includes("TRIGGER_BRANCH=master ではない push (main) のためスキップします"), r.stdout);
+
+  r = runCheckTriggerBranch({ defaultBranch: "main", currentBranch: "feature/foo" });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.output, "should_deploy=false\n");
+  assert.ok(r.stdout.includes(DEFAULT_BRANCH_LOG("main")), r.stdout);
+  assert.ok(r.stdout.includes("TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします"), r.stdout);
+
+  r = runCheckTriggerBranch({ defaultBranch: "main", currentBranch: "feature/foo", eventName: "workflow_dispatch" });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.output, "should_deploy=true\n");
+  assert.ok(r.stdout.includes(DEFAULT_BRANCH_LOG("main")), r.stdout);
+  assert.ok(r.stdout.includes("手動実行のためブランチ判定をスキップします"), r.stdout);
+});
+
+test("生成ワークフローの Check trigger branch: TRIGGER_BRANCH に値があれば、その値で判定する(既定ブランチは使わない)", () => {
+  let r = runCheckTriggerBranch({ triggerBranch: "docs", defaultBranch: "main", currentBranch: "docs" });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.output, "should_deploy=true\n");
+  assert.doesNotMatch(r.stdout, /既定ブランチ/);
+
+  r = runCheckTriggerBranch({ triggerBranch: "docs", defaultBranch: "main", currentBranch: "main" });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.output, "should_deploy=false\n");
+  assert.ok(r.stdout.includes("TRIGGER_BRANCH=docs ではない push (main) のためスキップします"), r.stdout);
+  assert.doesNotMatch(r.stdout, /既定ブランチ/);
+
+  r = runCheckTriggerBranch({ triggerBranch: "docs", defaultBranch: "main", currentBranch: "main", eventName: "workflow_dispatch" });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.output, "should_deploy=true\n");
+  assert.doesNotMatch(r.stdout, /既定ブランチ/);
+
+  // 値があれば、既定ブランチが取れなくても動く
+  r = runCheckTriggerBranch({ triggerBranch: "docs", defaultBranch: "", currentBranch: "docs" });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.output, "should_deploy=true\n");
+});
+
+test("生成ワークフローの Check trigger branch: TRIGGER_BRANCH が無い・空で、既定ブランチも取れないときはエラーで止まる", () => {
+  for (const triggerBranch of [undefined, ""]) {
+    const r = runCheckTriggerBranch({ triggerBranch, defaultBranch: "", currentBranch: "main" });
+    assert.equal(r.status, 1, r.stdout);
+    assert.ok(
+      r.stdout.includes(
+        "::error::設定ファイルに TRIGGER_BRANCH が無く(または空で)、リポジトリの既定ブランチも取得できませんでした。設定ファイルに TRIGGER_BRANCH=<公開するブランチ名> を書いてください。"
+      ),
+      r.stdout
+    );
+    assert.equal(r.output, "", "should_deploy を書き出さない");
+    assert.doesNotMatch(r.stdout, /を使います/);
+  }
+});
+
+test("buildDocsPagesConfig: TRIGGER_BRANCH のコメントに、省略・空のときの動きを書く", () => {
+  assert.ok(
+    buildDocsPagesConfig({}).includes(
+      "# 省略するか空にすると、リポジトリの既定ブランチになります。\n# リポジトリの既定ブランチ(通常は main)以外にする場合は、GitHub の\n"
+    )
+  );
+});

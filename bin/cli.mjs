@@ -258,6 +258,7 @@ export function buildDocsPagesConfig(answers) {
 # 各項目の詳しい説明: ${DOCS_URL}docs/configuration.html
 
 # 公開(デプロイ)するブランチ。このブランチに push したときだけサイトが更新されます。
+# 省略するか空にすると、リポジトリの既定ブランチになります。
 # リポジトリの既定ブランチ(通常は main)以外にする場合は、GitHub の
 # Settings > Environments > github-pages > Deployment branches and tags にこのブランチを追加してください。
 TRIGGER_BRANCH=${triggerBranch}

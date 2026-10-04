@@ -70,12 +70,18 @@ jobs:
         env:
           CURRENT_BRANCH: ${{ github.ref_name }}
           EVENT_NAME: ${{ github.event_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           # TRIGGER_BRANCH と現在の ref を比較し、一致すれば should_deploy=true、
           # 不一致なら should_deploy=false を必ず明示的に $GITHUB_OUTPUT に書き出す。
+          # 設定ファイルに TRIGGER_BRANCH が無い・空のときは、リポジトリの既定ブランチを使う。
           if [ -z "$TRIGGER_BRANCH" ]; then
-            echo "::error::設定ファイルに TRIGGER_BRANCH が定義されていません。"
-            exit 1
+            if [ -z "$DEFAULT_BRANCH" ]; then
+              echo "::error::設定ファイルに TRIGGER_BRANCH が無く(または空で)、リポジトリの既定ブランチも取得できませんでした。設定ファイルに TRIGGER_BRANCH=<公開するブランチ名> を書いてください。"
+              exit 1
+            fi
+            TRIGGER_BRANCH="$DEFAULT_BRANCH"
+            echo "設定ファイルに TRIGGER_BRANCH が無い(または空の)ため、リポジトリの既定ブランチ $TRIGGER_BRANCH を使います"
           fi
 
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
