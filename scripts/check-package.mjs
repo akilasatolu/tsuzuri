@@ -22,13 +22,18 @@ const work = fs.mkdtempSync(path.join(os.tmpdir(), "tsuzuri-package-"));
 const cache = path.join(work, "npm-cache");
 const site = path.join(work, "site");
 
+// 利用者の手元と同じ条件で動かすため、GitHub Actions の環境変数(GITHUB_*)は渡さない。
+// GITHUB_ACTIONS=true のとき、ビルドは設定ファイルを読まずにワークフローが渡す環境変数だけを使うので、
+// CI の中でこのスクリプトを動かすと、手元の流れ(設定ファイルを読む)を確かめられないため。
+const baseEnv = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith("GITHUB_")));
+
 function run(cmd, args, cwd, env = {}) {
   console.log(`$ ${cmd} ${args.join(" ")}`);
   return execFileSync(cmd, args, {
     cwd,
     encoding: "utf-8",
     stdio: ["ignore", "pipe", "inherit"],
-    env: { ...process.env, npm_config_cache: cache, ...env },
+    env: { ...baseEnv, npm_config_cache: cache, ...env },
   });
 }
 
