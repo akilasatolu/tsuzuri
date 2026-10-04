@@ -1,0 +1,475 @@
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--fg);
+    background: var(--bg);
+  }
+  main {
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: 40px 24px;
+    overflow-x: auto;
+  }
+  main img { max-width: 100%; height: auto; }
+
+  /* 「本文へスキップ」リンク(キーボードで選んだときだけ表示) */
+  .tsuzuri-skip {
+    position: absolute;
+    left: 8px;
+    top: -48px;
+    padding: 6px 12px;
+    background: var(--bg);
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    z-index: 10;
+  }
+  .tsuzuri-skip:focus { top: 8px; }
+  main pre { background: var(--code-bg); padding: 12px 16px; border-radius: 8px; overflow-x: auto; }
+  main code { background: var(--code-bg); padding: 2px 5px; border-radius: 4px; font-size: 0.9em; }
+  main pre code { background: none; padding: 0; }
+  main table { border-collapse: collapse; width: 100%; }
+
+  /* コードの色分け(言語名付きのコードブロックを highlight.js でビルド時に色分けしたもの)。
+     色はテーマのアクセント色・文字色から決める。独自CSSで --hl-* 変数を指定すれば個別に変えられる。 */
+  .hljs-comment, .hljs-quote { color: var(--hl-comment, var(--fg)); opacity: 0.6; font-style: italic; }
+  .hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-type, .hljs-meta {
+    color: var(--hl-keyword, var(--accent));
+    font-weight: 600;
+  }
+  .hljs-string, .hljs-regexp, .hljs-symbol, .hljs-template-tag, .hljs-addition {
+    color: var(--hl-string, color-mix(in srgb, var(--accent) 55%, var(--fg)));
+  }
+  .hljs-number, .hljs-literal, .hljs-bullet, .hljs-link {
+    color: var(--hl-number, color-mix(in srgb, var(--accent) 75%, var(--fg)));
+  }
+  .hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class {
+    color: var(--hl-title, var(--fg));
+    font-weight: 700;
+  }
+  .hljs-attr, .hljs-attribute, .hljs-variable, .hljs-property, .hljs-params {
+    color: var(--hl-attr, color-mix(in srgb, var(--accent) 35%, var(--fg)));
+  }
+  .hljs-deletion { color: var(--hl-deletion, var(--accent)); text-decoration: line-through; }
+  .hljs-emphasis { font-style: italic; }
+  .hljs-strong { font-weight: 700; }
+  main th, main td { border: 1px solid var(--border); padding: 6px 10px; }
+  main a { color: var(--accent); }
+
+  /* サイト内ナビゲーション(NAV_ENABLED=true のときだけ body 直下に出力される)。
+     広い画面では左側に固定したサイドバー、狭い画面では本文の上に「メニュー」ボタンを置き、
+     押すとページ一覧が開く(JavaScriptは使わず、チェックボックスとラベルで開閉する)。
+     色はテーマの変数を使うため、どのテーマでもそのまま馴染む。 */
+  body > nav {
+    font-size: 0.9em;
+    line-height: 1.5;
+    padding: 12px 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--border);
+  }
+  body > nav ul { list-style: none; margin: 0; padding: 0; }
+  body > nav ul ul { margin: 2px 0 4px 0.4em; padding-left: 0.8em; border-left: 1px solid var(--border); }
+  /* ディレクトリ(<details> で折りたためる見出し) */
+  body > nav summary { display: block; margin-top: 6px; font-weight: 600; opacity: 0.7; cursor: pointer; list-style: none; }
+  body > nav summary::-webkit-details-marker { display: none; }
+  body > nav summary::before { content: "▸"; display: inline-block; width: 1em; transition: transform 0.15s; }
+  body > nav details[open] > summary::before { transform: rotate(90deg); }
+  body > nav summary:focus-visible { outline: 2px solid var(--accent); }
+  body > nav a { display: block; padding: 3px 0; color: var(--accent); text-decoration: none; }
+  body > nav a:hover { text-decoration: underline; }
+  body > nav a[aria-current="page"] { color: var(--fg); font-weight: 700; }
+
+  .tsuzuri-nav-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+  /* ライト/ダークの切り替え(tsuzuri-theme.js がナビの見出しの横に置く。<html data-theme> で切り替える) */
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
+  .tsuzuri-theme-toggle {
+    margin-left: auto;
+    padding: 4px 10px;
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .tsuzuri-theme-toggle:focus-visible { outline: 2px solid var(--accent); }
+  .tsuzuri-theme-toggle + .tsuzuri-nav-label { margin-left: 0; }
+  .tsuzuri-nav-head > p { margin: 0; font-weight: 700; }
+  .tsuzuri-nav-label {
+    margin-left: auto;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+  /* チェックボックス本体は見えなくするが、キーボードで操作できるよう display:none にはしない */
+  .tsuzuri-nav-toggle { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .tsuzuri-nav-toggle:focus-visible + .tsuzuri-nav-head .tsuzuri-nav-label { outline: 2px solid var(--accent); }
+  body > nav > ul { display: none; margin-top: 8px; }
+  .tsuzuri-nav-toggle:checked ~ ul { display: block; }
+
+  /* 見出しへのリンク(#)。見出しにカーソルを当てたとき・キーボードで選んだときだけ表示する */
+  .tsuzuri-anchor {
+    margin-left: 0.4em;
+    font-weight: 400;
+    text-decoration: none;
+    opacity: 0;
+  }
+  :is(h2, h3, h4, h5, h6):hover > .tsuzuri-anchor, .tsuzuri-anchor:focus { opacity: 0.6; }
+
+  /* ページ内の目次(NAV_ENABLED=true で、見出しが3つ以上あるページ) */
+  .tsuzuri-toc {
+    margin: 16px 0 24px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9em;
+  }
+  .tsuzuri-toc > p { margin: 0 0 6px; font-weight: 700; }
+  .tsuzuri-toc ul { margin: 0; padding-left: 1.2em; }
+  .tsuzuri-toc li { margin: 2px 0; }
+
+  /* GitHub の注意書き(> [!NOTE] など) */
+  .markdown-alert {
+    margin: 16px 0;
+    padding: 8px 16px;
+    border-left: 4px solid var(--alert-color);
+    background: color-mix(in srgb, var(--alert-color) 8%, transparent);
+    border-radius: 0 6px 6px 0;
+  }
+  .markdown-alert > :last-child { margin-bottom: 8px; }
+  .markdown-alert-title { margin: 4px 0; font-weight: 700; color: var(--alert-color); }
+  .markdown-alert-note { --alert-color: var(--alert-note, #4493f8); }
+  .markdown-alert-tip { --alert-color: var(--alert-tip, #3fb950); }
+  .markdown-alert-important { --alert-color: var(--alert-important, #ab7df8); }
+  .markdown-alert-warning { --alert-color: var(--alert-warning, #d29922); }
+  .markdown-alert-caution { --alert-color: var(--alert-caution, #f85149); }
+
+  /* 脚注(本文の [^1] と、ページ末尾の脚注の一覧) */
+  .footnotes { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 0.9em; }
+  .footnotes .sr-only {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  [data-fn-ref] { text-decoration: none; }
+
+  /* コードブロックのコピーボタン(tsuzuri-copy.js が付ける)。カーソルを当てたとき・キーボードで選んだときに表示する */
+  .tsuzuri-code { position: relative; }
+  .tsuzuri-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 2px 10px;
+    font: inherit;
+    font-size: 0.8em;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .tsuzuri-code:hover .tsuzuri-copy, .tsuzuri-copy:focus-visible { opacity: 1; }
+  @media (hover: none) { .tsuzuri-copy { opacity: 1; } }
+
+  /* mermaid の図(描画前はコードのまま表示される) */
+  pre.mermaid { background: transparent; text-align: center; }
+
+  /* 最終更新日(LAST_UPDATED=true のとき) */
+  .tsuzuri-updated { margin-top: 32px; font-size: 0.85em; opacity: 0.7; }
+
+  /* サイト内検索(ナビの上部。検索欄と結果はスクリプトが作る) */
+  .tsuzuri-search { margin: 10px 0 4px; }
+  .tsuzuri-search input {
+    width: 100%;
+    padding: 6px 10px;
+    font: inherit;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+  body > nav .tsuzuri-search-results { margin: 6px 0 0; }
+  .tsuzuri-search-results:empty { display: none; }
+  .tsuzuri-search-results li { padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .tsuzuri-search-results small { display: block; opacity: 0.7; font-size: 0.85em; }
+
+  /* 本文末尾の「前のページ/次のページ」リンク(NAV_ENABLED=true のとき) */
+  .tsuzuri-pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  main .tsuzuri-pager a {
+    flex: 1 1 0;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+  }
+  main .tsuzuri-pager a:hover { border-color: var(--accent); }
+  .tsuzuri-pager span { display: block; font-size: 0.8em; color: var(--fg); opacity: 0.7; }
+  .tsuzuri-pager-next { margin-left: auto; text-align: right; }
+
+  /* OS で「視差効果を減らす」(動きを減らす)を選んでいる人には、動き(アニメーション・変化の演出)を付けない */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  }
+
+  @media (min-width: 960px) {
+    body:has(> nav) {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+    }
+    body > nav {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      max-height: none;
+      height: 100vh;
+      padding: 40px 24px;
+      border-bottom: none;
+      border-right: 1px solid var(--border);
+    }
+    body > nav > ul { display: block; }
+    .tsuzuri-nav-label { display: none; }
+    body:has(> nav) > main { width: 100%; }
+  }
+/*
+ * glass.css (グラス)
+ * Glassmorphism(グラスモーフィズム)のスタイル。ゆっくり揺れて流れるオーロラの地に、透明なガラスのカードを重ねる。
+ * カードは色がそのまま透けるほど薄く、縁には光が当たったような細いハイライト。
+ * ライト表示は明け方の淡い空にパステル(水色・青・紫・桃色)のオーロラ、ダーク表示は星空に緑・青緑・紫のオーロラ。
+ * オーロラは2層の光のカーテンが、違う周期(22秒・31秒)でゆっくり揺れて流れる(動きを減らす設定の人には止める)。
+ */
+:root {
+  color-scheme: light dark;
+  --fg: #1e2238;
+  --muted: #565d7a;
+  --bg: #f5f6fb;
+  --heading: #161a2e;
+  --accent: #3b5bdb;
+  --accent-2: #d6336c;
+  --border: rgba(255, 255, 255, 0.55);
+  --page-bg: linear-gradient(180deg, #e9f0ff 0%, #eef4fb 55%, #e3f5f1 100%) #eef4fb;
+  --card-bg: rgba(255, 255, 255, 0.38);
+  --card-border: 1px solid rgba(255, 255, 255, 0.6);
+  --card-filter: blur(12px) saturate(170%);
+  --card-shadow: 0 8px 32px rgba(31, 38, 135, 0.14), inset 1px 1px 0 rgba(255, 255, 255, 0.7), inset -1px -1px 0 rgba(255, 255, 255, 0.15);
+  --radius-lg: 24px;
+  --radius: 14px;
+  --pill: 999px;
+  --heading-weight: 700;
+  --el-bg: rgba(255, 255, 255, 0.22);
+  --el-shadow: 0 4px 16px rgba(31, 38, 135, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  --inset-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  --hr: linear-gradient(90deg, transparent, rgba(59, 91, 219, 0.6), transparent);
+  --code-bg: rgba(255, 255, 255, 0.4);
+  --pre-bg: rgba(255, 255, 255, 0.3);
+  --th-bg: rgba(255, 255, 255, 0.35);
+  --th-fg: #3b5bdb;
+  --hover-bg: rgba(255, 255, 255, 0.3);
+  --current-bg: rgba(255, 255, 255, 0.55);
+  --current-fg: #3b5bdb;
+  --current-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 4px 12px rgba(31, 38, 135, 0.12);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --heading-font: var(--font);
+  --content-width: 840px;
+}
+
+/* ダーク表示: OS がダークモードのとき(ライト表示に切り替えたときを除く)と、ダーク表示に切り替えたとき */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --fg: #e6e9f7;
+    --muted: #9ea5c4;
+    --bg: #07091a;
+    --heading: #f5f7ff;
+    --accent: #91a7ff;
+    --accent-2: #f783ac;
+    --border: rgba(255, 255, 255, 0.12);
+    --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='xMidYMid slice'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='997' cy='742' r='1.3' opacity='0.27'/%3E%3Ccircle cx='745' cy='943' r='0.6' opacity='0.84'/%3E%3Ccircle cx='181' cy='469' r='0.8' opacity='0.50'/%3E%3Ccircle cx='163' cy='249' r='0.8' opacity='0.52'/%3E%3Ccircle cx='291' cy='867' r='1' opacity='0.35'/%3E%3Ccircle cx='1275' cy='139' r='1.3' opacity='0.54'/%3E%3Ccircle cx='212' cy='972' r='0.6' opacity='0.39'/%3E%3Ccircle cx='345' cy='982' r='0.8' opacity='0.44'/%3E%3Ccircle cx='1538' cy='539' r='0.8' opacity='0.37'/%3E%3Ccircle cx='1550' cy='197' r='1' opacity='0.44'/%3E%3Ccircle cx='578' cy='166' r='0.8' opacity='0.42'/%3E%3Ccircle cx='531' cy='817' r='1.3' opacity='0.25'/%3E%3Ccircle cx='1085' cy='338' r='0.8' opacity='0.48'/%3E%3Ccircle cx='490' cy='696' r='0.8' opacity='0.56'/%3E%3Ccircle cx='1127' cy='57' r='0.6' opacity='0.87'/%3E%3Ccircle cx='572' cy='404' r='1.3' opacity='0.76'/%3E%3Ccircle cx='586' cy='579' r='0.6' opacity='0.54'/%3E%3Ccircle cx='1132' cy='624' r='0.8' opacity='0.33'/%3E%3Ccircle cx='394' cy='819' r='1' opacity='0.47'/%3E%3Ccircle cx='568' cy='525' r='1' opacity='0.32'/%3E%3Ccircle cx='1197' cy='797' r='0.8' opacity='0.27'/%3E%3Ccircle cx='1513' cy='91' r='0.8' opacity='0.58'/%3E%3Ccircle cx='580' cy='148' r='0.8' opacity='0.85'/%3E%3Ccircle cx='872' cy='312' r='0.8' opacity='0.45'/%3E%3Ccircle cx='1278' cy='627' r='0.8' opacity='0.90'/%3E%3Ccircle cx='258' cy='49' r='1.3' opacity='0.60'/%3E%3Ccircle cx='649' cy='237' r='1.3' opacity='0.47'/%3E%3Ccircle cx='400' cy='651' r='0.8' opacity='0.29'/%3E%3Ccircle cx='1466' cy='33' r='1' opacity='0.47'/%3E%3Ccircle cx='331' cy='981' r='1.3' opacity='0.87'/%3E%3Ccircle cx='1009' cy='788' r='0.6' opacity='0.36'/%3E%3Ccircle cx='597' cy='59' r='1' opacity='0.44'/%3E%3Ccircle cx='725' cy='999' r='0.8' opacity='0.88'/%3E%3Ccircle cx='726' cy='488' r='0.8' opacity='0.56'/%3E%3Ccircle cx='466' cy='404' r='0.8' opacity='0.32'/%3E%3Ccircle cx='1315' cy='532' r='0.8' opacity='0.66'/%3E%3Ccircle cx='799' cy='338' r='0.6' opacity='0.57'/%3E%3Ccircle cx='824' cy='548' r='1.3' opacity='0.48'/%3E%3Ccircle cx='1258' cy='775' r='1.3' opacity='0.68'/%3E%3Ccircle cx='1215' cy='363' r='0.8' opacity='0.79'/%3E%3Ccircle cx='424' cy='981' r='0.8' opacity='0.87'/%3E%3Ccircle cx='544' cy='179' r='0.6' opacity='0.56'/%3E%3Ccircle cx='1238' cy='326' r='0.8' opacity='0.55'/%3E%3Ccircle cx='1307' cy='647' r='0.8' opacity='0.48'/%3E%3Ccircle cx='1031' cy='738' r='1' opacity='0.48'/%3E%3Ccircle cx='1349' cy='870' r='1' opacity='0.88'/%3E%3Ccircle cx='1530' cy='518' r='1.3' opacity='0.89'/%3E%3Ccircle cx='318' cy='362' r='1' opacity='0.43'/%3E%3Ccircle cx='126' cy='671' r='1' opacity='0.36'/%3E%3Ccircle cx='1249' cy='581' r='1' opacity='0.45'/%3E%3Ccircle cx='885' cy='867' r='0.8' opacity='0.72'/%3E%3Ccircle cx='44' cy='160' r='1' opacity='0.66'/%3E%3Ccircle cx='289' cy='759' r='0.8' opacity='0.66'/%3E%3Ccircle cx='67' cy='472' r='0.8' opacity='0.36'/%3E%3Ccircle cx='1427' cy='111' r='0.8' opacity='0.56'/%3E%3Ccircle cx='877' cy='415' r='0.8' opacity='0.50'/%3E%3Ccircle cx='979' cy='590' r='0.8' opacity='0.72'/%3E%3Ccircle cx='598' cy='351' r='0.8' opacity='0.81'/%3E%3Ccircle cx='1386' cy='689' r='1.3' opacity='0.49'/%3E%3Ccircle cx='58' cy='614' r='0.6' opacity='0.44'/%3E%3Ccircle cx='820' cy='951' r='0.8' opacity='0.87'/%3E%3Ccircle cx='1310' cy='419' r='1.3' opacity='0.67'/%3E%3Ccircle cx='591' cy='142' r='1.3' opacity='0.50'/%3E%3Ccircle cx='763' cy='199' r='0.8' opacity='0.65'/%3E%3Ccircle cx='562' cy='893' r='0.6' opacity='0.50'/%3E%3Ccircle cx='522' cy='916' r='1.3' opacity='0.34'/%3E%3Ccircle cx='1007' cy='891' r='1' opacity='0.53'/%3E%3Ccircle cx='1563' cy='493' r='1' opacity='0.88'/%3E%3Ccircle cx='608' cy='961' r='0.8' opacity='0.64'/%3E%3Ccircle cx='416' cy='981' r='1' opacity='0.41'/%3E%3Ccircle cx='31' cy='945' r='0.8' opacity='0.57'/%3E%3Ccircle cx='458' cy='477' r='0.6' opacity='0.68'/%3E%3Ccircle cx='1537' cy='246' r='0.6' opacity='0.76'/%3E%3Ccircle cx='1323' cy='13' r='1.3' opacity='0.61'/%3E%3Ccircle cx='390' cy='474' r='0.6' opacity='0.41'/%3E%3Ccircle cx='428' cy='155' r='0.8' opacity='0.44'/%3E%3Ccircle cx='973' cy='475' r='1.3' opacity='0.82'/%3E%3Ccircle cx='1432' cy='16' r='0.8' opacity='0.45'/%3E%3Ccircle cx='854' cy='336' r='0.8' opacity='0.73'/%3E%3Ccircle cx='43' cy='350' r='1.3' opacity='0.34'/%3E%3Ccircle cx='5' cy='553' r='0.6' opacity='0.83'/%3E%3Ccircle cx='873' cy='15' r='1' opacity='0.64'/%3E%3Ccircle cx='1102' cy='953' r='1' opacity='0.81'/%3E%3Ccircle cx='1346' cy='476' r='0.8' opacity='0.83'/%3E%3Ccircle cx='744' cy='758' r='0.8' opacity='0.79'/%3E%3Ccircle cx='1111' cy='433' r='0.8' opacity='0.67'/%3E%3Ccircle cx='756' cy='311' r='0.8' opacity='0.56'/%3E%3Ccircle cx='879' cy='498' r='0.8' opacity='0.60'/%3E%3Ccircle cx='681' cy='541' r='0.6' opacity='0.29'/%3E%3Ccircle cx='368' cy='820' r='0.6' opacity='0.68'/%3E%3Ccircle cx='41' cy='723' r='0.6' opacity='0.90'/%3E%3Ccircle cx='1122' cy='49' r='0.6' opacity='0.39'/%3E%3Ccircle cx='1033' cy='952' r='0.8' opacity='0.90'/%3E%3Ccircle cx='1129' cy='438' r='0.8' opacity='0.65'/%3E%3Ccircle cx='662' cy='161' r='1.3' opacity='0.39'/%3E%3Ccircle cx='889' cy='660' r='0.6' opacity='0.43'/%3E%3Ccircle cx='914' cy='118' r='1' opacity='0.82'/%3E%3Ccircle cx='215' cy='432' r='0.8' opacity='0.70'/%3E%3Ccircle cx='783' cy='353' r='0.8' opacity='0.84'/%3E%3Ccircle cx='221' cy='295' r='1.3' opacity='0.66'/%3E%3Ccircle cx='809' cy='910' r='1.3' opacity='0.61'/%3E%3Ccircle cx='353' cy='63' r='0.8' opacity='0.42'/%3E%3Ccircle cx='1201' cy='517' r='0.8' opacity='0.78'/%3E%3Ccircle cx='1382' cy='453' r='1' opacity='0.37'/%3E%3Ccircle cx='1141' cy='655' r='0.6' opacity='0.62'/%3E%3Ccircle cx='58' cy='863' r='1.3' opacity='0.64'/%3E%3Ccircle cx='382' cy='877' r='1' opacity='0.88'/%3E%3Ccircle cx='172' cy='531' r='1.3' opacity='0.72'/%3E%3Ccircle cx='86' cy='151' r='1' opacity='0.69'/%3E%3Ccircle cx='357' cy='116' r='1' opacity='0.78'/%3E%3Ccircle cx='224' cy='625' r='0.8' opacity='0.79'/%3E%3Ccircle cx='464' cy='931' r='0.8' opacity='0.77'/%3E%3Ccircle cx='605' cy='723' r='0.8' opacity='0.67'/%3E%3Ccircle cx='1287' cy='433' r='0.8' opacity='0.59'/%3E%3Ccircle cx='948' cy='573' r='0.8' opacity='0.51'/%3E%3Ccircle cx='155' cy='33' r='0.8' opacity='0.38'/%3E%3Ccircle cx='784' cy='937' r='0.8' opacity='0.25'/%3E%3Ccircle cx='752' cy='890' r='1.3' opacity='0.85'/%3E%3Ccircle cx='517' cy='462' r='0.8' opacity='0.35'/%3E%3Ccircle cx='254' cy='375' r='1' opacity='0.81'/%3E%3Ccircle cx='751' cy='552' r='0.6' opacity='0.43'/%3E%3Ccircle cx='258' cy='287' r='0.8' opacity='0.27'/%3E%3Ccircle cx='1434' cy='344' r='0.8' opacity='0.46'/%3E%3Ccircle cx='94' cy='22' r='1' opacity='0.56'/%3E%3Ccircle cx='1513' cy='118' r='0.8' opacity='0.44'/%3E%3Ccircle cx='1079' cy='729' r='0.8' opacity='0.27'/%3E%3Ccircle cx='1144' cy='575' r='0.6' opacity='0.65'/%3E%3Ccircle cx='1459' cy='707' r='0.8' opacity='0.37'/%3E%3Ccircle cx='578' cy='67' r='1' opacity='0.36'/%3E%3Ccircle cx='385' cy='672' r='0.6' opacity='0.67'/%3E%3Ccircle cx='689' cy='975' r='0.6' opacity='0.55'/%3E%3Ccircle cx='725' cy='681' r='0.8' opacity='0.28'/%3E%3Ccircle cx='877' cy='990' r='1.3' opacity='0.62'/%3E%3Ccircle cx='1503' cy='717' r='0.8' opacity='0.83'/%3E%3Ccircle cx='786' cy='936' r='0.6' opacity='0.69'/%3E%3Ccircle cx='1031' cy='497' r='0.6' opacity='0.28'/%3E%3Ccircle cx='1333' cy='446' r='0.6' opacity='0.82'/%3E%3Ccircle cx='1520' cy='194' r='1.3' opacity='0.67'/%3E%3Ccircle cx='301' cy='234' r='0.8' opacity='0.76'/%3E%3Ccircle cx='139' cy='985' r='0.8' opacity='0.64'/%3E%3Ccircle cx='1371' cy='214' r='0.6' opacity='0.54'/%3E%3Ccircle cx='572' cy='423' r='1' opacity='0.59'/%3E%3Ccircle cx='212' cy='12' r='0.8' opacity='0.70'/%3E%3Ccircle cx='1426' cy='1000' r='1.3' opacity='0.33'/%3E%3Ccircle cx='499' cy='88' r='0.8' opacity='0.78'/%3E%3Ccircle cx='501' cy='130' r='0.6' opacity='0.56'/%3E%3Ccircle cx='1115' cy='799' r='1.3' opacity='0.68'/%3E%3Ccircle cx='441' cy='493' r='0.8' opacity='0.28'/%3E%3Ccircle cx='320' cy='286' r='0.8' opacity='0.83'/%3E%3Ccircle cx='115' cy='769' r='1' opacity='0.74'/%3E%3Ccircle cx='890' cy='896' r='0.8' opacity='0.62'/%3E%3Ccircle cx='707' cy='817' r='0.6' opacity='0.72'/%3E%3Ccircle cx='1122' cy='268' r='1' opacity='0.62'/%3E%3Ccircle cx='514' cy='306' r='0.8' opacity='0.42'/%3E%3Ccircle cx='1081' cy='286' r='0.6' opacity='0.60'/%3E%3Ccircle cx='1182' cy='28' r='0.6' opacity='0.28'/%3E%3Ccircle cx='208' cy='357' r='0.8' opacity='0.87'/%3E%3Ccircle cx='979' cy='231' r='1' opacity='0.33'/%3E%3Ccircle cx='322' cy='358' r='0.8' opacity='0.63'/%3E%3Ccircle cx='1323' cy='727' r='0.6' opacity='0.42'/%3E%3Ccircle cx='969' cy='631' r='0.8' opacity='0.54'/%3E%3Ccircle cx='1502' cy='795' r='0.6' opacity='0.47'/%3E%3Ccircle cx='713' cy='228' r='1.3' opacity='0.53'/%3E%3Ccircle cx='706' cy='768' r='0.8' opacity='0.60'/%3E%3Ccircle cx='1551' cy='596' r='0.6' opacity='0.33'/%3E%3Ccircle cx='1361' cy='685' r='0.8' opacity='0.89'/%3E%3Ccircle cx='53' cy='577' r='1' opacity='0.71'/%3E%3Ccircle cx='567' cy='464' r='0.8' opacity='0.43'/%3E%3Ccircle cx='322' cy='562' r='0.8' opacity='0.75'/%3E%3Ccircle cx='1256' cy='367' r='0.8' opacity='0.78'/%3E%3C/g%3E%3C/svg%3E") center / cover no-repeat, linear-gradient(180deg, #030712 0%, #081a33 60%, #0b2a3a 100%) #081a33;
+    --card-bg: rgba(16, 20, 44, 0.12);
+    --card-border: 1px solid rgba(255, 255, 255, 0.16);
+    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 1px 1px 0 rgba(255, 255, 255, 0.25), inset -1px -1px 0 rgba(255, 255, 255, 0.04);
+    --el-bg: rgba(255, 255, 255, 0.04);
+    --el-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+    --inset-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+    --hr: linear-gradient(90deg, transparent, rgba(145, 167, 255, 0.6), transparent);
+    --code-bg: rgba(255, 255, 255, 0.08);
+    --pre-bg: rgba(6, 8, 22, 0.3);
+    --th-bg: rgba(255, 255, 255, 0.08);
+    --th-fg: #bac8ff;
+    --hover-bg: rgba(255, 255, 255, 0.08);
+    --current-bg: rgba(255, 255, 255, 0.16);
+    --current-fg: #ffffff;
+    --current-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fg: #e6e9f7;
+  --muted: #9ea5c4;
+  --bg: #07091a;
+  --heading: #f5f7ff;
+  --accent: #91a7ff;
+  --accent-2: #f783ac;
+  --border: rgba(255, 255, 255, 0.12);
+  --page-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='xMidYMid slice'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='997' cy='742' r='1.3' opacity='0.27'/%3E%3Ccircle cx='745' cy='943' r='0.6' opacity='0.84'/%3E%3Ccircle cx='181' cy='469' r='0.8' opacity='0.50'/%3E%3Ccircle cx='163' cy='249' r='0.8' opacity='0.52'/%3E%3Ccircle cx='291' cy='867' r='1' opacity='0.35'/%3E%3Ccircle cx='1275' cy='139' r='1.3' opacity='0.54'/%3E%3Ccircle cx='212' cy='972' r='0.6' opacity='0.39'/%3E%3Ccircle cx='345' cy='982' r='0.8' opacity='0.44'/%3E%3Ccircle cx='1538' cy='539' r='0.8' opacity='0.37'/%3E%3Ccircle cx='1550' cy='197' r='1' opacity='0.44'/%3E%3Ccircle cx='578' cy='166' r='0.8' opacity='0.42'/%3E%3Ccircle cx='531' cy='817' r='1.3' opacity='0.25'/%3E%3Ccircle cx='1085' cy='338' r='0.8' opacity='0.48'/%3E%3Ccircle cx='490' cy='696' r='0.8' opacity='0.56'/%3E%3Ccircle cx='1127' cy='57' r='0.6' opacity='0.87'/%3E%3Ccircle cx='572' cy='404' r='1.3' opacity='0.76'/%3E%3Ccircle cx='586' cy='579' r='0.6' opacity='0.54'/%3E%3Ccircle cx='1132' cy='624' r='0.8' opacity='0.33'/%3E%3Ccircle cx='394' cy='819' r='1' opacity='0.47'/%3E%3Ccircle cx='568' cy='525' r='1' opacity='0.32'/%3E%3Ccircle cx='1197' cy='797' r='0.8' opacity='0.27'/%3E%3Ccircle cx='1513' cy='91' r='0.8' opacity='0.58'/%3E%3Ccircle cx='580' cy='148' r='0.8' opacity='0.85'/%3E%3Ccircle cx='872' cy='312' r='0.8' opacity='0.45'/%3E%3Ccircle cx='1278' cy='627' r='0.8' opacity='0.90'/%3E%3Ccircle cx='258' cy='49' r='1.3' opacity='0.60'/%3E%3Ccircle cx='649' cy='237' r='1.3' opacity='0.47'/%3E%3Ccircle cx='400' cy='651' r='0.8' opacity='0.29'/%3E%3Ccircle cx='1466' cy='33' r='1' opacity='0.47'/%3E%3Ccircle cx='331' cy='981' r='1.3' opacity='0.87'/%3E%3Ccircle cx='1009' cy='788' r='0.6' opacity='0.36'/%3E%3Ccircle cx='597' cy='59' r='1' opacity='0.44'/%3E%3Ccircle cx='725' cy='999' r='0.8' opacity='0.88'/%3E%3Ccircle cx='726' cy='488' r='0.8' opacity='0.56'/%3E%3Ccircle cx='466' cy='404' r='0.8' opacity='0.32'/%3E%3Ccircle cx='1315' cy='532' r='0.8' opacity='0.66'/%3E%3Ccircle cx='799' cy='338' r='0.6' opacity='0.57'/%3E%3Ccircle cx='824' cy='548' r='1.3' opacity='0.48'/%3E%3Ccircle cx='1258' cy='775' r='1.3' opacity='0.68'/%3E%3Ccircle cx='1215' cy='363' r='0.8' opacity='0.79'/%3E%3Ccircle cx='424' cy='981' r='0.8' opacity='0.87'/%3E%3Ccircle cx='544' cy='179' r='0.6' opacity='0.56'/%3E%3Ccircle cx='1238' cy='326' r='0.8' opacity='0.55'/%3E%3Ccircle cx='1307' cy='647' r='0.8' opacity='0.48'/%3E%3Ccircle cx='1031' cy='738' r='1' opacity='0.48'/%3E%3Ccircle cx='1349' cy='870' r='1' opacity='0.88'/%3E%3Ccircle cx='1530' cy='518' r='1.3' opacity='0.89'/%3E%3Ccircle cx='318' cy='362' r='1' opacity='0.43'/%3E%3Ccircle cx='126' cy='671' r='1' opacity='0.36'/%3E%3Ccircle cx='1249' cy='581' r='1' opacity='0.45'/%3E%3Ccircle cx='885' cy='867' r='0.8' opacity='0.72'/%3E%3Ccircle cx='44' cy='160' r='1' opacity='0.66'/%3E%3Ccircle cx='289' cy='759' r='0.8' opacity='0.66'/%3E%3Ccircle cx='67' cy='472' r='0.8' opacity='0.36'/%3E%3Ccircle cx='1427' cy='111' r='0.8' opacity='0.56'/%3E%3Ccircle cx='877' cy='415' r='0.8' opacity='0.50'/%3E%3Ccircle cx='979' cy='590' r='0.8' opacity='0.72'/%3E%3Ccircle cx='598' cy='351' r='0.8' opacity='0.81'/%3E%3Ccircle cx='1386' cy='689' r='1.3' opacity='0.49'/%3E%3Ccircle cx='58' cy='614' r='0.6' opacity='0.44'/%3E%3Ccircle cx='820' cy='951' r='0.8' opacity='0.87'/%3E%3Ccircle cx='1310' cy='419' r='1.3' opacity='0.67'/%3E%3Ccircle cx='591' cy='142' r='1.3' opacity='0.50'/%3E%3Ccircle cx='763' cy='199' r='0.8' opacity='0.65'/%3E%3Ccircle cx='562' cy='893' r='0.6' opacity='0.50'/%3E%3Ccircle cx='522' cy='916' r='1.3' opacity='0.34'/%3E%3Ccircle cx='1007' cy='891' r='1' opacity='0.53'/%3E%3Ccircle cx='1563' cy='493' r='1' opacity='0.88'/%3E%3Ccircle cx='608' cy='961' r='0.8' opacity='0.64'/%3E%3Ccircle cx='416' cy='981' r='1' opacity='0.41'/%3E%3Ccircle cx='31' cy='945' r='0.8' opacity='0.57'/%3E%3Ccircle cx='458' cy='477' r='0.6' opacity='0.68'/%3E%3Ccircle cx='1537' cy='246' r='0.6' opacity='0.76'/%3E%3Ccircle cx='1323' cy='13' r='1.3' opacity='0.61'/%3E%3Ccircle cx='390' cy='474' r='0.6' opacity='0.41'/%3E%3Ccircle cx='428' cy='155' r='0.8' opacity='0.44'/%3E%3Ccircle cx='973' cy='475' r='1.3' opacity='0.82'/%3E%3Ccircle cx='1432' cy='16' r='0.8' opacity='0.45'/%3E%3Ccircle cx='854' cy='336' r='0.8' opacity='0.73'/%3E%3Ccircle cx='43' cy='350' r='1.3' opacity='0.34'/%3E%3Ccircle cx='5' cy='553' r='0.6' opacity='0.83'/%3E%3Ccircle cx='873' cy='15' r='1' opacity='0.64'/%3E%3Ccircle cx='1102' cy='953' r='1' opacity='0.81'/%3E%3Ccircle cx='1346' cy='476' r='0.8' opacity='0.83'/%3E%3Ccircle cx='744' cy='758' r='0.8' opacity='0.79'/%3E%3Ccircle cx='1111' cy='433' r='0.8' opacity='0.67'/%3E%3Ccircle cx='756' cy='311' r='0.8' opacity='0.56'/%3E%3Ccircle cx='879' cy='498' r='0.8' opacity='0.60'/%3E%3Ccircle cx='681' cy='541' r='0.6' opacity='0.29'/%3E%3Ccircle cx='368' cy='820' r='0.6' opacity='0.68'/%3E%3Ccircle cx='41' cy='723' r='0.6' opacity='0.90'/%3E%3Ccircle cx='1122' cy='49' r='0.6' opacity='0.39'/%3E%3Ccircle cx='1033' cy='952' r='0.8' opacity='0.90'/%3E%3Ccircle cx='1129' cy='438' r='0.8' opacity='0.65'/%3E%3Ccircle cx='662' cy='161' r='1.3' opacity='0.39'/%3E%3Ccircle cx='889' cy='660' r='0.6' opacity='0.43'/%3E%3Ccircle cx='914' cy='118' r='1' opacity='0.82'/%3E%3Ccircle cx='215' cy='432' r='0.8' opacity='0.70'/%3E%3Ccircle cx='783' cy='353' r='0.8' opacity='0.84'/%3E%3Ccircle cx='221' cy='295' r='1.3' opacity='0.66'/%3E%3Ccircle cx='809' cy='910' r='1.3' opacity='0.61'/%3E%3Ccircle cx='353' cy='63' r='0.8' opacity='0.42'/%3E%3Ccircle cx='1201' cy='517' r='0.8' opacity='0.78'/%3E%3Ccircle cx='1382' cy='453' r='1' opacity='0.37'/%3E%3Ccircle cx='1141' cy='655' r='0.6' opacity='0.62'/%3E%3Ccircle cx='58' cy='863' r='1.3' opacity='0.64'/%3E%3Ccircle cx='382' cy='877' r='1' opacity='0.88'/%3E%3Ccircle cx='172' cy='531' r='1.3' opacity='0.72'/%3E%3Ccircle cx='86' cy='151' r='1' opacity='0.69'/%3E%3Ccircle cx='357' cy='116' r='1' opacity='0.78'/%3E%3Ccircle cx='224' cy='625' r='0.8' opacity='0.79'/%3E%3Ccircle cx='464' cy='931' r='0.8' opacity='0.77'/%3E%3Ccircle cx='605' cy='723' r='0.8' opacity='0.67'/%3E%3Ccircle cx='1287' cy='433' r='0.8' opacity='0.59'/%3E%3Ccircle cx='948' cy='573' r='0.8' opacity='0.51'/%3E%3Ccircle cx='155' cy='33' r='0.8' opacity='0.38'/%3E%3Ccircle cx='784' cy='937' r='0.8' opacity='0.25'/%3E%3Ccircle cx='752' cy='890' r='1.3' opacity='0.85'/%3E%3Ccircle cx='517' cy='462' r='0.8' opacity='0.35'/%3E%3Ccircle cx='254' cy='375' r='1' opacity='0.81'/%3E%3Ccircle cx='751' cy='552' r='0.6' opacity='0.43'/%3E%3Ccircle cx='258' cy='287' r='0.8' opacity='0.27'/%3E%3Ccircle cx='1434' cy='344' r='0.8' opacity='0.46'/%3E%3Ccircle cx='94' cy='22' r='1' opacity='0.56'/%3E%3Ccircle cx='1513' cy='118' r='0.8' opacity='0.44'/%3E%3Ccircle cx='1079' cy='729' r='0.8' opacity='0.27'/%3E%3Ccircle cx='1144' cy='575' r='0.6' opacity='0.65'/%3E%3Ccircle cx='1459' cy='707' r='0.8' opacity='0.37'/%3E%3Ccircle cx='578' cy='67' r='1' opacity='0.36'/%3E%3Ccircle cx='385' cy='672' r='0.6' opacity='0.67'/%3E%3Ccircle cx='689' cy='975' r='0.6' opacity='0.55'/%3E%3Ccircle cx='725' cy='681' r='0.8' opacity='0.28'/%3E%3Ccircle cx='877' cy='990' r='1.3' opacity='0.62'/%3E%3Ccircle cx='1503' cy='717' r='0.8' opacity='0.83'/%3E%3Ccircle cx='786' cy='936' r='0.6' opacity='0.69'/%3E%3Ccircle cx='1031' cy='497' r='0.6' opacity='0.28'/%3E%3Ccircle cx='1333' cy='446' r='0.6' opacity='0.82'/%3E%3Ccircle cx='1520' cy='194' r='1.3' opacity='0.67'/%3E%3Ccircle cx='301' cy='234' r='0.8' opacity='0.76'/%3E%3Ccircle cx='139' cy='985' r='0.8' opacity='0.64'/%3E%3Ccircle cx='1371' cy='214' r='0.6' opacity='0.54'/%3E%3Ccircle cx='572' cy='423' r='1' opacity='0.59'/%3E%3Ccircle cx='212' cy='12' r='0.8' opacity='0.70'/%3E%3Ccircle cx='1426' cy='1000' r='1.3' opacity='0.33'/%3E%3Ccircle cx='499' cy='88' r='0.8' opacity='0.78'/%3E%3Ccircle cx='501' cy='130' r='0.6' opacity='0.56'/%3E%3Ccircle cx='1115' cy='799' r='1.3' opacity='0.68'/%3E%3Ccircle cx='441' cy='493' r='0.8' opacity='0.28'/%3E%3Ccircle cx='320' cy='286' r='0.8' opacity='0.83'/%3E%3Ccircle cx='115' cy='769' r='1' opacity='0.74'/%3E%3Ccircle cx='890' cy='896' r='0.8' opacity='0.62'/%3E%3Ccircle cx='707' cy='817' r='0.6' opacity='0.72'/%3E%3Ccircle cx='1122' cy='268' r='1' opacity='0.62'/%3E%3Ccircle cx='514' cy='306' r='0.8' opacity='0.42'/%3E%3Ccircle cx='1081' cy='286' r='0.6' opacity='0.60'/%3E%3Ccircle cx='1182' cy='28' r='0.6' opacity='0.28'/%3E%3Ccircle cx='208' cy='357' r='0.8' opacity='0.87'/%3E%3Ccircle cx='979' cy='231' r='1' opacity='0.33'/%3E%3Ccircle cx='322' cy='358' r='0.8' opacity='0.63'/%3E%3Ccircle cx='1323' cy='727' r='0.6' opacity='0.42'/%3E%3Ccircle cx='969' cy='631' r='0.8' opacity='0.54'/%3E%3Ccircle cx='1502' cy='795' r='0.6' opacity='0.47'/%3E%3Ccircle cx='713' cy='228' r='1.3' opacity='0.53'/%3E%3Ccircle cx='706' cy='768' r='0.8' opacity='0.60'/%3E%3Ccircle cx='1551' cy='596' r='0.6' opacity='0.33'/%3E%3Ccircle cx='1361' cy='685' r='0.8' opacity='0.89'/%3E%3Ccircle cx='53' cy='577' r='1' opacity='0.71'/%3E%3Ccircle cx='567' cy='464' r='0.8' opacity='0.43'/%3E%3Ccircle cx='322' cy='562' r='0.8' opacity='0.75'/%3E%3Ccircle cx='1256' cy='367' r='0.8' opacity='0.78'/%3E%3C/g%3E%3C/svg%3E") center / cover no-repeat, linear-gradient(180deg, #030712 0%, #081a33 60%, #0b2a3a 100%) #081a33;
+  --card-bg: rgba(16, 20, 44, 0.12);
+  --card-border: 1px solid rgba(255, 255, 255, 0.16);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 1px 1px 0 rgba(255, 255, 255, 0.25), inset -1px -1px 0 rgba(255, 255, 255, 0.04);
+  --el-bg: rgba(255, 255, 255, 0.04);
+  --el-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+  --inset-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+  --hr: linear-gradient(90deg, transparent, rgba(145, 167, 255, 0.6), transparent);
+  --code-bg: rgba(255, 255, 255, 0.08);
+  --pre-bg: rgba(6, 8, 22, 0.3);
+  --th-bg: rgba(255, 255, 255, 0.08);
+  --th-fg: #bac8ff;
+  --hover-bg: rgba(255, 255, 255, 0.08);
+  --current-bg: rgba(255, 255, 255, 0.16);
+  --current-fg: #ffffff;
+  --current-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+/* ページの地と、本文・ナビのカード */
+body { line-height: 1.75; background: var(--page-bg); background-attachment: fixed; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+main {
+  margin: 24px auto 48px;
+  padding: 40px 44px;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: var(--card-filter);
+  backdrop-filter: var(--card-filter);
+}
+body > nav {
+  margin: 16px 16px 0;
+  padding: 16px 20px;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: var(--card-filter);
+  backdrop-filter: var(--card-filter);
+}
+@media (max-width: 640px) {
+  main { margin: 12px; padding: 28px 20px; }
+}
+@media (min-width: 960px) {
+  body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }
+  body > nav { top: 16px; height: calc(100vh - 32px); margin: 16px 0 16px 16px; padding: 28px 20px; border: var(--card-border); }
+  body:has(> nav) > main { width: auto; margin: 16px 24px 48px; max-width: var(--content-width); justify-self: center; }
+}
+
+/* 見出し */
+main :is(h1, h2, h3, h4) { font-family: var(--heading-font); font-weight: var(--heading-weight); line-height: 1.35; letter-spacing: 0.01em; color: var(--heading); }
+main h1 { margin: 0 0 1em; font-size: 2.2em; }
+main h2 { margin: 2.2em 0 0.7em; font-size: 1.5em; }
+main h3 { margin: 1.8em 0 0.5em; font-size: 1.2em; color: var(--accent); }
+main h4 { margin: 1.5em 0 0.4em; font-size: 1em; color: var(--muted); }
+
+/* リンク */
+main a { color: var(--accent); font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.2em; text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+main a:hover { color: var(--accent-2); text-decoration-color: var(--accent-2); }
+
+/* 本文の部品(角を丸く、テーマの質感で) */
+main strong { color: var(--heading); }
+main blockquote { margin: 1.4em 0; padding: 0.8em 1.2em; color: var(--muted); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
+main hr { margin: 2.5em 0; height: 3px; border: 0; border-radius: 3px; background: var(--hr); }
+main kbd { padding: 0.15em 0.5em; font-size: 0.85em; background: var(--el-bg); border: 0; border-radius: 6px; box-shadow: var(--el-shadow); }
+main img { border-radius: var(--radius); }
+main code { padding: 2px 6px; background: var(--code-bg); border-radius: 6px; }
+main pre { padding: 16px 20px; background: var(--pre-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); line-height: 1.6; }
+main pre code { background: none; padding: 0; }
+main table { border-collapse: separate; border-spacing: 0; overflow: hidden; font-size: 0.95em; background: var(--el-bg); border-radius: var(--radius); box-shadow: var(--el-shadow); }
+main th, main td { border: 0; border-bottom: 1px solid var(--border); padding: 10px 14px; }
+main tr:last-child td { border-bottom: 0; }
+main th { text-align: left; color: var(--th-fg); background: var(--th-bg); }
+
+/* 注意書き・目次・前後のページ */
+.markdown-alert { border: 0; border-radius: var(--radius); background: color-mix(in srgb, var(--alert-color) 12%, var(--el-bg)); box-shadow: var(--el-shadow); }
+.tsuzuri-toc { background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
+.tsuzuri-toc > p { color: var(--accent); }
+.tsuzuri-pager { border-top: 0; }
+main .tsuzuri-pager a { color: var(--heading); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--el-shadow); transition: transform 0.15s; }
+main .tsuzuri-pager a:hover { transform: translateY(-2px); color: var(--accent); }
+.tsuzuri-pager span { color: var(--accent); opacity: 1; }
+.tsuzuri-updated { opacity: 1; color: var(--muted); }
+
+/* ナビ */
+.tsuzuri-nav-head > p { font-weight: 800; color: var(--heading); }
+body > nav a { margin: 2px 0; padding: 6px 12px; color: var(--fg); border-radius: var(--pill); }
+body > nav a:hover { color: var(--accent); background: var(--hover-bg); text-decoration: none; }
+body > nav a[aria-current="page"] { color: var(--current-fg); background: var(--current-bg); box-shadow: var(--current-shadow); font-weight: 700; }
+body > nav ul ul { border-left: 2px solid var(--border); }
+.tsuzuri-search input { padding: 9px 16px; background: var(--el-bg); border: 0; border-radius: var(--pill); box-shadow: var(--inset-shadow); }
+.tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
+
+/* ---- オーロラ: ページの後ろで、光のカーテンがゆっくり揺れて流れる(動きを減らす設定の人には、基礎CSSが止める) ---- */
+:root {
+  --aurora-1: rgba(45, 212, 191, 0.45);
+  --aurora-2: rgba(96, 165, 250, 0.40);
+  --aurora-3: rgba(167, 139, 250, 0.40);
+  --aurora-4: rgba(244, 114, 182, 0.30);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --aurora-1: rgba(45, 212, 191, 0.55);
+    --aurora-2: rgba(74, 222, 128, 0.45);
+    --aurora-3: rgba(139, 92, 246, 0.50);
+    --aurora-4: rgba(34, 211, 238, 0.40);
+  }
+}
+:root[data-theme="dark"] {
+  --aurora-1: rgba(45, 212, 191, 0.55);
+  --aurora-2: rgba(74, 222, 128, 0.45);
+  --aurora-3: rgba(139, 92, 246, 0.50);
+  --aurora-4: rgba(34, 211, 238, 0.40);
+}
+body::before, body::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: -20% -10%;
+  pointer-events: none;
+  filter: blur(40px);
+}
+body::before {
+  background:
+    radial-gradient(ellipse 18% 55% at 22% 32%, var(--aurora-1), transparent 70%),
+    radial-gradient(ellipse 14% 60% at 42% 26%, var(--aurora-2), transparent 70%),
+    radial-gradient(ellipse 20% 50% at 66% 30%, var(--aurora-3), transparent 70%);
+  animation: tsuzuri-aurora-a 22s ease-in-out infinite alternate;
+}
+body::after {
+  background:
+    radial-gradient(ellipse 16% 58% at 32% 36%, var(--aurora-4), transparent 70%),
+    radial-gradient(ellipse 22% 48% at 78% 28%, var(--aurora-1), transparent 70%),
+    radial-gradient(ellipse 12% 55% at 55% 40%, var(--aurora-3), transparent 70%);
+  opacity: 0.85;
+  animation: tsuzuri-aurora-b 31s ease-in-out infinite alternate;
+}
+@keyframes tsuzuri-aurora-a {
+  0% { transform: translate3d(-6%, 0, 0) skewX(-10deg) scaleY(1); }
+  50% { transform: translate3d(2%, -4%, 0) skewX(8deg) scaleY(1.18); }
+  100% { transform: translate3d(7%, 2%, 0) skewX(-4deg) scaleY(0.92); }
+}
+@keyframes tsuzuri-aurora-b {
+  0% { transform: translate3d(6%, 2%, 0) skewX(8deg) scaleY(1.05); }
+  50% { transform: translate3d(-3%, -3%, 0) skewX(-12deg) scaleY(0.9); }
+  100% { transform: translate3d(-8%, 1%, 0) skewX(5deg) scaleY(1.2); }
+}

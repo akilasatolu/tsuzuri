@@ -8,11 +8,11 @@
  *   - YAMLパーサライブラリは追加しない(依存量の最小性を維持するため)。
  *     `key: value` 形式のフラットな行のみをサポートする自作パーサとする。
  *   - サポートするキーは `title` / `description` / `ogImage` / `ogType` /
- *     `lang` / `noindex` / `theme` / `styleFile` / `toc` / `nav` / `order` の11個。`noindex` のみ真偽値化し、それ以外は
+ *     `noindex` / `theme` / `styleFile` / `toc` / `nav` / `order` の10個。`noindex` のみ真偽値化し、それ以外は
  *     文字列として保持する(値全体を囲む引用符 "…" / '…' は外す)。
  *     `styleFile` はページ単位の独自CSS(STYLE_FILE の代わりに使うファイル)で、解釈は build-docs.mjs が行う。
  *     `nav`(false でナビに載せない)・`order`(ナビの並び順)の解釈は site-tree.mjs が行う。
- *   - 上記11キー以外の未知のキーも文字列のまま `meta` に保持する
+ *   - 上記10キー以外の未知のキーも文字列のまま `meta` に保持する
  *     (将来のフォーマット拡張に向けた寛容な扱い)。
  *
  * `theme`キーについて:
@@ -25,13 +25,8 @@
  *     `console.warn` で警告を出し、ブロック全体を本文としてそのまま扱う
  *     (fail-open。ビルドを止めない)。
  *
- * `lang`キーについての注意(決定3準拠):
- *   `lang` もパース処理自体は他のキーと同様に `meta.lang` へ文字列として
- *   保持する。しかし呼び出し側の `html-renderer.mjs` は `meta.lang` を
- *   一切参照・使用しない。多言語対応は対象外であり、生成されるHTMLの
- *   `<html lang="...">` は常に `.github/docs-pages.config` の `LANG`
- *   環境変数由来のサイト全体固定値のみが使われ、ページ単位のfrontmatterで
- *   上書きされることはない。
+ * ページの言語はfrontmatterでは指定しない。`<html lang="...">` は
+ * `.github/docs-pages.config` の `LANGUAGES` とファイル名(言語の印)で決まる。
  */
 
 const FRONTMATTER_DELIMITER = "---";

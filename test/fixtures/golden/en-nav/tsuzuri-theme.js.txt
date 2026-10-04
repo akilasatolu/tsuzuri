@@ -1,0 +1,47 @@
+(() => {
+  const root = document.documentElement;
+  const head = document.querySelector(".tsuzuri-nav-head");
+  if (!head) return;
+  const ja = (root.lang || "").toLowerCase().startsWith("ja");
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  const current = () => root.dataset.theme || (media.matches ? "dark" : "light");
+  // テーマにライト/ダークの違いがあるかを、実際に切り替えて背景を比べて確かめる。
+  // 背景がグラデーションや画像だけのテーマもあるので、背景色と背景画像の両方を比べる
+  const saved = root.dataset.theme;
+  const bgOf = (mode) => {
+    root.dataset.theme = mode;
+    const s = getComputedStyle(document.body);
+    return s.backgroundColor + "|" + s.backgroundImage;
+  };
+  const differs = bgOf("light") !== bgOf("dark");
+  if (saved) root.dataset.theme = saved;
+  else delete root.dataset.theme;
+  if (!differs) return;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "tsuzuri-theme-toggle";
+  const render = () => {
+    const dark = current() === "dark";
+    button.textContent = dark ? "☀" : "☾";
+    const label = dark
+      ? ja ? "ライト表示に切り替える" : "Switch to light mode"
+      : ja ? "ダーク表示に切り替える" : "Switch to dark mode";
+    button.setAttribute("aria-label", label);
+    button.title = label;
+  };
+  button.addEventListener("click", () => {
+    const next = current() === "dark" ? "light" : "dark";
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem("tsuzuri-theme", next);
+    } catch {
+      // 保存できなくても、このページでは切り替わる
+    }
+    render();
+  });
+  media.addEventListener("change", render);
+  render();
+  const label = head.querySelector(".tsuzuri-nav-label");
+  head.insertBefore(button, label);
+})();

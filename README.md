@@ -122,8 +122,8 @@ STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
 - `STYLE_DIR`は、作業ツリーのテーマCSSを使うために指定します(省略すると、ビルド対象の
   `.github/tsuzuri/styles`を使います)。
 - GitHub Actionsの外では、`.github/docs-pages.config`があればその値を使います。環境変数で
-  指定したキー(例: `THEME=nineties`)は環境変数の値が優先されます。OSが設定する`LANG`
-  (`ja_JP.UTF-8`など)は無視され、設定ファイルの値になります。
+  指定したキー(例: `THEME=nineties`)は環境変数の値が優先されます。サイトの言語は`LANGUAGES`で
+  決まり、OSの`LANG`(`ja_JP.UTF-8`など)は使いません(例: `LANGUAGES=ja,en`で多言語のサイトを試せます)。
 - 出力先は`_site/`です(`OUT_DIR`で変更可)。前回の出力は消さないので、ページを消した・
   名前を変えたときは`_site/`を消してからビルドしてください。
 
@@ -174,7 +174,7 @@ npx github:akilasatolu/tsuzuri#<作業ブランチ名> init
 bin/cli.mjs                 セットアップCLI(init)。生成するワークフロー・設定ファイルのテンプレートもここ
 .github/scripts/
   build-docs.mjs            ビルドのエントリーポイント
-  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap
+  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap / i18n
 styles/*.css                テーマCSSの原本(base + material / glass / neumorphism / editorial / minimal / blueprint / nineties)
 templates/.github/workflows/docs-pages.yml  initが生成するワークフローのひな形
 scripts/release-notes.mjs   CHANGELOGからGitHubのReleaseの本文を作る(release.ymlが使う。配布対象外)

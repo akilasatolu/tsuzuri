@@ -57,7 +57,8 @@ jobs:
             # 既知の設定キーだけを環境変数として取り込む。それ以外(NODE_OPTIONS等)を
             # 設定ファイル経由で注入できないようにする。
             case "$key" in
-              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANG|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS|SITEMAP_JSON|LAST_UPDATED)
+              LANG) echo "::warning::LANG は廃止しました。LANGUAGES に書いてください(例: LANGUAGES=ja。先頭が基本言語)。この行は無視します" ;;
+              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANGUAGES|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS|SITEMAP_JSON|LAST_UPDATED)
                 echo "${key}=${value}" >> "$GITHUB_ENV" ;;
               *)
                 echo "::warning::未知の設定キー ${key} を無視します" ;;
@@ -136,7 +137,7 @@ jobs:
           STYLE_FILE: ${{ env.STYLE_FILE }}
           BASE_PATH: ${{ env.BASE_PATH }}
           SITE_ORIGIN: ${{ env.SITE_ORIGIN }}
-          LANG: ${{ env.LANG }}
+          LANGUAGES: ${{ env.LANGUAGES }}
           NAV_ENABLED: ${{ env.NAV_ENABLED }}
           FAVICON_FILE: ${{ env.FAVICON_FILE }}
           SITE_NAME: ${{ env.SITE_NAME }}

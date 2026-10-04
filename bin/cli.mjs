@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { execFileSync } from "node:child_process";
 import { runPreview } from "./preview.mjs";
+import { LANG_TAG_RE, resolveLanguages } from "../.github/scripts/lib/config.mjs";
 
 // 実リポジトリ作成時に確定させる固定値。
 // 「今動いているセットアップコマンド自体がどのバージョンか」を利用者に案内する際や、
@@ -59,6 +60,8 @@ const DEFAULT_ANSWERS = {
   theme: "material",
   // ナビ(サイドバー・検索・目次・前後のページ)は、新しく作るときは表示する
   navEnabled: true,
+  // サイトの言語(LANGUAGES)。カンマ区切りで、先頭が基本言語
+  languages: "en",
   // 空ならビルド時にリポジトリ名になる
   siteName: "",
   createStyleFile: false,
@@ -108,6 +111,13 @@ export function buildDependencySpecs({ packageRoot = PACKAGE_ROOT, fsImpl = { re
 // ビルド用の依存を入れる package.json の名前(${VENDOR_DIR}/package.json)
 const BUILD_PACKAGE_NAME = "tsuzuri-build";
 
+// ビルド用の依存の package.json・package-lock.json の完成品を置くディレクトリ(PACKAGE_ROOT からの相対パス)。
+// npm はパッケージを作るときにルートの package-lock.json を必ず外すので、
+// `npx github:akilasatolu/tsuzuri init` の取得物には本体の lockfile が入らない。
+// そのため、本体の lockfile から組み立てた完成品をここにコミットしておき、init はこれをコピーする。
+// 本体の lockfile を更新したら `node scripts/build-lockfiles.mjs` で作り直す(ずれるとテストが失敗する)。
+export const BUILD_LOCKFILES_DIR = "templates/tsuzuri";
+
 /**
  * ビルド用の依存(BUILD_DEPENDENCIES)だけを入れる package.json と package-lock.json を、このパッケージの
  * package-lock.json から組み立てる。利用者のワークフローはこれを `npm ci` でインストールするので、
@@ -149,6 +159,27 @@ export function buildBuildLockfiles(packageRoot = PACKAGE_ROOT, fsImpl = { exist
   return {
     packageJson: `${JSON.stringify(packageJson, null, 2)}\n`,
     packageLock: `${JSON.stringify(packageLock, null, 2)}\n`,
+  };
+}
+
+/**
+ * init が利用者側にコピーする、ビルド用の依存の package.json・package-lock.json の完成品
+ * (BUILD_LOCKFILES_DIR)を読む。無ければ、壊れた取得物で init が中途半端に終わらないようエラーにする。
+ * @param {string} [packageRoot]
+ * @param {{ existsSync, readFileSync }} [fsImpl]
+ * @returns {{ packageJson: string, packageLock: string }}
+ */
+export function readBuildLockfiles(packageRoot = PACKAGE_ROOT, fsImpl = { existsSync, readFileSync }) {
+  const pkgAbs = join(packageRoot, BUILD_LOCKFILES_DIR, "package.json");
+  const lockAbs = join(packageRoot, BUILD_LOCKFILES_DIR, "package-lock.json");
+  if (!fsImpl.existsSync(pkgAbs) || !fsImpl.existsSync(lockAbs)) {
+    throw new Error(
+      `${BUILD_LOCKFILES_DIR}/package.json・package-lock.json が見つかりません。Tsuzuri の取得物が壊れている可能性があります。`,
+    );
+  }
+  return {
+    packageJson: fsImpl.readFileSync(pkgAbs, "utf-8"),
+    packageLock: fsImpl.readFileSync(lockAbs, "utf-8"),
   };
 }
 
@@ -219,7 +250,7 @@ export function buildDocsPagesYml(
  * それ以外のキーはデフォルト値のまま出力する。
  */
 export function buildDocsPagesConfig(answers) {
-  const { triggerBranch, rootMd, theme, navEnabled, siteName } = { ...DEFAULT_ANSWERS, ...answers };
+  const { triggerBranch, rootMd, theme, navEnabled, languages, siteName } = { ...DEFAULT_ANSWERS, ...answers };
   return `# Tsuzuri の設定ファイル
 #
 # 「KEY=VALUE」の形で1行に1項目を書きます。# で始まる行と空行は無視されます。
@@ -244,8 +275,10 @@ THEME=${theme}
 # 独自のCSSファイル。ファイルがあれば、テーマの後に読み込まれて最優先で反映されます(無ければ使いません)。
 STYLE_FILE=${VENDOR_DIR}/styles/custom.css
 
-# ページの言語(<html lang="...">)。ja / en / en-US などの言語タグで書きます。
-LANG=ja
+# サイトの言語。カンマ区切りで、先頭が基本言語(起点の README の言語)です。例: ja / en / ja,en
+# 1つなら1言語のサイト(ページの言語 <html lang="..."> と画面の文言がその言語になります)。
+# 2つ以上なら多言語のサイトになります(ページの置き方: ${DOCS_URL}docs/i18n.html)。空なら en です。
+LANGUAGES=${languages}
 
 # サイドバーのナビゲーション・サイト内検索・ページ内の目次・前後のページへのリンクを表示するか(true/false)
 NAV_ENABLED=${navEnabled ? "true" : "false"}
@@ -338,13 +371,11 @@ export function buildVendorTargets(packageRoot = PACKAGE_ROOT, fsImpl = { exists
   }
 
   // ビルド用の依存の package.json・package-lock.json(ワークフローと preview が npm ci でインストールする)
-  const lockfiles = buildBuildLockfiles(packageRoot, fsImpl);
-  if (lockfiles) {
-    targets.push(
-      { name: "package.json", relPath: `${VENDOR_DIR}/package.json`, content: lockfiles.packageJson },
-      { name: "package-lock.json", relPath: `${VENDOR_DIR}/package-lock.json`, content: lockfiles.packageLock }
-    );
-  }
+  const lockfiles = readBuildLockfiles(packageRoot, fsImpl);
+  targets.push(
+    { name: "package.json", relPath: `${VENDOR_DIR}/package.json`, content: lockfiles.packageJson },
+    { name: "package-lock.json", relPath: `${VENDOR_DIR}/package-lock.json`, content: lockfiles.packageLock }
+  );
 
   // 手元でプレビューするときに入れる依存(.github/tsuzuri/node_modules)を誤ってコミットしないように
   targets.push({
@@ -483,7 +514,7 @@ export function createAsker(rl) {
 }
 
 /**
- * 対話プロンプトで4項目(TRIGGER_BRANCH/ROOT_MD/THEME/STYLE_FILEひな形作成有無)を収集する。
+ * 対話プロンプトで7項目(TRIGGER_BRANCH/ROOT_MD/THEME/NAV_ENABLED/LANGUAGES/SITE_NAME/STYLE_FILEひな形作成有無)を収集する。
  * readlineインターフェースは呼び出し側から注入する(テスト時は標準入力をモックしたものを渡す)。
  */
 export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
@@ -510,6 +541,12 @@ export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
   );
   const navEnabled = parseYesNo(navInput, DEFAULT_ANSWERS.navEnabled);
 
+  const languagesInput = await rl.question(
+    `? サイトの言語 (LANGUAGES。カンマ区切りで、先頭は README の言語。例: ja / en / ja,en) [${DEFAULT_ANSWERS.languages}]: `,
+  );
+  // config.mjs と同じ決まりで確かめる(不正なタグは同じ警告を出して捨てる。空なら en)。入力した順のまま書く
+  const languages = resolveLanguages(languagesInput).join(",");
+
   const siteNameInput = await rl.question("? サイト名 (SITE_NAME。空ならリポジトリ名) []: ");
   const siteName = siteNameInput.trim();
 
@@ -518,7 +555,7 @@ export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
   );
   const createStyleFile = parseYesNo(createStyleFileInput, false);
 
-  return { triggerBranch, rootMd, theme, navEnabled, siteName, createStyleFile };
+  return { triggerBranch, rootMd, theme, navEnabled, languages, siteName, createStyleFile };
 }
 
 /**
@@ -614,6 +651,8 @@ preview: 公開時と同じ設定でサイトを手元にビルドし、ブラ�
                      (origin/HEAD。分からなければ main)
       --root <パス>   起点となるMarkdownファイル(ROOT_MD)。既定: README.md
       --theme <名前>  テーマ(THEME)。${THEME_CHOICES.map((c) => c.key).join(" / ")}。既定: material
+      --languages <一覧>
+                     サイトの言語(LANGUAGES。先頭が基本言語)。既定: en
       --site-name <名前>
                      サイト名(SITE_NAME)。既定: 空(ビルド時にリポジトリ名になる)
       --no-nav       ナビ・サイト内検索・目次を表示しない(NAV_ENABLED=false)。既定: 表示する
@@ -625,14 +664,14 @@ preview: 公開時と同じ設定でサイトを手元にビルドし、ブラ�
   -v, --version      バージョンを表示する
   -h, --help         この説明を表示する
 
---branch / --root / --theme / --site-name / --no-nav / --style のいずれかを指定した場合も、対話なしで実行します。`;
+--branch / --root / --theme / --languages / --site-name / --no-nav / --style のいずれかを指定した場合も、対話なしで実行します。`;
 
 /**
  * コマンドライン引数を解析する。不明なオプション・サブコマンドや不正なテーマ名はエラーにする。
  *
  * @param {string[]} argv - process.argv.slice(2) 相当
  * @returns {{ update: boolean, yes: boolean, force: boolean, style: boolean, version: boolean,
- *   help: boolean, branch?: string, root?: string, theme?: string, port: number, command: "init" | "preview",
+ *   help: boolean, branch?: string, root?: string, theme?: string, languages?: string, port: number, command: "init" | "preview",
  *   nonInteractive: boolean }}
  */
 export function parseCliArgs(argv = []) {
@@ -662,6 +701,7 @@ function parseCliArgsRaw(argv) {
       branch: { type: "string" },
       root: { type: "string" },
       theme: { type: "string" },
+      languages: { type: "string" },
       "site-name": { type: "string" },
       "no-nav": { type: "boolean", default: false },
       style: { type: "boolean", default: false },
@@ -689,17 +729,29 @@ function parseCliArgsRaw(argv) {
       `--theme には ${THEME_CHOICES.map((c) => c.key).join(" / ")} のいずれかを指定してください(指定: ${values.theme})`,
     );
   }
-  for (const key of ["branch", "root"]) {
+  for (const key of ["branch", "root", "languages"]) {
     if (values[key] !== undefined && !values[key].trim()) {
       throw new Error(`--${key} に空の値は指定できません`);
     }
+  }
+  if (values.languages !== undefined && !isValidLanguagesOption(values.languages)) {
+    throw new Error(
+      `--languages には言語タグをカンマ区切りで指定してください(例: ja / en / ja,en)(指定: ${values.languages})`,
+    );
   }
   const nonInteractive =
     values.yes ||
     values.style ||
     values["no-nav"] ||
-    ["branch", "root", "theme", "site-name"].some((k) => values[k] !== undefined);
+    ["branch", "root", "theme", "languages", "site-name"].some((k) => values[k] !== undefined);
   return { ...values, command, port, nonInteractive };
+}
+
+// --languages で明示した値が正しいか。空でない要素が1つ以上あり、すべて言語タグの形であること。
+// (対話の答えと違い、明示した値の書き間違いは警告で済ませずにエラーにする)
+function isValidLanguagesOption(raw) {
+  const items = raw.split(",").map((item) => item.trim()).filter((item) => item !== "");
+  return items.length > 0 && items.every((item) => LANG_TAG_RE.test(item));
 }
 
 /**
@@ -712,6 +764,7 @@ export function answersFromArgs(args, defaults = DEFAULT_ANSWERS) {
     rootMd: args.root?.trim() ?? DEFAULT_ANSWERS.rootMd,
     theme: args.theme ?? DEFAULT_ANSWERS.theme,
     navEnabled: !args["no-nav"],
+    languages: args.languages !== undefined ? resolveLanguages(args.languages).join(",") : DEFAULT_ANSWERS.languages,
     siteName: args["site-name"]?.trim() ?? DEFAULT_ANSWERS.siteName,
     createStyleFile: args.style,
   };

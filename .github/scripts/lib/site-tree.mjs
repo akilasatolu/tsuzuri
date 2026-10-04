@@ -48,11 +48,6 @@ export function pageLabel(rel, meta, fallback = "", h1 = "") {
   return title || (h1 || "").trim() || fallback || posix.basename(rel);
 }
 
-/**
- * @param {Iterable<[string, { meta?: object }]>} visitedMdEntries - crawlSite の visitedMd.entries()(発見順)
- * @param {{ rootMd?: string, siteName?: string }} [options] - 起点ページの表示名にサイト名を使うための情報
- * @returns {DirNode} ルートディレクトリ(name="", path="")
- */
 // frontmatter の order を数値にする(書いていない・数値でないときは undefined)
 export function pageOrder(meta) {
   const raw = typeof meta?.order === "string" ? meta.order.trim() : meta?.order;
@@ -68,7 +63,20 @@ export function isHiddenFromNav(meta) {
 
 const DIR_INDEX_NAMES = ["README.md", "readme.md", "index.md"];
 
-export function buildSiteTree(visitedMdEntries, { rootMd = "", siteName = "" } = {}) {
+// isDirIndex を渡さないときの「フォルダの入口(README.md / readme.md / index.md)か」の判定
+function defaultIsDirIndex(rel) {
+  return DIR_INDEX_NAMES.includes(posix.basename(rel));
+}
+
+/**
+ * @param {Iterable<[string, { meta?: object }]>} visitedMdEntries - crawlSite の visitedMd.entries()(発見順)
+ * @param {{ rootMd?: string, siteName?: string, isDirIndex?: (rel: string) => boolean }} [options]
+ *   rootMd・siteName は起点ページの表示名にサイト名を使うための情報。
+ *   isDirIndex はページ(rel)がフォルダの入口か(そのフォルダの位置をこのページの order で決めるか)の判定。
+ *   省略時は README.md / readme.md / index.md。
+ * @returns {DirNode} ルートディレクトリ(name="", path="")
+ */
+export function buildSiteTree(visitedMdEntries, { rootMd = "", siteName = "", isDirIndex = defaultIsDirIndex } = {}) {
   const root = { type: "dir", name: "", path: "", children: [] };
   const dirIndex = new Map([["", root]]);
 
@@ -91,21 +99,19 @@ export function buildSiteTree(visitedMdEntries, { rootMd = "", siteName = "" } =
     getDir(dirPath).children.push(node);
   }
 
-  sortByOrder(root);
+  sortByOrder(root, isDirIndex);
   return root;
 }
 
 // order を書いたもの(小さい順)を先に、書いていないものは見つかった順のまま後ろに並べる。
-// ディレクトリの order は、その中の README.md / index.md の order。
-function sortByOrder(dir) {
+// ディレクトリの order は、その中の入口のページ(isDirIndex が true の最初のページ)の order。
+function sortByOrder(dir, isDirIndex) {
   const keyOf = (node) => {
     if (node.type === "page") return node.order ?? Infinity;
-    const index = node.children.find(
-      (c) => c.type === "page" && DIR_INDEX_NAMES.includes(posix.basename(c.rel))
-    );
+    const index = node.children.find((c) => c.type === "page" && isDirIndex(c.rel));
     return index?.order ?? Infinity;
   };
-  for (const child of dir.children) if (child.type === "dir") sortByOrder(child);
+  for (const child of dir.children) if (child.type === "dir") sortByOrder(child, isDirIndex);
   // Array.prototype.sort は安定ソートなので、同じ順位のものは見つかった順のまま
   dir.children.sort((a, b) => {
     const ka = keyOf(a);

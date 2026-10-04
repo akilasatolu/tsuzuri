@@ -227,3 +227,8 @@ body::after {
   50% { transform: translate3d(-3%, -3%, 0) skewX(-12deg) scaleY(0.9); }
   100% { transform: translate3d(-8%, 1%, 0) skewX(5deg) scaleY(1.2); }
 }
+
+/* ---------- 言語の切り替え ここから(ボタンの見た目は「メニュー」「ライト/ダーク」と同じ) ---------- */
+/* .tsuzuri-nav-label, .tsuzuri-theme-toggle の最終的な見た目を写したもの。テーマのボタンの見た目を変えるときは、このかたまりも一緒に直す */
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
+/* ---------- 言語の切り替え ここまで ---------- */

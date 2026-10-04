@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://example.github.io/repo/</loc></url>
+  <url><loc>https://example.github.io/repo/docs/a.html</loc></url>
+  <url><loc>https://example.github.io/repo/guide/</loc></url>
+  <url><loc>https://example.github.io/repo/ref/index.html</loc></url>
+  <url><loc>https://example.github.io/repo/notes.de.html</loc></url>
+  <url><loc>https://example.github.io/repo/docs/code.html</loc></url>
+</urlset>

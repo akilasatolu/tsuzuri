@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { loadConfig, CONFIG_FILE_KEYS, parseConfigText, withConfigFileDefaults } from "../.github/scripts/lib/config.mjs";
+import { loadConfig, CONFIG_FILE_KEYS, parseConfigText, withConfigFileDefaults, resolveLanguages } from "../.github/scripts/lib/config.mjs";
 
 // console.warn を一時的に黙らせつつ呼び出し回数/内容を検査するヘルパー
 function withCapturedWarn(fn) {
@@ -22,7 +22,8 @@ test("全キー未設定+GITHUB_REPOSITORY未設定 → 全デフォルト値", 
   assert.equal(config.styleFile, ".github/tsuzuri/styles/custom.css");
   assert.equal(config.basePath, "");
   assert.equal(config.siteOrigin, "");
-  assert.equal(config.lang, "ja");
+  assert.equal(config.lang, "en");
+  assert.deepEqual(config.languages, ["en"]);
   assert.equal(config.navEnabled, false);
   assert.equal(config.faviconFile, "");
   assert.equal(config.siteName, "");
@@ -39,7 +40,7 @@ test("全キー設定済みで正しく反映される", () => {
     STYLE_FILE: "custom.css",
     BASE_PATH: "my-repo",
     SITE_ORIGIN: "https://example.com",
-    LANG: "en",
+    LANGUAGES: "en",
     NAV_ENABLED: "true",
     FAVICON_FILE: "favicon.ico",
     SITE_NAME: "My Site",
@@ -54,6 +55,7 @@ test("全キー設定済みで正しく反映される", () => {
   assert.equal(config.basePath, "/my-repo");
   assert.equal(config.siteOrigin, "https://example.com");
   assert.equal(config.lang, "en");
+  assert.deepEqual(config.languages, ["en"]);
   assert.equal(config.navEnabled, true);
   assert.equal(config.faviconFile, "favicon.ico");
   assert.equal(config.siteName, "My Site");
@@ -111,9 +113,10 @@ test('CUSTOM_DOMAIN="https://example.com/path" → warnして空文字', () => {
   });
 });
 
-test('LANG="" → "ja" にフォールバック', () => {
-  const config = loadConfig({ LANG: "" });
-  assert.equal(config.lang, "ja");
+test('LANGUAGES="" → ["en"]、lang は "en"', () => {
+  const config = loadConfig({ LANGUAGES: "" });
+  assert.equal(config.lang, "en");
+  assert.deepEqual(config.languages, ["en"]);
 });
 
 test('THEME="nineties" → 正常反映', () => {
@@ -173,7 +176,7 @@ test("回帰テスト: 旧4キーのみの設定オブジェクトで新規キ�
     STYLE_FILE: ".github/docs-pages.style.css",
     BASE_PATH: "",
   });
-  assert.equal(config.lang, "ja");
+  assert.equal(config.lang, "en");
   assert.equal(config.navEnabled, false);
   assert.equal(config.faviconFile, "");
   assert.equal(config.siteName, "");
@@ -196,29 +199,82 @@ test("loadConfig は例外を投げない(不正値だらけの入力)", () => {
   });
 });
 
-test("NAV_ENABLED・THEME・LANGを省略(未設定・空文字)してもwarnは出ない", () => {
+test("NAV_ENABLED・THEME・LANGUAGESを省略(未設定・空文字)してもwarnは出ない", () => {
   withCapturedWarn((calls) => {
     const unset = loadConfig({});
-    const empty = loadConfig({ NAV_ENABLED: "", THEME: "  ", LANG: "" });
-    for (const config of [unset, empty]) {
+    const empty = loadConfig({ NAV_ENABLED: "", THEME: "  ", LANGUAGES: "" });
+    const blank = loadConfig({ LANGUAGES: " , ,," });
+    for (const config of [unset, empty, blank]) {
       assert.equal(config.navEnabled, false);
       assert.equal(config.theme, "material");
-      assert.equal(config.lang, "ja");
+      assert.equal(config.lang, "en");
+      assert.deepEqual(config.languages, ["en"]);
     }
     assert.deepEqual(calls, []);
   });
 });
 
-test('LANG="en-US" などBCP 47形式の言語タグはそのまま使う', () => {
-  assert.equal(loadConfig({ LANG: "en-US" }).lang, "en-US");
-  assert.equal(loadConfig({ LANG: "zh-Hant-TW" }).lang, "zh-Hant-TW");
+test('LANGUAGES="en-US" などBCP 47形式の言語タグはそのまま使う', () => {
+  assert.deepEqual(loadConfig({ LANGUAGES: "en-US" }).languages, ["en-US"]);
+  assert.deepEqual(loadConfig({ LANGUAGES: "zh-Hant-TW" }).languages, ["zh-Hant-TW"]);
 });
 
-test('LANG="en_US.UTF-8"(OSのロケール値) → warnして"ja"', () => {
+test("LANGUAGES: 1つ・複数・前後の空白・空要素。先頭が lang(基本言語)", () => {
   withCapturedWarn((calls) => {
-    const config = loadConfig({ LANG: "en_US.UTF-8" });
-    assert.equal(config.lang, "ja");
-    assert.ok(calls.some((c) => c.includes("LANG")));
+    assert.deepEqual(loadConfig({ LANGUAGES: "ja" }).languages, ["ja"]);
+    assert.equal(loadConfig({ LANGUAGES: "ja" }).lang, "ja");
+    for (const raw of ["ja,en", " ja , en ", "ja,,en", ",ja,en,"]) {
+      const config = loadConfig({ LANGUAGES: raw });
+      assert.deepEqual(config.languages, ["ja", "en"], raw);
+      assert.equal(config.lang, "ja", raw);
+    }
+    const enJa = loadConfig({ LANGUAGES: "en,ja" });
+    assert.deepEqual(enJa.languages, ["en", "ja"]);
+    assert.equal(enJa.lang, "en");
+    assert.deepEqual(calls, []);
+  });
+});
+
+test('resolveLanguages: 不正なタグは警告して捨てる("en,en_US" → ["en"])', () => {
+  withCapturedWarn((calls) => {
+    assert.deepEqual(resolveLanguages("en,en_US"), ["en"]);
+    assert.deepEqual(calls, ['[config] LANGUAGES の "en_US" は言語タグとして不正なため無視します。']);
+  });
+});
+
+test('resolveLanguages: 大文字小文字を区別せず重複は警告して捨てる("en,EN" → ["en"])', () => {
+  withCapturedWarn((calls) => {
+    assert.deepEqual(resolveLanguages("en,EN"), ["en"]);
+    assert.deepEqual(calls, ['[config] LANGUAGES の "EN" が重複しているため無視します。']);
+  });
+});
+
+test('resolveLanguages: 全部不正("en_US") → ["en"]+警告2つ(不正・全部不正)', () => {
+  withCapturedWarn((calls) => {
+    assert.deepEqual(resolveLanguages("en_US"), ["en"]);
+    assert.deepEqual(calls, [
+      '[config] LANGUAGES の "en_US" は言語タグとして不正なため無視します。',
+      '[config] LANGUAGES に正しい言語タグがありません。"en" にします。',
+    ]);
+  });
+});
+
+test('resolveLanguages: undefined・空文字は警告なしで ["en"]', () => {
+  withCapturedWarn((calls) => {
+    assert.deepEqual(resolveLanguages(undefined), ["en"]);
+    assert.deepEqual(resolveLanguages(""), ["en"]);
+    assert.deepEqual(calls, []);
+  });
+});
+
+test("環境変数 LANG(OS の値・言語タグ)は languages に影響しない", () => {
+  withCapturedWarn((calls) => {
+    for (const LANG of ["ja_JP.UTF-8", "ja"]) {
+      assert.deepEqual(loadConfig({ LANG }).languages, ["en"], LANG);
+      assert.equal(loadConfig({ LANG }).lang, "en", LANG);
+      assert.deepEqual(loadConfig({ LANG, LANGUAGES: "fr" }).languages, ["fr"], LANG);
+    }
+    assert.deepEqual(calls, []);
   });
 });
 
@@ -260,13 +316,39 @@ test("parseConfigText: コメント・空行・未知のキーを読み飛ばし
   assert.deepEqual(values, { THEME: "nineties", SITE_NAME: "A=B", NAV_ENABLED: "true" });
 });
 
-test("withConfigFileDefaults: 環境変数を優先し、OSのLANG(言語タグでない)は設定ファイルの値にする", () => {
-  const file = { THEME: "nineties", LANG: "en", NAV_ENABLED: "true" };
+test("parseConfigText: LANG の行は廃止の警告を1回だけ出して無視し、LANGUAGES は読む", () => {
+  withCapturedWarn((calls) => {
+    assert.deepEqual(parseConfigText("LANG=ja\n"), {});
+    assert.equal(calls.length, 1);
+    assert.equal(
+      calls[0],
+      "[config] LANG は廃止しました。LANGUAGES に書いてください(例: LANGUAGES=ja。先頭が基本言語)。この行は無視します。"
+    );
+  });
+  withCapturedWarn((calls) => {
+    assert.deepEqual(parseConfigText("LANG=ja\nLANG=en\n"), {});
+    assert.equal(calls.length, 1, "LANG が2行あっても警告は1回");
+  });
+  withCapturedWarn((calls) => {
+    assert.deepEqual(parseConfigText("LANGUAGES=ja,en\n"), { LANGUAGES: "ja,en" });
+    assert.deepEqual(calls, []);
+  });
+  withCapturedWarn((calls) => {
+    const values = parseConfigText("LANG=ja\nLANGUAGES=en\n");
+    assert.deepEqual(values, { LANGUAGES: "en" }, "両方あれば LANGUAGES を使う");
+    assert.deepEqual(loadConfig(values).languages, ["en"]);
+    assert.equal(calls.length, 1);
+  });
+});
+
+test("withConfigFileDefaults: 環境変数を優先し、無いキーは設定ファイルの値にする", () => {
+  const file = { THEME: "nineties", LANGUAGES: "en", NAV_ENABLED: "true" };
   const env = withConfigFileDefaults({ THEME: "glass", LANG: "ja_JP.UTF-8" }, file);
   assert.equal(env.THEME, "glass");
-  assert.equal(env.LANG, "en");
+  assert.equal(env.LANGUAGES, "en");
+  assert.equal(env.LANG, "ja_JP.UTF-8", "OS の LANG はそのまま(読まれない)");
   assert.equal(env.NAV_ENABLED, "true");
-  assert.equal(withConfigFileDefaults({ LANG: "ja" }, file).LANG, "ja", "言語タグなら環境変数を優先");
+  assert.equal(withConfigFileDefaults({ LANGUAGES: "ja" }, file).LANGUAGES, "ja", "環境変数を優先");
   const actions = { GITHUB_ACTIONS: "true" };
   assert.equal(withConfigFileDefaults(actions, file), actions, "GitHub Actions では何もしない");
 });
@@ -278,6 +360,32 @@ test("CONFIG_FILE_KEYS はワークフローの Load config が受け付ける�
   assert.deepEqual(m[1].split("|").sort(), [...CONFIG_FILE_KEYS].sort());
 });
 
+test("ワークフローの Build の env: CONFIG_FILE_KEYS のうち TRIGGER_BRANCH 以外がすべてあり、LANG が無い", () => {
+  const yml = fs.readFileSync(new URL("../templates/.github/workflows/docs-pages.yml", import.meta.url), "utf-8");
+  const m = yml.match(/- name: Build\n(?: {8}.*\n)*? {8}env:\n((?: {10}.*\n)+)/);
+  assert.ok(m, "Build ステップの env");
+  const envKeys = [...m[1].matchAll(/^ {10}([A-Z_]+):/gm)].map((x) => x[1]);
+  for (const key of CONFIG_FILE_KEYS.filter((k) => k !== "TRIGGER_BRANCH")) {
+    assert.ok(envKeys.includes(key), `Build の env に ${key} がある`);
+  }
+  assert.ok(!envKeys.includes("LANG"), "Build の env に LANG が無い");
+  assert.match(m[1], /^ {10}LANGUAGES: \$\{\{ env\.LANGUAGES \}\}$/m);
+});
+
+test("ワークフローの Load config: LANG の行には廃止の警告を出す(許可リストより前)", () => {
+  const yml = fs.readFileSync(new URL("../templates/.github/workflows/docs-pages.yml", import.meta.url), "utf-8");
+  const warnLine = yml.indexOf(
+    'LANG) echo "::warning::LANG は廃止しました。LANGUAGES に書いてください(例: LANGUAGES=ja。先頭が基本言語)。この行は無視します" ;;'
+  );
+  assert.ok(warnLine >= 0, "LANG) の廃止の警告の行");
+  assert.ok(warnLine < yml.indexOf("TRIGGER_BRANCH|ROOT_MD|"), "許可リストより前");
+});
+
 test('THEME="glass"(月) → 正常反映', () => {
   assert.equal(loadConfig({ THEME: "glass" }).theme, "glass");
+});
+
+test("CONFIG_FILE_KEYS: LANG は無く、LANGUAGES がある", () => {
+  assert.ok(!CONFIG_FILE_KEYS.includes("LANG"));
+  assert.ok(CONFIG_FILE_KEYS.includes("LANGUAGES"));
 });

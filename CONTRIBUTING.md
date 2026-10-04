@@ -101,11 +101,15 @@ npm run lint
 
 1. `main`で`npm test`・`npm run lint`が通り、CIが成功していることを確認する
 2. 手元の検証用ディレクトリで、実際の利用と同じ流れを確認する(`npx`はパッケージをインストールして
-   シンボリックリンク経由でCLIを起動するため、`node bin/cli.mjs`の直接実行とは経路が異なる)
-   - `npx --yes <tsuzuriの作業ツリー> init`でファイルが生成されること
+   シンボリックリンク経由でCLIを起動するため、`node bin/cli.mjs`の直接実行とは経路が異なる)。
+   作業ツリーを直接指定すると、npm がパッケージを作るときに外すファイル(`package.json`の`files`に無いもの、
+   ルートの`package-lock.json`)もそのまま見えてしまうので、`npm pack`で作ったファイルから実行する
+   - `npm pack --ignore-scripts`で作った`tsuzuri-X.Y.Z.tgz`を使い、
+     `npm exec --yes --package=<そのtgzの絶対パス> -- tsuzuri init`でファイルが生成されること
+     (`.github/tsuzuri/package.json`・`package-lock.json`も作られること)
    - 生成されたワークフローの手順(設定の読み込み → `BASE_PATH`/`SITE_ORIGIN`の決定 →
      `marked`のインストール → `.github/tsuzuri/build-docs.mjs`の実行)でビルドできること
-   - 設定ファイルを書き換えてから`npx --yes <tsuzuriの作業ツリー> init --update`を実行し、
+   - 設定ファイルを書き換えてから同じ方法で`init --update`を実行し、
      設定ファイルが保持されること
 3. `CHANGELOG.md`の`[Unreleased]`を`[X.Y.Z] - YYYY-MM-DD`に改め、空の`[Unreleased]`を追加する
 4. `package.json`・`package-lock.json`の`version`を`X.Y.Z`にする(依存パッケージの`version`は変えない)

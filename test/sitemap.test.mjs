@@ -129,3 +129,92 @@ test("buildSitemapXml: lastmod 付きの項目は <lastmod> を出力する", ()
   assert.match(xml, /<url><loc>https:\/\/example\.com\/a\.html<\/loc><lastmod>2026-09-27<\/lastmod><\/url>/);
   assert.match(xml, /<url><loc>https:\/\/example\.com\/b\.html<\/loc><\/url>/);
 });
+
+// ---- 多言語の情報(T-011) ----
+
+const LANG_KEYS = ["languages", "trees"];
+
+test("多言語: languages・langOf・trees を省略すると今と同じ形(言語の情報を足さない)", () => {
+  const result = buildSitemap(baseOpts());
+  for (const k of LANG_KEYS) assert.equal(Object.hasOwn(result, k), false, k);
+  for (const p of result.pages) assert.equal(Object.hasOwn(p, "lang"), false);
+});
+
+test("多言語: 言語が1つ(languages=[ja])なら省略時と JSON が1文字も変わらない", () => {
+  const plain = JSON.stringify(buildSitemap(baseOpts()), null, 2);
+  const one = JSON.stringify(
+    buildSitemap(baseOpts({ languages: ["ja"], langOf: () => "ja", trees: new Map([["ja", { rel: "README.md" }]]) })),
+    null,
+    2
+  );
+  assert.equal(one, plain);
+});
+
+test("多言語: 空の languages も1言語と同じ扱い", () => {
+  const plain = JSON.stringify(buildSitemap(baseOpts()));
+  assert.equal(JSON.stringify(buildSitemap(baseOpts({ languages: [] }))), plain);
+});
+
+function multiOpts(overrides = {}) {
+  const visitedMd = new Map([
+    ["README.md", { content: "# Top\n", meta: { title: "Top" } }],
+    ["README.en.md", { content: "# Top\n", meta: { title: "Top (en)" } }],
+    ["docs/a.md", { content: "# A\n", meta: { title: "A" } }],
+  ]);
+  return baseOpts({
+    visitedMd,
+    languages: ["ja", "en"],
+    langOf: (rel) => (/\.en\.md$/.test(rel) ? "en" : "ja"),
+    trees: new Map([
+      ["en", { rel: "README.en.md", children: [] }],
+      ["ja", { rel: "README.md", children: [{ rel: "docs/a.md", children: [] }] }],
+    ]),
+    ...overrides,
+  });
+}
+
+test("多言語: 2言語なら languages・pages[].lang・trees が入り、lang は基本言語のまま", () => {
+  const result = buildSitemap(multiOpts());
+  assert.equal(result.lang, "ja");
+  assert.deepEqual(result.languages, ["ja", "en"]);
+  assert.deepEqual(
+    result.pages.map((p) => [p.rel, p.lang]),
+    [["README.md", "ja"], ["README.en.md", "en"], ["docs/a.md", "ja"]]
+  );
+  assert.deepEqual(result.trees, {
+    ja: { rel: "README.md", children: [{ rel: "docs/a.md", children: [] }] },
+    en: { rel: "README.en.md", children: [] },
+  });
+  // 既存のフィールドはそのまま
+  assert.deepEqual(result.pageRels, ["README.md", "README.en.md", "docs/a.md"]);
+});
+
+test("多言語: キーの並びが固定(JSON の文字列で比べられる)", () => {
+  const result = buildSitemap(multiOpts());
+  const plainKeys = Object.keys(buildSitemap(baseOpts()));
+  assert.deepEqual(Object.keys(result), [...plainKeys, "languages", "trees"]);
+  assert.deepEqual(Object.keys(result.pages[0]), ["rel", "title", "description", "theme", "lang"]);
+  // trees のキーは languages の順(渡した Map の順に左右されない)
+  assert.deepEqual(Object.keys(result.trees), ["ja", "en"]);
+  // 同じ入力なら JSON が同じ
+  assert.equal(JSON.stringify(result), JSON.stringify(buildSitemap(multiOpts())));
+});
+
+test("多言語: trees は普通のオブジェクトでも受け取れ、無い言語は null", () => {
+  const result = buildSitemap(multiOpts({ languages: ["ja", "en", "fr"], trees: { ja: { rel: "README.md" } } }));
+  assert.deepEqual(result.trees, { ja: { rel: "README.md" }, en: null, fr: null });
+  const noTrees = buildSitemap(multiOpts({ trees: undefined }));
+  assert.deepEqual(noTrees.trees, { ja: null, en: null });
+});
+
+test("多言語: langOf を省略すると各ページの lang は基本言語", () => {
+  const result = buildSitemap(multiOpts({ langOf: undefined }));
+  assert.deepEqual(result.pages.map((p) => p.lang), ["ja", "ja", "ja"]);
+});
+
+test("多言語: 渡した languages の配列を書き換えても結果は変わらない(コピーを持つ)", () => {
+  const languages = ["ja", "en"];
+  const result = buildSitemap(multiOpts({ languages }));
+  languages.push("fr");
+  assert.deepEqual(result.languages, ["ja", "en"]);
+});

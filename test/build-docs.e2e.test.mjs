@@ -29,6 +29,8 @@ const CONFIG_ENV_KEYS = [
   "STYLE_FILE",
   "BASE_PATH",
   "SITE_ORIGIN",
+  "LANGUAGES",
+  // LANG は廃止した設定キー。OS の値が影響しないことは個別のテストで確かめるので、念のため消しておく
   "LANG",
   "NAV_ENABLED",
   "FAVICON_FILE",
@@ -76,11 +78,18 @@ function copyFixtureStyleDir(dir) {
 
 // sitemap.json(SITEMAP_JSON=true のときだけ出力)の内容を検証するテストが多いため、
 // E2E では既定で SITEMAP_JSON=true にしておく(未設定時の挙動は個別のテストで確認する)。
+// overrides の値が null のキーは、環境変数から消す(既定の LANGUAGES を外すときなど)。
+// 既定の LANGUAGES=ja は、このファイルの既存のテストが日本語の出力を前提にしているため
+// (Tsuzuri の既定の言語は en)。新しい e2e のファイルにはこの既定を写さず、言語をはっきり指定する。
 function runBuild(cwd, overrides = {}) {
   const env = { ...process.env };
   for (const key of CONFIG_ENV_KEYS) delete env[key];
   env.SITEMAP_JSON = "true";
-  Object.assign(env, overrides);
+  env.LANGUAGES = "ja";
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value === null) delete env[key];
+    else env[key] = value;
+  }
   return spawnSync(process.execPath, [SCRIPT_PATH], { cwd, env, encoding: "utf-8" });
 }
 
@@ -690,7 +699,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.match(html, /<nav aria-label="サイト内ページ">/);
       assert.doesNotMatch(html, /rel="canonical"/);
 
-      result = runBuild(dir, { LANG: "en" });
+      result = runBuild(dir, { LANGUAGES: "en" });
       assert.match(readOut(dir, "404.html"), /<title>Page not found<\/title>/);
 
       fs.writeFileSync(path.join(dir, "404.md"), "---\ntitle: 迷子\n---\n# 迷子です\n");
@@ -1224,7 +1233,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("ナビがあるページは本文へスキップのリンクを持ち、LANG=enならナビのラベルも英語", () => {
+  test("ナビがあるページは本文へスキップのリンクを持ち、LANGUAGES=enならナビのラベルも英語", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
@@ -1235,7 +1244,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.match(html, /<a class="tsuzuri-skip" href="#tsuzuri-main">本文へスキップ<\/a>/);
       assert.match(html, /<main id="tsuzuri-main">/);
       assert.match(html, /<nav aria-label="サイト内ページ">/);
-      result = runBuild(dir, { NAV_ENABLED: "true", LANG: "en" });
+      result = runBuild(dir, { NAV_ENABLED: "true", LANGUAGES: "en" });
       html = readOut(dir, "index.html");
       assert.match(html, /<nav aria-label="Site pages">/);
       assert.match(html, />Skip to content<\/a>/);
@@ -1341,20 +1350,21 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.copyFileSync(path.join(REAL_STYLES_DIR, "nineties.css"), path.join(vendored, "nineties.css"));
       fs.writeFileSync(
         path.join(dir, ".github", "docs-pages.config"),
-        "# c\nTHEME=nineties\nSITE_NAME=FromFile\nLANG=en\nNAV_ENABLED=true\n"
+        "# c\nTHEME=nineties\nSITE_NAME=FromFile\nLANGUAGES=ja\nNAV_ENABLED=true\n"
       );
-      let result = runBuild(dir, { LANG: "ja_JP.UTF-8" });
+      // 設定ファイルの LANGUAGES=ja が使われ、OS の LANG(言語タグでない値)は影響しない
+      let result = runBuild(dir, { LANGUAGES: null, LANG: "ja_JP.UTF-8" });
       assert.equal(result.status, 0, result.stderr);
-      assert.doesNotMatch(result.stderr, /LANG の値が言語タグとして不正/);
+      assert.doesNotMatch(result.stderr, /LANG は廃止しました/, "設定ファイルに LANG が無いので廃止の警告は出ない");
       let html = readOut(dir, "index.html");
-      assert.match(html, /<html lang="en">/);
+      assert.match(html, /<html lang="ja">/);
       assert.match(html, /FromFile/);
       assert.ok(extractStyleBlock(html).includes(fs.readFileSync(path.join(REAL_STYLES_DIR, "nineties.css"), "utf-8").slice(0, 200)));
       result = runBuild(dir, { SITE_NAME: "FromEnv" });
       html = readOut(dir, "index.html");
       assert.match(html, /FromEnv/, "環境変数を優先する");
-      result = runBuild(dir, { GITHUB_ACTIONS: "true", STYLE_DIR: ".github/tsuzuri/styles" });
-      assert.match(readOut(dir, "index.html"), /<html lang="ja">/, "Actions では設定ファイルを読まない");
+      result = runBuild(dir, { GITHUB_ACTIONS: "true", LANGUAGES: null, STYLE_DIR: ".github/tsuzuri/styles" });
+      assert.match(readOut(dir, "index.html"), /<html lang="en">/, "Actions では設定ファイルを読まない(既定の en)");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

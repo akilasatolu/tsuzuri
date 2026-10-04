@@ -18,8 +18,8 @@ import { normalizeBasePath } from "./path-utils.mjs";
 export const ALLOWED_THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "blueprint", "nineties", "none"];
 const HOSTNAME_RE = /^[a-zA-Z0-9.-]+$/;
 // BCP 47 形式の言語タグ(例: "ja" / "en" / "en-US" / "zh-Hant-TW")の簡易チェック。
-// OSの環境変数 LANG(例: "en_US.UTF-8")がローカル実行時にそのまま渡ってきた場合を弾く。
-const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
+// "en_US" のような書き間違いを弾く。
+export const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
 
 /**
  * @typedef {object} Config
@@ -28,7 +28,8 @@ const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @property {string} styleFile
  * @property {string} basePath
  * @property {string} siteOrigin
- * @property {string} lang
+ * @property {string} lang - 基本言語(languages の先頭)
+ * @property {string[]} languages - サイトの言語(1つ以上。先頭が基本言語)
  * @property {boolean} navEnabled
  * @property {boolean} strictLinks
  * @property {boolean} sitemapJson
@@ -47,7 +48,7 @@ export const CONFIG_FILE_KEYS = [
   "ROOT_MD",
   "OUT_DIR",
   "STYLE_FILE",
-  "LANG",
+  "LANGUAGES",
   "NAV_ENABLED",
   "FAVICON_FILE",
   "SITE_NAME",
@@ -62,14 +63,25 @@ export const CONFIG_FILE_KEYS = [
 // 設定ファイルの本文を { KEY: 値 } にする(ワークフローの Load config と同じ読み方)。
 //   - "#" で始まる行と空行は読み飛ばす。値の前後の空白は取り除く
 //   - 一覧にないキーは無視する
+//   - LANG は廃止したキー。書かれていたら1回だけ警告して無視する
 export function parseConfigText(text) {
   const values = {};
+  let warnedLang = false;
   for (const rawLine of text.replace(/^\uFEFF/, "").split(/\r?\n/)) {
     const line = rawLine.trim();
     if (!line || line.startsWith("#")) continue;
     const eq = line.indexOf("=");
     if (eq < 0) continue;
     const key = line.slice(0, eq).trim();
+    if (key === "LANG") {
+      if (!warnedLang) {
+        console.warn(
+          "[config] LANG は廃止しました。LANGUAGES に書いてください(例: LANGUAGES=ja。先頭が基本言語)。この行は無視します。"
+        );
+        warnedLang = true;
+      }
+      continue;
+    }
     if (CONFIG_FILE_KEYS.includes(key)) values[key] = line.slice(eq + 1).trim();
   }
   return values;
@@ -78,7 +90,6 @@ export function parseConfigText(text) {
 // 手元でビルドするときに、設定ファイルの値を環境変数の既定値として使う。
 // GitHub Actions では、ワークフローが設定ファイルの値を環境変数で渡すので何もしない。
 //   - 環境変数で指定したキーは、環境変数の値を優先する(試しに値を変えてビルドできるように)
-//   - ただし LANG は、OS が設定する値("ja_JP.UTF-8" など言語タグでないもの)なら設定ファイルを使う
 //
 // @param {NodeJS.ProcessEnv} env
 // @param {Record<string, string>} fileValues - parseConfigText の結果
@@ -87,9 +98,7 @@ export function withConfigFileDefaults(env, fileValues) {
   if (env.GITHUB_ACTIONS === "true") return env;
   const merged = { ...env };
   for (const [key, value] of Object.entries(fileValues)) {
-    const envValue = env[key];
-    const useFile = envValue === undefined || (key === "LANG" && !LANG_TAG_RE.test(envValue.trim()));
-    if (useFile) merged[key] = value;
+    if (env[key] === undefined) merged[key] = value;
   }
   return merged;
 }
@@ -112,7 +121,9 @@ export function loadConfig(env = process.env) {
 
   const basePath = normalizeBasePath((env.BASE_PATH ?? "").trim());
 
-  const lang = resolveLang(env.LANG);
+  // OS の環境変数 LANG("ja_JP.UTF-8" など)は読まない(設定キー LANG は廃止した)
+  const languages = resolveLanguages(env.LANGUAGES);
+  const lang = languages[0];
 
   const navEnabled = parseBoolean("NAV_ENABLED", env.NAV_ENABLED);
 
@@ -141,6 +152,7 @@ export function loadConfig(env = process.env) {
     basePath,
     siteOrigin,
     lang,
+    languages,
     navEnabled,
     strictLinks,
     sitemapJson,
@@ -188,15 +200,40 @@ function resolveSiteName(env) {
   return "";
 }
 
-// 省略(未設定・空文字)は既定値 "ja" として黙って扱い、言語タグとして不正な値のときだけ warn する。
-function resolveLang(raw) {
-  const trimmed = (raw ?? "").trim();
-  if (trimmed === "") return "ja";
-  if (LANG_TAG_RE.test(trimmed)) return trimmed;
-  console.warn(
-    `[config] LANG の値が言語タグとして不正です("${trimmed}")。"ja" にフォールバックします。`
-  );
-  return "ja";
+/**
+ * LANGUAGES を読む。常に1つ以上の言語タグの配列を返す(先頭が基本言語)。
+ *   - カンマで分け、各要素の前後の空白を取り除き、空の要素は捨てる。何も無ければ ["en"](警告なし)
+ *   - 言語タグとして不正な要素・大文字小文字を区別せず重複する要素は、警告して捨てる
+ *   - 残りが0なら警告して ["en"]
+ * @param {string|undefined} raw - env.LANGUAGES
+ * @returns {string[]}
+ */
+export function resolveLanguages(raw) {
+  const items = (raw ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item !== "");
+  if (items.length === 0) return ["en"];
+  const languages = [];
+  const seen = new Set();
+  for (const item of items) {
+    if (!LANG_TAG_RE.test(item)) {
+      console.warn(`[config] LANGUAGES の "${item}" は言語タグとして不正なため無視します。`);
+      continue;
+    }
+    const lower = item.toLowerCase();
+    if (seen.has(lower)) {
+      console.warn(`[config] LANGUAGES の "${item}" が重複しているため無視します。`);
+      continue;
+    }
+    seen.add(lower);
+    languages.push(item);
+  }
+  if (languages.length === 0) {
+    console.warn('[config] LANGUAGES に正しい言語タグがありません。"en" にします。');
+    return ["en"];
+  }
+  return languages;
 }
 
 function resolveCustomDomain(raw) {

@@ -1,9 +1,16 @@
 {
   "name": "tsuzuri",
-  "version": "1.27.0",
+  "version": "1.28.0",
   "description": "README起点でリンクを辿った複数のMarkdownファイルをGitHub Pagesサイトとして自動デプロイするツール",
   "type": "module",
   "license": "MIT",
+  "files": [
+    "bin/",
+    ".github/scripts/",
+    "styles/",
+    "templates/",
+    "CHANGELOG.md"
+  ],
   "bin": {
     "tsuzuri": "./bin/cli.mjs"
   },

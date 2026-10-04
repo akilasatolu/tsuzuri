@@ -16,9 +16,11 @@
  *                        `<style>` タグ内は `baseCss + themeCss + customCss` の順で連結する
  *                        (基礎CSS→THEME→STYLE_FILE の3層カスケード)。
  *   preprocessRawHtmlPaths — basePath をモジュール内グローバル定数ではなく明示引数化。
+ *   renderLangSwitch  — 新規。多言語サイトの言語切り替えボタン(JavaScript を使わない普通のリンク)。
  */
 
 import { isExternal, toSiteAbsHref, pageHref } from "./path-utils.mjs";
+import { uiStrings, formatUi, languageName } from "./i18n.mjs";
 
 /**
  * @param {string} s
@@ -52,6 +54,11 @@ export function escapeHtml(s) {
  * @param {{ indexUrl: string, scriptUrl: string, placeholder: string, empty: string } | null} [search]
  *   - サイト内検索の設定。指定すると検索欄の置き場所と検索スクリプトの読み込みを出力する
  *     (検索欄そのものはスクリプトが作るため、JavaScriptが動かない環境では何も表示されない)
+ * @param {string} [navLabel] - <nav> の aria-label
+ * @param {{ hrefFor?: (rel: string) => string, langSwitchHtml?: string }} [opts]
+ *   - hrefFor: ページへのリンク先の組み立て(省略時は pageHref(rel, basePath))
+ *   - langSwitchHtml: 言語切り替えボタンのHTML。見出し(サイト名)と「メニュー」ラベルの間に入れる
+ *     (ライト/ダーク切り替えは「メニュー」ラベルの手前に差し込まれるので、並びは サイト名・言語・☾・メニュー)
  * @returns {string}
  */
 export function renderNav(
@@ -62,6 +69,7 @@ export function renderNav(
   menuLabel = "メニュー",
   search = null,
   navLabel = "サイト内ページ",
+  { hrefFor = (rel) => pageHref(rel, basePath), langSwitchHtml = "" } = {},
 ) {
   // ディレクトリは <details> で折りたためるようにする(JavaScript は不要)。
   // どのページを見ていても全ページへのリンクが見えるよう、最初はすべて開いておく。
@@ -69,7 +77,7 @@ export function renderNav(
     if (node.type === "dir") {
       return `<li><details open><summary>${escapeHtml(node.name)}</summary>${renderList(node.children, depth + 1)}</details></li>`;
     }
-    const href = pageHref(node.rel, basePath);
+    const href = hrefFor(node.rel);
     const currentAttr = node.rel === currentRel ? ' aria-current="page"' : "";
     return `<li><a href="${escapeHtml(href)}"${currentAttr}>${escapeHtml(node.title)}</a></li>`;
   }
@@ -81,7 +89,7 @@ export function renderNav(
   const heading = siteName ? `<p>${escapeHtml(siteName)}</p>` : "";
   const toggle =
     `<input type="checkbox" id="tsuzuri-nav-toggle" class="tsuzuri-nav-toggle">` +
-    `<div class="tsuzuri-nav-head">${heading}` +
+    `<div class="tsuzuri-nav-head">${heading}${langSwitchHtml}` +
     `<label for="tsuzuri-nav-toggle" class="tsuzuri-nav-label">${escapeHtml(menuLabel)}</label></div>`;
   const searchHtml = search
     ? `<div class="tsuzuri-search" data-index="${escapeHtml(search.indexUrl)}"` +
@@ -92,6 +100,56 @@ export function renderNav(
 }
 
 /**
+ * 言語切り替えボタンのHTMLを構築する(JavaScript は使わない)。
+ * - 今の言語以外の切り替え先(href が空でないもの)が1つ: その言語へのリンク1つ
+ * - 2つ以上: <details> のメニュー(押すと下に一覧が開く)。一覧は entries の順で、今の言語も含め aria-current を付ける
+ * - 0: ""(ボタンを出さない)
+ * 翻訳が無くその言語のトップへ飛ぶ項目(untranslated)には data-untranslated と、その旨の title を付ける。
+ * placement が "bar"(ナビの無いページの本文の上)なら <div class="tsuzuri-lang-bar"> で包む。
+ * 見た目は base.css の「言語の切り替え」のかたまり。
+ *
+ * @param {{
+ *   current: string,
+ *   entries: Array<{ tag: string, href: string, untranslated: boolean }>, // 全言語(languages の順。今の言語を含む)
+ *   strings: { langMenu: string, langSwitchTo: string, langUntranslated: string }, // 今のページの言語の文言
+ *   placement: "nav" | "bar",
+ * }} opts
+ * @returns {string}
+ */
+export function renderLangSwitch({ current, entries, strings, placement }) {
+  const targets = entries.filter((e) => e.tag !== current && e.href);
+  if (targets.length === 0) return "";
+  const titleOf = (e) =>
+    formatUi(e.untranslated ? strings.langUntranslated : strings.langSwitchTo, { name: languageName(e.tag) });
+  let html;
+  if (targets.length === 1) {
+    const e = targets[0];
+    html =
+      `<a class="tsuzuri-lang-switch" href="${escapeHtml(e.href)}" hreflang="${escapeHtml(e.tag)}"` +
+      `${e.untranslated ? " data-untranslated" : ""} title="${escapeHtml(titleOf(e))}">` +
+      `<span lang="${escapeHtml(e.tag)}">${escapeHtml(languageName(e.tag))}</span></a>`;
+  } else {
+    const items = entries
+      .filter((e) => e.tag === current || e.href)
+      .map((e) => {
+        const tag = escapeHtml(e.tag);
+        const attrs =
+          e.tag === current
+            ? ' aria-current="true"'
+            : e.untranslated
+              ? ` data-untranslated title="${escapeHtml(titleOf(e))}"`
+              : "";
+        return `<li><a href="${escapeHtml(e.href)}" hreflang="${tag}" lang="${tag}"${attrs}>${escapeHtml(languageName(e.tag))}</a></li>`;
+      })
+      .join("");
+    html =
+      `<details class="tsuzuri-lang-menu"><summary class="tsuzuri-lang-switch" title="${escapeHtml(strings.langMenu)}">` +
+      `<span lang="${escapeHtml(current)}">${escapeHtml(languageName(current))}</span></summary><ul>${items}</ul></details>`;
+  }
+  return placement === "bar" ? `<div class="tsuzuri-lang-bar">${html}</div>` : html;
+}
+
+/**
  * 本文末尾の「前のページ/次のページ」リンク(ページャー)のHTMLを構築する。
  * 前後どちらも無ければ空文字を返す。
  *
@@ -99,6 +157,7 @@ export function renderNav(
  * @param {{ rel: string, title: string } | null} next
  * @param {string} basePath
  * @param {{ prev: string, next: string, nav: string }} [labels]
+ * @param {{ hrefFor?: (rel: string) => string }} [opts] - hrefFor: リンク先の組み立て(省略時は pageHref(rel, basePath))
  * @returns {string}
  */
 export function renderPager(
@@ -106,10 +165,11 @@ export function renderPager(
   next,
   basePath,
   labels = { prev: "前のページ", next: "次のページ", nav: "前後のページ" },
+  { hrefFor = (rel) => pageHref(rel, basePath) } = {},
 ) {
   if (!prev && !next) return "";
   const link = (page, rel, label) =>
-    `<a class="tsuzuri-pager-${rel}" rel="${rel}" href="${escapeHtml(pageHref(page.rel, basePath))}">` +
+    `<a class="tsuzuri-pager-${rel}" rel="${rel}" href="${escapeHtml(hrefFor(page.rel))}">` +
     `<span>${escapeHtml(label)}</span>${escapeHtml(page.title)}</a>`;
   return (
     `<nav class="tsuzuri-pager" aria-label="${escapeHtml(labels.nav)}">` +
@@ -146,28 +206,23 @@ export function renderToc(headings, label = "目次") {
   return `<nav class="tsuzuri-toc" aria-label="${escapeHtml(label)}"><p>${escapeHtml(label)}</p><ul>${list}</ul></nav>\n`;
 }
 
-// GitHub の注意書き(> [!NOTE] など)の種類と、表示する見出し(日本語/英語)
-const ALERT_TYPES = {
-  note: ["補足", "Note"],
-  tip: ["ヒント", "Tip"],
-  important: ["重要", "Important"],
-  warning: ["警告", "Warning"],
-  caution: ["注意", "Caution"],
-};
-
 /**
  * 引用ブロックの中身(レンダリング済みHTML)が GitHub の注意書き(先頭が [!NOTE] 等)なら、
  * 種類ごとの枠のHTMLを返す。注意書きでなければ null を返す(呼び出し側で通常の引用にする)。
  *
  * @param {string} innerHtml - 引用ブロックの中身のHTML
- * @param {boolean} [ja] - 見出しを日本語にするか
+ * @param {boolean | Record<string, string>} [jaOrLabels] - 見出しの文言。
+ *   真偽値なら見出しを日本語にするか(true=日本語・false=英語)。
+ *   オブジェクトなら種類ごとの見出し({ note, tip, important, warning, caution }。i18n.mjs の alerts)
  * @returns {string | null}
  */
-export function renderAlert(innerHtml, ja = true) {
+export function renderAlert(innerHtml, jaOrLabels = true) {
   const m = innerHtml.match(/^<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*(?:<br>)?\n?/i);
   if (!m) return null;
   const type = m[1].toLowerCase();
-  const title = ALERT_TYPES[type][ja ? 0 : 1];
+  const labels =
+    jaOrLabels && typeof jaOrLabels === "object" ? jaOrLabels : uiStrings(jaOrLabels ? "ja" : "en").alerts;
+  const title = labels[type] ?? uiStrings("en").alerts[type]; // 渡された表にその種類が無ければ英語
   const body = ("<p>" + innerHtml.slice(m[0].length)).replace(/^<p>\s*<\/p>\n?/, "");
   return (
     `<div class="markdown-alert markdown-alert-${type}">` +
@@ -210,8 +265,10 @@ if (window.mermaid) {
  *   noindex?: boolean,
  *   faviconHref?: string,
  *   siteName?: string,
+ *   alternates?: Array<{ hreflang: string, href: string }>,
  * }} opts
  * canonicalUrl があれば、canonical と同じ値を og:url としても出力する。
+ * alternates が空でなければ、canonical の後に <link rel="alternate" hreflang="…" href="…"> を渡した順に出力する。
  * @returns {string}
  */
 export function renderMetaTags({
@@ -223,6 +280,7 @@ export function renderMetaTags({
   noindex,
   faviconHref,
   siteName,
+  alternates = [],
 } = {}) {
   const tags = [];
 
@@ -247,6 +305,10 @@ export function renderMetaTags({
     tags.push(`<link rel="canonical" href="${escapeHtml(canonicalUrl)}">`);
   }
 
+  for (const { hreflang, href } of alternates) {
+    tags.push(`<link rel="alternate" hreflang="${escapeHtml(hreflang)}" href="${escapeHtml(href)}">`);
+  }
+
   if (noindex === true) {
     tags.push(`<meta name="robots" content="noindex">`);
   }
@@ -260,39 +322,30 @@ export function renderMetaTags({
 
 /**
  * リポジトリ直下に 404.md が無い場合に使う、404ページ(404.html)の既定の内容(Markdown)。
- * LANG が日本語(ja…)なら日本語、それ以外は英語にする。
+ * ページの言語が日本語(ja・ja-JP など)なら日本語、それ以外は英語にする(文言は i18n.mjs の notFound)。
  * 「/」へのリンクはビルド時にサイトのトップURL(basePath付き)に書き換えられる。
  *
+ * sections を渡すと(多言語のサイト用)、言語ごとに <div lang="…"> で包んだ見出し・本文・戻るリンクを
+ * 渡した順に並べる。frontmatter の title は lang の文言。
+ * homeHref は Markdown に書くリンク先(`/` や `/en/`)で、basePath は描画時のリンクの書き換えで付く
+ * (この関数では付けない)。
+ *
  * @param {string} lang
+ * @param {{ sections?: Array<{ tag: string, homeHref: string }> }} [opts]
  * @returns {string}
  */
-export function defaultNotFoundMarkdown(lang = "ja") {
-  if (String(lang).toLowerCase().startsWith("ja")) {
-    return [
-      "---",
-      "title: ページが見つかりません",
-      "---",
-      "",
-      "# ページが見つかりません",
-      "",
-      "お探しのページは、移動または削除されたか、URLが間違っている可能性があります。",
-      "",
-      "[トップページへ戻る](/)",
-      "",
-    ].join("\n");
+export function defaultNotFoundMarkdown(lang = "ja", { sections } = {}) {
+  const { title, body, back } = uiStrings(lang).notFound;
+  if (!sections) {
+    return ["---", `title: ${title}`, "---", "", `# ${title}`, "", body, "", `[${back}](/)`, ""].join("\n");
   }
-  return [
-    "---",
-    "title: Page not found",
-    "---",
-    "",
-    "# Page not found",
-    "",
-    "The page you are looking for may have been moved or deleted, or the URL may be incorrect.",
-    "",
-    "[Back to the top page](/)",
-    "",
-  ].join("\n");
+  const lines = ["---", `title: ${title}`, "---", ""];
+  for (const { tag, homeHref } of sections) {
+    const s = uiStrings(tag).notFound;
+    // <div> の直後・直前に空行を置き、中身が Markdown として描画されるようにする
+    lines.push(`<div lang="${escapeHtml(tag)}">`, "", `# ${s.title}`, "", s.body, "", `[${s.back}](${homeHref})`, "", "</div>", "");
+  }
+  return lines.join("\n");
 }
 
 // Markdown 記法ではなく生の HTML で書かれた <a href>・<img src>・<video src> などは
@@ -332,6 +385,8 @@ export function preprocessRawHtmlPaths(
  *   lang?: string,
  *   navHtml?: string,
  *   metaTagsHtml?: string,
+ *   skipLabel?: string,      // 「本文へスキップ」の文言(省略時は lang の文言)
+ *   langBarHtml?: string,    // 本文の上の言語切り替え欄。空でなければ <main…> の直後に入れる
  * }} opts
  * @returns {string}
  */
@@ -353,10 +408,11 @@ export function pageTemplate({
   styleFileRel,
   stylesheetHref = "",
   headHtml = "",
-  lang = "ja",
+  lang = "en",
   navHtml = "",
   metaTagsHtml = "",
-  skipLabel = "本文へスキップ",
+  skipLabel = uiStrings(lang).skip,
+  langBarHtml = "",
 }) {
   // ナビがあるページだけ、先頭に「本文へスキップ」リンクを置き、<main> にその飛び先の id を付ける
   // (ナビが無いページの出力は従来と同じ)
@@ -377,7 +433,7 @@ ${metaTagsHtml ? metaTagsHtml + "\n" : ""}${
 ${headHtml ? headHtml + "\n" : ""}</head>
 <body>
 ${skipLink}${navHtml ? navHtml + "\n" : ""}${mainTag}
-${body}
+${langBarHtml ? langBarHtml + "\n" : ""}${body}
 </main>
 </body>
 </html>

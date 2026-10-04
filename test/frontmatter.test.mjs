@@ -16,7 +16,6 @@ test("全キー指定時に正しくパースされ、bodyからブロックが�
     "description: これは説明文です",
     "ogImage: /images/og.png",
     "ogType: article",
-    "lang: en",
     "noindex: true",
     "---",
     "# 本文見出し",
@@ -32,7 +31,6 @@ test("全キー指定時に正しくパースされ、bodyからブロックが�
     description: "これは説明文です",
     ogImage: "/images/og.png",
     ogType: "article",
-    lang: "en",
     noindex: true,
   });
   assert.equal(result.body, "# 本文見出し\n\n本文の内容。\n");
@@ -77,12 +75,6 @@ test("未知のキー(foo: bar)はmeta.fooに文字列のまま保持される",
   assert.equal(result.meta.foo, "bar");
 });
 
-test("lang: en指定時にmeta.lang === 'en'としてパースされる(保持のみ確認。HTML出力への非反映はhtml-renderer側のテストで確認)", () => {
-  const raw = "---\nlang: en\n---\n本文\n";
-  const result = parseFrontmatter(raw);
-  assert.equal(result.meta.lang, "en");
-});
-
 test("改行コードがCRLFでもfrontmatterを認識する", () => {
   const raw = "---\r\ntitle: Windows\r\nnoindex: true\r\n---\r\n# 本文\r\n";
   const result = parseFrontmatter(raw);
@@ -103,7 +95,7 @@ test("値全体が対応する引用符で囲まれていれば外す(片側だ�
     'title: "My Site: Home"',
     "description: 'シングル'",
     "ogType: \"article",
-    'lang: say "hi"',
+    'title2: say "hi"',
     'noindex: "true"',
     "---",
     "本文",
@@ -112,7 +104,7 @@ test("値全体が対応する引用符で囲まれていれば外す(片側だ�
     title: "My Site: Home",
     description: "シングル",
     ogType: '"article',
-    lang: 'say "hi"',
+    title2: 'say "hi"',
     noindex: true,
   });
 });

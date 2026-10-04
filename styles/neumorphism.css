@@ -172,3 +172,8 @@ body > nav ul ul { border-left: 2px solid var(--border); }
 
 /* 表の見出し行はへこませず、下に細い線だけ */
 main th { border-bottom: 2px solid var(--border); }
+
+/* ---------- 言語の切り替え ここから(ボタンの見た目は「メニュー」「ライト/ダーク」と同じ) ---------- */
+/* .tsuzuri-nav-label, .tsuzuri-theme-toggle の最終的な見た目を写したもの。テーマのボタンの見た目を変えるときは、このかたまりも一緒に直す */
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
+/* ---------- 言語の切り替え ここまで ---------- */

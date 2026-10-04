@@ -1,0 +1,153 @@
+{
+  "root": "README.md",
+  "basePath": "",
+  "styleFile": ".github/tsuzuri/styles/custom.css",
+  "customStyleApplied": false,
+  "pages": [
+    {
+      "rel": "README.md",
+      "title": "README.md",
+      "description": null,
+      "theme": null
+    },
+    {
+      "rel": "docs/a.md",
+      "title": "docs/a.md",
+      "description": null,
+      "theme": null
+    },
+    {
+      "rel": "guide/README.md",
+      "title": "guide/README.md",
+      "description": null,
+      "theme": null
+    },
+    {
+      "rel": "ref/index.md",
+      "title": "ref/index.md",
+      "description": null,
+      "theme": null
+    },
+    {
+      "rel": "notes.de.md",
+      "title": "notes.de.md",
+      "description": null,
+      "theme": null
+    },
+    {
+      "rel": "docs/code.md",
+      "title": "docs/code.md",
+      "description": null,
+      "theme": null
+    }
+  ],
+  "pageRels": [
+    "README.md",
+    "docs/a.md",
+    "guide/README.md",
+    "ref/index.md",
+    "notes.de.md",
+    "docs/code.md"
+  ],
+  "images": [
+    "docs/img.png"
+  ],
+  "files": [],
+  "hierarchy": {
+    "README.md": {
+      "parent": null,
+      "children": [
+        "docs/a.md",
+        "guide/README.md",
+        "ref/index.md",
+        "notes.de.md",
+        "docs/code.md"
+      ]
+    },
+    "docs/a.md": {
+      "parent": "README.md",
+      "children": []
+    },
+    "guide/README.md": {
+      "parent": "README.md",
+      "children": []
+    },
+    "ref/index.md": {
+      "parent": "README.md",
+      "children": []
+    },
+    "notes.de.md": {
+      "parent": "README.md",
+      "children": []
+    },
+    "docs/code.md": {
+      "parent": "README.md",
+      "children": []
+    }
+  },
+  "tree": {
+    "type": "dir",
+    "name": "",
+    "path": "",
+    "children": [
+      {
+        "type": "page",
+        "rel": "README.md",
+        "title": "Root Page"
+      },
+      {
+        "type": "dir",
+        "name": "docs",
+        "path": "docs",
+        "children": [
+          {
+            "type": "page",
+            "rel": "docs/a.md",
+            "title": "Page A"
+          },
+          {
+            "type": "page",
+            "rel": "docs/code.md",
+            "title": "Code samples"
+          }
+        ]
+      },
+      {
+        "type": "dir",
+        "name": "guide",
+        "path": "guide",
+        "children": [
+          {
+            "type": "page",
+            "rel": "guide/README.md",
+            "title": "Guide"
+          }
+        ]
+      },
+      {
+        "type": "dir",
+        "name": "ref",
+        "path": "ref",
+        "children": [
+          {
+            "type": "page",
+            "rel": "ref/index.md",
+            "title": "Reference"
+          }
+        ]
+      },
+      {
+        "type": "page",
+        "rel": "notes.de.md",
+        "title": "Notizen"
+      }
+    ]
+  },
+  "missing": [],
+  "rejected": [],
+  "lang": "en",
+  "siteName": "",
+  "siteOrigin": "",
+  "customDomain": "",
+  "theme": "material"
+}

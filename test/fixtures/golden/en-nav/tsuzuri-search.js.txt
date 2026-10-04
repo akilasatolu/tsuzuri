@@ -1,0 +1,87 @@
+(() => {
+  const root = document.querySelector(".tsuzuri-search");
+  if (!root) return;
+  const input = document.createElement("input");
+  input.type = "search";
+  input.placeholder = root.dataset.placeholder || "Search";
+  input.setAttribute("aria-label", input.placeholder);
+  const list = document.createElement("ul");
+  list.className = "tsuzuri-search-results";
+  list.setAttribute("aria-live", "polite");
+  root.append(input, list);
+
+  let index = null;
+  let loading = null;
+  const load = () =>
+    (loading ??= fetch(root.dataset.index)
+      .then((res) => res.json())
+      .then((data) => (index = data))
+      .catch(() => (index = [])));
+
+  const snippet = (text, term) => {
+    const at = Math.max(0, text.toLowerCase().indexOf(term) - 30);
+    const body = text.slice(at, at + 100);
+    return (at > 0 ? "…" : "") + body + (text.length > at + 100 ? "…" : "");
+  };
+
+  const render = () => {
+    list.replaceChildren();
+    const query = input.value.trim().toLowerCase();
+    if (!query || !index) return;
+    const terms = query.split(/\s+/);
+    const hits = index
+      .map((page) => ({ page, title: page.t.toLowerCase(), text: page.x.toLowerCase() }))
+      .filter(({ title, text }) => terms.every((term) => title.includes(term) || text.includes(term)))
+      .map((hit) => ({ ...hit, inTitle: terms.every((term) => hit.title.includes(term)) }))
+      .sort((a, b) => Number(b.inTitle) - Number(a.inTitle))
+      .slice(0, 10);
+    if (!hits.length) {
+      const li = document.createElement("li");
+      li.textContent = root.dataset.empty || "No results";
+      list.append(li);
+      return;
+    }
+    for (const { page } of hits) {
+      const li = document.createElement("li");
+      const link = document.createElement("a");
+      link.href = page.u;
+      link.textContent = page.t;
+      const excerpt = document.createElement("small");
+      excerpt.textContent = snippet(page.x, terms[0]);
+      li.append(link, excerpt);
+      list.append(li);
+    }
+  };
+
+  input.addEventListener("focus", load, { once: true });
+  // キーボード操作: ↓で検索結果へ、結果の中は↑↓で移動し Enter で開く。Esc で検索欄に戻って消す。
+  const links = () => [...list.querySelectorAll("a")];
+  const clear = () => {
+    input.value = "";
+    list.replaceChildren();
+    input.focus();
+  };
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      clear();
+    } else if (event.key === "ArrowDown" && links().length) {
+      event.preventDefault();
+      links()[0].focus();
+    }
+  });
+  list.addEventListener("keydown", (event) => {
+    const items = links();
+    const i = items.indexOf(document.activeElement);
+    if (i < 0) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      items[Math.min(i + 1, items.length - 1)].focus();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      (i === 0 ? input : items[i - 1]).focus();
+    } else if (event.key === "Escape") {
+      clear();
+    }
+  });
+  input.addEventListener("input", () => (index ? render() : load().then(render)));
+})();

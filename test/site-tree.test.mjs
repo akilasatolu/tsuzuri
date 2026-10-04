@@ -133,3 +133,76 @@ describe("nav: false / order", () => {
     assert.deepEqual(titles(tree.children), ["[api]", "README.md", "[guide]"]);
   });
 });
+
+describe("isDirIndex(フォルダの入口の判定の差し替え)", () => {
+  const titles = (nodes) => nodes.map((n) => (n.type === "page" ? n.title : `[${n.name}]`));
+  const isReadmeEn = (rel) => /^README\.en\.md$/i.test(rel.split("/").pop());
+
+  test("isDirIndex を渡すと、guide/README.en.md の order でフォルダが並ぶ", () => {
+    const entries = [
+      ["README.en.md", { meta: { title: "Top" } }],
+      ["api/a.en.md", { meta: { title: "API-A" } }],
+      ["guide/a.en.md", { meta: { title: "GA" } }],
+      ["guide/README.en.md", { meta: { title: "Guide", order: "1" } }],
+    ];
+    const tree = buildSiteTree(entries, { isDirIndex: isReadmeEn });
+    assert.deepEqual(titles(tree.children), ["[guide]", "Top", "[api]"]);
+    // 省略時(今の判定)では README.en.md は入口ではないので、見つかった順のまま
+    assert.deepEqual(titles(buildSiteTree(entries).children), ["Top", "[api]", "[guide]"]);
+  });
+
+  test("isDirIndex は rel(リポジトリからの道のり)で呼ばれ、深いフォルダでも使われる", () => {
+    const seen = [];
+    const tree = buildSiteTree(
+      [
+        ["docs/x/a.md", { meta: { title: "XA" } }],
+        ["docs/y/a.md", { meta: { title: "YA" } }],
+        ["docs/y/top.md", { meta: { title: "YTop", order: "0" } }],
+      ],
+      { isDirIndex: (rel) => (seen.push(rel), rel === "docs/y/top.md") }
+    );
+    assert.deepEqual(titles(tree.children[0].children), ["[y]", "[x]"]);
+    assert.ok(seen.includes("docs/y/top.md"));
+    assert.ok(seen.every((rel) => rel.includes("/")), "ファイル名だけでなく道のりで渡す");
+  });
+
+  test("省略時は README.md・readme.md・index.md が入口(大文字・小文字の別はそのまま)", () => {
+    const build = (name) =>
+      buildSiteTree([
+        ["top.md", { meta: { title: "Top" } }],
+        ["guide/a.md", { meta: { title: "GA" } }],
+        [`guide/${name}`, { meta: { title: "G", order: "1" } }],
+      ]);
+    for (const name of ["README.md", "readme.md", "index.md"]) {
+      assert.deepEqual(titles(build(name).children), ["[guide]", "Top"], name);
+    }
+    for (const name of ["Readme.md", "INDEX.md", "README.en.md"]) {
+      assert.deepEqual(titles(build(name).children), ["Top", "[guide]"], name);
+    }
+  });
+
+  test("isDirIndex が常に false なら、フォルダは見つかった順のまま(ページの order は効く)", () => {
+    const tree = buildSiteTree(
+      [
+        ["README.md", { meta: { title: "Top" } }],
+        ["guide/a.md", { meta: { title: "GA" } }],
+        ["api/README.md", { meta: { title: "API", order: "1" } }],
+        ["z.md", { meta: { title: "Z", order: "2" } }],
+      ],
+      { isDirIndex: () => false }
+    );
+    assert.deepEqual(titles(tree.children), ["Z", "Top", "[guide]", "[api]"]);
+  });
+
+  test("isDirIndex に undefined を渡すと省略時と同じ", () => {
+    const entries = [
+      ["README.md", { meta: {} }],
+      ["guide/a.md", { meta: { title: "GA" } }],
+      ["api/README.md", { meta: { title: "API", order: "1" } }],
+    ];
+    assert.deepEqual(
+      buildSiteTree(entries, { isDirIndex: undefined }),
+      buildSiteTree(entries)
+    );
+  });
+});
