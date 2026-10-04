@@ -39,7 +39,7 @@ description: THEME=noneと独自CSS(STYLE_FILE)だけで作った、このサイ
 |---|---|---|
 | `THEME` | `material` | 組み込みテーマ名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
-| `LANG` | `ja` | `<html lang>`の値 |
+| `LANGUAGES` | `en` | サイトの言語(`<html lang>`の値) |
 
 ```js
 // コードブロック

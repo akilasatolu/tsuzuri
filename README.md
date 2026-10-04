@@ -88,6 +88,7 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 - [テーマ・スタイル(Theming)](docs/theming.md)
 - [テーマギャラリー(Gallery)](docs/gallery.md)
 - [Frontmatterリファレンス](docs/frontmatter.md)
+- [多言語サイト(i18n)](docs/i18n.md)
 - [CLIリファレンス](docs/cli.md)
 - [デプロイ設定(Deployment)](docs/deployment.md)
 - [使用例(Examples)](docs/examples.md)

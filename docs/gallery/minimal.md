@@ -38,7 +38,7 @@ Vercel や Linear のドキュメントのような、白・黒・グレーだ�
 |---|---|---|
 | `THEME` | `material` | 組み込みテーマ名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
-| `LANG` | `ja` | `<html lang>`の値 |
+| `LANGUAGES` | `en` | サイトの言語(`<html lang>`の値) |
 
 ```js
 // コードブロック

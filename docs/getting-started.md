@@ -106,7 +106,7 @@ npx github:akilasatolu/tsuzuri#v1 preview
 
    > [!NOTE]
    > 設定ファイルを自動で読むのはv1.4.0以降です。それより前のバージョンでは、設定ファイルの値を
-   > 環境変数で渡してください(例: `STYLE_DIR=.github/tsuzuri/styles LANG=ja NAV_ENABLED=true node .github/tsuzuri/build-docs.mjs`)。
+   > 環境変数で渡してください(例: `STYLE_DIR=.github/tsuzuri/styles NAV_ENABLED=true node .github/tsuzuri/build-docs.mjs`)。
    > リポジトリにコピー済みのバージョンは、`.github/workflows/docs-pages.yml`の先頭のコメント
    > (`# tsuzuri v1.4.0 の …`)で確認できます。古い場合は`init --update`で更新できます
    > ([CLIリファレンス](cli.md)参照)。

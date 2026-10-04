@@ -36,6 +36,7 @@ npx github:akilasatolu/tsuzuri#v1 init
 | `--branch <名前>` | トリガーブランチ(`TRIGGER_BRANCH`)。既定: リポジトリの既定ブランチ(`origin`の既定ブランチ。分からなければ`main`。v1.3.0以前は今のブランチになることがある) |
 | `--root <パス>` | 起点となるMarkdownファイル(`ROOT_MD`)。既定: `README.md` |
 | `--theme <名前>` | テーマ(`THEME`)。`material` / `glass` / `neumorphism` / `editorial` / `minimal` / `blueprint` / `nineties` / `none`。既定: `material` |
+| `--languages <一覧>` | サイトの言語(`LANGUAGES`)。カンマ区切りで、先頭が基本言語(例: `ja`・`ja,en`)。既定: `en`(v1.28.0以降) |
 | `--site-name <名前>` | サイト名(`SITE_NAME`)。既定: 空(ビルド時にリポジトリ名になる) |
 | `--no-nav` | ナビ・サイト内検索・目次を表示しない(`NAV_ENABLED=false`)。既定: 表示する |
 | `--style` | 独自CSSの空ひな形(`.github/tsuzuri/styles/custom.css`)も作る |
@@ -46,15 +47,16 @@ npx github:akilasatolu/tsuzuri#v1 init
 | `-v`, `--version` | バージョンを表示する |
 | `-h`, `--help` | 使い方を表示する |
 
-`--yes`・`--branch`・`--root`・`--theme`・`--site-name`・`--no-nav`・`--style`のいずれかを付けると、質問せずに生成します
+`--yes`・`--branch`・`--root`・`--theme`・`--languages`・`--site-name`・`--no-nav`・`--style`のいずれかを付けると、質問せずに生成します
 (スクリプトやCIから実行する場合に使えます)。このとき、既に存在するファイルは上書きせずに
 スキップします。上書きしたい場合は`--force`を付けてください。
 
 ```
-npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --theme nineties
+npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --theme nineties --languages ja
 ```
 
-知らないオプションを指定した場合はエラーになり、何も生成しません。
+知らないオプションを指定した場合はエラーになり、何も生成しません。`--languages`に`ja_JP`のような
+言語タグとして正しくない値を指定した場合も、エラーになり何も生成しません。
 
 ## 手元で確認する(`preview`)
 
@@ -106,9 +108,16 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 4. **ナビを表示するか(`NAV_ENABLED`)(Y/n)**(v1.7.0以降)
    - サイドバーのナビ・サイト内検索・ページ内の目次・前後のページへのリンクを表示するかどうかです。
      未入力(または`y`)なら表示します。
-5. **サイト名(`SITE_NAME`)**(v1.7.0以降)
+5. **サイトの言語(`LANGUAGES`)** `[en]`(v1.28.0以降)
+   - サイトの言語を、カンマ区切りで入力します。先頭はREADMEの言語(基本言語)にします。
+     READMEが日本語なら`ja`、日本語と英語のサイトにするなら`ja,en`です。入力した順のまま設定ファイルに
+     書かれます。未入力なら`en`(英語)になります。
+   - 言語タグとして正しくない値(例: `ja_JP`)は、警告を出したうえで無視されます(正しい値が残らなければ`en`)。
+   - 多言語のサイトの作り方は[多言語サイト](./i18n.md)を参照してください。
+6. **サイト名(`SITE_NAME`)**(v1.7.0以降)
    - ナビの見出しやSNSでのシェアに使うサイト名です。未入力ならビルド時にリポジトリ名になります。
-6. **独自CSSのひな形ファイルを作成するか(y/N)**
+     サイト名はすべての言語で共通です。
+7. **独自CSSのひな形ファイルを作成するか(y/N)**
    - `.github/tsuzuri/styles/custom.css`という、コメントだけが書かれた空のCSSファイルを
      作るかどうかを聞かれます。組み込みテーマCSS一式と同じディレクトリに置かれるため、
      既存テーマのCSSを参考にしながら書けます。未入力(または`n`)なら作成しません。
@@ -120,7 +129,7 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 | ファイル | 常に生成されるか | 内容 |
 |---|---|---|
 | `.github/workflows/docs-pages.yml` | 常に生成 | ビルド・デプロイの手順を直接持つ、自己完結型のワークフロー(以前のように`build.yml`を`uses:`で呼び出すことはしない) |
-| `.github/docs-pages.config` | 常に生成 | `TRIGGER_BRANCH`/`ROOT_MD`/`THEME`は回答内容を反映し、それ以外のキーは既定値で出力される設定ファイル |
+| `.github/docs-pages.config` | 常に生成 | `TRIGGER_BRANCH`/`ROOT_MD`/`THEME`/`NAV_ENABLED`/`LANGUAGES`/`SITE_NAME`は回答内容を反映し、それ以外のキーは既定値で出力される設定ファイル |
 | `.github/tsuzuri/build-docs.mjs` | 常に生成 | ビルド本体のスクリプト(OSS本体リポジトリの`.github/scripts/build-docs.mjs`と同一内容) |
 | `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/crawler/frontmatter/html-renderer/link-extractor/path-utils/site-tree/slugger/search/sitemap) |
 | `.github/tsuzuri/styles/*.css` | 常に生成 | 組み込みテーマ(`base.css`+`material`/`glass`/`neumorphism`/`editorial`/`minimal`/`blueprint`/`nineties`)のCSS一式。frontmatterの`theme`キー([参照](./frontmatter.md#theme))で選択中以外のテーマを使う場合に備え、常に全テーマ分コピーされる |
@@ -132,6 +141,15 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 そのもの」です。利用者が直接編集する必要はありませんが、削除・改変すると
 ビルドが失敗するため注意してください。スクリプトを最新版に更新したい場合は、
 後述の「最新版に更新する(`--update`)」を参照してください。
+
+生成される設定ファイルでは、サイトの言語は次のように書かれます(質問に`ja`と答えた場合)。
+
+```
+# サイトの言語。カンマ区切りで、先頭が基本言語(起点の README の言語)です。例: ja / en / ja,en
+# 1つなら1言語のサイト(ページの言語 <html lang="..."> と画面の文言がその言語になります)。
+# 2つ以上なら多言語のサイトになります(ページの置き方: https://akilasatolu.github.io/tsuzuri/docs/i18n.html)。空なら en です。
+LANGUAGES=ja
+```
 
 生成されるキーの一覧・意味は[configuration.md](./configuration.md)を参照してください。
 
@@ -170,8 +188,13 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 |---|---|
 | `.github/workflows/docs-pages.yml` | 最新版で上書き |
 | `.github/tsuzuri/`配下のビルドスクリプト・組み込みテーマCSS | 最新版で上書き(新しく増えたファイルは追加。最新版で使われなくなった`lib/`配下のスクリプトは削除) |
-| `.github/docs-pages.config` | **変更しない** |
+| `.github/docs-pages.config` | **変更しない**(v1.27.0までに作った設定ファイルの`LANG`も、`LANGUAGES`に書き換えない) |
 | 独自CSS(`.github/tsuzuri/styles/custom.css`) | **変更しない** |
+
+v1.27.0までに作った設定ファイル(`LANG`だけで`LANGUAGES`が無いもの)で`--update`すると、
+「設定ファイルに無い項目があります」として`LANGUAGES`が案内されます。言語を書かないとサイトは英語になる
+ので、日本語のサイトなら`LANGUAGES=ja`を書き足し、`LANG`の行は消してください
+([configuration.md](./configuration.md#languages)参照)。
 
 実行後、`git diff`で変更内容を確認してからコミット・pushしてください。
 `.github/docs-pages.config`が無いリポジトリ(まだ`init`していない)で実行すると、

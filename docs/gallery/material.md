@@ -38,7 +38,7 @@ Material Design 3 風。青系の配色、角丸のカードと影、トーン�
 |---|---|---|
 | `THEME` | `material` | 組み込みテーマ名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
-| `LANG` | `ja` | `<html lang>`の値 |
+| `LANGUAGES` | `en` | サイトの言語(`<html lang>`の値) |
 
 ```js
 // コードブロック
