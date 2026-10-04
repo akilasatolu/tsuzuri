@@ -297,7 +297,7 @@ test("buildDocsPagesYml: 設定ファイルは既知のキーだけを取り込�
   const yml = buildDocsPagesYml();
   assert.match(
     yml,
-    /TRIGGER_BRANCH\|ROOT_MD\|OUT_DIR\|STYLE_FILE\|LANGUAGES\|NAV_ENABLED\|FAVICON_FILE\|SITE_NAME\|CUSTOM_DOMAIN\|OGP_DEFAULT_IMAGE\|THEME\|STRICT_LINKS\|SITEMAP_JSON\|LAST_UPDATED\)/
+    /TRIGGER_BRANCH\|ROOT_MD\|OUT_DIR\|STYLE_FILE\|LANGUAGES\|NAV_ENABLED\|FAVICON_FILE\|SITE_NAME\|CUSTOM_DOMAIN\|OGP_DEFAULT_IMAGE\|THEME\|STRICT_LINKS\|SITEMAP_JSON\|LAST_UPDATED\|EDIT_LINK\)/
   );
   assert.ok(!yml.includes("| xargs"));
   assert.ok(yml.includes("--ignore-scripts"));
@@ -1030,7 +1030,7 @@ test("生成する設定ファイル・CSSひな形に、開発側の内部的�
   for (const word of ["★", "詳細設計", "後方互換", "現行", "build-docs.mjs", "ハードコード"]) {
     assert.ok(!config.includes(word), `設定ファイルに「${word}」が含まれる`);
   }
-  for (const key of ["TRIGGER_BRANCH", "ROOT_MD", "OUT_DIR", "THEME", "STYLE_FILE", "LANGUAGES", "NAV_ENABLED", "FAVICON_FILE", "SITE_NAME", "CUSTOM_DOMAIN", "OGP_DEFAULT_IMAGE", "STRICT_LINKS", "LAST_UPDATED", "SITEMAP_JSON"]) {
+  for (const key of ["TRIGGER_BRANCH", "ROOT_MD", "OUT_DIR", "THEME", "STYLE_FILE", "LANGUAGES", "NAV_ENABLED", "FAVICON_FILE", "SITE_NAME", "CUSTOM_DOMAIN", "OGP_DEFAULT_IMAGE", "STRICT_LINKS", "LAST_UPDATED", "EDIT_LINK", "SITEMAP_JSON"]) {
     assert.match(config, new RegExp(`^${key}=`, "m"), key);
   }
   assert.ok(buildStyleCssTemplate().includes("https://akilasatolu.github.io/tsuzuri/docs/theming.html"));

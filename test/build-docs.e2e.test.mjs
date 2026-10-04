@@ -45,6 +45,9 @@ const CONFIG_ENV_KEYS = [
   "LAST_UPDATED",
   "GITHUB_SERVER_URL",
   "GITHUB_SHA",
+  "GITHUB_REF",
+  "GITHUB_REF_NAME",
+  "EDIT_LINK",
   "GITHUB_ACTIONS",
 ];
 
@@ -1590,3 +1593,72 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 });
+
+describe("build-docs.mjs :: 編集リンク(EDIT_LINK)", () => {
+  const gh = {
+    GITHUB_SERVER_URL: "https://github.com",
+    GITHUB_REPOSITORY: "o/r",
+    GITHUB_SHA: "abc123",
+    GITHUB_REF: "refs/heads/docs",
+    GITHUB_REF_NAME: "docs",
+  };
+  const withBasic = (fn) => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fn(dir);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  };
+
+  test("EDIT_LINK=true: 集めたページの末尾に、そのファイルの GitHub の編集画面へのリンク。404 には付けない", () => {
+    withBasic((dir) => {
+      const result = runBuild(dir, { ...gh, EDIT_LINK: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.ok(
+        readOut(dir, "index.html").includes(
+          '<p class="tsuzuri-updated"><a class="tsuzuri-edit-link" href="https://github.com/o/r/edit/docs/README.md">このページを GitHub で編集</a></p>'
+        )
+      );
+      assert.match(readOut(dir, "docs", "a.html"), /href="https:\/\/github\.com\/o\/r\/edit\/docs\/docs\/a\.md"/);
+      assert.doesNotMatch(readOut(dir, "404.html"), /tsuzuri-edit-link/);
+    });
+  });
+
+  test("EDIT_LINK を書かない・false なら付けない(今までと同じ出力)", () => {
+    withBasic((dir) => {
+      assert.equal(runBuild(dir, gh).status, 0);
+      const before = readOut(dir, "docs", "a.html");
+      assert.doesNotMatch(before, /tsuzuri-edit-link/);
+      assert.equal(runBuild(dir, { ...gh, EDIT_LINK: "false" }).status, 0);
+      assert.equal(readOut(dir, "docs", "a.html"), before);
+    });
+  });
+
+  test("ブランチ以外(タグ)のビルドではブランチが分からないので、警告して付けない", () => {
+    withBasic((dir) => {
+      const result = runBuild(dir, { ...gh, GITHUB_REF: "refs/tags/v1", GITHUB_REF_NAME: "v1", EDIT_LINK: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stderr, /EDIT_LINK=true ですが/);
+      assert.doesNotMatch(readOut(dir, "index.html"), /tsuzuri-edit-link/);
+    });
+  });
+
+  test("手元のビルドでは git の origin と今のブランチで作る。英語のページでは英語の文言", () => {
+    withBasic((dir) => {
+      const git = (...args) => spawnSync("git", args, { cwd: dir, encoding: "utf-8" });
+      git("init", "-q", "-b", "work");
+      git("remote", "add", "origin", "https://github.com/owner/repo.git");
+      const result = runBuild(dir, { EDIT_LINK: "true", LANGUAGES: "en" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.ok(
+        readOut(dir, "docs", "a.html").includes(
+          '<a class="tsuzuri-edit-link" href="https://github.com/owner/repo/edit/work/docs/a.md">Edit this page on GitHub</a>'
+        )
+      );
+    });
+  });
+});
+

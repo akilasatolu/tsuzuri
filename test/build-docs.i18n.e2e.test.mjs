@@ -44,6 +44,9 @@ const CONFIG_ENV_KEYS = [
   "LAST_UPDATED",
   "GITHUB_SERVER_URL",
   "GITHUB_SHA",
+  "GITHUB_REF",
+  "GITHUB_REF_NAME",
+  "EDIT_LINK",
   "GITHUB_ACTIONS",
 ];
 
@@ -730,3 +733,21 @@ describe("build-docs.mjs :: hreflang と SITE_ORIGIN(レビューの気づき)",
     });
   });
 });
+
+describe("build-docs.mjs :: 編集リンク(多言語)", () => {
+  test("翻訳のページは翻訳のファイル(*.en.md)を編集する。文言はページの言語", () => {
+    withSite(FIXTURE_A, {}, (dir) => {
+      const gh = {
+        GITHUB_SERVER_URL: "https://github.com",
+        GITHUB_REPOSITORY: "o/r",
+        GITHUB_SHA: "abc",
+        GITHUB_REF: "refs/heads/main",
+        GITHUB_REF_NAME: "main",
+      };
+      assert.equal(runBuild(dir, { ...A_ENV, ...gh, EDIT_LINK: "true" }).status, 0);
+      assert.ok(readOut(dir, "en/index.html").includes('href="https://github.com/o/r/edit/main/README.en.md">Edit this page on GitHub</a>'));
+      assert.ok(readOut(dir, "index.html").includes('href="https://github.com/o/r/edit/main/README.md">このページを GitHub で編集</a>'));
+    });
+  });
+});
+
