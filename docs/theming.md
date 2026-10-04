@@ -1,120 +1,133 @@
 ---
-title: テーマ・スタイル(Theming)
+title: Theming
 ---
 
-# テーマ・スタイル(Theming)
+# Theming
 
-## 3層カスケードの仕組み
+## The three-layer cascade
 
-生成されるページの見た目(CSS)は、次の3つの層を順番に重ねて(カスケードして)
-作られています。後の層ほど優先度が高く、同じ詳細度のルールであれば後の層が
-先の層を上書きします。
+The look (CSS) of the generated pages is made by stacking (cascading) three layers in order.
+Later layers have higher priority: for rules of the same specificity, a later layer overrides
+an earlier one.
 
 ```
-1. 基礎CSS(base.css)      … 常に適用される。レイアウト幅・テーブル罫線・
-                              コードブロックのpaddingなど、色を持たない構造ルールのみ
+1. Base CSS (base.css)       … always applied. Only structural rules without colors, such as
+                               the layout width, table borders and code block padding
         ↓
-2. THEME(config.mjsで名前解決) … `THEME`キーで選んだテーマの配色+装飾
-                              (`THEME=none`の場合はこの層が丸ごと適用されない)
+2. THEME (resolved by name in config.mjs) … the colors and decoration of the theme chosen
+                               with the `THEME` key (with `THEME=none`, this whole layer is skipped)
         ↓
-3. STYLE_FILE(常に最優先)   … 利用者が書く独自CSS。設定していれば必ず最後に読み込まれる
+3. STYLE_FILE (always last)  … your own CSS. If set, it's always loaded last
 ```
 
-基礎CSSは色を一切持たず、`color: var(--fg);`のようにCSSカスタムプロパティ(変数)を
-参照するだけにとどめています。実際の色は2層目のTHEMEが定義する変数によって
-初めて決まります。`THEME=none`を指定すると、この2層目が丸ごとスキップされるため、
-変数が未定義のままとなり、結果として色はブラウザの既定の見た目(黒文字・白背景など)
-になります。
+The base CSS has no colors at all; it only references CSS custom properties (variables), as in
+`color: var(--fg);`. The actual colors are decided only by the variables defined by the theme
+in the second layer. With `THEME=none`, the second layer is skipped entirely, so the variables
+stay undefined, and the colors end up as the browser's default look (black text on a white
+background, and so on).
 
-## 組み込みテーマ一覧
+## Built-in themes
 
-`.github/docs-pages.config`の`THEME`キーで、以下から1つを選べます。
-**THEMEは配色だけでなく、リンクの下線の有無や見出しの太さ・行送りといった装飾も
-含めてセットで切り替わる「視覚的なアイデンティティ」です**(配色のみを独立して
-差し替える機能ではありません)。
+Choose one of the following with the `THEME` key in `.github/docs-pages.config`.
+**A theme switches not just the colors but also decoration such as link underlines, heading
+weight and line spacing, as one "visual identity"** (it isn't a feature for swapping only the
+colors).
 
-各テーマの実際の見た目は、[テーマギャラリー](gallery.md)で確認できます。
+You can see what each theme actually looks like in the [theme gallery](gallery.md).
 
-最近のウェブデザインの流行を取り入れたテーマです(v1.19.0以降)。どれも本文とナビを、テーマの質感のカードにのせて表示します。
-`THEME`を省略した場合はマテリアル(`material`)になります(v1.20.0以降)。
+These themes follow recent web design trends (v1.19.0 or later). Each one shows the content and
+the navigation on cards with the theme's texture. If `THEME` is left out, it's Material
+(`material`) (v1.20.0 or later).
 
-- **マテリアル(`material`・既定)**: Material Design 3 風の標準スタイル。青系の配色、角丸のカードと影、トーンのついたナビの選択。
-- **グラス(`glass`)**: Glassmorphism。ゆっくり揺れて流れるオーロラの地に、色がそのまま透ける薄い透明なガラスのカード。
-- **ニューモーフィズム(`neumorphism`)**: Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。
-- **エディトリアル(`editorial`)**: 雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色。
-- **ミニマル(`minimal`)**: Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青。
-- **ブループリント(`blueprint`)**: 設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示。
-- **90年代(`nineties`)**: 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。
+- **Material (`material`, the default)**: a standard style inspired by Material Design 3. Blue
+  colors, rounded cards with shadows, and a tinted selection in the navigation.
+- **Glass (`glass`)**: Glassmorphism. Thin, clear glass cards that let the colors show through,
+  over a slowly swaying, flowing aurora.
+- **Neumorphism (`neumorphism`)**: Neumorphism. Parts in the same color as the background,
+  raised or pressed in with light and shadow.
+- **Editorial (`editorial`)**: a style that relies on typography and white space, like a
+  magazine or a polished document. Large serif headings with chapter numbers, and a vermilion
+  accent.
+- **Minimal (`minimal`)**: a calm look in only white, black and gray, like the Vercel or Linear
+  docs. Only links are blue.
+- **Blueprint (`blueprint`)**: like a blueprint, with a white grid and fine lines on blue, and
+  headings with dimension lines. Always looks the same.
+- **90s (`nineties`)**: 90s nostalgia. A Windows 95-style teal desktop with gray windows and
+  raised buttons. Light only.
 
-ライト/ダーク表示は、ブループリント(`blueprint`)が常に同じ表示、90年代(`nineties`)がライトのみで、それ以外はOSの設定に合わせて
-自動で切り替わります。グラスのガラス(背景のぼかし)は、ブラウザが対応していない場合は半透明のカードとして表示されます。
+Blueprint (`blueprint`) always looks the same and 90s (`nineties`) is light only; the others
+switch between light and dark automatically to match the OS setting. Glass's glass (the
+background blur) is shown as semi-transparent cards in browsers that don't support it.
 
 ### none
-テーマ層(2層目)を丸ごと適用しません。基礎CSSのみが適用され、色や装飾は
-ブラウザの既定の見た目になります。
+The theme layer (the second layer) isn't applied at all. Only the base CSS is applied, and the
+colors and decoration are the browser's defaults.
 
-## ページ単位でテーマを上書きする
+## Overriding the theme for a single page
 
-`.github/docs-pages.config`の`THEME`はサイト全体の既定値ですが、frontmatterの
-`theme`キーを使うと、ページごとに2層目(THEME)だけを個別に差し替えられます。
-組み込みテーマ名だけでなく、ユーザーが用意した独自CSSファイル(パス込みで指定)も
-指定できます。詳しくは[Frontmatterリファレンス](frontmatter.md#theme)を参照してください。
+`THEME` in `.github/docs-pages.config` is the site-wide default, but the frontmatter `theme`
+key lets you swap only the second layer (THEME) for each page. Besides built-in theme names,
+you can also give a custom CSS file you've prepared (with its path). See the
+[frontmatter reference](frontmatter.md#theme) for details.
 
-## 独自CSSでカスタマイズする
+## Customizing with your own CSS
 
-`.github/docs-pages.config`の`STYLE_FILE`(既定値`.github/tsuzuri/styles/custom.css`。
-組み込みテーマCSS一式と同じディレクトリです)に指定したパスにCSSファイルを置くと、
-選んだTHEMEの後に読み込まれる第3層として追記されます。THEMEの内容の一部だけを
-上書きしたい場合や、変数を上書きするだけで配色を微調整したい場合に使います。
-ファイルが存在しない場合は無視され、既定のテーマのままビルドされます。
+Put a CSS file at the path set in `STYLE_FILE` of `.github/docs-pages.config` (default
+`.github/tsuzuri/styles/custom.css`, the same folder as the built-in theme CSS), and it's added
+as the third layer, loaded after the chosen theme. Use it to override part of a theme, or to
+fine-tune the colors just by overriding variables. If the file doesn't exist it's ignored, and
+the site is built with the theme as is.
 
-各テーマファイルは`:root { --変数名: 値; }`という形でCSSカスタムプロパティを定義しています。
-`STYLE_FILE`側で同じ変数名を書き換えることで、配色だけを差し替えることもできます。
-主な変数は以下の通りです。
+Each theme file defines CSS custom properties in the form `:root { --name: value; }`. By
+redefining the same variable names in `STYLE_FILE`, you can swap just the colors. The main
+variables are listed below.
 
-| 変数 | 意味 |
+| Variable | Meaning |
 |---|---|
-| `--fg` | 本文の文字色 |
-| `--bg` | 背景色 |
-| `--border` | テーブル罫線・区切り線の色 |
-| `--accent` | リンクなどの強調色 |
-| `--code-bg` | コードブロック・インラインコードの背景色 |
-| `--font` | 本文のフォント指定(font-family) |
-| `--content-width` | 本文カラムの最大幅(例: `860px`) |
-| `color-scheme` | `light` / `dark` / `light dark`(OS設定に追従) |
-| `--hl-keyword` / `--hl-string` / `--hl-number` / `--hl-title` / `--hl-attr` / `--hl-comment` | コードの色分けの色(キーワード・文字列・数値・関数名等・属性や変数・コメント)。未指定ならテーマの`--accent`と`--fg`から自動で決まる |
-| `--alert-note` / `--alert-tip` / `--alert-important` / `--alert-warning` / `--alert-caution` | 注意書き(`> [!NOTE]`など)の枠と見出しの色 |
+| `--fg` | Text color |
+| `--bg` | Background color |
+| `--border` | Color of table borders and dividers |
+| `--accent` | Accent color for links and the like |
+| `--code-bg` | Background of code blocks and inline code |
+| `--font` | Body font (font-family) |
+| `--content-width` | Maximum width of the content column (e.g. `860px`) |
+| `color-scheme` | `light` / `dark` / `light dark` (follows the OS setting) |
+| `--hl-keyword` / `--hl-string` / `--hl-number` / `--hl-title` / `--hl-attr` / `--hl-comment` | Syntax highlighting colors (keywords, strings, numbers, function names and the like, attributes and variables, comments). If not set, they're derived from the theme's `--accent` and `--fg` |
+| `--alert-note` / `--alert-tip` / `--alert-important` / `--alert-warning` / `--alert-caution` | Color of the box and title of alerts (`> [!NOTE]` and so on) |
 
 > [!TIP]
-> このサイト自体も、`THEME=none`にして`STYLE_FILE`の独自CSSだけで見た目を作っています。
-> 書き方の例として[custom.css](https://github.com/akilasatolu/tsuzuri/blob/docs/.github/tsuzuri/styles/custom.css)を
-> 参考にしてください(見た目は[独自CSSの例](gallery/custom.md)で確認できます)。
+> This site itself uses `THEME=none` and creates its look only with custom CSS in `STYLE_FILE`.
+> See [custom.css](https://github.com/akilasatolu/tsuzuri/blob/docs/.github/tsuzuri/styles/custom.css)
+> as an example of how to write it (you can see the result in the
+> [custom CSS example](gallery/custom.md)).
 >
-> 一部のページだけ独自CSSを変えたい・当てたくない場合は、そのページのfrontmatterの
-> [`styleFile`](frontmatter.md#stylefile)で別のCSSファイルを指定します(v1.5.0以降)。このサイトの
-> テーマギャラリーは、中身が空のCSSを指定して、組み込みテーマだけの見た目にしています。
+> To change the custom CSS for some pages only, or not apply it at all, set a different CSS file
+> with [`styleFile`](frontmatter.md#stylefile) in that page's frontmatter (v1.5.0 or later). This
+> site's theme gallery sets an empty CSS file, so it shows only the built-in themes.
 
-変数の上書きだけでなく、`main h1 { ... }`のような通常のCSSルールを`STYLE_FILE`に
-直接追記して細部を調整することも可能です。`STYLE_FILE`は基礎CSS・THEMEの後に
-読み込まれるため、同じ詳細度であれば追記した内容が優先されます。
+Besides overriding variables, you can also add ordinary CSS rules such as `main h1 { ... }`
+directly to `STYLE_FILE` to adjust details. `STYLE_FILE` is loaded after the base CSS and the
+theme, so for the same specificity, what you add wins.
 
-## ライト/ダーク表示に対応する
+## Supporting light and dark
 
-`NAV_ENABLED=true`のサイトでは、閲覧者がナビのボタンでライト/ダーク表示を選べます(v1.7.0以降)。
-選ばれた表示は`<html data-theme="light">`または`<html data-theme="dark">`として付きます
-(選んでいないときは付かず、OSの設定に従います)。
+On sites with `NAV_ENABLED=true`, readers can choose light or dark with a button in the
+navigation (v1.7.0 or later). The chosen mode is added as `<html data-theme="light">` or
+`<html data-theme="dark">` (nothing is added when they haven't chosen, and the OS setting is
+followed).
 
-独自CSSでダーク表示の色を書く場合は、「OSがダークモードのとき(ライト表示を選んだときを除く)」と
-「ダーク表示を選んだとき」の両方に同じ色を書きます。組み込みテーマもこの書き方です。
+To write dark colors in your custom CSS, write the same colors for both "when the OS is in dark
+mode (unless light was chosen)" and "when dark was chosen". The built-in themes are written
+this way too.
 
 ```css
-/* ライト表示の色 */
+/* Light colors */
 :root {
   --fg: #1a1a1a;
   --bg: #ffffff;
 }
 
-/* ダーク表示の色 */
+/* Dark colors */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --fg: #e5e5e5;
@@ -127,5 +140,5 @@ title: テーマ・スタイル(Theming)
 }
 ```
 
-`@media (prefers-color-scheme: dark)`の中に`:root`だけを書いた古い書き方でも表示は崩れませんが、
-OSがダークモードのときに「ライト表示」を選んでも、その色はダークのままになります。
+The older style, with only `:root` inside `@media (prefers-color-scheme: dark)`, doesn't break
+the page, but if the OS is in dark mode and the reader chooses "light", those colors stay dark.

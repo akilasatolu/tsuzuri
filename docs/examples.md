@@ -1,41 +1,45 @@
 ---
-title: 使用例(Examples)
+title: Examples
 ---
 
-# 使用例(Examples)
+# Examples
 
-## Tsuzuriで作られたサイト
+## Sites built with Tsuzuri
 
-### このサイト
+### This site
 
-いま見ているこのドキュメントサイトも、Tsuzuri自身で作っています
-([ソース](https://github.com/akilasatolu/tsuzuri/tree/docs))。次の機能を組み合わせています。
+The documentation site you're reading is built with Tsuzuri itself
+([source](https://github.com/akilasatolu/tsuzuri/tree/docs)). It combines the following features.
 
-- **独自CSSだけで作った見た目**: `THEME=none`にして、`STYLE_FILE`の独自CSSで配色・カード・ボタンを
-  作っています([独自CSSの例](gallery/custom.md))。
-- **トップページの入口**: `README.md`の冒頭に、`<div class="tsuzuri-hero">`のようにclass付きのHTMLを書き、
-  独自CSSで見た目を付けています。GitHub上ではclassが消えて普通の文章として表示されるので、
-  GitHubで読んでも崩れません。
-- **テーマギャラリー**: 各テーマの見本ページは、frontmatterで`theme`(そのページのテーマ)と
-  `styleFile`(中身が空のCSS)を指定して、組み込みテーマだけの見た目にしています
-  ([テーマギャラリー](gallery.md))。
-- **404ページ**: リポジトリ直下の`404.md`で作っています。
-- **リンク切れを公開しない**: `STRICT_LINKS=true`にして、リンク切れや見出しの無いリンクがあると
-  ビルドを失敗させています。
+- **A look made only with custom CSS**: it uses `THEME=none` and builds the colors, cards and
+  buttons with custom CSS in `STYLE_FILE` ([custom CSS example](gallery/custom.md)).
+- **The top page entrance**: the beginning of `README.md` contains HTML with classes, such as
+  `<div class="tsuzuri-hero">`, styled with custom CSS. On GitHub the classes are dropped and it
+  shows as ordinary text, so it still reads fine on GitHub.
+- **Theme gallery**: each theme sample page sets `theme` (the page's theme) and `styleFile` (an
+  empty CSS file) in the frontmatter, so it shows only the built-in theme
+  ([theme gallery](gallery.md)).
+- **404 page**: made with `404.md` at the root of the repository.
+- **English and Japanese**: it's a [multilingual site](i18n.md) with `LANGUAGES=en,ja`. The
+  English pages are the base, and each Japanese page sits next to it as `*.ja.md`.
+- **No broken links published**: `STRICT_LINKS=true` makes the build fail on broken links or
+  links to missing headings.
 
-事例を募集しています。自分のサイトを載せてほしい場合は、下の「コントリビュート歓迎」を参照してください。
+We're looking for more examples. If you'd like your site listed, see "Contributions welcome"
+below.
 
-## ドキュメントサイトの例
+## A documentation site
 
-リポジトリの`README.md`と`docs/`フォルダを、そのままドキュメントサイトにする構成です。
+A setup that turns the repository's `README.md` and `docs/` folder into a documentation site as
+they are.
 
 ```
-README.md                 … トップページ(docs/ の各ページへリンクする)
+README.md                 … the top page (links to each page in docs/)
 docs/getting-started.md   … order: 1
 docs/guide.md             … order: 2
-docs/reference/README.md  … order: 3(ディレクトリの位置もこの order で決まる)
+docs/reference/README.md  … order: 3 (this order also decides the folder's position)
 docs/reference/api.md
-docs/faq.md               … order を書かない(order を書いたページの後ろに並ぶ)
+docs/faq.md               … no order (listed after the pages with an order)
 ```
 
 ```
@@ -45,34 +49,36 @@ STRICT_LINKS=true
 LAST_UPDATED=true
 ```
 
-- ナビの並び順は、リンクを見つけた順です。READMEでのリンクの順番と違う順にしたいときは、
-  frontmatterの`order`で指定します([Frontmatterリファレンス](frontmatter.md#order))。
-- pushする前に`npx github:akilasatolu/tsuzuri#v1 preview --open`で確認すると、保存するたびに
-  ブラウザの表示が更新されます([CLIリファレンス](cli.md#手元で確認するpreview))。
+- The navigation is in the order the links were found. To use an order different from the links
+  in the README, set `order` in the frontmatter
+  ([frontmatter reference](frontmatter.md#order)).
+- Checking with `npx github:akilasatolu/tsuzuri#v1 preview --open` before pushing updates the
+  browser every time you save ([CLI reference](cli.md#previewing-locally-preview)).
 
-## コーポレートページとしての活用例
+## Using it as a company page
 
-Tsuzuriは元々「READMEをそのままGitHub Pagesにする」ことを目的にしたツールですが、
-設定を組み合わせることで、READMEを起点にした簡易的なコーポレートページ・製品紹介
-ページのような使い方もできます。例えば次のような組み合わせが考えられます。
+Tsuzuri was originally made to "turn a README into GitHub Pages as it is", but by combining
+settings you can also use it for a simple company or product page that starts from the README.
+For example, you could combine the following.
 
-- `ROOT_MD`にトップページ用のMarkdownを指定し、そこから会社概要・サービス紹介・
-  お問い合わせ方法などのページへリンクを張って構成する
-- `NAV_ENABLED=true`にして、各ページ間を行き来できる簡易ナビゲーションを表示する
-- 各ページのfrontmatterで`title`/`description`/`ogImage`を設定し、SNS等でシェアされた
-  際の見え方(OGP)を整える(詳細は[frontmatter.md](./frontmatter.md)。`description`を書かないページは、
-  本文の最初の段落から自動で作られます)
-- `FAVICON_FILE`でブランドのfaviconを設定し、`CUSTOM_DOMAIN`で独自ドメインを割り当てる
-  (詳細は[configuration.md](./configuration.md)、[deployment.md](./deployment.md))
-- `THEME`を`material`(マテリアル)や`glass`(グラス)のようなブランドカラーに近いテーマに変更する。さらに作り込みたい
-  場合は、このサイトのように`THEME=none`と独自CSSで見た目を作る(詳細は[theming.md](./theming.md))
-- 「お知らせ」の過去記事のように、ナビに並べるほどではないページは`nav: false`にする
+- Set a Markdown file for the top page in `ROOT_MD`, and link from it to pages such as the
+  company profile, the services and how to contact you
+- Set `NAV_ENABLED=true` to show simple navigation between the pages
+- Set `title`, `description` and `ogImage` in each page's frontmatter to control how it looks
+  when shared on social media (OGP) (see the [frontmatter reference](./frontmatter.md); pages
+  without a `description` get one made from the first paragraph)
+- Set your brand's favicon with `FAVICON_FILE` and assign your own domain with `CUSTOM_DOMAIN`
+  (see the [configuration reference](./configuration.md) and [Deployment](./deployment.md))
+- Change `THEME` to one close to your brand colors, such as `material` or `glass`. To go
+  further, build the look with `THEME=none` and custom CSS, like this site (see
+  [Theming](./theming.md))
+- Set `nav: false` on pages not worth listing in the navigation, such as past news posts
 
-このように、追加のビルドツールやCMSを用意しなくても、Markdownファイルと設定ファイルの
-組み合わせだけである程度体裁の整ったページ群を用意できます。
+This way, you can prepare a reasonably polished set of pages with just Markdown files and a
+settings file, without any extra build tools or CMS.
 
-## コントリビュート歓迎
+## Contributions welcome
 
-自分が作ったサイトをこのページの事例集に載せてほしい場合は、ぜひご連絡ください。
-掲載方法や、その他プロジェクトへの貢献方法全般については[CONTRIBUTING.md](https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.md)を
-参照してください。
+If you'd like a site you built to be listed among the examples on this page, please get in
+touch. For how to submit it, and how to contribute to the project in general, see
+[CONTRIBUTING.md](https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.md).

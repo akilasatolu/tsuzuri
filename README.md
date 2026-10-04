@@ -4,145 +4,143 @@
 
 # Tsuzuri
 
-<p class="tsuzuri-hero-lead">README を綴じて、あなたのサイトに。</p>
+<p class="tsuzuri-hero-lead">Bind your README into a website.</p>
 
-<p class="tsuzuri-hero-sub">README を起点にリンクをたどり、つながった Markdown を GitHub Pages のサイトにして自動で公開します。</p>
+<p class="tsuzuri-hero-sub">Starting from your README, Tsuzuri follows the links, turns the connected Markdown into a GitHub Pages site, and publishes it automatically.</p>
 
-<p class="tsuzuri-hero-actions"><a class="tsuzuri-button tsuzuri-button-primary" href="docs/getting-started.md">はじめる</a><span class="tsuzuri-sep"> ・ </span><a class="tsuzuri-button" href="#ドキュメント">ドキュメント</a><span class="tsuzuri-sep"> ・ </span><a class="tsuzuri-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
+<p class="tsuzuri-hero-actions"><a class="tsuzuri-button tsuzuri-button-primary" href="docs/getting-started.md">Get started</a><span class="tsuzuri-sep"> · </span><a class="tsuzuri-button" href="#documentation">Documentation</a><span class="tsuzuri-sep"> · </span><a class="tsuzuri-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/akilasatolu/tsuzuri/blob/main/LICENSE)
 [![Build Status](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml)
 
 </div>
 
-## Tsuzuriとは
+## What is Tsuzuri?
 
-Tsuzuri(綴)は、リポジトリの`README.md`を起点にして本文中のリンクをたどり、
-つながっているMarkdownファイルと画像をそのままGitHub Pagesのサイトへ変換・
-デプロイするツールです。名前は「複数の紙を綴じて1冊にする」という製本用語に
-由来しており、README起点でつながった複数のMarkdownファイルを1つのサイトに
-束ねる、というこのツールの動きをそのまま表しています。
+Tsuzuri starts from your repository's `README.md`, follows the links in the text, and turns
+the connected Markdown files and images into a GitHub Pages site, then deploys it. The name
+(綴, *tsuzuri*) is a bookbinding term for binding many sheets of paper into one volume, which
+is exactly what the tool does: it binds the Markdown files linked from your README into a
+single site.
 
-設定ファイルを1つ用意するだけで、READMEやdocsフォルダの構成をほぼそのまま
-Webサイトとして公開できます。ページ数が増えても、READMEにリンクを追加する
-だけで自動的にサイトへ反映されるので、ナビゲーションを手作業で作り直す必要
-はありません。
+With a single settings file, you can publish your README and docs folder as a website
+almost as they are. As you add pages, just link them from the README and they appear on
+the site automatically, so you never have to rebuild the navigation by hand.
 
-**ブランディングについての注意**: ロゴ(紺の地に、炎の橙に灯る中心から白いページへ線が
-つながる形)の配色は、Tsuzuri自身のブランディングです。利用者が
-生成するページ側のfavicon(`FAVICON_FILE`設定キーで指定するもの)とは無関係
-なので混同しないでください。
+**A note on branding**: the colors of the logo (lines running from a flame-orange center to
+white pages on a navy background) are Tsuzuri's own branding. They have nothing to do with
+the favicon of the pages you generate (the one you set with the `FAVICON_FILE` setting), so
+please don't confuse the two.
 
-このドキュメント自体もTsuzuriで生成し、GitHub Pagesで公開しています:
+This documentation is itself generated with Tsuzuri and published on GitHub Pages:
 https://akilasatolu.github.io/tsuzuri/
 
-## 特徴
+## Features
 
 <div class="tsuzuri-features">
 <div class="tsuzuri-feature">
-<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">綴</span><span class="tsuzuri-sep">】</span>リンクをたどって、1つのサイトに</h3>
-<p>READMEからリンクでつながったページと画像を自動で集めます。ページを増やすときは、リンクを1本張るだけ。サイトマップの管理は要りません。</p>
+<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">綴</span><span class="tsuzuri-sep">】</span>Follow the links, get one site</h3>
+<p>Pages and images linked from the README are collected automatically. To add a page, just add one link. No sitemap to maintain.</p>
 </div>
 <div class="tsuzuri-feature">
-<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">設</span><span class="tsuzuri-sep">】</span>設定ファイルは1つだけ</h3>
-<p>.github/docs-pages.config を書き換えるだけで動作を変えられます。ワークフローのYAMLを編集する必要はありません。</p>
+<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">設</span><span class="tsuzuri-sep">】</span>Just one settings file</h3>
+<p>Change the behavior by editing .github/docs-pages.config. You never need to edit the workflow YAML.</p>
 </div>
 <div class="tsuzuri-feature">
-<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>テーマと独自CSS</h3>
-<p>マテリアル・グラス・エディトリアル・ミニマルなど7つのテーマに、独自CSSを重ねて自由に調整できます。このサイトも独自CSSで作っています。</p>
+<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>Themes and custom CSS</h3>
+<p>Pick one of seven themes such as Material, Glass, Editorial and Minimal, then fine-tune it with your own CSS. This site is built with custom CSS too.</p>
 </div>
 <div class="tsuzuri-feature">
-<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">探</span><span class="tsuzuri-sep">】</span>ナビ・検索・目次</h3>
-<p>サイドバーのナビ、サイト内検索、ページ内の目次を自動で作ります。OGP・favicon・sitemap.xmlにも対応しています。</p>
+<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">探</span><span class="tsuzuri-sep">】</span>Navigation, search and table of contents</h3>
+<p>A sidebar, site search and an in-page table of contents are generated for you. OGP, favicons, sitemap.xml and multilingual sites are supported.</p>
 </div>
 </div>
 
-## クイックスタート
+## Quick start
 
-詳しい手順は[Getting Started](docs/getting-started.md)で説明しています。
+[Getting Started](docs/getting-started.md) explains each step in detail.
 
-1. 自分のリポジトリのルートで次のコマンドを実行する(対話形式でファイルが生成されます)。
+1. Run the following command at the root of your repository (it asks a few questions and
+   generates the files).
 
    ```sh
    npx github:akilasatolu/tsuzuri#v1 init
    ```
 
-   このコマンドは、ワークフロー(`.github/workflows/docs-pages.yml`)・設定ファイル
-   (`.github/docs-pages.config`)に加えて、ビルドスクリプト本体一式
-   (`.github/tsuzuri/`配下)もリポジトリにコピーします。生成後は、実行のたびに
-   `akilasatolu/tsuzuri`本体を参照することなく、あなたのリポジトリの中だけで
-   ビルド・デプロイが完結します(詳しくは[CLIリファレンス](docs/cli.md)を参照)。
+   Besides the workflow (`.github/workflows/docs-pages.yml`) and the settings file
+   (`.github/docs-pages.config`), this command copies the whole build script
+   (under `.github/tsuzuri/`) into your repository. After that, builds and deployments run
+   entirely inside your repository, without fetching `akilasatolu/tsuzuri` each time
+   (see the [CLI reference](docs/cli.md) for details).
 
-2. GitHubリポジトリの **Settings → Pages** で、Sourceを **GitHub Actions** に設定する(初回のみ)。
-3. `.github/docs-pages.config`の`TRIGGER_BRANCH`に指定したブランチ(デフォルトは`main`)にpush/マージする。
+2. In your GitHub repository, open **Settings → Pages** and set Source to **GitHub Actions**
+   (first time only).
+3. Push or merge to the branch set in `TRIGGER_BRANCH` of `.github/docs-pages.config`
+   (`main` by default).
 
-Actionsタブでワークフローが実行され、完了するとGitHub Pagesに公開されます。URLは
-Settings → Pagesに表示されます。設定ファイルの各項目の詳細は
-[設定リファレンス](docs/configuration.md)を参照してください。
+The workflow runs in the Actions tab, and when it finishes the site is published on GitHub
+Pages. The URL is shown under Settings → Pages. For each item in the settings file, see the
+[configuration reference](docs/configuration.md).
 
-## ドキュメント
+## Documentation
 
 - [Getting Started](docs/getting-started.md)
-- [仕組み(Concepts)](docs/concepts.md)
-- [設定リファレンス(Configuration)](docs/configuration.md)
-- [テーマ・スタイル(Theming)](docs/theming.md)
-- [テーマギャラリー(Gallery)](docs/gallery.md)
-- [Frontmatterリファレンス](docs/frontmatter.md)
-- [多言語サイト(i18n)](docs/i18n.md)
-- [CLIリファレンス](docs/cli.md)
-- [デプロイ設定(Deployment)](docs/deployment.md)
-- [使用例(Examples)](docs/examples.md)
+- [Concepts](docs/concepts.md)
+- [Configuration reference](docs/configuration.md)
+- [Theming](docs/theming.md)
+- [Theme gallery](docs/gallery.md)
+- [Frontmatter reference](docs/frontmatter.md)
+- [Multilingual sites (i18n)](docs/i18n.md)
+- [CLI reference](docs/cli.md)
+- [Deployment](docs/deployment.md)
+- [Examples](docs/examples.md)
 - [FAQ](docs/faq.md)
-- [更新履歴(リリースノート)](https://github.com/akilasatolu/tsuzuri/releases)
+- [Changelog (release notes)](https://github.com/akilasatolu/tsuzuri/releases)
 
-## スタイルのカスタマイズ
+## Customizing the style
 
-見た目を変えたい場合、CSSを自分で書く必要は必ずしもありません。
-`.github/docs-pages.config`の`THEME`に、マテリアル(`material`・既定)/グラス(`glass`)/
-90年代(`nineties`)/装飾なし(`none`)などのテーマのいずれかを指定するだけで、配色や
-リンクの下線の有無などの見た目がまとめて切り替わります。詳しくは
-[テーマ・スタイル(Theming)](docs/theming.md)を参照してください。
+You don't have to write CSS to change the look. Just set `THEME` in
+`.github/docs-pages.config` to one of the themes, such as Material (`material`, the default),
+Glass (`glass`), 90s (`nineties`) or no decoration (`none`), and the colors, link underlines
+and the rest of the look switch together. See [Theming](docs/theming.md) for details.
 
-さらに細かく配色だけを調整したい場合は、`.github/docs-pages.config`の
-`STYLE_FILE`に指定したCSSファイルの中で、以下のCSSカスタムプロパティを
-上書きしてください(THEMEの後に読み込まれる第3層として反映されます)。
+If you only want to fine-tune the colors, override the following CSS custom properties in
+the CSS file set in `STYLE_FILE` of `.github/docs-pages.config` (it is loaded after the
+theme, as the third layer).
 
-| 変数 | 意味 |
+| Variable | Meaning |
 |---|---|
-| `--fg` | 本文の文字色 |
-| `--bg` | 背景色 |
-| `--border` | テーブル罫線・区切り線の色 |
-| `--accent` | リンクなどの強調色 |
-| `--code-bg` | コードブロック・インラインコードの背景色 |
-| `--font` | 本文のフォント指定(font-family) |
-| `--content-width` | 本文カラムの最大幅(例: `860px`) |
-| `color-scheme` | `light` / `dark` / `light dark`(OS設定に追従) |
+| `--fg` | Text color |
+| `--bg` | Background color |
+| `--border` | Color of table borders and dividers |
+| `--accent` | Accent color for links and the like |
+| `--code-bg` | Background of code blocks and inline code |
+| `--font` | Body font (font-family) |
+| `--content-width` | Maximum width of the content column (e.g. `860px`) |
+| `color-scheme` | `light` / `dark` / `light dark` (follows the OS setting) |
 
-`THEME=none`を指定した場合はこれらの変数がどこにも定義されないため、
-ブラウザの既定の見た目(黒文字・白背景など)がそのまま使われます。
+With `THEME=none`, these variables are not defined anywhere, so the browser's default look
+(black text on a white background, and so on) is used as is.
 
-## テーマプレビュー
+## Theme preview
 
-組み込みテーマの見た目は、[テーマギャラリー](docs/gallery.md)で実際のページとして
-見比べられます。
+You can compare the built-in themes as real pages in the [theme gallery](docs/gallery.md).
 
-自分のサイトで見比べたい場合は、frontmatterの`theme`キーで
-ページごとに異なるテーマを指定できます(サイト全体の`THEME`設定とは別に、
-1ページだけテーマを差し替える機能。詳しくは[Frontmatterリファレンス](docs/frontmatter.md#theme)を参照)。
-複数のMarkdownファイルにそれぞれ違う`theme`を指定してビルドすれば、
-通常の`docs-pages.yml`だけで見た目を比較できます。
+To compare them on your own site, use the `theme` key in the frontmatter to give each page a
+different theme (it swaps the theme of a single page, separately from the site-wide `THEME`
+setting; see the [frontmatter reference](docs/frontmatter.md#theme)). Give several Markdown
+files different `theme` values and build, and you can compare the looks with the regular
+`docs-pages.yml`.
 
-## コントリビュート
+## Contributing
 
-コード・ドキュメントいずれの貢献も歓迎します。Tsuzuri本体(CLI・ビルドスクリプト・
-テーマCSS)の開発は[`main`ブランチ](https://github.com/akilasatolu/tsuzuri/tree/main)で
-行っています。このサイト(利用者向けドキュメント)は`docs`ブランチにあり、Tsuzuri自身を
-使ってGitHub Pagesに公開しています。開発環境のセットアップ方法やPRの作法は
-[CONTRIBUTING.md](https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.md)を参照してください。
+Contributions to both code and documentation are welcome. Tsuzuri itself (the CLI, the build
+script and the theme CSS) is developed on the
+[`main` branch](https://github.com/akilasatolu/tsuzuri/tree/main). This site (the user
+documentation) lives on the `docs` branch and is published to GitHub Pages with Tsuzuri
+itself. For setting up a development environment and how to send a PR, see
+[CONTRIBUTING.md](https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.md).
 
-**Help Wanted**: ドキュメントは現状すべて日本語のみです。英語版ドキュメント
-の整備に協力していただける方を募集しています。
-
-## ライセンス
+## License
 
 [MIT License](https://github.com/akilasatolu/tsuzuri/blob/main/LICENSE)

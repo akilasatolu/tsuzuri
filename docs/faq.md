@@ -4,108 +4,109 @@ title: FAQ
 
 # FAQ
 
-## デプロイが実行されない
+## Deployment doesn't run
 
-まず、pushしたブランチ名が`.github/docs-pages.config`の`TRIGGER_BRANCH`と
-一致しているか確認してください。ビルドジョブ自体はどのブランチへのpushでも実行されますが、
-ブランチ名が一致しない場合は内部的に`should_deploy=false`という値が記録され、
-後続のデプロイジョブ(実際にGitHub Pagesへ公開する処理)そのものがスキップされます。
-リポジトリのActionsタブでワークフローの実行結果を開き、「Check trigger branch」という
-ステップのログに
+First, check that the name of the branch you pushed matches `TRIGGER_BRANCH` in
+`.github/docs-pages.config`. The build job runs for a push to any branch, but if the branch name
+doesn't match, a value `should_deploy=false` is recorded internally and the following deploy job
+(the step that actually publishes to GitHub Pages) is skipped entirely. Open the workflow run in
+the repository's Actions tab, and if the log of the "Check trigger branch" step shows a message
+like
 
 ```
 TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします
 ```
 
-のようなメッセージが出ていれば、これが原因です。対象ブランチへマージ・pushするか、
-`TRIGGER_BRANCH`の値自体を変更してください(手動実行(`workflow_dispatch`)の場合は
-この判定自体が行われず常にデプロイされます。詳細は[deployment.md](./deployment.md))。
+(skipping because the push (feature/foo) isn't to TRIGGER_BRANCH=main), this is the cause. Merge
+or push to the target branch, or change the value of `TRIGGER_BRANCH` itself (for manual runs
+(`workflow_dispatch`) this check isn't done and it always deploys; see
+[Deployment](./deployment.md)).
 
-デプロイジョブ自体は起動したのに、次のエラーで失敗している場合は原因が異なります。
+If the deploy job did start but fails with the following error, the cause is different.
 
 ```
 Branch "docs" is not allowed to deploy to github-pages due to environment protection rules.
 ```
 
-これは、既定ブランチ以外を`TRIGGER_BRANCH`にしたときに、`github-pages`環境で
-そのブランチからのデプロイが許可されていないことが原因です。
-[デプロイ設定](./deployment.md)の「既定ブランチ以外をトリガーブランチにする場合」の
-手順で許可してください。
+This happens when you set a branch other than the default branch as `TRIGGER_BRANCH` and the
+`github-pages` environment doesn't allow deployments from that branch. Allow it with the steps in
+"Using a branch other than the default branch as the trigger branch" in
+[Deployment](./deployment.md).
 
-## リンク切れの警告が出る
+## I get broken link warnings
 
-Markdown内でリンクした先のファイルが実際には存在しない場合、ビルドはエラーにはならず、
-そのリンクを「見つからなかったリンク」として記録したうえで処理を続けます。
-どのリンクが該当するかは、ActionsタブのワークフローのログのBuildステップに、
-「リンク先が見つからなかったファイル」「セキュリティ上の理由で無視されたリンク」として
-参照元のファイルとともに表示されます。さらに詳しく調べたい場合は、一時的に`SITEMAP_JSON=true`に
-してデバッグ用の`sitemap.json`を出力することもできます([concepts.md](./concepts.md)参照)。
-リンク切れのまま公開したくない場合は、`STRICT_LINKS=true`にするとビルドを失敗させられます
-([configuration.md](./configuration.md#strict_links)参照)。
+If a file linked from Markdown doesn't actually exist, the build doesn't fail; it records the link
+as "a link that wasn't found" and continues. Which links these are is shown in the Build step of
+the workflow log in the Actions tab, as "files whose link target wasn't found" and "links ignored
+for security reasons", along with the file that contains them. To dig deeper, you can temporarily
+set `SITEMAP_JSON=true` to output the debugging `sitemap.json` (see [Concepts](./concepts.md)). If
+you don't want to publish with broken links, set `STRICT_LINKS=true` to make the build fail (see
+the [configuration reference](./configuration.md#strict_links)).
 
-## スタイルが反映されない
+## My styles aren't applied
 
-見た目が期待通りにならない場合は、以下を順番に確認してください。
+If the look isn't what you expect, check the following in order.
 
-1. `THEME`のスペルミス。存在しないテーマ名(例: `sepia`)を指定すると警告のうえ
-   自動的に`material`にフォールバックします([configuration.md](./configuration.md))。
-2. `STYLE_FILE`に指定したパスに、実際にファイルが存在しているか。存在しない場合は
-   警告は出ず(ビルドのログに`Custom style file not used`と出るだけで)、独自CSSは反映されません。
-3. 3層カスケード(基礎CSS→THEME→STYLE_FILE)の優先順位。`STYLE_FILE`は最後に
-   読み込まれる最優先層のため、ここに書いたCSSルールが期待通り上書きしているか、
-   詳細度(セレクタの強さ)の観点でも確認してください。詳しくは
-   [theming.md](./theming.md)を参照してください。
+1. A typo in `THEME`. A theme name that doesn't exist (e.g. `sepia`) falls back to `material`
+   automatically, with a warning (see the [configuration reference](./configuration.md)).
+2. Whether a file actually exists at the path set in `STYLE_FILE`. If it doesn't, no warning is
+   shown (the build log only says `Custom style file not used`), and the custom CSS isn't
+   applied.
+3. The priority of the three-layer cascade (base CSS → THEME → STYLE_FILE). `STYLE_FILE` is the
+   top layer, loaded last, so check whether the CSS rules you wrote there override as expected,
+   including in terms of specificity (the strength of the selector). See
+   [Theming](./theming.md) for details.
 
-## previewの表示が公開サイトと違う
+## The preview looks different from the published site
 
-`preview`は、リポジトリにコピー済みのビルドスクリプト(`.github/tsuzuri/`)と`.github/docs-pages.config`の
-設定でビルドするので、基本的には公開サイトと同じ見た目になります。違う場合は、次を確認してください。
+`preview` builds with the build script copied into your repository (`.github/tsuzuri/`) and the
+settings in `.github/docs-pages.config`, so it generally looks the same as the published site. If
+it doesn't, check the following.
 
-1. **まだpushしていない変更**: 手元の変更は`preview`には反映されますが、公開サイトにはpushするまで反映されません。
-2. **ブラウザのキャッシュ**: 公開サイトが古いまま表示されていることがあります。再読み込みしてください。
-3. **サイトのURLの違い**: 公開サイトは`https://<owner>.github.io/<repo>/`のようにパスが付き、`preview`は
-   `http://localhost:4000/`で開きます。リンクは自動で合わせるので通常は問題ありませんが、Markdownに
-   `https://<owner>.github.io/<repo>/...`のような公開サイトの完全なURLを書いた場合は、公開サイトへ移動します。
+1. **Changes not pushed yet**: local changes show up in `preview`, but not on the published site
+   until you push.
+2. **Browser cache**: the published site may be showing an old version. Reload it.
+3. **Different site URL**: the published site has a path, like `https://<owner>.github.io/<repo>/`,
+   while `preview` opens at `http://localhost:4000/`. Links are adjusted automatically, so this is
+   usually fine, but if you wrote a full URL of the published site in Markdown, like
+   `https://<owner>.github.io/<repo>/...`, it goes to the published site.
 
-## previewで「ポート 4000 は使用中です」と出る
+## preview says "ポート 4000 は使用中です" (port 4000 is in use)
 
-別のアプリ(または別の`preview`)が同じポートを使っています。`--port 4001`のように別の番号を
-指定してください([CLIリファレンス](cli.md#手元で確認するpreview))。
+Another app (or another `preview`) is using the same port. Choose another number, like
+`--port 4001` (see the [CLI reference](cli.md#previewing-locally-preview)).
 
-## npx実行時にキャッシュが古い
+## npx uses an old cached version
 
-`npx github:akilasatolu/tsuzuri#v1 init`を実行した際に、最新の変更が反映されていない
-(修正したはずの挙動が変わらない)場合は、`npx`側またはgit側のキャッシュが古いバージョンを
-再利用している可能性があります。実行時の最初の行に表示されるバージョン(`tsuzuri v1.0.0`など)で、
-実際に動いているバージョンを確認できます。古い場合は、次のように完全なバージョン
-([リリース一覧](https://github.com/akilasatolu/tsuzuri/releases)にある最新のもの)を指定して
-実行してみてください。
+If running `npx github:akilasatolu/tsuzuri#v1 init` doesn't reflect the latest changes (behavior
+you expected to be fixed hasn't changed), `npx` or git may be reusing an old version from its
+cache. The version shown on the first line when it runs (`tsuzuri v1.0.0` and so on) tells you
+which version is actually running. If it's old, try running it with a full version (the latest
+one in the [releases](https://github.com/akilasatolu/tsuzuri/releases)), like this.
 
 ```
-npx github:akilasatolu/tsuzuri#v<最新のバージョン> init --update
+npx github:akilasatolu/tsuzuri#v<latest version> init --update
 ```
 
-これでも解消しない場合は、ローカル環境の`npx`のキャッシュを一度クリアしてから
-再実行することも検討してください。
+If that doesn't help, consider clearing your local `npx` cache and running it again.
 
-## カスタムドメインにしたらページが崩れた
+## Pages broke after switching to a custom domain
 
-`CUSTOM_DOMAIN`を設定すると、内部的な`BASE_PATH`(サイト内リンクの先頭に付与される
-パス)が空文字に、`SITE_ORIGIN`(絶対URLの基点)が`https://<CUSTOM_DOMAIN>`に
-それぞれ切り替わります。カスタムドメイン移行前後でこの値が変わるため、
-画像やCSSが読み込めない・リンクが二重にパスを含んでいるといった崩れが起きた場合は、
-まずビルドが正しい`CUSTOM_DOMAIN`の値を認識しているか(ホスト名として妥当な形式に
-なっているか。スキームやパスを含めると無効な値として空文字にフォールバックします)、
-`SITEMAP_JSON=true`で出力した`sitemap.json`の`customDomain`/`siteOrigin`の値を確認してください。詳細は
-[deployment.md](./deployment.md)の「カスタムドメインの設定」を参照してください。
+Setting `CUSTOM_DOMAIN` switches the internal `BASE_PATH` (the path prefixed to links within the
+site) to empty, and `SITE_ORIGIN` (the base of absolute URLs) to `https://<CUSTOM_DOMAIN>`. Since
+these values change when you move to a custom domain, if images or CSS fail to load, or links
+contain the path twice, first check whether the build recognizes the right `CUSTOM_DOMAIN` value
+(whether it's a valid host name; including a scheme or path makes it invalid, and it falls back
+to empty) by looking at `customDomain` and `siteOrigin` in the `sitemap.json` output with
+`SITEMAP_JSON=true`. See "Setting up a custom domain" in [Deployment](./deployment.md) for
+details.
 
-## Markdownに書いたHTMLはそのまま出力される?
+## Is HTML written in Markdown output as is?
 
-はい。Markdownの中に書いたHTML(`<div>`・`<script>`など)や、`javascript:`で始まるリンクは、
-無害化されずにそのまま生成されたページに出力されます。Tsuzuriは「自分のリポジトリの内容を
-自分のサイトとして公開する」ためのツールで、Markdownを書く人をサイトの持ち主と同じく信頼する
-前提だからです。
+Yes. HTML written in Markdown (`<div>`, `<script>` and so on) and links starting with
+`javascript:` are output to the generated page as they are, without sanitizing. Tsuzuri is a tool
+for "publishing the contents of your own repository as your own site", and it assumes the people
+writing the Markdown are trusted just like the site owner.
 
-ほかの人からのプルリクエストでMarkdownを受け取る場合は、マージする前に、意図しない
-`<script>`やリンクが含まれていないか確認してください。
-
+If you accept Markdown through pull requests from others, check before merging that it doesn't
+contain unintended `<script>` tags or links.

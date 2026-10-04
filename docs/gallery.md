@@ -1,29 +1,29 @@
 ---
-title: テーマギャラリー(Gallery)
-description: Tsuzuriの組み込みテーマの見た目を実際のページで比較できるギャラリー
+title: Theme gallery
+description: A gallery to compare the look of Tsuzuri's built-in themes on real pages
 ---
 
-# テーマギャラリー(Gallery)
+# Theme gallery
 
-Tsuzuriの組み込みテーマの見た目を、実際に生成されたページで確認できます。
-各ページには同じ見本(見出し・段落・リンク・リスト・表・コード・引用・画像)が
-並んでいるので、見比べながらテーマを選んでください。
+See what Tsuzuri's built-in themes look like on actually generated pages. Each page has the same
+sample content (headings, paragraphs, links, lists, a table, code, a quote and an image), so you
+can compare them and choose a theme.
 
-| テーマ | 設定値 | 特徴 |
+| Theme | Setting | Character |
 |---|---|---|
-| [マテリアル(material)](gallery/material.md) | `THEME=material` | Material Design 3 風の標準スタイル(既定)。青系の配色、角丸のカードと影、トーンのついたナビの選択。ライト/ダークモードを自動で切り替える。 |
-| [グラス(glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism。ゆっくり揺れて流れるオーロラの地に、色がそのまま透ける薄い透明なガラスのカード。 |
-| [ニューモーフィズム(neumorphism)](gallery/neumorphism.md) | `THEME=neumorphism` | Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。 |
-| [エディトリアル(editorial)](gallery/editorial.md) | `THEME=editorial` | 雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色。 |
-| [ミニマル(minimal)](gallery/minimal.md) | `THEME=minimal` | Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青。 |
-| [ブループリント(blueprint)](gallery/blueprint.md) | `THEME=blueprint` | 設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示。 |
-| [90年代(nineties)](gallery/nineties.md) | `THEME=nineties` | 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。 |
-| [装飾なし(none)](gallery/none.md) | `THEME=none` | テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。 |
-| [独自CSSの例(このサイト)](gallery/custom.md) | `THEME=none`+`STYLE_FILE` | テーマを使わず、独自CSSだけで作ったこのサイト自身の見た目。 |
+| [Material (material)](gallery/material.md) | `THEME=material` | A standard style inspired by Material Design 3 (the default). Blue colors, rounded cards with shadows, and a tinted selection in the navigation. Switches between light and dark automatically. |
+| [Glass (glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism. Thin, clear glass cards that let the colors show through, over a slowly swaying, flowing aurora. |
+| [Neumorphism (neumorphism)](gallery/neumorphism.md) | `THEME=neumorphism` | Neumorphism. Parts in the same color as the background, raised or pressed in with light and shadow. |
+| [Editorial (editorial)](gallery/editorial.md) | `THEME=editorial` | A style that relies on typography and white space, like a magazine or a polished document. Large serif headings with chapter numbers, and a vermilion accent. |
+| [Minimal (minimal)](gallery/minimal.md) | `THEME=minimal` | A calm look in only white, black and gray, like the Vercel or Linear docs. Only links are blue. |
+| [Blueprint (blueprint)](gallery/blueprint.md) | `THEME=blueprint` | Like a blueprint, with a white grid and fine lines on blue, and headings with dimension lines. Always looks the same. |
+| [90s (nineties)](gallery/nineties.md) | `THEME=nineties` | 90s nostalgia. A Windows 95-style teal desktop with gray windows and raised buttons. Light only. |
+| [No decoration (none)](gallery/none.md) | `THEME=none` | No theme layer; only the base CSS and the browser's default look. |
+| [Custom CSS example (this site)](gallery/custom.md) | `THEME=none` + `STYLE_FILE` | This site's own look, made only with custom CSS and no theme. |
 
-このサイト全体は、`THEME=none`と独自CSS(`STYLE_FILE`)で作っています。テーマの各ページは、
-frontmatterの`theme`でそのページのテーマを指定し、`styleFile`で中身が空のCSSを指定して
-サイトの独自CSSを当てないようにしています(組み込みテーマだけの見た目になります)。
+This whole site is built with `THEME=none` and custom CSS (`STYLE_FILE`). Each theme page sets its
+theme with `theme` in the frontmatter, and sets an empty CSS file with `styleFile` so the site's
+custom CSS isn't applied (it shows only the built-in theme).
 
 ```yaml
 ---
@@ -32,7 +32,8 @@ styleFile: .github/tsuzuri/styles/plain.css
 ---
 ```
 
-設定方法は[テーマ・スタイル](theming.md)と[Frontmatterリファレンス](frontmatter.md#theme)を参照してください。
+For how to set it up, see [Theming](theming.md) and the
+[frontmatter reference](frontmatter.md#theme).
 
-配色をさらに細かく調整したい場合は、`STYLE_FILE`で指定した独自CSSでCSS変数
-(`--fg`・`--bg`・`--accent`など)を上書きできます。
+To fine-tune the colors further, override CSS variables (`--fg`, `--bg`, `--accent` and so on) in
+the custom CSS set in `STYLE_FILE`.

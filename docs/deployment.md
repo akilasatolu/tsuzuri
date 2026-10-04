@@ -1,132 +1,133 @@
 ---
-title: デプロイ設定(Deployment)
+title: Deployment
 ---
 
-# デプロイ設定(Deployment)
+# Deployment
 
-## 自己完結型のワークフロー
+## A self-contained workflow
 
-`npx github:akilasatolu/tsuzuri#v1 init`を実行すると、次のファイルが利用者リポジトリに
-生成されます。
+Running `npx github:akilasatolu/tsuzuri#v1 init` generates the following files in your
+repository.
 
 ```
-利用者リポジトリ
-.github/workflows/docs-pages.yml   … ビルド・デプロイの手順一式(自己完結)
-.github/docs-pages.config          … 動作をカスタマイズする設定ファイル
-.github/tsuzuri/build-docs.mjs     … ビルド本体のスクリプト(コピー済み)
-.github/tsuzuri/lib/*.mjs          … ビルド本体が依存するモジュール一式(コピー済み)
-.github/tsuzuri/styles/*.css       … 組み込みテーマのCSS一式(コピー済み)
+Your repository
+.github/workflows/docs-pages.yml   … all the build and deploy steps (self-contained)
+.github/docs-pages.config          … the settings file that customizes the behavior
+.github/tsuzuri/build-docs.mjs     … the build script itself (copied)
+.github/tsuzuri/lib/*.mjs          … the modules the build script depends on (copied)
+.github/tsuzuri/styles/*.css       … the CSS of the built-in themes (copied)
 ```
 
-以前のバージョンでは、利用者側`docs-pages.yml`はOSS本体リポジトリ(tsuzuri)の
-再利用可能ワークフロー(`build.yml`)を`uses:`で呼び出すだけの薄いラッパーで、
-実際のビルドスクリプトはワークフロー実行のたびにOSS本体リポジトリから取得していました。
-現在は`init`実行時にビルドスクリプト本体を`.github/tsuzuri/`配下へコピー(ベンダリング)
-するようになったため、**生成後のワークフローはOSS本体リポジトリに一切依存せず、
-利用者リポジトリの中だけでビルド・デプロイが完結します**。ネットワーク越しにOSS本体
-リポジトリを参照する処理(第2の`checkout`など)は行われません。
+In earlier versions, your `docs-pages.yml` was a thin wrapper that just called the reusable
+workflow (`build.yml`) of the Tsuzuri repository with `uses:`, and the actual build script was
+fetched from the Tsuzuri repository on every run. Now `init` copies (vendors) the build script
+itself under `.github/tsuzuri/`, so **the generated workflow doesn't depend on the Tsuzuri
+repository at all, and builds and deploys entirely inside your repository**. Nothing fetches the
+Tsuzuri repository over the network (no second `checkout` or the like).
 
-- **`docs-pages.yml`**: 設定ファイルの読み込み、`TRIGGER_BRANCH`との比較、
-  `BASE_PATH`/`SITE_ORIGIN`の算出、実際のビルド(`.github/tsuzuri/build-docs.mjs`実行)、
-  GitHub Pagesへのデプロイまで、すべての処理はこのファイル自身に書かれています。
-  利用者はこのファイルを直接編集することはなく、`.github/docs-pages.config`の値を
-  変更することで動作をカスタマイズします。
-- **`.github/tsuzuri/`配下**: ビルドスクリプト本体そのものです。利用者が直接編集する
-  必要はありません。削除・改変するとビルドが失敗します。
+- **`docs-pages.yml`**: everything is written in this file itself: reading the settings file,
+  comparing with `TRIGGER_BRANCH`, computing `BASE_PATH` and `SITE_ORIGIN`, the actual build
+  (running `.github/tsuzuri/build-docs.mjs`) and the deployment to GitHub Pages. You don't edit
+  this file directly; you customize the behavior by changing values in
+  `.github/docs-pages.config`.
+- **Under `.github/tsuzuri/`**: the build script itself. You don't need to edit it. Deleting or
+  changing it makes the build fail.
 
-## トリガーブランチの変更
+## Changing the trigger branch
 
-デプロイを実行するブランチを変えたい場合は、ワークフローファイルではなく
-`.github/docs-pages.config`の`TRIGGER_BRANCH`キーを書き換えるだけで完結します。
+To change the branch that deploys, you only need to edit the `TRIGGER_BRANCH` key in
+`.github/docs-pages.config`, not the workflow file.
 
 ```
 TRIGGER_BRANCH=release
 ```
 
-このように書き換えて、そのブランチへpushすれば、以後はそのブランチへのpushだけが
-デプロイのトリガーになります(`TRIGGER_BRANCH`以外へのpushはビルドジョブ自体は動きますが、
-`should_deploy=false`と判定されデプロイジョブはスキップされます。詳細は
-[faq.md](./faq.md)の「デプロイが実行されない」を参照)。
+After editing it like this and pushing to that branch, only pushes to that branch trigger
+deployment from then on (pushes to other branches still run the build job, but it decides
+`should_deploy=false` and the deploy job is skipped; see "Deployment doesn't run" in the
+[FAQ](./faq.md)).
 
-### 既定ブランチ以外をトリガーブランチにする場合(追加設定が必要)
+### Using a branch other than the default branch as the trigger branch (extra setup required)
 
-`TRIGGER_BRANCH`にリポジトリの**既定ブランチ(通常は`main`)以外**を指定した場合は、
-`TRIGGER_BRANCH`の書き換えだけでは足りません。GitHub Pagesの公開先である
-`github-pages`環境は、初期状態では既定ブランチからのデプロイしか許可していないためです。
-このままpushすると、デプロイジョブが次のようなエラーで失敗します。
+If you set `TRIGGER_BRANCH` to a branch **other than the repository's default branch (usually
+`main`)**, editing `TRIGGER_BRANCH` alone isn't enough. The `github-pages` environment, where
+GitHub Pages publishes, only allows deployments from the default branch by default. If you push
+as is, the deploy job fails with an error like this.
 
 ```
 Branch "docs" is not allowed to deploy to github-pages due to environment protection rules.
 ```
 
-次の手順で、トリガーブランチからのデプロイを許可してください(最初の1回だけ)。
+Allow deployments from the trigger branch with the following steps (first time only).
 
-1. リポジトリの `Settings` タブを開く
-2. 左メニューの `Environments` を選び、`github-pages` を開く
-3. `Deployment branches and tags` の一覧で `Add deployment branch or tag rule` を押す
-4. `Ref type` は `Branch` のまま、`Name pattern` にトリガーブランチ名(例: `docs`)を入力して追加する
+1. Open the repository's `Settings` tab
+2. Choose `Environments` in the left menu and open `github-pages`
+3. In the `Deployment branches and tags` list, press `Add deployment branch or tag rule`
+4. Leave `Ref type` as `Branch`, enter the trigger branch name (e.g. `docs`) in `Name pattern`
+   and add it
 
-`github-pages`環境は、`Settings > Pages`の`Source`を`GitHub Actions`にした時点で
-自動的に作成されます。一覧に見当たらない場合は、先にPagesの設定を済ませてください。
+The `github-pages` environment is created automatically when you set `Source` to
+`GitHub Actions` under `Settings > Pages`. If it isn't in the list, finish the Pages setup
+first.
 
-あわせて、次の点にも注意してください。
+Also note the following.
 
-- **ワークフローファイルもトリガーブランチに置く**: GitHub Actionsはpushされたブランチにある
-  ワークフローファイルを実行します。`.github/workflows/docs-pages.yml`・
-  `.github/docs-pages.config`・`.github/tsuzuri/`は、トリガーブランチにコミットしてください。
-- **手動実行ボタンは表示されない**: Actionsタブの「Run workflow」ボタンは、ワークフローファイルが
-  既定ブランチにある場合にしか表示されません。トリガーブランチにだけ置いた場合は、
-  そのブランチへのpushでデプロイしてください。
+- **Put the workflow file on the trigger branch too**: GitHub Actions runs the workflow files on
+  the branch that was pushed. Commit `.github/workflows/docs-pages.yml`,
+  `.github/docs-pages.config` and `.github/tsuzuri/` to the trigger branch.
+- **The manual run button isn't shown**: the "Run workflow" button in the Actions tab only
+  appears when the workflow file is on the default branch. If it's only on the trigger branch,
+  deploy by pushing to that branch.
 
-## カスタムドメインの設定
+## Setting up a custom domain
 
-独自ドメインでサイトを公開したい場合は、`.github/docs-pages.config`の`CUSTOM_DOMAIN`に
-ドメイン名(スキームなし。例: `docs.example.com`)を設定します。
+To publish the site on your own domain, set the domain name (without a scheme, e.g.
+`docs.example.com`) in `CUSTOM_DOMAIN` of `.github/docs-pages.config`.
 
 ```
 CUSTOM_DOMAIN=docs.example.com
 ```
 
-これを設定すると、ビルド時に出力ディレクトリ直下へ`CNAME`ファイルが自動生成されます。
-また、内部的な`SITE_ORIGIN`(OGPの絶対URL等に使われるサイトの基点URL)の算出方法も
-変わり、`BASE_PATH`は空文字(ドメイン直下に配置)、`SITE_ORIGIN`は
-`https://<CUSTOM_DOMAIN>`になります。カスタムドメイン設定後にGitHub側のDNS設定
-(CNAMEレコードの登録など)が別途必要になる点は、GitHub Pages自体の標準的な手順に
-従ってください。
+With this set, a `CNAME` file is generated automatically right under the output folder at build
+time. The internal `SITE_ORIGIN` (the base URL of the site, used for OGP absolute URLs and the
+like) is computed differently too: `BASE_PATH` is empty (the site is placed right under the
+domain) and `SITE_ORIGIN` is `https://<CUSTOM_DOMAIN>`. You still need to set up DNS (register a
+CNAME record and so on) after setting the custom domain; follow GitHub Pages' standard steps for
+that.
 
-## 手動実行(workflow_dispatch)
+## Manual runs (workflow_dispatch)
 
-リポジトリのActionsタブから、`Deploy Docs to GitHub Pages`ワークフローを選び、
-「Run workflow」ボタンで手動実行することもできます(`workflow_dispatch`トリガー)。
-手動実行の場合は、現在のブランチが`TRIGGER_BRANCH`と一致しているかどうかの判定
-そのものがスキップされ、常にデプロイが実行されます。設定を変えずにトリガーブランチの内容を
-デプロイし直したいときに使います。
+You can also run the `Deploy Docs to GitHub Pages` workflow manually from the repository's
+Actions tab, with the "Run workflow" button (the `workflow_dispatch` trigger). For manual runs,
+the check of whether the current branch matches `TRIGGER_BRANCH` is skipped entirely, and it
+always deploys. Use it to redeploy the trigger branch's contents without changing any settings.
 
-実行するブランチは、「Run workflow」で選んだブランチです。トリガーブランチ以外を選ぶと、
-`github-pages`環境で許可されていないブランチならデプロイが失敗し、許可されているブランチなら
-公開中のサイトがそのブランチの内容で上書きされるので注意してください。
+It runs on the branch you choose in "Run workflow". If you choose a branch other than the
+trigger branch, the deployment fails if the branch isn't allowed in the `github-pages`
+environment, and if it is allowed, the published site is overwritten with that branch's
+contents, so be careful.
 
-## バージョンの固定・更新
+## Pinning and updating the version
 
-ビルドスクリプト本体は`init`実行時に`.github/tsuzuri/`配下へコピーされるため、
-**一度生成した後は、利用者側で何もしない限りバージョンが自動的に変わることはありません**
-(以前のバージョンの`uses: ...@v1`のように、ワークフロー実行のたびに自動で最新化される
-仕組みではなくなりました)。
+The build script is copied under `.github/tsuzuri/` when you run `init`, so **once generated,
+the version never changes automatically unless you do something** (unlike the old
+`uses: ...@v1`, it's no longer updated to the latest on every workflow run).
 
-最新版のtsuzuriに更新したい場合は、`--update`を付けてセットアップコマンドを実行してください。
-ワークフローとビルドスクリプトだけが最新版に上書きされ、`.github/docs-pages.config`や
-独自CSS(`STYLE_FILE`)はそのまま残ります(詳しくは[CLIリファレンス](./cli.md)の
-「最新版に更新する(`--update`)」を参照)。
+To update to the latest Tsuzuri, run the setup command with `--update`. Only the workflow and
+the build script are overwritten with the latest version; `.github/docs-pages.config` and your
+custom CSS (`STYLE_FILE`) are left as they are (see "Updating to the latest version
+(`--update`)" in the [CLI reference](./cli.md)).
 
 ```sh
 npx github:akilasatolu/tsuzuri#v1 init --update
 ```
 
-ビルド用の依存(marked など)も、`.github/tsuzuri/package-lock.json`に書かれた版とハッシュで固定されています
-(v1.7.0以降)。`--update`を実行するまで変わりません。
+The build dependencies (marked and others) are also pinned to the versions and hashes written in
+`.github/tsuzuri/package-lock.json` (v1.7.0 or later). They don't change until you run
+`--update`.
 
-特定のバージョンに固定したい場合は、タグを指定します。`#v1`はv1系の最新版(互換性を保ったまま更新される)、
-`#v1.2.0`のように完全なバージョンを指定すると、そのリリースに固定されます。
+To pin a specific version, specify a tag. `#v1` is the latest v1 release (updated without
+breaking compatibility); a full version such as `#v1.2.0` pins that release.
 
 ```sh
 npx github:akilasatolu/tsuzuri#v1.2.0 init --update

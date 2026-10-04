@@ -1,53 +1,53 @@
 ---
-title: ブループリント(blueprint)
+title: Blueprint (blueprint)
 theme: blueprint
 styleFile: .github/tsuzuri/styles/plain.css
-description: Tsuzuriの組み込みテーマ「ブループリント(blueprint)」の見本ページ
+description: A sample page of Tsuzuri's built-in theme "Blueprint (blueprint)"
 ---
 
-# ブループリント(blueprint)
+# Blueprint (blueprint)
 
-設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示。
+Like a blueprint, with a white grid and fine lines on blue, and headings with dimension lines. Always looks the same.
 
-このテーマをサイト全体で使うには、`.github/docs-pages.config`で`THEME=blueprint`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: blueprint`と書きます
-([テーマ・スタイル](../theming.md)参照)。
+To use this theme for the whole site, set `THEME=blueprint` in `.github/docs-pages.config`.
+To use it for a single page, write `theme: blueprint` in that page's frontmatter
+(see [Theming](../theming.md)).
 
-[← ミニマル(minimal)](minimal.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)
+[← Minimal (minimal)](minimal.md) · [Gallery](../gallery.md) · [90s (nineties) →](nineties.md)
 
-## 見出しレベル2
+## Heading level 2
 
-段落のテキストです。**太字**、*斜体*、~~取り消し線~~、`インラインコード`、
-[サイト内リンク](../getting-started.md)、[外部リンク](https://github.com/akilasatolu/tsuzuri)を含みます。
-長めの文章が続いたときの行送りや文字の読みやすさも、このあたりで確認できます。
+A paragraph of text. It includes **bold**, *italic*, ~~strikethrough~~, `inline code`,
+[a link within the site](../getting-started.md) and [an external link](https://github.com/akilasatolu/tsuzuri).
+This is also where you can check the line spacing and readability of longer passages of text.
 
-### 見出しレベル3
+### Heading level 3
 
-- 箇条書きの項目1
-- 箇条書きの項目2
-  - 入れ子の項目
+- Bullet item 1
+- Bullet item 2
+  - Nested item
 
-1. 番号付きリスト1
-2. 番号付きリスト2
+1. Numbered item 1
+2. Numbered item 2
 
-#### 見出しレベル4
+#### Heading level 4
 
-> 引用ブロックです。ほかのドキュメントからの引用や、補足の説明に使います。
+> A blockquote. Use it for quotes from other documents or for supplementary notes.
 
-| 設定キー | 既定値 | 説明 |
+| Setting | Default | Description |
 |---|---|---|
-| `THEME` | `material` | 組み込みテーマ名 |
-| `NAV_ENABLED` | `false` | ナビゲーションの表示 |
-| `LANGUAGES` | `en` | サイトの言語(`<html lang>`の値) |
+| `THEME` | `material` | The built-in theme name |
+| `NAV_ENABLED` | `false` | Whether to show the navigation |
+| `LANGUAGES` | `en` | The site language (the value of `<html lang>`) |
 
 ```js
-// コードブロック
+// A code block
 import { marked } from "marked";
 console.log(marked.parse("# Hello Tsuzuri"));
 ```
 
 ---
 
-![Tsuzuriのロゴ](../../assets/favicon.svg)
+![The Tsuzuri logo](../../assets/favicon.svg)
 
-[← ミニマル(minimal)](minimal.md) ・ [ギャラリー一覧](../gallery.md) ・ [90年代(nineties) →](nineties.md)
+[← Minimal (minimal)](minimal.md) · [Gallery](../gallery.md) · [90s (nineties) →](nineties.md)

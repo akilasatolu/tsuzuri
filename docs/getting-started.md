@@ -4,130 +4,137 @@ title: Getting Started
 
 # Getting Started
 
-## 前提条件
+## Prerequisites
 
-- 対象がGitHubリポジトリであること(GitHub Pagesを使うため)。
-- Node.jsやgit等をローカルに常設インストールしておく必要は基本的にありません。
-  セットアップコマンド(`npx ...`)の実行にはNode.js 20以上(npx)が必要ですが、これは
-  一時的に実行されるだけで、プロジェクトへの恒久的なインストールは発生しません。
-- ビルド・デプロイ自体はGitHub Actions上で実行されるため、利用者のローカル環境に
-  Node.jsをインストールしていなくてもデプロイは可能です(セットアップコマンドの
-  実行時のみNode.jsが必要です)。
+- Your project must be a GitHub repository (Tsuzuri uses GitHub Pages).
+- You generally don't need Node.js, git or similar tools permanently installed. Running the
+  setup command (`npx ...`) needs Node.js 20 or later (npx), but it only runs temporarily and
+  installs nothing permanently into your project.
+- The build and deployment run on GitHub Actions, so you can deploy without Node.js on your
+  machine (Node.js is only needed when you run the setup command).
 
-## インストール
+## Installation
 
-リポジトリのルートで、次のコマンドを実行します。
+Run the following command at the root of your repository.
 
 ```
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-実行すると、トリガーブランチ・起点となるMarkdownファイル・テーマ・独自CSSひな形の
-要否について、4つの質問が対話形式で表示されます。すべてEnterキーだけで既定値
-(`main`ブランチ・`README.md`・和テーマ・ひな形は作らない)を選ぶこともできます。
-対話フローの詳細は[cli.md](./cli.md)を参照してください。
+It asks seven questions: the trigger branch, the starting Markdown file, the theme, whether
+to show the navigation, the site language, the site name, and whether to create a custom CSS
+template. You can accept every default just by pressing Enter (the repository's default
+branch, `README.md`, the Material theme, navigation shown, English (`en`), the repository
+name, and no template). If your README is written in another language, answer the site
+language question with that language (for example `ja`). See the [CLI reference](./cli.md)
+for the full question flow.
 
-このコマンドにより、ワークフロー・設定ファイルに加えて、ビルドスクリプト本体一式が
-リポジトリに生成されます。
+Besides the workflow and the settings file, this command adds the whole build script to your
+repository.
 
 - `.github/workflows/docs-pages.yml`
 - `.github/docs-pages.config`
-- `.github/tsuzuri/`(ビルドスクリプト本体一式。`build-docs.mjs`・`lib/*.mjs`・`styles/*.css`)
-- (任意)`.github/tsuzuri/styles/custom.css`(組み込みテーマCSSと同じディレクトリに置かれる独自CSSひな形)
+- `.github/tsuzuri/` (the build script itself: `build-docs.mjs`, `lib/*.mjs`, `styles/*.css`)
+- (optional) `.github/tsuzuri/styles/custom.css` (a custom CSS template placed in the same
+  folder as the built-in theme CSS)
 
-ビルドスクリプト本体もリポジトリにコピーされるため、生成後のワークフローは実行のたびに
-OSS本体リポジトリ(tsuzuri)を参照することなく、このリポジトリの中だけでビルド・
-デプロイが完結します。詳しくは[デプロイ設定(deployment.md)](./deployment.md)を
-参照してください。
+Because the build script is copied into your repository too, the generated workflow builds
+and deploys entirely inside your repository, without fetching the Tsuzuri repository each
+time. See [Deployment](./deployment.md) for details.
 
-## GitHub Pagesの設定
+## Setting up GitHub Pages
 
-生成されたファイルをコミットする前後どちらでも構いませんが、GitHubリポジトリの
-設定画面で、GitHub Pagesのソースを切り替える必要があります(最初の1回だけ)。
+Before or after committing the generated files, you need to switch the GitHub Pages source in
+your repository settings (first time only).
 
-1. リポジトリの `Settings` タブを開く
-2. 左メニューの `Pages` を選ぶ
-3. `Build and deployment` の `Source` を `GitHub Actions` に変更する
+1. Open the repository's `Settings` tab
+2. Choose `Pages` in the left menu
+3. Under `Build and deployment`, change `Source` to `GitHub Actions`
 
-この設定をしていないと、ワークフロー自体は正常に実行されても、実際のPagesへの公開が
-行われません。
+Without this setting, the workflow itself runs fine but nothing is actually published to
+Pages.
 
-`TRIGGER_BRANCH`に既定ブランチ(通常は`main`)以外のブランチを指定した場合は、
-さらに`Settings > Environments > github-pages`でそのブランチからのデプロイを許可する
-必要があります。手順は[デプロイ設定](./deployment.md)の「既定ブランチ以外を
-トリガーブランチにする場合」を参照してください。
+If you set `TRIGGER_BRANCH` to a branch other than the default branch (usually `main`), you
+also need to allow deployments from that branch under `Settings > Environments > github-pages`.
+See "Using a branch other than the default branch as the trigger branch" in
+[Deployment](./deployment.md).
 
-## 初回デプロイ
+## First deployment
 
-生成されたファイル一式をコミットし、`.github/docs-pages.config`の`TRIGGER_BRANCH`
-(デフォルト`main`)へpushしてください。pushが完了すると、GitHub Actionsのワークフローが
-自動的に起動します。
+Commit all the generated files and push to the `TRIGGER_BRANCH` in `.github/docs-pages.config`
+(`main` by default). Once the push completes, the GitHub Actions workflow starts
+automatically.
 
-リポジトリの `Actions` タブを開くと、`Deploy Docs to GitHub Pages`という名前の
-ワークフロー実行が表示されます。緑のチェックマークが付けば成功です。
-`Settings > Pages`のページに表示されるURLから、生成されたサイトを確認できます
-(反映まで数分かかる場合があります)。
+Open the repository's `Actions` tab and you'll see a run named `Deploy Docs to GitHub Pages`.
+A green check mark means it succeeded. You can open the generated site from the URL shown on
+the `Settings > Pages` page (it can take a few minutes to appear).
 
-## pushする前に手元で確認する(任意)
+## Checking locally before you push (optional)
 
-pushしてGitHub Actionsを待たなくても、手元で同じビルドを実行して見た目やリンク切れを確認できます
-(Node.js 20以上が必要です)。リポジトリの直下で、次のコマンドを実行するのがいちばん簡単です(v1.5.0以降)。
+Instead of pushing and waiting for GitHub Actions, you can run the same build locally to check
+the look and broken links (Node.js 20 or later is required). The easiest way is to run this at
+the root of your repository (v1.5.0 or later).
 
 ```sh
 npx github:akilasatolu/tsuzuri#v1 preview
 ```
 
-ビルドが終わると`http://localhost:4000/`でサイトを開けます(詳しくは[CLIリファレンス](cli.md#手元で確認するpreview))。
+When the build finishes, open the site at `http://localhost:4000/` (see the
+[CLI reference](cli.md#previewing-locally-preview) for details).
 
-`preview`を使わずに、手動で同じことをする場合は次の順に実行します。
+To do the same thing by hand without `preview`, run the following steps in order.
 
-1. ビルドに使う依存を`.github/tsuzuri/`にインストールします。`.github/tsuzuri/package-lock.json`の
-   とおりに入るので、ワークフローと同じ版になります(v1.7.0以降)。
+1. Install the build dependencies into `.github/tsuzuri/`. They are installed exactly as listed
+   in `.github/tsuzuri/package-lock.json`, so you get the same versions as the workflow
+   (v1.7.0 or later).
 
    ```sh
    npm ci --prefix .github/tsuzuri --ignore-scripts
    ```
 
-   v1.6.0以前は`package-lock.json`が無いので、生成された`.github/workflows/docs-pages.yml`の
-   「Install build dependency」にある`npm install ...`の行をそのまま使ってください。
+   Up to v1.6.0 there is no `package-lock.json`, so use the `npm install ...` line from
+   "Install build dependency" in the generated `.github/workflows/docs-pages.yml` as is.
 
-   インストール先の`.github/tsuzuri/node_modules/`は、`init`が生成する`.github/tsuzuri/.gitignore`に
-   よってコミットの対象外になっています。
+   The install location, `.github/tsuzuri/node_modules/`, is excluded from commits by the
+   `.github/tsuzuri/.gitignore` that `init` generates.
 
-2. ビルドします。`.github/docs-pages.config`の設定がそのまま使われるので、公開サイトと同じ
-   見た目で確認できます。
+2. Build. The settings in `.github/docs-pages.config` are used as is, so you see the same look
+   as the published site.
 
    ```sh
    node .github/tsuzuri/build-docs.mjs
    ```
 
-   試しに設定を変えたいときは、`THEME=nineties node .github/tsuzuri/build-docs.mjs`のように
-   環境変数で渡すと、そのキーだけ設定ファイルより優先されます。
+   To try a different setting, pass it as an environment variable, like
+   `THEME=nineties node .github/tsuzuri/build-docs.mjs`. Only that key overrides the settings
+   file.
 
    > [!NOTE]
-   > 設定ファイルを自動で読むのはv1.4.0以降です。それより前のバージョンでは、設定ファイルの値を
-   > 環境変数で渡してください(例: `STYLE_DIR=.github/tsuzuri/styles NAV_ENABLED=true node .github/tsuzuri/build-docs.mjs`)。
-   > リポジトリにコピー済みのバージョンは、`.github/workflows/docs-pages.yml`の先頭のコメント
-   > (`# tsuzuri v1.4.0 の …`)で確認できます。古い場合は`init --update`で更新できます
-   > ([CLIリファレンス](cli.md)参照)。
+   > The settings file is read automatically from v1.4.0. With older versions, pass the values
+   > from the settings file as environment variables (for example
+   > `STYLE_DIR=.github/tsuzuri/styles NAV_ENABLED=true node .github/tsuzuri/build-docs.mjs`).
+   > You can see which version is copied into your repository in the comment at the top of
+   > `.github/workflows/docs-pages.yml` (`# tsuzuri v1.4.0 の …`). If it's old, update it with
+   > `init --update` (see the [CLI reference](cli.md)).
 
-3. できあがった`_site/`を簡易サーバーで開きます(ファイルを直接開くとリンクが切れます)。
+3. Serve the resulting `_site/` with a simple server (opening the files directly breaks the
+   links).
 
    ```sh
    npx serve _site
    ```
 
-   `http://localhost:3000/`などで確認できます。確認が終わったら`_site/`は削除して構いません。
-   v1.5.0以降は、ビルドの前に前回の出力が自動で消されます(それより前のバージョンでは、ページを
-   削除・改名したときは`_site/`を消してからビルドし直してください)。
-   `_site/`を誤ってコミットしないよう、リポジトリの`.gitignore`に次の1行を追加しておくと安心です。
+   Check it at `http://localhost:3000/` or similar. You can delete `_site/` when you're done.
+   From v1.5.0, the previous output is removed automatically before each build (with older
+   versions, delete `_site/` and rebuild after deleting or renaming pages). To avoid
+   committing `_site/` by mistake, add this line to your repository's `.gitignore`.
 
    ```
    _site/
    ```
 
-## 次のステップ
+## Next steps
 
-- サイトがどのように組み立てられているかを知りたい場合は[仕組み(concepts.md)](./concepts.md)
-- 設定できる項目の一覧は[設定リファレンス(configuration.md)](./configuration.md)
-- 見た目(配色・装飾)を変えたい場合は[テーマ・スタイル(theming.md)](./theming.md)
+- To learn how the site is put together, see [Concepts](./concepts.md)
+- For the list of settings, see the [configuration reference](./configuration.md)
+- To change the look (colors and decoration), see [Theming](./theming.md)

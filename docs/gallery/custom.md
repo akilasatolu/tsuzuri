@@ -1,54 +1,56 @@
 ---
-title: 独自CSSの例(このサイト)
-description: THEME=noneと独自CSS(STYLE_FILE)だけで作った、このサイト自身の見た目の見本ページ
+title: Custom CSS example (this site)
+description: A sample page of this site's own look, made only with THEME=none and custom CSS (STYLE_FILE)
 ---
 
-# 独自CSSの例(このサイト)
+# Custom CSS example (this site)
 
-組み込みテーマを使わず(`THEME=none`)、`STYLE_FILE`の独自CSSだけで作った見た目です。
-このサイト全体がこの見た目になっています。Tsuzuri(綴り)の名前とロゴをそのまま形にした「スレッド」のデザインで、
-本文の左にページを綴じる1本の糸が通り、h1 はロゴの中心のような灯った点から、h2 は糸の上の結び目になります。
-糸は読み進めるほど上から炎の色に染まり、結び目は読んだ章まで灯るので、どこまで読んだかが分かります。
-ナビは、ページどうしが線でつながる木の形です。
+This look is made without a built-in theme (`THEME=none`), using only custom CSS in `STYLE_FILE`.
+The whole site looks like this. It's the "thread" design, which gives shape to the name and logo of
+Tsuzuri (綴り, "binding"): a single thread that binds the pages runs to the left of the content,
+the h1 starts from a lit dot like the center of the logo, and each h2 is a knot on the thread.
+As you read on, the thread turns flame-colored from the top, and the knots light up for the
+chapters you've read, so you can tell how far you've got. The navigation is a tree in which pages
+are connected by lines.
 
-使っているCSSは[custom.css](https://github.com/akilasatolu/tsuzuri/blob/docs/.github/tsuzuri/styles/custom.css)です。
-書き方は[テーマ・スタイル](../theming.md#独自cssでカスタマイズする)を参照してください。
+The CSS is [custom.css](https://github.com/akilasatolu/tsuzuri/blob/docs/.github/tsuzuri/styles/custom.css).
+See [Theming](../theming.md#customizing-with-your-own-css) for how to write it.
 
-[← 装飾なし(none)](none.md) ・ [ギャラリー一覧](../gallery.md)
+[← No decoration (none)](none.md) · [Gallery](../gallery.md)
 
-## 見出しレベル2
+## Heading level 2
 
-段落のテキストです。**太字**、*斜体*、~~取り消し線~~、`インラインコード`、
-[サイト内リンク](../getting-started.md)、[外部リンク](https://github.com/akilasatolu/tsuzuri)を含みます。
-長めの文章が続いたときの行送りや文字の読みやすさも、このあたりで確認できます。
+A paragraph of text. It includes **bold**, *italic*, ~~strikethrough~~, `inline code`,
+[a link within the site](../getting-started.md) and [an external link](https://github.com/akilasatolu/tsuzuri).
+This is also where you can check the line spacing and readability of longer passages of text.
 
-### 見出しレベル3
+### Heading level 3
 
-- 箇条書きの項目1
-- 箇条書きの項目2
-  - 入れ子の項目
+- Bullet item 1
+- Bullet item 2
+  - Nested item
 
-1. 番号付きリスト1
-2. 番号付きリスト2
+1. Numbered item 1
+2. Numbered item 2
 
-#### 見出しレベル4
+#### Heading level 4
 
-> 引用ブロックです。ほかのドキュメントからの引用や、補足の説明に使います。
+> A blockquote. Use it for quotes from other documents or for supplementary notes.
 
-| 設定キー | 既定値 | 説明 |
+| Setting | Default | Description |
 |---|---|---|
-| `THEME` | `material` | 組み込みテーマ名 |
-| `NAV_ENABLED` | `false` | ナビゲーションの表示 |
-| `LANGUAGES` | `en` | サイトの言語(`<html lang>`の値) |
+| `THEME` | `material` | The built-in theme name |
+| `NAV_ENABLED` | `false` | Whether to show the navigation |
+| `LANGUAGES` | `en` | The site language (the value of `<html lang>`) |
 
 ```js
-// コードブロック
+// A code block
 import { marked } from "marked";
 console.log(marked.parse("# Hello Tsuzuri"));
 ```
 
 ---
 
-![Tsuzuriのロゴ](../../assets/favicon.svg)
+![The Tsuzuri logo](../../assets/favicon.svg)
 
-[← 装飾なし(none)](none.md) ・ [ギャラリー一覧](../gallery.md)
+[← No decoration (none)](none.md) · [Gallery](../gallery.md)

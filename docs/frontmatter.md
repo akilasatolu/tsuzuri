@@ -1,82 +1,84 @@
 ---
-title: Frontmatterリファレンス
+title: Frontmatter reference
 ---
 
-# Frontmatterリファレンス
+# Frontmatter reference
 
-「frontmatter」とは、Markdownファイルの一番先頭に`---`で囲んで書く、そのページ専用の
-補足情報(メタデータ)のことです。ページタイトルやSEO用の説明文などを、本文とは別枠で
-指定できます。
+"Frontmatter" is extra information (metadata) for a single page, written between `---` lines at
+the very top of a Markdown file. It lets you set things like the page title and the description
+used for SEO, separately from the content.
 
-## 書式
+## Format
 
-Markdownファイル(例: `README.md`)の一番先頭に、`---`で始まり`---`で終わるブロックを置き、
-その中に`キー: 値`の形式で1行ずつ書きます。
+At the very top of a Markdown file (e.g. `README.md`), put a block that starts and ends with
+`---`, and write one `key: value` per line inside it.
 
 ```markdown
 ---
-title: プロジェクト名
-description: このプロジェクトの概要を1〜2文で
+title: Project name
+description: A one- or two-sentence summary of the project
 ogImage: /assets/ogp.png
 noindex: false
 ---
 
-# ここから普通のMarkdown本文
+# Regular Markdown content starts here
 ...
 ```
 
-対応しているのは「`キー: 値`」というシンプルな1行形式のみです。YAMLのような
-本格的な構文解析は行わない、独自の簡易パーサで読み取っています。
+Only the simple one-line `key: value` form is supported. It's read by a small built-in parser
+that doesn't do full YAML parsing.
 
-## サポートされるキー
+## Supported keys
 
 ### title
-ページのタイトルです。使われる場所と、指定しなかった場合の扱いは次のとおりです。
+The title of the page. Where it's used, and what happens when it isn't set:
 
-| 使われる場所 | `title`あり | `title`なし |
+| Used in | With `title` | Without `title` |
 |---|---|---|
-| `<title>`タグ・`og:title` | `title`の値 | 本文先頭の見出し(h1。`<h1>`で書いたものも含む)。それも無ければ、起点のページはサイト名、それ以外はファイルパス |
-| ナビゲーション・前後のページへのリンク(`NAV_ENABLED=true`時) | `title`の値 | 本文先頭の見出し(h1。`<h1>`で書いたものも含む)。それも無ければファイル名(例: `cli.md`)。起点のページだけは、h1も無ければサイト名 |
-| `sitemap.json`のページ一覧(`SITEMAP_JSON=true`時) | `title`の値 | ファイルパス(例: `docs/cli.md`) |
+| The `<title>` tag and `og:title` | The `title` value | The first heading in the text (h1, including one written as `<h1>`). If there's none, the site name for the starting page and the file path for other pages |
+| The navigation and the previous/next page links (with `NAV_ENABLED=true`) | The `title` value | The first heading in the text (h1, including one written as `<h1>`). If there's none, the file name (e.g. `cli.md`). Only for the starting page, the site name if there's no h1 either |
+| The page list in `sitemap.json` (with `SITEMAP_JSON=true`) | The `title` value | The file path (e.g. `docs/cli.md`) |
 
-`<title>`とナビで違う名前にしたい場合(ナビには短い名前を出したい等)は、`title`を書いてください。
+To use different names in `<title>` and the navigation (to show a shorter name in the
+navigation, for example), write a `title`.
 
 ### description
-ページの説明文です。`<meta name="description">`と`<meta property="og:description">`の
-両方に使われます(検索結果やSNSでシェアされたときに表示されます)。
+The description of the page. It's used for both `<meta name="description">` and
+`<meta property="og:description">` (shown in search results and when the page is shared on
+social media).
 
-指定しない場合は、本文の最初の段落(注意書きの見出しは除く)から、120文字までの説明文を自動で作ります
-(v1.6.0以降。それより前のバージョンでは、これらのタグ自体が出力されません)。
+If not set, a description of up to 120 characters is made automatically from the first
+paragraph of the text (excluding alert titles) (v1.6.0 or later; in earlier versions these tags
+aren't output at all).
 
 ### ogImage
-SNS等でシェアされた際に表示される画像(OGP画像)の指定です。相対パス、または
-`https://`から始まる絶対URLのどちらでも指定できます。相対パスはそのページのファイルからの
-相対パス(`/`で始めるとリポジトリルートから)で、サイトの絶対URLに変換され、画像もサイトに
-コピーされます。省略した場合は、
-`.github/docs-pages.config`の`OGP_DEFAULT_IMAGE`が設定されていればそちらが使われ、
-それも無ければ`og:image`タグ自体が出力されません。
+The image shown when the page is shared on social media (the OGP image). You can give either a
+relative path or an absolute URL starting with `https://`. A relative path is relative to the
+page's file (or to the repository root if it starts with `/`); it's converted to an absolute URL
+of the site, and the image is copied to the site too. If left out, `OGP_DEFAULT_IMAGE` in
+`.github/docs-pages.config` is used if set, and otherwise no `og:image` tag is output.
 
 ### ogType
-OGPの`og:type`に使う値です。省略した場合のデフォルトは`website`です。
+The value used for OGP's `og:type`. If left out, the default is `website`.
 
 ### noindex
-検索エンジンにこのページをインデックスさせたくない場合に`true`を指定します。
-`true`と指定した場合のみ`<meta name="robots" content="noindex">`が出力されます。
-それ以外の値(`false`や未指定)の場合はこのタグ自体が出力されません
-(大文字小文字は区別せず、`"true"`と一致する場合のみ真として扱われます)。
+Set to `true` if you don't want search engines to index this page. Only when it's `true` is
+`<meta name="robots" content="noindex">` output. With any other value (`false` or not set), the
+tag isn't output at all (it's case-insensitive, and only a value equal to `"true"` counts as
+true).
 
 ### theme
-このページだけ、`.github/docs-pages.config`の`THEME`(サイト全体のテーマ)とは
-違うテーマを使いたい場合に指定します。指定できる値は次の2種類です。
+Set this when you want this page alone to use a theme different from `THEME` (the site-wide
+theme) in `.github/docs-pages.config`. Two kinds of values are accepted.
 
-- **組み込みテーマ名**: `material` / `glass` / `neumorphism` / `editorial` / `minimal` / `blueprint` / `nineties` / `none`
-  (意味は[テーマ・スタイル(Theming)](theming.md)を参照。`none`を指定すると、
-  このページだけテーマ層を適用しません)
-- **独自CSSファイルのパス**: 上記8個のいずれにも一致しない値は、
-  「リポジトリルートからの相対パス」で指定した独自CSSファイルとして扱われます。
-  ファイル自体は自分で用意し、パスを含めてそのまま書いてください。
-  リポジトリの外(`../`で始まるパスや絶対パス、リポジトリ外を指すシンボリックリンク)は
-  指定できません。指定した場合は警告を出して、サイト全体の`THEME`にフォールバックします。
+- **A built-in theme name**: `material` / `glass` / `neumorphism` / `editorial` / `minimal` /
+  `blueprint` / `nineties` / `none` (see [Theming](theming.md) for what they mean; with `none`,
+  the theme layer isn't applied to this page)
+- **The path of a custom CSS file**: any value that doesn't match one of the eight names above
+  is treated as a custom CSS file, given as a path relative to the repository root. Prepare the
+  file yourself and write its path as is. Paths outside the repository (a path starting with
+  `../`, an absolute path, or a symbolic link pointing outside the repository) aren't allowed;
+  if given, a warning is shown and the site-wide `THEME` is used instead.
 
 ```markdown
 ---
@@ -90,23 +92,24 @@ theme: assets/my-original-theme.css
 ---
 ```
 
-いずれの場合も、`.github/docs-pages.config`の`STYLE_FILE`(サイト全体の独自CSS、
-第3層)は、このキーの指定とは関係なく引き続き適用されます。つまり
-「基礎CSS → (このページの)theme → STYLE_FILE」という順で重なります。
-このページには`STYLE_FILE`を当てたくない場合は、次の[`styleFile`](#stylefile)を使います。
+Either way, `STYLE_FILE` in `.github/docs-pages.config` (the site-wide custom CSS, the third
+layer) is still applied regardless of this key. So the layers stack as "base CSS → (this
+page's) theme → STYLE_FILE". If you don't want `STYLE_FILE` applied to this page, use
+[`styleFile`](#stylefile) below.
 
-指定したテーマ名・パスに対応するCSSファイルが見つからない場合(組み込みテーマ名の
-CSSが欠落している、独自パスのファイルが存在しない、など)は、警告(warning)を
-出したうえで、そのページだけサイト全体の`THEME`にフォールバックします
-(ビルド自体は止まりません。いわゆる「fail-open」な挙動です)。
+If no CSS file is found for the given theme name or path (a built-in theme's CSS is missing, a
+custom path doesn't exist, and so on), a warning is shown and that page falls back to the
+site-wide `THEME` (the build itself doesn't stop; a "fail-open" behavior).
 
 ### styleFile
-このページだけ、`.github/docs-pages.config`の`STYLE_FILE`(サイト全体の独自CSS、第3層)の代わりに
-使う独自CSSファイルを、リポジトリの直下からのパスで指定します(v1.5.0以降)。
+Sets, as a path from the root of the repository, a custom CSS file used for this page instead
+of `STYLE_FILE` in `.github/docs-pages.config` (the site-wide custom CSS, the third layer)
+(v1.5.0 or later).
 
-中身が空(コメントだけ)のCSSファイルを指定すれば、そのページにはサイト全体の独自CSSを当てず、
-`theme`(テーマ)だけの見た目にできます。例えば、サイト全体は独自CSSで作りつつ、テーマの見本ページだけ
-組み込みテーマの見た目で見せたい場合に使います(このサイトの[テーマギャラリー](gallery.md)がこの方法です)。
+Give it an empty CSS file (only comments) and that page won't get the site-wide custom CSS, so
+it shows only the `theme`. For example, use it when the whole site is built with custom CSS but
+you want theme sample pages to look like the built-in theme (this site's
+[theme gallery](gallery.md) does exactly that).
 
 ```markdown
 ---
@@ -115,14 +118,16 @@ styleFile: .github/tsuzuri/styles/plain.css
 ---
 ```
 
-指定したファイルが見つからない場合や、リポジトリの外を指している場合は、警告を出したうえで
-サイト全体の`STYLE_FILE`を使います。
+If the file isn't found or points outside the repository, a warning is shown and the site-wide
+`STYLE_FILE` is used.
 
 ### nav
-`false`を指定すると、そのページをナビ(サイドバー)と「前のページ/次のページ」のリンクに載せません
-(v1.6.0以降)。ページ自体は出力されるので、他のページからのリンクで開けます。サイト内検索の対象にも含まれます。
+With `false`, the page isn't listed in the navigation (sidebar) or in the "previous page / next
+page" links (v1.6.0 or later). The page itself is still output, so it opens from links on other
+pages. It's still included in site search.
 
-見本ページや補足ページのように、ナビに並べるほどではないページに使います。
+Use it for pages that aren't worth listing in the navigation, such as sample or supplementary
+pages.
 
 ```markdown
 ---
@@ -131,11 +136,12 @@ nav: false
 ```
 
 ### order
-ナビでの並び順を数値で指定します(v1.6.0以降)。同じディレクトリの中で、`order`を書いたページが
-小さい順に先に並び、書いていないページはその後ろに、リンクで見つかった順に並びます。
-ディレクトリの位置は、その中の`README.md`(または`index.md`)の`order`で指定できます。
-[多言語サイト](i18n.md)では、ナビが言語ごとに作られ、`order`もそれぞれの言語のナビで効きます
-(英語のページの`order`は英語のナビの並びを決めます)。
+Sets the order in the navigation as a number (v1.6.0 or later). Within the same folder, pages
+with an `order` come first, smallest first, and pages without one come after them, in the order
+they were found through links. A folder's position can be set with the `order` of the
+`README.md` (or `index.md`) inside it. On a [multilingual site](i18n.md), a navigation is made
+for each language, and `order` works within each language's navigation (the `order` of a
+Japanese page decides the order in the Japanese navigation).
 
 ```markdown
 ---
@@ -144,8 +150,8 @@ order: 1
 ```
 
 ### toc
-`NAV_ENABLED=true`のとき、見出し(h2・h3)が3つ以上あるページには目次が表示されます。
-このページだけ目次を出したくない場合は`false`を指定します。
+With `NAV_ENABLED=true`, pages with three or more headings (h2 and h3) show a table of contents.
+Set `false` to hide it on this page only.
 
 ```markdown
 ---
@@ -153,18 +159,17 @@ toc: false
 ---
 ```
 
-## 制限事項
+## Limitations
 
-- 改行コードはLF・CRLFのどちらでも構いません(Windowsで作成したファイルもそのまま使えます)。
-  ファイル先頭のBOMも無視されます。
-
-- 配列やネストしたオブジェクトのような複雑な構造には対応していません。あくまで
-  「1行=1つの文字列(または`noindex`のみ真偽値)」というフラットな形式のみです。
-- 複数行にまたがる値(YAMLのブロックスカラーのような書き方)にも対応していません。
-- 値全体を`"…"`または`'…'`で囲んだ場合、囲んでいる引用符は取り除かれます
-  (`title: "My Site: Home"`は`My Site: Home`になります)。
-- YAMLパーサ自体を追加していないため、上記8キー以外の未知のキーを書いても
-  エラーにはならず、文字列としてそのまま保持されます(現時点では出力には使われません)。
-- 開始の`---`はあるのに終端の`---`が見つからない場合、警告(warning)を出したうえで
-  frontmatterとしては解釈せず、ブロック全体をそのまま本文として扱います
-  (ビルド自体は止まりません。いわゆる「fail-open」な挙動です)。
+- Line endings can be LF or CRLF (files created on Windows work as they are). A BOM at the start
+  of the file is ignored too.
+- Complex structures such as arrays and nested objects aren't supported. Only the flat form
+  "one line = one string (or a boolean, for `noindex` only)" is.
+- Values that span multiple lines (like YAML block scalars) aren't supported either.
+- If the whole value is wrapped in `"…"` or `'…'`, the wrapping quotes are removed
+  (`title: "My Site: Home"` becomes `My Site: Home`).
+- Since no YAML parser is added, unknown keys other than those above don't cause an error;
+  they're kept as strings (they aren't used in the output at the moment).
+- If there's an opening `---` but no closing `---`, a warning is shown, the block isn't
+  interpreted as frontmatter, and the whole block is treated as content (the build itself
+  doesn't stop; a "fail-open" behavior).

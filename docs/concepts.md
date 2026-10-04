@@ -1,285 +1,309 @@
 ---
-title: 仕組み(Concepts)
+title: Concepts
 ---
 
-# 仕組み(Concepts)
+# Concepts
 
-このページでは、README1枚から複数ページのサイトが組み上がる仕組みを説明します。
+This page explains how a multi-page site is built from a single README.
 
-## READMEを起点にした探索(BFS)
+## Crawling from the README (BFS)
 
-ビルドは、`ROOT_MD`(既定値`README.md`)を出発点にして、そこからMarkdown内のリンクを
-たどっていく「BFS(幅優先探索)」という方法でページを集めていきます。
+The build starts from `ROOT_MD` (`README.md` by default) and collects pages by following the
+links in the Markdown, using a method called BFS (breadth-first search).
 
 ```
 README.md ──> docs/getting-started.md ──> docs/configuration.md
        └────> docs/faq.md
 ```
 
-ポイントは、**リンクをたどって到達できるファイルだけ**がサイトに含まれるという点です。
-リポジトリ内にMarkdownファイルがあっても、README.mdからどこからもリンクされていなければ、
-そのファイルはビルド結果(`_site/`)には出力されません。逆に言えば、新しいページを追加したい
-場合は、既存のどこかのページからリンクを1本張るだけでサイトに組み込まれます。
-画像ファイル(`.png`/`.jpg`/`.svg`等)や、PDF・zipなどその他のファイルについても同様に、
-Markdownからリンク・埋め込みされているものだけが収集され、同じディレクトリ構成でコピーされます。
-ただし、`.`で始まるファイル(`.env`など)と、`.`で始まるディレクトリ(`.github/`など)の中の
-Markdown・画像・動画・音声・PDF以外のファイル(設定ファイルなど)は、誤って公開しないようにコピーしません
-(GitHub上のファイルへのリンクになります。下の表を参照)。
+The key point is that **only files reachable by following links** are included in the site.
+Even if a Markdown file is in the repository, it isn't written to the build output (`_site/`)
+unless some page reachable from README.md links to it. Put the other way around, to add a new
+page, just link it from an existing page and it becomes part of the site.
+The same goes for images (`.png`, `.jpg`, `.svg` and so on) and other files such as PDFs and
+zips: only those linked or embedded from Markdown are collected, and they are copied with the
+same folder structure.
+However, files starting with `.` (such as `.env`), and files inside folders starting with `.`
+(such as `.github/`) other than Markdown, images, video, audio and PDFs (settings files, for
+example), are never copied, so they aren't published by mistake (they become links to the file
+on GitHub; see the table below).
 
-`.github/`のように`.`で始まるディレクトリにあるページ・画像は、`_.github/`のように先頭に`_`を付けた
-パスに出力します(例: `.github/logo.png` → `_.github/logo.png`。v1.4.0以降)。GitHub Pagesに上げる成果物には、
-`.`で始まるファイル・ディレクトリが含まれないためです。リンクは自動でこのパスに書き換わります。
-動画(`.mp4`・`.webm`など)・音声(`.mp3`など)・PDFも同じように出力します(v1.5.0以降。v1.4.0では
-GitHub上のファイルへのリンクになります)。
+Pages and images in folders starting with `.`, such as `.github/`, are written to a path with
+a leading `_`, like `_.github/` (e.g. `.github/logo.png` → `_.github/logo.png`; v1.4.0 or
+later). This is because the artifact uploaded to GitHub Pages can't contain files or folders
+starting with `.`. Links are rewritten to this path automatically. Video (`.mp4`, `.webm` and
+so on), audio (`.mp3` and so on) and PDFs are written the same way (v1.5.0 or later; in v1.4.0
+they become links to the file on GitHub).
 
-リンクしたファイルの出力先が、生成したページやTsuzuriが作るファイル(`index.html`・`404.html`・
-`sitemap.xml`など)と重なる場合は、生成したものを上書きしないよう、そのファイルはコピーせずに
-警告します(`STRICT_LINKS=true`ならビルドを失敗させます。v1.4.0以降)。
+If the output path of a linked file collides with a generated page or a file Tsuzuri creates
+(`index.html`, `404.html`, `sitemap.xml` and so on), the file is not copied, so the generated
+one isn't overwritten, and a warning is shown (with `STRICT_LINKS=true` the build fails;
+v1.4.0 or later).
 
-拡張子の無いパスや`.`で始まるパスへのリンクは、リポジトリに実在するものに合わせて次のように扱います。
+Links to paths without an extension, or to paths starting with `.`, are handled as follows,
+depending on what actually exists in the repository.
 
-| リンク先 | 生成されるサイトでのリンク |
+| Link target | Link in the generated site |
 |---|---|
-| `README.md`か`index.md`のあるディレクトリ(`[ガイド](guide)`・`[ガイド](guide/)`) | サイトのそのディレクトリのページ(`…/guide/`) |
-| サイトに出さないファイル(`LICENSE`・`.env.example`など) | GitHub上のそのファイル(`https://github.com/<owner>/<repo>/blob/<コミット>/LICENSE`) |
-| `README.md`も`index.md`も無いディレクトリ(`[ソース](src/)`) | GitHub上のそのディレクトリの一覧 |
-| 存在しないもの | そのまま(リンク切れとして扱い、`STRICT_LINKS=true`ならビルドを失敗させる) |
+| A folder containing `README.md` or `index.md` (`[Guide](guide)`, `[Guide](guide/)`) | The page for that folder on the site (`…/guide/`) |
+| A file that isn't published on the site (`LICENSE`, `.env.example` and so on) | That file on GitHub (`https://github.com/<owner>/<repo>/blob/<commit>/LICENSE`) |
+| A folder with neither `README.md` nor `index.md` (`[Source](src/)`) | The listing of that folder on GitHub |
+| Something that doesn't exist | Left as is (treated as a broken link; with `STRICT_LINKS=true` the build fails) |
 
-GitHub上へのリンクのURLは、GitHub Actionsでビルドしたときは自動で分かります。手元でビルドしたときは、
-gitの`origin`(GitHubのリポジトリ)と今のブランチ名から作ります(まだpushしていないファイルへのリンクは、GitHub上では開けません)。どちらも分からない場合は、警告を出して
-サイト内のパスのままリンクします(サイトには無いので開けません。リンク先は実在するので、
-リンク切れとしては扱いません)。
+When building on GitHub Actions, the URL for links to GitHub is known automatically. When
+building locally, it's made from git's `origin` (the GitHub repository) and the current branch
+name (links to files you haven't pushed yet won't open on GitHub). If neither is known, a
+warning is shown and the link keeps the path within the site (it won't open, since the file
+isn't on the site, but the target exists, so it isn't treated as a broken link).
 
-同じファイルへ複数箇所からリンクしても二重に処理されることはなく、A→B→Aのように循環して
-リンクし合っていても無限ループにはなりません(一度訪れたファイルは再訪しません)。
+Linking to the same file from several places doesn't process it twice, and pages that link to
+each other in a cycle, like A→B→A, don't cause an infinite loop (a file already visited is not
+visited again).
 
-## Markdown → HTML変換
+## Markdown → HTML conversion
 
-収集された各`.md`ファイルはHTMLに変換され、`_site/`以下に同じディレクトリ構成で
-`.html`拡張子として出力されます(例: `docs/faq.md` → `docs/faq.html`)。
-Markdown内の他ページへのリンク(`[FAQ](./docs/faq.md)`のような記法)も、
-出力時に自動的に`.html`への参照に書き換えられます。利用者側でリンクの書き換え作業をする
-必要はありません。
+Each collected `.md` file is converted to HTML and written under `_site/` with the same folder
+structure and a `.html` extension (e.g. `docs/faq.md` → `docs/faq.html`). Links to other pages
+in the Markdown (written like `[FAQ](./docs/faq.md)`) are rewritten to point to the `.html`
+files automatically. You don't need to rewrite any links yourself.
 
-日本語の文を途中で改行して書いても(Markdownとしては同じ段落)、表示に余計な空白が入らないように、
-前後がどちらも全角文字(漢字・かな・全角の記号)の改行は取り除いて出力します。
+When Japanese text is wrapped in the middle of a sentence (still the same paragraph in
+Markdown), line breaks between two full-width characters (kanji, kana and full-width
+punctuation) are removed in the output, so no stray spaces appear.
 
-### ディレクトリのURL(README.md → index.html)
+### Folder URLs (README.md → index.html)
 
-`ROOT_MD`はサイトのトップ(`index.html`)としても出力されます。同じように、サブディレクトリに
-ある`README.md`は、そのディレクトリの`index.html`としても出力されます(例: `guide/README.md` →
-`guide/README.html`と`guide/index.html`)。これにより`https://…/guide/`のようなディレクトリの
-URLでも開けます。同じディレクトリに`index.md`がある場合は、そちらが`index.html`になります。
+`ROOT_MD` is also written as the top page of the site (`index.html`). In the same way, a
+`README.md` in a subfolder is also written as that folder's `index.html` (e.g.
+`guide/README.md` → `guide/README.html` and `guide/index.html`). This lets the page open at a
+folder URL like `https://…/guide/`. If the same folder has an `index.md`, that one becomes
+`index.html`.
 
-Markdownで`[ガイド](guide/)`のようにディレクトリへリンクした場合も、末尾の`/`を保ったまま
-`…/guide/`へのリンクになり、そのディレクトリの`README.md`(無ければ`index.md`)がサイトに
-含まれます。どちらも無いディレクトリへのリンクは、GitHub上のディレクトリの一覧へのリンクになります
-(上の表を参照)。
+When Markdown links to a folder, like `[Guide](guide/)`, the link keeps the trailing `/` and
+points to `…/guide/`, and that folder's `README.md` (or `index.md` if there's no README) is
+included in the site. A link to a folder with neither becomes a link to the folder listing on
+GitHub (see the table above).
 
-### 見出しへのリンク
+### Links to headings
 
-各見出しには、GitHubでREADMEを表示したときと同じ規則で`id`が付きます。そのため、
-GitHub上で使えている`[説明](docs/frontmatter.md#theme)`のようなページ内の見出しへのリンクは、
-生成されたサイトでもそのまま使えます。
+Each heading gets an `id` using the same rules as when GitHub displays a README. So links to a
+heading within a page that work on GitHub, such as `[details](docs/frontmatter.md#theme)`, also
+work on the generated site.
 
-- 見出しの文字を小文字にし、記号を取り除き、空白を`-`に置き換えたものが`id`になります
-  (例: `## Getting Started` → `getting-started`、`## テーマ・スタイル(Theming)` →
-  `テーマスタイルtheming`)。日本語はそのまま残ります。
-- 同じページに同じ見出しが複数ある場合は、2つ目以降に`-1`・`-2`…が付きます。
+- The `id` is the heading text lowercased, with punctuation removed and spaces replaced by `-`
+  (e.g. `## Getting Started` → `getting-started`, `## テーマ・スタイル(Theming)` →
+  `テーマスタイルtheming`). Non-ASCII letters such as Japanese are kept as they are.
+- If the same heading appears more than once on a page, the second and later ones get `-1`,
+  `-2` and so on.
 
-リンク先のページにその見出しが無い場合(見出しの名前を変えた、綴りが違うなど)は、ビルドのログに
-「リンク先のページに見出しが見つからないリンク」として表示します。`STRICT_LINKS=true`なら
-ビルドを失敗させます(v1.5.0以降)。
+If the target page doesn't have that heading (the heading was renamed, misspelled and so on),
+the build log shows it as "a link whose heading isn't found on the target page". With
+`STRICT_LINKS=true` the build fails (v1.5.0 or later).
 
-## 絶対パスとBASE_PATH
+## Absolute paths and BASE_PATH
 
-生成されるHTML内のリンク・画像パスは、すべて「サイトのルートを起点にした絶対パス」に
-統一されます。これは`BASE_PATH`という値を先頭に付与することで実現されています。
+All links and image paths in the generated HTML are unified as "absolute paths from the root of
+the site". This is done by prefixing them with a value called `BASE_PATH`.
 
-`BASE_PATH`は、サイトの種類によって次のように自動算出されます(利用者が設定する値では
-ありません。ワークフロー(`docs-pages.yml`)のビルドジョブ内で算出し、
-GitHub Actions側の環境変数として`build-docs.mjs`に渡されます)。
+`BASE_PATH` is computed automatically depending on the kind of site (it's not something you
+set; it's computed in the build job of the workflow (`docs-pages.yml`) and passed to
+`build-docs.mjs` as an environment variable on GitHub Actions).
 
-- **ユーザー/組織サイト**(リポジトリ名が`<owner>.github.io`の形式)や、カスタムドメイン
-  使用時: `BASE_PATH`は空文字になり、サイトはドメイン直下に配置されます。
-- **プロジェクトサイト**(それ以外の通常のリポジトリ名): `BASE_PATH`は`/<リポジトリ名>`に
-  なります(例: `https://<owner>.github.io/<repo>/`のように、リポジトリ名がURLの一部に
-  含まれる配置になります)。
+- **User or organization sites** (repositories named `<owner>.github.io`), or when using a
+  custom domain: `BASE_PATH` is empty and the site is placed right under the domain.
+- **Project sites** (any other ordinary repository name): `BASE_PATH` is `/<repository name>`
+  (the repository name becomes part of the URL, as in `https://<owner>.github.io/<repo>/`).
 
-この絶対パス統一のおかげで、ページがどんなに深い階層にあっても相対パスの計算ミスによる
-リンク切れが起きにくくなっています。
+Thanks to these unified absolute paths, broken links from miscalculated relative paths are
+unlikely, however deep a page is in the folder structure.
 
-## 外部リンク・アンカーの扱い
+## External links and anchors
 
-次のようなリンクは「サイト内のページ」とはみなされず、BFS探索の対象にはなりません
-(そのままの記述で出力され、書き換えもされません)。
+The following links are not treated as "pages within the site" and are not crawled (they are
+written as they are, without rewriting).
 
-- `http://`/`https://`/`mailto:`のようなスキーム付きの外部リンク
-- `//example.com/...`のようなプロトコル相対URL
-- `#見出し名`のような、同一ページ内アンカーのみのリンク
+- External links with a scheme, such as `http://`, `https://` and `mailto:`
+- Protocol-relative URLs such as `//example.com/...`
+- Links that are only an anchor within the same page, such as `#heading-name`
 
-## リンク切れ・パストラバーサルへの対応
+## Broken links and path traversal
 
-リンク先のファイルが実際には存在しなかった場合(いわゆるリンク切れ)、ビルドはエラーで
-停止せず、そのリンクを`missing`として記録したうえで処理を継続します。
+If the target file doesn't actually exist (a broken link), the build doesn't stop with an
+error. It records the link as `missing` and continues.
 
-また、`../../../etc/passwd`のようにリポジトリの外側のファイルを覗こうとするリンク
-(パストラバーサル)や、URLエンコードの解読に失敗するような壊れたリンクについては、
-安全のため一切たどらず`rejected`として記録します。これはセキュリティ上の防御であり、
-外部リンクやアンカーのみのリンクとは異なり「意図的に拒否した」ことが分かるように
-区別して記録されます。
+Links that try to reach files outside the repository, such as `../../../etc/passwd` (path
+traversal), and broken links that fail URL decoding are never followed, for safety, and are
+recorded as `rejected`. This is a security defense, and unlike external links or anchor-only
+links, they're recorded separately so you can tell they were "deliberately refused".
 
-いずれの場合も、ビルド自体は失敗させず、正常なページの生成は続行されます
-(`STRICT_LINKS=true`にした場合だけは、ビルドを失敗させて公開を止めます。
-[configuration.md](./configuration.md#strict_links)参照)。
+In either case the build itself doesn't fail, and the valid pages are still generated (only
+with `STRICT_LINKS=true` does the build fail to stop publishing; see the
+[configuration reference](./configuration.md#strict_links)).
 
-## 404ページ
+## The 404 page
 
-存在しないURLにアクセスされたときに表示する`404.html`も生成されます。リポジトリ直下に
-`404.md`を置けばその内容(中で使っている画像もコピーされます。このサイトの404ページも`404.md`で作っています)が、無ければ既定の内容(「ページが見つかりません」とトップページへの
-リンク。ページの言語が日本語以外なら英語。[多言語サイト](./i18n.md)では、トップページのある言語のお知らせと
-それぞれのトップページへのリンクを並べたもの)が使われます。通常のページと同じナビゲーション・テーマで
-表示され、検索エンジンにはインデックスされません(`noindex`)。
+A `404.html`, shown when someone visits a URL that doesn't exist, is generated too. If you put
+a `404.md` at the root of the repository, its contents are used (images used in it are copied
+too; this site's 404 page is also made with `404.md`). Otherwise the default content is used
+("Page not found" and a link to the top page, in Japanese if the page language is Japanese and
+in English otherwise; on a [multilingual site](./i18n.md), a notice for each language that has
+a top page, with links to each top page). It's shown with the same navigation and theme as the
+other pages, and isn't indexed by search engines (`noindex`).
 
-## sitemap.xml・robots.txt(検索エンジン向け)
+## sitemap.xml and robots.txt (for search engines)
 
-GitHub Actionsでビルドした場合(サイトのURLが分かる場合)は、検索エンジン向けの
-`sitemap.xml`も出力されます(`LAST_UPDATED=true`のときは、各ページの最終更新日も`<lastmod>`として入ります)。サイト内の全ページのURL(frontmatterで`noindex: true`を
-指定したページは除く)が載るので、Google Search Consoleなどに登録できます。
+When building on GitHub Actions (when the site URL is known), a `sitemap.xml` for search
+engines is also written (with `LAST_UPDATED=true`, each page's last update date is included as
+`<lastmod>`). It lists the URLs of all pages on the site (except pages with `noindex: true` in
+the frontmatter), so you can submit it to Google Search Console and similar tools.
 
-サイトがドメイン直下にある場合(`<owner>.github.io`という名前のリポジトリや、
-`CUSTOM_DOMAIN`を設定した場合)は、`sitemap.xml`の場所を知らせる`robots.txt`も出力されます
-(`robots.txt`はドメイン直下にしか置けないため、`https://<owner>.github.io/<repo>/`の
-ようなサイトでは出力されません)。
+When the site is right under the domain (a repository named `<owner>.github.io`, or when
+`CUSTOM_DOMAIN` is set), a `robots.txt` pointing to `sitemap.xml` is written too (`robots.txt`
+can only live right under the domain, so it isn't written for a site like
+`https://<owner>.github.io/<repo>/`).
 
-各ページには、正規のURLを示す`<link rel="canonical">`と`og:url`も出力されます。
-トップページとディレクトリの`README.md`は、`README.html`ではなくトップURL・
-ディレクトリのURL(`…/guide/`)が正規のURLになります。
+Each page also gets a `<link rel="canonical">` and an `og:url` showing its canonical URL. For
+the top page and a folder's `README.md`, the canonical URL is the top URL or the folder URL
+(`…/guide/`), not `README.html`.
 
-## GitHubの記法(注意書き・脚注・図・タスクリスト)
+## GitHub syntax (alerts, footnotes, diagrams, task lists)
 
-GitHubでREADMEを表示したときと同じように、次の記法が使えます。
+The following syntax works the same as when GitHub displays a README.
 
-**注意書き** — 引用ブロックの1行目に`[!NOTE]`などを書くと、種類ごとの色の枠で表示されます。
+**Alerts**: write `[!NOTE]` or similar on the first line of a blockquote, and it's shown in a
+box colored by type.
 
 ```markdown
 > [!NOTE]
-> 補足の説明です。
+> A supplementary note.
 ```
 
-種類は`[!NOTE]`(補足)・`[!TIP]`(ヒント)・`[!IMPORTANT]`(重要)・`[!WARNING]`(警告)・
-`[!CAUTION]`(注意)の5つです。枠の見出しはページの言語が日本語ならかっこ内の日本語、それ以外は英語になります。
+There are five types: `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]` and `[!CAUTION]`. The
+box title is in Japanese if the page language is Japanese, and in English otherwise.
 
-**脚注** — 本文に`[^1]`、ページ内のどこかに`[^1]: 内容`と書くと、本文に番号付きのリンクが入り、
-ページの末尾に脚注の一覧が表示されます。
+**Footnotes**: write `[^1]` in the text and `[^1]: content` anywhere on the page, and a
+numbered link appears in the text, with a list of footnotes at the end of the page.
 
 ```markdown
-Tsuzuriは製本用語に由来します[^1]。
+The name Tsuzuri comes from a bookbinding term[^1].
 
-[^1]: 複数の紙を綴じて1冊にすること。
+[^1]: Binding many sheets of paper into one volume.
 ```
 
-**図(mermaid)** — ```` ```mermaid ```` のコードブロックは、フローチャートなどの図として表示されます。
-図は閲覧時に、CDN(jsDelivr)から読み込んだ[mermaid](https://mermaid.js.org/)が描きます
-(図のあるページだけで読み込みます。JavaScriptが動かない環境では、図の元のコードが表示されます)。
+**Diagrams (mermaid)**: a ```` ```mermaid ```` code block is shown as a diagram such as a
+flowchart. Diagrams are drawn in the browser by [mermaid](https://mermaid.js.org/), loaded
+from a CDN (jsDelivr) (only on pages that have a diagram; where JavaScript doesn't run, the
+diagram's source code is shown).
 
-**タスクリスト** — `- [ ]`・`- [x]`はチェックボックス付きのリストになります。
+**Task lists**: `- [ ]` and `- [x]` become a list with checkboxes.
 
-## 見出しへのリンク・目次
+## Links to headings and the table of contents
 
-h2以下の見出しには、カーソルを当てると`#`のリンクが表示されます。クリックするとその見出しへの
-URLになるので、特定の見出しを共有するときに使えます。
+Headings at h2 and below show a `#` link when you hover over them. Clicking it gives you the URL
+of that heading, which is handy for sharing a specific heading.
 
-`NAV_ENABLED=true`のときは、見出し(h2・h3)が3つ以上あるページの先頭(h1の直後)に、そのページの
-目次が表示されます。目次を出したくないページは、frontmatterに`toc: false`と書いてください
-([frontmatter.md](./frontmatter.md#toc)参照)。
+With `NAV_ENABLED=true`, pages with three or more headings (h2 and h3) show their table of
+contents at the top (right after the h1). For pages where you don't want it, write
+`toc: false` in the frontmatter (see the [frontmatter reference](./frontmatter.md#toc)).
 
-## 画像の読み込み
+## Image loading
 
-Markdownで書いた画像(`![説明](画像.png)`)には`loading="lazy"`が付き、画面に表示される位置まで
-スクロールしたときに読み込まれます。画像の多いページでも最初の表示が速くなります。
+Images written in Markdown (`![alt](image.png)`) get `loading="lazy"`, so they load when you
+scroll to where they appear. Pages with many images show up faster.
 
-リポジトリ内の画像(PNG・GIF・JPEG・WebP、大きさが書かれたSVG)には、画像ファイルから読み取った
-`width`・`height`も付きます(v1.5.0以降)。画像の読み込み中に、下の文章がずれて動くのを防ぎます。
-表示される大きさは変わりません(本文の幅より大きい画像は、縦横の比率を保って縮小されます)。
+Images in the repository (PNG, GIF, JPEG, WebP, and SVGs with a stated size) also get `width`
+and `height` read from the image file (v1.5.0 or later). This keeps the text below from
+jumping while images load. The displayed size doesn't change (images wider than the content
+are scaled down, keeping their aspect ratio).
 
-## 最終更新日
+## Last updated date
 
-`LAST_UPDATED=true`にすると、各ページの末尾に、そのMarkdownファイルをgitで最後にコミットした日が
-「最終更新: 2026-09-27」のように表示されます。GitHub Actionsでビルドするときは、ワークフローが
-gitの全履歴を取得してから日付を求めます([configuration.md](./configuration.md#last_updated)参照)。
+With `LAST_UPDATED=true`, the end of each page shows the date that Markdown file was last
+committed in git, like "Last updated: 2026-09-27". When building on GitHub Actions, the
+workflow fetches the full git history before computing the dates (see the
+[configuration reference](./configuration.md#last_updated)).
 
-## 外部から読み込むファイルと依存の安全性
+## Externally loaded files and dependency safety
 
-図(mermaid)のあるページは、閲覧時にmermaidをCDN(jsDelivr)から読み込みます。読み込むファイルには
-ハッシュを確かめる仕組み(SRI)を付けているので、CDNで中身が差し替えられていた場合、ブラウザは実行しません
-(図はコードのまま表示されます。v1.7.0以降)。
+Pages with a diagram (mermaid) load mermaid from a CDN (jsDelivr) in the browser. The loaded
+file carries a hash check (SRI), so if its contents were swapped on the CDN, the browser won't
+run it (the diagram is shown as code; v1.7.0 or later).
 
-ビルドに使う依存(marked・highlight.js・marked-footnote)は、`.github/tsuzuri/package-lock.json`に書かれた
-版とハッシュのとおりにインストールします。ダウンロードした中身が違えばインストールが止まり、
-さらにnpmの正規の署名付きで配布されたものかも確認します(`npm audit signatures`)。
-インストール時にパッケージのスクリプトは実行しません(v1.7.0以降)。
+The build dependencies (marked, highlight.js and marked-footnote) are installed exactly as the
+versions and hashes written in `.github/tsuzuri/package-lock.json`. If the downloaded contents
+differ, the installation stops, and it also checks that the packages were published with
+npm's official signatures (`npm audit signatures`). Package scripts are not run during
+installation (v1.7.0 or later).
 
-## コードのコピーボタン
+## Copy button for code
 
-コードブロックの右上に「コピー」ボタンが付き、クリックするとコードをコピーできます(v1.6.0以降)。
-ボタンはカーソルを当てたとき(スマートフォンでは常に)表示されます。コードブロックがあるページだけが、
-小さなスクリプト(`tsuzuri-copy.js`)を読み込みます。文言はページの言語が日本語なら「コピー」、それ以外なら「Copy」です。
+A "Copy" button appears at the top right of code blocks; click it to copy the code (v1.6.0 or
+later). The button appears on hover (always on smartphones). Only pages with code blocks load
+the small script (`tsuzuri-copy.js`). The label is "コピー" if the page language is Japanese,
+and "Copy" otherwise.
 
-## コードの色分け
+## Syntax highlighting
 
-```` ```js ```` のように言語名を書いたコードブロックは、ビルド時に色分けされます
-([highlight.js](https://highlightjs.org/)を使用。閲覧時にJavaScriptは使いません)。
-言語名を書かなかったコードブロックや、対応していない言語名のものは、色分けせずにそのまま表示します
-(言語を自動で推測することはしません)。色はテーマに合わせて決まり、独自CSSで変更できます
-([theming.md](./theming.md)参照)。
+Code blocks with a language name, like ```` ```js ````, are highlighted at build time (using
+[highlight.js](https://highlightjs.org/); no JavaScript runs in the browser). Code blocks
+without a language name, or with an unsupported one, are shown as they are without
+highlighting (the language is never guessed). The colors follow the theme and can be changed
+with custom CSS (see [Theming](./theming.md)).
 
-## サイト内検索
+## Site search
 
-`NAV_ENABLED=true`のときは、ナビゲーションの上部に検索欄が表示されます。ビルド時に各ページの
-タイトルと本文から索引(`search-index.json`)を作り、検索欄に入力すると、小さなスクリプト
-(`tsuzuri-search.js`)がその索引から該当するページを探して表示します。
+With `NAV_ENABLED=true`, a search box appears at the top of the navigation. At build time, an
+index (`search-index.json`) is made from each page's title and text, and when you type in the
+search box, a small script (`tsuzuri-search.js`) finds the matching pages in that index and
+shows them.
 
-- 空白で区切った語をすべて含むページが、タイトルに含むものを優先して最大10件表示されます。
-- 索引は検索欄を初めて使ったときに読み込むので、検索しない閲覧者には読み込みの負担がありません。
-- JavaScriptが動かない環境では検索欄が表示されないだけで、ナビゲーションはそのまま使えます。
-- キーボードでも操作できます。検索欄で↓を押すと結果に移り、↑↓で選んでEnterで開きます。Escで検索欄に
-  戻り、入力を消します(v1.7.0以降)。
+- Pages containing all the space-separated words are shown, up to 10, with title matches
+  first.
+- The index is loaded the first time the search box is used, so readers who don't search don't
+  pay for it.
+- Where JavaScript doesn't run, the search box simply isn't shown, and the navigation still
+  works.
+- It works from the keyboard too. Press ↓ in the search box to move to the results, pick one
+  with ↑↓ and open it with Enter. Esc returns to the search box and clears it (v1.7.0 or later).
 
-## ライト/ダーク表示の切り替え
+## Switching between light and dark
 
-`NAV_ENABLED=true`のときは、ナビの見出しの横に、ライト/ダーク表示を切り替えるボタン(☀/☾)が
-付きます(v1.7.0以降)。選んだ表示はブラウザに保存され、次に開いたときも同じ表示になります。
-選んでいないときは、これまでどおりOSの設定(ダークモードかどうか)に従います。
+With `NAV_ENABLED=true`, a button that switches between light and dark (☀/☾) appears next to
+the navigation header (v1.7.0 or later). Your choice is saved in the browser, so the page looks
+the same the next time you open it. If you haven't chosen, it follows the OS setting (dark mode
+or not), as before.
 
-テーマにライト/ダークの違いが無い場合(ライト表示のみの90年代(`nineties`)や、`none`など)は、ボタンを表示しません。
-独自CSSでダーク表示の色を書く場合の書き方は、[theming.md](./theming.md#ライトダーク表示に対応する)を参照してください。
+If the theme has no light/dark difference (90s (`nineties`), which is light only, `none` and so
+on), the button isn't shown. To write dark colors in your custom CSS, see
+[Theming](./theming.md#supporting-light-and-dark).
 
-## CSSの読み込み
+## How the CSS is loaded
 
-ページのCSS(基礎CSS・テーマ・独自CSS)は、1つのファイル(`tsuzuri-<内容から作った文字列>.css`)に
-まとめて出力し、各ページから読み込みます(v1.7.0以降。それより前はページごとに埋め込んでいました)。
-全ページで同じファイルを使うので、2ページ目以降はブラウザのキャッシュが効いて表示が速くなります。
-CSSの内容が変わるとファイル名も変わるので、古いCSSが使われ続けることはありません。
-ページごとに`theme`や`styleFile`を変えたページは、その組み合わせ用のファイルを読み込みます。
+The page CSS (base CSS, theme and custom CSS) is combined into one file
+(`tsuzuri-<string made from its contents>.css`) that every page loads (v1.7.0 or later; before
+that it was embedded in each page). Since all pages use the same file, the browser cache makes
+the second and later pages show up faster. When the CSS changes, the file name changes too, so
+an old CSS never sticks around. Pages that change `theme` or `styleFile` load a file for that
+combination.
 
-また、OSで「視差効果を減らす」(動きを減らす)を選んでいる閲覧者には、カードの浮き上がりなどの
-アニメーションを付けません(v1.7.0以降)。
+Readers who chose "reduce motion" in their OS don't get animations such as cards lifting on
+hover (v1.7.0 or later).
 
-## sitemap.jsonについて(デバッグ用)
+## About sitemap.json (for debugging)
 
-`.github/docs-pages.config`で`SITEMAP_JSON=true`にすると、出力先ディレクトリ(`OUT_DIR`。
-既定値`_site`)の直下に`sitemap.json`というファイルが生成されます。既定では生成しません
-(リンク切れのファイル名なども含むため、公開サイトに置くと外から見えてしまうからです)。
-これはブラウザに表示するためのページではなく、
-「実際にどのファイルが収集され、どのリンクが除外されたか」を確認するためのデバッグ用の
-出力です。収集されたページ一覧(タイトル・説明文つき)、画像一覧、ページ階層
-(リンクをたどった親子関係の`hierarchy`と、ディレクトリ構成に沿った`tree`)、
-上記の`missing`(リンク切れ)・`rejected`(拒否されたリンク)の一覧、
-現在の`THEME`やサイト名などの設定値が含まれます。サイトが想定通りに生成されない場合は、
-一時的に`SITEMAP_JSON=true`にしてこのファイルを確認すると、原因を特定しやすくなります
-(確認が終わったら`false`に戻すことをおすすめします)。
+With `SITEMAP_JSON=true` in `.github/docs-pages.config`, a file named `sitemap.json` is
+generated right under the output folder (`OUT_DIR`, `_site` by default). It isn't generated by
+default (it includes things like the names of broken link targets, which would be visible to
+anyone if placed on the public site). It isn't a page to view in the browser; it's debugging
+output to check "which files were actually collected and which links were excluded". It
+includes the list of collected pages (with titles and descriptions), the list of images, the
+page hierarchy (`hierarchy`, the parent-child relationships from following links, and `tree`,
+following the folder structure), the lists of `missing` (broken links) and `rejected` (refused
+links) described above, and settings such as the current `THEME` and the site name. When the
+site isn't generated as you expect, set `SITEMAP_JSON=true` temporarily and check this file to
+find the cause more easily (we recommend setting it back to `false` when you're done).
 
-ページ一覧(`pages`)と`tree`に入る各ページのタイトルは、frontmatterの`title`です。
-`title`が無いページは、`pages`ではファイルパス(例: `docs/cli.md`)、`tree`とナビゲーションでは
-本文の最初の`# 見出し`(h1)、それも無ければファイル名(例: `cli.md`)になります。
+The title of each page in the page list (`pages`) and in `tree` is the frontmatter `title`. For
+pages without a `title`, `pages` uses the file path (e.g. `docs/cli.md`), while `tree` and the
+navigation use the first `# heading` (h1) in the text, or the file name (e.g. `cli.md`) if
+there's none.
