@@ -14,14 +14,16 @@ The format is simple text in the form `KEY=VALUE`, one item per line. Lines star
 and empty lines are skipped (use them freely for comments and spacing). YAML-style nesting,
 quoting and multi-line values are not supported. Spaces around the value are removed, and
 values containing `'` or `"` are used as they are (the quotes become part of the value). Keys
-not in the list below are ignored with a warning. Only lines that start with `#` are comments.
+not in the list below are ignored (the workflow on GitHub Actions shows a warning; local builds
+and `preview` ignore them without one). Only lines that start with `#` are comments.
 A `#` written after the value, as in `THEME=nineties  # 90s style`, is not a comment; it's read
 as part of the value, so be careful (write comments on their own line).
 
 ## Settings
 
 ### TRIGGER_BRANCH
-The name of the branch that triggers deployment. The default is `main`. Deployment to GitHub
+The name of the branch that triggers deployment. If left out (no key, or an
+empty value), it's the repository's default branch (usually `main`). Deployment to GitHub
 Pages runs only when there's a push (including merges) to this branch (for manual runs
 (`workflow_dispatch`) this check is skipped and it always deploys; see
 [Deployment](./deployment.md)). If you set a branch other than the default branch (usually

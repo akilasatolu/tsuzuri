@@ -7,9 +7,10 @@ title: FAQ
 ## Deployment doesn't run
 
 First, check that the name of the branch you pushed matches `TRIGGER_BRANCH` in
-`.github/docs-pages.config`. The build job runs for a push to any branch, but if the branch name
-doesn't match, a value `should_deploy=false` is recorded internally and the following deploy job
-(the step that actually publishes to GitHub Pages) is skipped entirely. Open the workflow run in
+`.github/docs-pages.config`. The workflow starts for a push to any branch, but if the branch name
+doesn't match, a value `should_deploy=false` is recorded internally, and the build (including
+installing the dependencies and checking for broken links) and the following deploy job
+(the step that actually publishes to GitHub Pages) are skipped entirely. Open the workflow run in
 the repository's Actions tab, and if the log of the "Check trigger branch" step shows a message
 like
 

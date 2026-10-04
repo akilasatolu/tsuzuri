@@ -131,7 +131,7 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 | `.github/workflows/docs-pages.yml` | 常に生成 | ビルド・デプロイの手順を直接持つ、自己完結型のワークフロー(以前のように`build.yml`を`uses:`で呼び出すことはしない) |
 | `.github/docs-pages.config` | 常に生成 | `TRIGGER_BRANCH`/`ROOT_MD`/`THEME`/`NAV_ENABLED`/`LANGUAGES`/`SITE_NAME`は回答内容を反映し、それ以外のキーは既定値で出力される設定ファイル |
 | `.github/tsuzuri/build-docs.mjs` | 常に生成 | ビルド本体のスクリプト(OSS本体リポジトリの`.github/scripts/build-docs.mjs`と同一内容) |
-| `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/crawler/frontmatter/html-renderer/link-extractor/path-utils/site-tree/slugger/search/sitemap) |
+| `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/copy-button/crawler/frontmatter/html-renderer/i18n/image-size/link-extractor/path-utils/site-tree/slugger/search/sitemap/theme-toggle) |
 | `.github/tsuzuri/styles/*.css` | 常に生成 | 組み込みテーマ(`base.css`+`material`/`glass`/`neumorphism`/`editorial`/`minimal`/`blueprint`/`nineties`)のCSS一式。frontmatterの`theme`キー([参照](./frontmatter.ja.md#theme))で選択中以外のテーマを使う場合に備え、常に全テーマ分コピーされる |
 | `.github/tsuzuri/package.json`・`package-lock.json` | 常に生成(v1.7.0以降) | ビルド用の依存(marked など)の版と、ダウンロードした中身を確かめるハッシュ。ワークフローと`preview`はこのとおりに`npm ci`でインストールする |
 | `.github/tsuzuri/.gitignore` | 常に生成 | 手元でプレビューするときにインストールする依存(`node_modules/`)をコミットしないための設定 |

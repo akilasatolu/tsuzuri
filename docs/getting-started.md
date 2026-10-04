@@ -1,5 +1,6 @@
 ---
 title: Getting Started
+order: 1
 ---
 
 # Getting Started
@@ -34,7 +35,8 @@ repository.
 
 - `.github/workflows/docs-pages.yml`
 - `.github/docs-pages.config`
-- `.github/tsuzuri/` (the build script itself: `build-docs.mjs`, `lib/*.mjs`, `styles/*.css`)
+- `.github/tsuzuri/` (the build script itself: `build-docs.mjs`, `lib/*.mjs`, `styles/*.css`,
+  plus `package.json` and `package-lock.json`, which pin the build dependencies, and `.gitignore`)
 - (optional) `.github/tsuzuri/styles/custom.css` (a custom CSS template placed in the same
   folder as the built-in theme CSS)
 
@@ -62,7 +64,7 @@ See "Using a branch other than the default branch as the trigger branch" in
 ## First deployment
 
 Commit all the generated files and push to the `TRIGGER_BRANCH` in `.github/docs-pages.config`
-(`main` by default). Once the push completes, the GitHub Actions workflow starts
+(the repository's default branch, usually `main`, if left out). Once the push completes, the GitHub Actions workflow starts
 automatically.
 
 Open the repository's `Actions` tab and you'll see a run named `Deploy Docs to GitHub Pages`.
@@ -138,3 +140,4 @@ To do the same thing by hand without `preview`, run the following steps in order
 - To learn how the site is put together, see [Concepts](./concepts.md)
 - For the list of settings, see the [configuration reference](./configuration.md)
 - To change the look (colors and decoration), see [Theming](./theming.md)
+- To get help from an AI agent with the setup, see [Reference for AI agents](./ai-reference.md)

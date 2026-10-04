@@ -16,6 +16,9 @@ Your repository
 .github/tsuzuri/build-docs.mjs     … the build script itself (copied)
 .github/tsuzuri/lib/*.mjs          … the modules the build script depends on (copied)
 .github/tsuzuri/styles/*.css       … the CSS of the built-in themes (copied)
+.github/tsuzuri/package.json       … the versions of the build dependencies (marked and others)
+.github/tsuzuri/package-lock.json  … the same (with the hashes used to verify the downloaded contents)
+.github/tsuzuri/.gitignore         … keeps locally installed dependencies (node_modules/) out of commits
 ```
 
 In earlier versions, your `docs-pages.yml` was a thin wrapper that just called the reusable
@@ -43,8 +46,9 @@ TRIGGER_BRANCH=release
 ```
 
 After editing it like this and pushing to that branch, only pushes to that branch trigger
-deployment from then on (pushes to other branches still run the build job, but it decides
-`should_deploy=false` and the deploy job is skipped; see "Deployment doesn't run" in the
+deployment from then on (pushes to other branches still start the workflow, but it decides
+`should_deploy=false`, and the build (including the broken-link check) and the deploy job are
+skipped; see "Deployment doesn't run" in the
 [FAQ](./faq.md)).
 
 ### Using a branch other than the default branch as the trigger branch (extra setup required)

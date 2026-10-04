@@ -1,5 +1,6 @@
 ---
 title: Getting Started
+order: 1
 ---
 
 # Getting Started
@@ -33,7 +34,7 @@ npx github:akilasatolu/tsuzuri#v1 init
 
 - `.github/workflows/docs-pages.yml`
 - `.github/docs-pages.config`
-- `.github/tsuzuri/`(ビルドスクリプト本体一式。`build-docs.mjs`・`lib/*.mjs`・`styles/*.css`)
+- `.github/tsuzuri/`(ビルドスクリプト本体一式。`build-docs.mjs`・`lib/*.mjs`・`styles/*.css`と、ビルド用の依存を固定する`package.json`・`package-lock.json`、`.gitignore`)
 - (任意)`.github/tsuzuri/styles/custom.css`(組み込みテーマCSSと同じディレクトリに置かれる独自CSSひな形)
 
 ビルドスクリプト本体もリポジトリにコピーされるため、生成後のワークフローは実行のたびに
@@ -61,7 +62,7 @@ OSS本体リポジトリ(tsuzuri)を参照することなく、このリポジ�
 ## 初回デプロイ
 
 生成されたファイル一式をコミットし、`.github/docs-pages.config`の`TRIGGER_BRANCH`
-(デフォルト`main`)へpushしてください。pushが完了すると、GitHub Actionsのワークフローが
+(省略した場合は、リポジトリの既定ブランチ。通常は`main`)へpushしてください。pushが完了すると、GitHub Actionsのワークフローが
 自動的に起動します。
 
 リポジトリの `Actions` タブを開くと、`Deploy Docs to GitHub Pages`という名前の
@@ -132,3 +133,4 @@ npx github:akilasatolu/tsuzuri#v1 preview
 - サイトがどのように組み立てられているかを知りたい場合は[仕組み(concepts.md)](./concepts.ja.md)
 - 設定できる項目の一覧は[設定リファレンス(configuration.md)](./configuration.ja.md)
 - 見た目(配色・装飾)を変えたい場合は[テーマ・スタイル(theming.md)](./theming.ja.md)
+- 導入の作業をAIエージェントに手伝ってもらう場合は[AIエージェント向けの参考情報](./ai-reference.ja.md)

@@ -74,7 +74,7 @@ https://akilasatolu.github.io/tsuzuri/
    ビルド・デプロイが完結します(詳しくは[CLIリファレンス](docs/cli.ja.md)を参照)。
 
 2. GitHubリポジトリの **Settings → Pages** で、Sourceを **GitHub Actions** に設定する(初回のみ)。
-3. `.github/docs-pages.config`の`TRIGGER_BRANCH`に指定したブランチ(デフォルトは`main`)にpush/マージする。
+3. `.github/docs-pages.config`の`TRIGGER_BRANCH`に指定したブランチ(省略した場合は、リポジトリの既定ブランチ。通常は`main`)にpush/マージする。
 
 Actionsタブでワークフローが実行され、完了するとGitHub Pagesに公開されます。URLは
 Settings → Pagesに表示されます。設定ファイルの各項目の詳細は
@@ -83,6 +83,7 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 ## ドキュメント
 
 - [Getting Started](docs/getting-started.ja.md)
+- [AIエージェント向けの参考情報](docs/ai-reference.ja.md)
 - [仕組み(Concepts)](docs/concepts.ja.md)
 - [設定リファレンス(Configuration)](docs/configuration.ja.md)
 - [テーマ・スタイル(Theming)](docs/theming.ja.md)

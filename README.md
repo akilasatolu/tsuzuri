@@ -76,7 +76,7 @@ https://akilasatolu.github.io/tsuzuri/
 2. In your GitHub repository, open **Settings → Pages** and set Source to **GitHub Actions**
    (first time only).
 3. Push or merge to the branch set in `TRIGGER_BRANCH` of `.github/docs-pages.config`
-   (`main` by default).
+   (the repository's default branch, usually `main`, if left out).
 
 The workflow runs in the Actions tab, and when it finishes the site is published on GitHub
 Pages. The URL is shown under Settings → Pages. For each item in the settings file, see the
@@ -85,6 +85,7 @@ Pages. The URL is shown under Settings → Pages. For each item in the settings 
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)
+- [Reference for AI agents](docs/ai-reference.md)
 - [Concepts](docs/concepts.md)
 - [Configuration reference](docs/configuration.md)
 - [Theming](docs/theming.md)

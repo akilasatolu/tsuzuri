@@ -16,6 +16,9 @@ title: デプロイ設定(Deployment)
 .github/tsuzuri/build-docs.mjs     … ビルド本体のスクリプト(コピー済み)
 .github/tsuzuri/lib/*.mjs          … ビルド本体が依存するモジュール一式(コピー済み)
 .github/tsuzuri/styles/*.css       … 組み込みテーマのCSS一式(コピー済み)
+.github/tsuzuri/package.json       … ビルド用の依存(marked など)の版
+.github/tsuzuri/package-lock.json  … 同上(ダウンロードした中身を確かめるハッシュを含む)
+.github/tsuzuri/.gitignore         … 手元でインストールした依存(node_modules/)をコミットしないための設定
 ```
 
 以前のバージョンでは、利用者側`docs-pages.yml`はOSS本体リポジトリ(tsuzuri)の
@@ -44,8 +47,8 @@ TRIGGER_BRANCH=release
 ```
 
 このように書き換えて、そのブランチへpushすれば、以後はそのブランチへのpushだけが
-デプロイのトリガーになります(`TRIGGER_BRANCH`以外へのpushはビルドジョブ自体は動きますが、
-`should_deploy=false`と判定されデプロイジョブはスキップされます。詳細は
+デプロイのトリガーになります(`TRIGGER_BRANCH`以外へのpushでもワークフロー自体は起動しますが、
+`should_deploy=false`と判定され、ビルド(リンク切れの検査を含む)とデプロイジョブはスキップされます。詳細は
 [faq.md](./faq.ja.md)の「デプロイが実行されない」を参照)。
 
 ### 既定ブランチ以外をトリガーブランチにする場合(追加設定が必要)
