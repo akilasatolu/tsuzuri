@@ -1,0 +1,6 @@
+# actionlint の設定。
+# actionlint 1.7.12 は GitHub のホストランナー ubuntu-26.04 をまだ知らないため、名前を登録しておく
+# (ci.yml の ubuntu-26-04 ジョブ用)。actionlint が対応するか、そのジョブを消したら、この設定も消してよい。
+self-hosted-runner:
+  labels:
+    - ubuntu-26.04
