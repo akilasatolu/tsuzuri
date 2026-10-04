@@ -85,23 +85,3 @@ jobs:
           node-version: 24
       - name: Check the packaged CLI
         run: node scripts/check-package.mjs
-
-  # ubuntu-latest は 2026-10-19 から 11-19 にかけて Ubuntu 26.04 に切り替わる
-  # (https://github.com/actions/runner-images/issues/14748)。本体の CI・sync-docs・release と、
-  # init が利用者に生成するワークフローもすべて ubuntu-latest で動くので、切り替わる前に 26.04 で
-  # テストと配布物の確認(init → npm ci → ビルド → init --update)が通ることを確かめる。
-  # 切り替えが終わって ubuntu-latest が 26.04 になったら、このジョブは消してよい。
-  ubuntu-26-04:
-    runs-on: ubuntu-26.04
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci --ignore-scripts
-      - run: npm run lint
-      - run: npm test
-      - name: Check the packaged CLI
-        run: node scripts/check-package.mjs
-
