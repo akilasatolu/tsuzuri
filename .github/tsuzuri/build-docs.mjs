@@ -643,12 +643,26 @@ async function main() {
   const hasRepoLinks = [...linkTargets.values()].some((t) => t.kind === "repo");
   let repoBaseUrl = "";
   let repoRef = "";
+  // 編集リンク(EDIT_LINK=true)の行き先のブランチ。GitHub の編集画面はブランチにしか開けないので、
+  // GitHub Actions ではブランチへの push のときの GITHUB_REF_NAME、手元では今のブランチを使う
+  let editBranch = "";
   if (process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_SHA) {
     repoBaseUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}`;
     repoRef = process.env.GITHUB_SHA;
-  } else if (hasRepoLinks) {
+    if (String(process.env.GITHUB_REF ?? "").startsWith("refs/heads/")) editBranch = process.env.GITHUB_REF_NAME ?? "";
+  } else if (hasRepoLinks || config.editLink) {
     repoBaseUrl = webUrlFromGitRemote(gitOut(["remote", "get-url", "origin"]));
-    repoRef = repoBaseUrl ? gitOut(["branch", "--show-current"]) || gitOut(["rev-parse", "HEAD"]) : "";
+    editBranch = repoBaseUrl ? gitOut(["branch", "--show-current"]) : "";
+    repoRef = repoBaseUrl ? editBranch || gitOut(["rev-parse", "HEAD"]) : "";
+  }
+  function editUrlOf(repoRel) {
+    if (!config.editLink || !repoBaseUrl || !editBranch) return null;
+    return `${repoBaseUrl}/edit/${encodeUrlPath(editBranch)}/${encodeUrlPath(repoRel)}`;
+  }
+  if (config.editLink && !editUrlOf(siteRootRel)) {
+    console.warn(
+      "[build-docs] EDIT_LINK=true ですが、GitHub 上のリポジトリかブランチが分からない(git の origin が無い・ブランチ以外をビルドしている等)ため、編集リンクを付けません。"
+    );
   }
   function repoUrlOf(repoRel, isDir) {
     if (!repoBaseUrl || !repoRef) return null;
@@ -886,12 +900,15 @@ async function main() {
       const h1End = bodyHtml.indexOf("</h1>");
       bodyHtml = h1End >= 0 ? bodyHtml.slice(0, h1End + 5) + "\n" + toc + bodyHtml.slice(h1End + 5) : toc + bodyHtml;
     }
+    // ページの末尾の情報: 最終更新日(LAST_UPDATED=true)と、GitHub で編集するリンク(EDIT_LINK=true)。
+    // 集めたページだけに付ける(404 などには付けない)
     const updated = visitedMd.has(rel) ? lastUpdatedOf(rel) : "";
-    if (updated) {
-      bodyHtml += `<p class="tsuzuri-updated">${S.lastUpdated}: <time datetime="${escapeHtml(
-        updated
-      )}">${escapeHtml(updated)}</time></p>\n`;
-    }
+    const editUrl = visitedMd.has(rel) ? editUrlOf(rel) : null;
+    const pageMeta = [
+      updated ? `${S.lastUpdated}: <time datetime="${escapeHtml(updated)}">${escapeHtml(updated)}</time>` : "",
+      editUrl ? `<a class="tsuzuri-edit-link" href="${escapeHtml(editUrl)}">${escapeHtml(S.editPage)}</a>` : "",
+    ].filter(Boolean);
+    if (pageMeta.length) bodyHtml += `<p class="tsuzuri-updated">${pageMeta.join(" · ")}</p>\n`;
     if (hasMermaid) bodyHtml += MERMAID_SCRIPT;
     if (hasCode) {
       copyScriptUsed = true;

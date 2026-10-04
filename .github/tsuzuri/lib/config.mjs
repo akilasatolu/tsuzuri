@@ -34,6 +34,7 @@ export const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @property {boolean} strictLinks
  * @property {boolean} sitemapJson
  * @property {boolean} lastUpdated
+ * @property {boolean} editLink
  * @property {string} faviconFile
  * @property {string} siteName
  * @property {string} customDomain
@@ -58,6 +59,7 @@ export const CONFIG_FILE_KEYS = [
   "STRICT_LINKS",
   "SITEMAP_JSON",
   "LAST_UPDATED",
+  "EDIT_LINK",
 ];
 
 // 設定ファイルの本文を { KEY: 値 } にする(ワークフローの Load config と同じ読み方)。
@@ -137,6 +139,9 @@ export function loadConfig(env = process.env) {
   // true のとき、各ページに git の履歴から求めた最終更新日を表示する
   const lastUpdated = parseBoolean("LAST_UPDATED", env.LAST_UPDATED);
 
+  // true のとき、各ページの末尾に「このページを GitHub で編集」のリンクを付ける
+  const editLink = parseBoolean("EDIT_LINK", env.EDIT_LINK);
+
   const siteName = resolveSiteName(env);
 
   const customDomain = resolveCustomDomain(env.CUSTOM_DOMAIN);
@@ -157,6 +162,7 @@ export function loadConfig(env = process.env) {
     strictLinks,
     sitemapJson,
     lastUpdated,
+    editLink,
     faviconFile,
     siteName,
     customDomain,

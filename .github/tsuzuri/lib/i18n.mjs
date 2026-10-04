@@ -29,6 +29,7 @@ export const UI_STRINGS = deepFreeze({
     toc: "Contents",
     anchorLabel: 'Link to "{text}"',
     lastUpdated: "Last updated",
+    editPage: "Edit this page on GitHub",
     skip: "Skip to content",
     footnotes: "Footnotes",
     footnoteBack: "Back to reference {0}", // {0} は marked-footnote が置き換える
@@ -58,6 +59,7 @@ export const UI_STRINGS = deepFreeze({
     toc: "目次",
     anchorLabel: "「{text}」へのリンク",
     lastUpdated: "最終更新",
+    editPage: "このページを GitHub で編集",
     skip: "本文へスキップ",
     footnotes: "脚注",
     footnoteBack: "本文の参照箇所 {0} に戻る",
