@@ -1,7 +1,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 
-import { buildTranslationIndex, createLangContext } from "../.github/scripts/lib/i18n.mjs";
+import { buildTranslationIndex, createLangContext, notFoundLangScript } from "../.github/scripts/lib/i18n.mjs";
 
 const multi = () => createLangContext({ languages: ["ja", "en", "pt-BR"], rootMd: "README.md" });
 const single = () => createLangContext({ languages: ["ja"], rootMd: "README.md" });
@@ -492,5 +492,45 @@ describe("buildTranslationIndex: 名前の大文字・小文字(crawler の isVa
       ["ja", "docs/CLI.md"],
       ["en", "docs/Cli.en.md"],
     ]);
+  });
+});
+
+describe("notFoundLangScript(404 で URL の言語の案内だけを見せる)", () => {
+  // スクリプトを、location と document だけを差し替えて実際に動かし、足される CSS を返す
+  const cssFor = (script, pathname) => {
+    const added = [];
+    const document = {
+      createElement: () => ({ textContent: "" }),
+      head: { appendChild: (e) => added.push(e.textContent) },
+    };
+    const code = script.replace(/^<script>/, "").replace(/<\/script>$/, "");
+    new Function("location", "document", code)({ pathname }, document);
+    assert.equal(added.length, 1);
+    return added[0];
+  };
+  const ctx = createLangContext({ languages: ["en", "ja", "pt-BR"], rootMd: "README.md" });
+  const make = (basePath) =>
+    notFoundLangScript({ languages: ctx.languages, base: ctx.base, prefixOf: ctx.prefixOf, basePath });
+
+  test("URL の先頭が他の言語ならその言語、それ以外は基本言語のかたまりだけを見せる", () => {
+    const script = make("");
+    assert.match(cssFor(script, "/ja/docs/missing.html"), /\[lang="ja" i\]\) > \[lang\]:not\(\[lang="ja" i\]\)/);
+    assert.match(cssFor(script, "/pt-br/x"), /\[lang="pt-BR" i\]/);
+    assert.match(cssFor(script, "/docs/missing.html"), /\[lang="en" i\]/);
+    assert.match(cssFor(script, "/"), /\[lang="en" i\]/);
+    // 言語の先頭と似ているだけの名前は基本言語
+    assert.match(cssFor(script, "/japan/x"), /\[lang="en" i\]/);
+  });
+
+  test("BASE_PATH を取り除いてから言語を決める", () => {
+    const script = make("/repo");
+    assert.match(cssFor(script, "/repo/ja/missing"), /\[lang="ja" i\]/);
+    assert.match(cssFor(script, "/repo/missing"), /\[lang="en" i\]/);
+    assert.match(cssFor(script, "/repo"), /\[lang="en" i\]/);
+  });
+
+  test("その言語のかたまりがあるときだけ隠す(:has)、main の直下だけが対象", () => {
+    const css = cssFor(make(""), "/ja/");
+    assert.equal(css, 'main:has(> [lang="ja" i]) > [lang]:not([lang="ja" i]){display:none}');
   });
 });

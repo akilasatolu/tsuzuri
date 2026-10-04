@@ -87,6 +87,7 @@ import {
   createLangContext,
   buildTranslationIndex,
   languageName,
+  notFoundLangScript,
 } from "./lib/i18n.mjs";
 
 // 印の無いフォルダの入口の名前(ナビの木のフォルダの並び順に使う。今の site-tree と同じ3つ・同じ綴り)
@@ -787,7 +788,7 @@ async function main() {
   }
 
   // 1ページ分のHTMLを組み立てる。
-  function renderPage(rel, content, meta, { canonical = true } = {}) {
+  function renderPage(rel, content, meta, { canonical = true, extraHeadHtml = "" } = {}) {
     // ページの言語(集めたページ以外の 404 などは基本言語)で、文言・ナビ・前後・検索を選ぶ
     const pageLang = visitedMd.has(rel) ? i18n.langOf(rel) : i18n.base;
     const site = langSites.get(pageLang);
@@ -988,9 +989,14 @@ async function main() {
       body: bodyHtml,
       stylesheetHref: stylesheetFor(css),
       // ナビがあるページは、ライト/ダークの切り替えを使う(前に選んだ表示を、表示される前に反映する)
-      headHtml: config.navEnabled
-        ? `${THEME_HEAD_SCRIPT}\n<script src="${escapeHtml(`${config.basePath}/${THEME_SCRIPT_NAME}`)}" defer></script>`
-        : "",
+      headHtml: [
+        config.navEnabled
+          ? `${THEME_HEAD_SCRIPT}\n<script src="${escapeHtml(`${config.basePath}/${THEME_SCRIPT_NAME}`)}" defer></script>`
+          : "",
+        extraHeadHtml,
+      ]
+        .filter(Boolean)
+        .join("\n"),
       lang: pageLang,
       navHtml,
       metaTagsHtml,
@@ -1064,7 +1070,18 @@ async function main() {
     }
     writeOut(
       "404.html",
-      renderPage(notFoundRel, body, { ...meta, noindex: true }, { canonical: false }),
+      renderPage(notFoundRel, body, { ...meta, noindex: true }, {
+        canonical: false,
+        // 多言語では、開かれたURLの言語の案内(<div lang="…">)だけを見せる
+        extraHeadHtml: i18n.enabled
+          ? notFoundLangScript({
+              languages: i18n.languages,
+              base: i18n.base,
+              prefixOf: (tag) => i18n.prefixOf(tag),
+              basePath: config.basePath,
+            })
+          : "",
+      }),
       notFoundRel
     );
   }

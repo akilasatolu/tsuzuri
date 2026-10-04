@@ -325,9 +325,19 @@ describe("build-docs.mjs :: 多言語 A(LANGUAGES=ja,en)", () => {
         assert.ok(hrefs.includes(`${basePath}/`), hrefs.join(", "));
         assert.ok(hrefs.includes(`${basePath}/en/`), hrefs.join(", "));
         assert.equal(htmlLang(html), "ja");
+        // URL の言語の案内だけを見せるスクリプト(BASE_PATH を取り除いて判定する)
+        assert.match(html, /<head>[\s\S]*const m=\{"en":"en"\}[\s\S]*<\/head>/);
+        assert.ok(html.includes(`const b=${JSON.stringify(basePath)}`));
       });
     });
   }
+
+  test("404: 1言語のサイトには言語を切り替えるスクリプトを入れない", () => {
+    withSite(null, { "README.md": "# Home\n" }, (dir) => {
+      assert.equal(runBuild(dir, { LANGUAGES: "ja" }).status, 0);
+      assert.doesNotMatch(readOut(dir, "404.html"), /main:has\(/);
+    });
+  });
 
   test("sitemap.xml に両言語のページ、sitemap.json に言語の情報", () => {
     withSite(FIXTURE_A, {}, (dir) => {

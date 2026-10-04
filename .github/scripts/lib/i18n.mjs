@@ -452,6 +452,29 @@ export function buildTranslationIndex(rels, ctx) {
   return Object.freeze({ byBase, alternatesOf, rootOf, dirIndexOf, excluded, shadowed });
 }
 
+/**
+ * 多言語サイトの 404.html の <head> に入れる短いスクリプト。404 ページはサイトに1枚だけで、
+ * どの言語のURLでも同じものが返る(GitHub Pages の仕組み)。そこで、開かれたURLの先頭
+ * (BASE_PATH の後)が他の言語の URL の先頭(`/ja/` など)ならその言語、それ以外は基本言語として、
+ * <main> の直下にある `<div lang="…">` のうち、その言語のものだけを表示する。
+ *   - その言語のかたまりが無いページでは何も隠さない(`:has()` で判定)。
+ *   - `lang` の付かない部分は、どの言語でも表示する。
+ *   - ナビや画面の文言(<html lang>)は変えない。JavaScript が動かない・`:has()` に対応していない
+ *     ブラウザでは、すべての言語のかたまりがそのまま表示される。
+ * @param {{ languages: string[], base: string, prefixOf: (tag: string) => string, basePath?: string }} opts
+ * @returns {string} `<script>…</script>`
+ */
+export function notFoundLangScript({ languages, base, prefixOf, basePath = "" }) {
+  // URL の先頭 → 言語。基本言語は先頭を持たないので入れない
+  const byPrefix = {};
+  for (const tag of languages) {
+    const prefix = prefixOf(tag);
+    if (prefix) byPrefix[prefix] = tag;
+  }
+  // 言語タグは LANGUAGES の検査を通った英数字と "-" だけなので、そのまま CSS のセレクタに入れられる
+  return `<script>(()=>{const m=${JSON.stringify(byPrefix)};const b=${JSON.stringify(basePath)};let p=location.pathname;if(b&&(p===b||p.startsWith(b+"/")))p=p.slice(b.length);const t=m[(p.split("/")[1]||"").toLowerCase()]||${JSON.stringify(base)};const e=document.createElement("style");e.textContent='main:has(> [lang="'+t+'" i]) > [lang]:not([lang="'+t+'" i]){display:none}';document.head.appendChild(e)})()</script>`;
+}
+
 function deepFreeze(obj) {
   for (const value of Object.values(obj)) {
     if (value && typeof value === "object") deepFreeze(value);
