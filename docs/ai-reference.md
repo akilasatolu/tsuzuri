@@ -10,13 +10,13 @@ from installation to publishing on GitHub Pages. The "Copy" button at its top
 right copies the whole text, which can then be pasted into the AI agent of
 your choice.
 
-The content reflects Tsuzuri v1.30.3. The step-by-step guide written for
+The content reflects Tsuzuri v1.30.4. The step-by-step guide written for
 people is [Getting Started](getting-started.md).
 
 ````markdown
 # Tsuzuri reference
 
-- Covers: Tsuzuri v1.30.3 (v1 series)
+- Covers: Tsuzuri v1.30.4 (v1 series)
 - Last verified: 2026-10-07
 - Official documentation: https://akilasatolu.github.io/tsuzuri/
 - Source code: https://github.com/akilasatolu/tsuzuri
@@ -71,11 +71,11 @@ npx github:akilasatolu/tsuzuri#v1 init
 ```
 
 - `#v1` is a tag that points to the latest release of the v1 series. A full
-  version such as `#v1.30.3` pins that release. Without the part from `#`
+  version such as `#v1.30.4` pins that release. Without the part from `#`
   onward, the content of the `main` branch runs, which can include changes
   that are not released yet.
 - The command prints the running version on its first line, in the form
-  `tsuzuri v1.30.3`.
+  `tsuzuri v1.30.4`.
 - The screen output of `init` and `preview` is in Japanese. The comments in
   the generated settings file and workflow are in Japanese too.
 - `init` can be omitted. Without a subcommand, the command behaves as `init`.
@@ -650,7 +650,7 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   the change to the site.
 
 The version copied into the repository is written in the comment at the top
-of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.30.3`. The
+of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.30.4`. The
 version inside the repository stays the same until an update.
 
 ## 11. Common pitfalls
