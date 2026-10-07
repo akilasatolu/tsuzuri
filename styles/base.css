@@ -157,8 +157,10 @@
   }
   [data-fn-ref] { text-decoration: none; }
 
-  /* コードブロックのコピーボタン(tsuzuri-copy.js が付ける)。カーソルを当てたとき・キーボードで選んだときに表示する */
+  /* コードブロックのコピーボタン(tsuzuri-copy.js が付ける)。カーソルを当てたとき・キーボードで選んだときに表示する。
+     ボタンが文字に重ならないよう、ボタンを付けたコードブロックは上の余白を広げ、ボタンの下から文字を始める */
   .tsuzuri-code { position: relative; }
+  .tsuzuri-code > pre { padding-top: 40px; }
   .tsuzuri-copy {
     position: absolute;
     top: 8px;
@@ -166,6 +168,7 @@
     padding: 2px 10px;
     font: inherit;
     font-size: 0.8em;
+    line-height: 1.5;
     color: var(--fg);
     background: var(--bg);
     border: 1px solid var(--border);
