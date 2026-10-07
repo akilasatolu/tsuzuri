@@ -29,7 +29,10 @@
   main pre { background: var(--code-bg); padding: 12px 16px; border-radius: 8px; overflow-x: auto; }
   main code { background: var(--code-bg); padding: 2px 5px; border-radius: 4px; font-size: 0.9em; }
   main pre code { background: none; padding: 0; }
-  main table { border-collapse: collapse; width: 100%; }
+  /* 表は内容に合わせた幅にし、入り切らないときは表の中だけを横にスクロールさせる(本文ごと横に動かさない)。
+     overflow-x は、テーマや独自CSSの main table { overflow: hidden; }(角を丸く切る指定)より優先させるため、body を付けて書く */
+  main table { display: block; width: max-content; max-width: 100%; border-collapse: collapse; }
+  body main table { overflow-x: auto; }
 
   /* コードの色分け(言語名付きのコードブロックを highlight.js でビルド時に色分けしたもの)。
      色はテーマのアクセント色・文字色から決める。独自CSSで --hl-* 変数を指定すれば個別に変えられる。 */
@@ -303,41 +306,41 @@
 }
 /* ---------- 言語の切り替え ここまで ---------- */
 /*
- * neumorphism.css (ニューモーフィズム)
- * Neumorphism(ニューモーフィズム)のスタイル。地と同じ色の部品が、光と影で地から浮き出したり
- * (カード・ボタン)、へこんだり(コード・検索欄)して見える。色数を抑えた、やわらかい立体感。
+ * material.css (マテリアル)
+ * Material Design 3(マテリアルデザイン)風のスタイル。色の役割(プライマリ・セカンダリコンテナなど)に沿った
+ * 青系の配色、角丸のカードと影(エレベーション)、トーンのついたナビの選択。見出しは太さを抑えた大きめの文字。
  * ライト/ダーク表示に対応する。
  */
 :root {
   color-scheme: light dark;
-  --fg: #2f3542;
-  --muted: #6b7280;
-  --bg: #e4e8ef;
-  --heading: #2a2f3a;
-  --accent: #4a63e7;
-  --accent-2: #e2557a;
-  --border: #d3d8e0;
-  --page-bg: #e4e8ef;
-  --card-bg: #e4e8ef;
+  --fg: #1a1c1e;
+  --muted: #43474e;
+  --bg: #f8f9ff;
+  --heading: #1a1c1e;
+  --accent: #0061a4;
+  --accent-2: #6b5778;
+  --border: #dfe2eb;
+  --page-bg: #f8f9ff;
+  --card-bg: #ffffff;
   --card-border: 0;
   --card-filter: none;
-  --card-shadow: 14px 14px 28px #c3c7ce, -14px -14px 28px #ffffff;
-  --radius-lg: 30px;
-  --radius: 18px;
-  --pill: 999px;
-  --heading-weight: 800;
-  --el-bg: #e4e8ef;
-  --el-shadow: 6px 6px 12px #c3c7ce, -6px -6px 12px #ffffff;
-  --inset-shadow: inset 5px 5px 10px #c3c7ce, inset -5px -5px 10px #ffffff;
-  --hr: linear-gradient(90deg, #c3c7ce, #ffffff);
-  --code-bg: #dde2ea;
-  --pre-bg: #e4e8ef;
-  --th-bg: #e4e8ef;
-  --th-fg: #4a63e7;
-  --hover-bg: #dfe3ea;
-  --current-bg: #e4e8ef;
-  --current-fg: #4a63e7;
-  --current-shadow: inset 4px 4px 8px #c3c7ce, inset -4px -4px 8px #ffffff;
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px 2px rgba(0, 0, 0, 0.15);
+  --radius-lg: 16px;
+  --radius: 12px;
+  --pill: 100px;
+  --heading-weight: 500;
+  --el-bg: #f1f4fa;
+  --el-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+  --inset-shadow: none;
+  --hr: #c3c7cf;
+  --code-bg: #eceef4;
+  --pre-bg: #eceef4;
+  --th-bg: #d1e4ff;
+  --th-fg: #001d36;
+  --hover-bg: rgba(0, 97, 164, 0.08);
+  --current-bg: #d1e4ff;
+  --current-fg: #001d36;
+  --current-shadow: none;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
   --heading-font: var(--font);
@@ -348,54 +351,50 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --fg: #dde2ea;
-    --muted: #98a0ad;
-    --bg: #2b2f36;
-    --heading: #eef1f6;
-    --accent: #8ea2ff;
-    --accent-2: #ff8fab;
-    --border: #383d45;
-    --page-bg: #2b2f36;
-    --card-bg: #2b2f36;
-    --card-shadow: 14px 14px 28px #1f2227, -14px -14px 28px #373c45;
-    --el-bg: #2b2f36;
-    --el-shadow: 6px 6px 12px #1f2227, -6px -6px 12px #373c45;
-    --inset-shadow: inset 5px 5px 10px #1f2227, inset -5px -5px 10px #373c45;
-    --hr: linear-gradient(90deg, #1f2227, #3a3f48);
-    --code-bg: #31353d;
-    --pre-bg: #2b2f36;
-    --th-bg: #2b2f36;
-    --th-fg: #8ea2ff;
-    --hover-bg: #30343c;
-    --current-bg: #2b2f36;
-    --current-fg: #8ea2ff;
-    --current-shadow: inset 4px 4px 8px #1f2227, inset -4px -4px 8px #373c45;
+    --fg: #e2e2e6;
+    --muted: #c3c7cf;
+    --bg: #111318;
+    --heading: #e2e2e6;
+    --accent: #9ecaff;
+    --accent-2: #d7bee4;
+    --border: #43474e;
+    --page-bg: #111318;
+    --card-bg: #1a1c20;
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 6px 2px rgba(0, 0, 0, 0.3);
+    --el-bg: #1e2025;
+    --el-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 3px 1px rgba(0, 0, 0, 0.3);
+    --hr: #43474e;
+    --code-bg: #282a2f;
+    --pre-bg: #282a2f;
+    --th-bg: #00497d;
+    --th-fg: #d1e4ff;
+    --hover-bg: rgba(158, 202, 255, 0.08);
+    --current-bg: #00497d;
+    --current-fg: #d1e4ff;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --fg: #dde2ea;
-  --muted: #98a0ad;
-  --bg: #2b2f36;
-  --heading: #eef1f6;
-  --accent: #8ea2ff;
-  --accent-2: #ff8fab;
-  --border: #383d45;
-  --page-bg: #2b2f36;
-  --card-bg: #2b2f36;
-  --card-shadow: 14px 14px 28px #1f2227, -14px -14px 28px #373c45;
-  --el-bg: #2b2f36;
-  --el-shadow: 6px 6px 12px #1f2227, -6px -6px 12px #373c45;
-  --inset-shadow: inset 5px 5px 10px #1f2227, inset -5px -5px 10px #373c45;
-  --hr: linear-gradient(90deg, #1f2227, #3a3f48);
-  --code-bg: #31353d;
-  --pre-bg: #2b2f36;
-  --th-bg: #2b2f36;
-  --th-fg: #8ea2ff;
-  --hover-bg: #30343c;
-  --current-bg: #2b2f36;
-  --current-fg: #8ea2ff;
-  --current-shadow: inset 4px 4px 8px #1f2227, inset -4px -4px 8px #373c45;
+  --fg: #e2e2e6;
+  --muted: #c3c7cf;
+  --bg: #111318;
+  --heading: #e2e2e6;
+  --accent: #9ecaff;
+  --accent-2: #d7bee4;
+  --border: #43474e;
+  --page-bg: #111318;
+  --card-bg: #1a1c20;
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 6px 2px rgba(0, 0, 0, 0.3);
+  --el-bg: #1e2025;
+  --el-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 3px 1px rgba(0, 0, 0, 0.3);
+  --hr: #43474e;
+  --code-bg: #282a2f;
+  --pre-bg: #282a2f;
+  --th-bg: #00497d;
+  --th-fg: #d1e4ff;
+  --hover-bg: rgba(158, 202, 255, 0.08);
+  --current-bg: #00497d;
+  --current-fg: #d1e4ff;
 }
 
 /* ページの地と、本文・ナビのカード */
@@ -474,8 +473,10 @@ body > nav ul ul { border-left: 2px solid var(--border); }
 .tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
 .tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
 
-/* 表の見出し行はへこませず、下に細い線だけ */
-main th { border-bottom: 2px solid var(--border); }
+/* Material: 見出しは細めで大きく、リンクは下線を控えめに */
+main h1 { font-size: 2.4em; letter-spacing: 0; }
+main a { font-weight: 500; text-decoration-thickness: 1px; }
+.tsuzuri-nav-head > p { font-weight: 500; font-size: 1.25em; }
 
 /* ---------- 言語の切り替え ここから(ボタンの見た目は「メニュー」「ライト/ダーク」と同じ) ---------- */
 /* .tsuzuri-nav-label, .tsuzuri-theme-toggle の最終的な見た目を写したもの。テーマのボタンの見た目を変えるときは、このかたまりも一緒に直す */

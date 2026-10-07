@@ -29,7 +29,10 @@
   main pre { background: var(--code-bg); padding: 12px 16px; border-radius: 8px; overflow-x: auto; }
   main code { background: var(--code-bg); padding: 2px 5px; border-radius: 4px; font-size: 0.9em; }
   main pre code { background: none; padding: 0; }
-  main table { border-collapse: collapse; width: 100%; }
+  /* 表は内容に合わせた幅にし、入り切らないときは表の中だけを横にスクロールさせる(本文ごと横に動かさない)。
+     overflow-x は、テーマや独自CSSの main table { overflow: hidden; }(角を丸く切る指定)より優先させるため、body を付けて書く */
+  main table { display: block; width: max-content; max-width: 100%; border-collapse: collapse; }
+  body main table { overflow-x: auto; }
 
   /* コードの色分け(言語名付きのコードブロックを highlight.js でビルド時に色分けしたもの)。
      色はテーマのアクセント色・文字色から決める。独自CSSで --hl-* 変数を指定すれば個別に変えられる。 */
@@ -303,95 +306,51 @@
 }
 /* ---------- 言語の切り替え ここまで ---------- */
 /*
- * material.css (マテリアル)
- * Material Design 3(マテリアルデザイン)風のスタイル。色の役割(プライマリ・セカンダリコンテナなど)に沿った
- * 青系の配色、角丸のカードと影(エレベーション)、トーンのついたナビの選択。見出しは太さを抑えた大きめの文字。
- * ライト/ダーク表示に対応する。
+ * blueprint.css (ブループリント)
+ * 設計図(青焼き)のようなスタイル。青い地に白い方眼、白い細線の枠。見出しは字間を空けた大文字、
+ * h1 の下には寸法線、h2 には § の記号。カードの四隅には、図面のような角のしるし。
+ * 設計図の青に合わせて、常に同じ表示にする(OSの設定に関わらない)。
  */
 :root {
-  color-scheme: light dark;
-  --fg: #1a1c1e;
-  --muted: #43474e;
-  --bg: #f8f9ff;
-  --heading: #1a1c1e;
-  --accent: #0061a4;
-  --accent-2: #6b5778;
-  --border: #dfe2eb;
-  --page-bg: #f8f9ff;
-  --card-bg: #ffffff;
-  --card-border: 0;
+  color-scheme: dark;
   --card-filter: none;
-  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px 2px rgba(0, 0, 0, 0.15);
-  --radius-lg: 16px;
-  --radius: 12px;
-  --pill: 100px;
-  --heading-weight: 500;
-  --el-bg: #f1f4fa;
-  --el-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+  --el-shadow: none;
   --inset-shadow: none;
-  --hr: #c3c7cf;
-  --code-bg: #eceef4;
-  --pre-bg: #eceef4;
-  --th-bg: #d1e4ff;
-  --th-fg: #001d36;
-  --hover-bg: rgba(0, 97, 164, 0.08);
-  --current-bg: #d1e4ff;
-  --current-fg: #001d36;
   --current-shadow: none;
+  --fg: #e3eeff;
+  --muted: #9fbde6;
+  --bg: #0d3b73;
+  --heading: #ffffff;
+  --accent: #9ee0ff;
+  --accent-2: #ffd166;
+  --border: rgba(255, 255, 255, 0.35);
+  --page-bg: linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px) 0 0 / 100px 100px, linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px) 0 0 / 100px 100px, linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px) 0 0 / 20px 20px, linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px) 0 0 / 20px 20px, #0d3b73;
+  --card-bg: rgba(13, 59, 115, 0.9);
+  --card-border: 1px solid rgba(255, 255, 255, 0.7);
+  --card-shadow: none;
+  --radius-lg: 0;
+  --radius: 0;
+  --pill: 0;
+  --heading-weight: 600;
+  --el-bg: rgba(255, 255, 255, 0.05);
+  --hr: rgba(255, 255, 255, 0.6);
+  --code-bg: rgba(255, 255, 255, 0.1);
+  --pre-bg: rgba(0, 20, 50, 0.35);
+  --th-bg: rgba(255, 255, 255, 0.08);
+  --th-fg: #ffffff;
+  --hover-bg: rgba(255, 255, 255, 0.08);
+  --current-bg: #ffffff;
+  --current-fg: #0d3b73;
+  --hl-keyword: #ffd166;
+  --hl-string: #9ee0ff;
+  --hl-number: #ffb3a7;
+  --hl-title: #ffffff;
+  --hl-attr: #c7d7ff;
+  --hl-comment: #8fb0dd;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
   --heading-font: var(--font);
   --content-width: 840px;
-}
-
-/* ダーク表示: OS がダークモードのとき(ライト表示に切り替えたときを除く)と、ダーク表示に切り替えたとき */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --fg: #e2e2e6;
-    --muted: #c3c7cf;
-    --bg: #111318;
-    --heading: #e2e2e6;
-    --accent: #9ecaff;
-    --accent-2: #d7bee4;
-    --border: #43474e;
-    --page-bg: #111318;
-    --card-bg: #1a1c20;
-    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 6px 2px rgba(0, 0, 0, 0.3);
-    --el-bg: #1e2025;
-    --el-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 3px 1px rgba(0, 0, 0, 0.3);
-    --hr: #43474e;
-    --code-bg: #282a2f;
-    --pre-bg: #282a2f;
-    --th-bg: #00497d;
-    --th-fg: #d1e4ff;
-    --hover-bg: rgba(158, 202, 255, 0.08);
-    --current-bg: #00497d;
-    --current-fg: #d1e4ff;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --fg: #e2e2e6;
-  --muted: #c3c7cf;
-  --bg: #111318;
-  --heading: #e2e2e6;
-  --accent: #9ecaff;
-  --accent-2: #d7bee4;
-  --border: #43474e;
-  --page-bg: #111318;
-  --card-bg: #1a1c20;
-  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 6px 2px rgba(0, 0, 0, 0.3);
-  --el-bg: #1e2025;
-  --el-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 3px 1px rgba(0, 0, 0, 0.3);
-  --hr: #43474e;
-  --code-bg: #282a2f;
-  --pre-bg: #282a2f;
-  --th-bg: #00497d;
-  --th-fg: #d1e4ff;
-  --hover-bg: rgba(158, 202, 255, 0.08);
-  --current-bg: #00497d;
-  --current-fg: #d1e4ff;
 }
 
 /* ページの地と、本文・ナビのカード */
@@ -470,12 +429,23 @@ body > nav ul ul { border-left: 2px solid var(--border); }
 .tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
 .tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
 
-/* Material: 見出しは細めで大きく、リンクは下線を控えめに */
-main h1 { font-size: 2.4em; letter-spacing: 0; }
-main a { font-weight: 500; text-decoration-thickness: 1px; }
-.tsuzuri-nav-head > p { font-weight: 500; font-size: 1.25em; }
+:root { --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif; --heading-font: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, "BIZ UDGothic", monospace; }
+
+main { position: relative; background-image: linear-gradient(#fff, #fff), linear-gradient(#fff, #fff), linear-gradient(#fff, #fff), linear-gradient(#fff, #fff), linear-gradient(#fff, #fff), linear-gradient(#fff, #fff), linear-gradient(#fff, #fff), linear-gradient(#fff, #fff);
+  background-repeat: no-repeat; background-size: 18px 2px, 2px 18px, 18px 2px, 2px 18px, 18px 2px, 2px 18px, 18px 2px, 2px 18px;
+  background-position: 0 0, 0 0, 100% 0, 100% 0, 0 100%, 0 100%, 100% 100%, 100% 100%; background-color: var(--card-bg); }
+main :is(h1, h2) { text-transform: uppercase; letter-spacing: 0.08em; }
+main h1::after { content: ""; display: block; height: 9px; margin-top: 0.4em; width: min(14em, 100%);
+  background: linear-gradient(var(--accent), var(--accent)) 0 4px / 100% 1px no-repeat, linear-gradient(var(--accent), var(--accent)) 0 0 / 1px 9px no-repeat, linear-gradient(var(--accent), var(--accent)) 100% 0 / 1px 9px no-repeat; }
+main h2::before { content: "§ "; color: var(--accent-2); }
+main h3 { color: var(--accent); }
+main a { color: var(--accent); }
+main pre, main table, main blockquote, .tsuzuri-toc, .markdown-alert, main .tsuzuri-pager a { border: 1px solid var(--border); }
+main blockquote { border-style: dashed; }
+body > nav a[aria-current="page"] { font-weight: 600; }
+.tsuzuri-search input, .tsuzuri-nav-label, .tsuzuri-theme-toggle { border: 1px solid var(--border); }
 
 /* ---------- 言語の切り替え ここから(ボタンの見た目は「メニュー」「ライト/ダーク」と同じ) ---------- */
-/* .tsuzuri-nav-label, .tsuzuri-theme-toggle の最終的な見た目を写したもの。テーマのボタンの見た目を変えるときは、このかたまりも一緒に直す */
-:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
+/* .tsuzuri-nav-label, .tsuzuri-theme-toggle(後ろの行での上書きを含む) の最終的な見た目を写したもの。テーマのボタンの見た目を変えるときは、このかたまりも一緒に直す */
+:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch { color: var(--current-fg); background: var(--current-bg); border: 1px solid var(--border); border-radius: var(--pill); box-shadow: var(--current-shadow); }
 /* ---------- 言語の切り替え ここまで ---------- */

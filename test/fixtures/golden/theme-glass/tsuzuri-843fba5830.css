@@ -29,7 +29,10 @@
   main pre { background: var(--code-bg); padding: 12px 16px; border-radius: 8px; overflow-x: auto; }
   main code { background: var(--code-bg); padding: 2px 5px; border-radius: 4px; font-size: 0.9em; }
   main pre code { background: none; padding: 0; }
-  main table { border-collapse: collapse; width: 100%; }
+  /* 表は内容に合わせた幅にし、入り切らないときは表の中だけを横にスクロールさせる(本文ごと横に動かさない)。
+     overflow-x は、テーマや独自CSSの main table { overflow: hidden; }(角を丸く切る指定)より優先させるため、body を付けて書く */
+  main table { display: block; width: max-content; max-width: 100%; border-collapse: collapse; }
+  body main table { overflow-x: auto; }
 
   /* コードの色分け(言語名付きのコードブロックを highlight.js でビルド時に色分けしたもの)。
      色はテーマのアクセント色・文字色から決める。独自CSSで --hl-* 変数を指定すれば個別に変えられる。 */
