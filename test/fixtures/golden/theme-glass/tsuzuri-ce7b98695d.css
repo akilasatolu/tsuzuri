@@ -157,7 +157,7 @@
   }
   [data-fn-ref] { text-decoration: none; }
 
-  /* コードブロックのコピーボタン(tsuzuri-copy.js が付ける)。カーソルを当てたとき・キーボードで選んだときに表示する。
+  /* コードブロックのコピーボタン(tsuzuri-copy.js が付ける)。常に表示する。
      ボタンが文字に重ならないよう、ボタンを付けたコードブロックは上の余白を広げ、ボタンの下から文字を始める */
   .tsuzuri-code { position: relative; }
   .tsuzuri-code > pre { padding-top: 40px; }
@@ -174,11 +174,7 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.15s;
   }
-  .tsuzuri-code:hover .tsuzuri-copy, .tsuzuri-copy:focus-visible { opacity: 1; }
-  @media (hover: none) { .tsuzuri-copy { opacity: 1; } }
 
   /* mermaid の図(描画前はコードのまま表示される) */
   pre.mermaid { background: transparent; text-align: center; }
