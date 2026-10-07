@@ -387,7 +387,6 @@ main .tsuzuri-feature h3::before { content: none; }
 
 /* ---------- コードのコピーボタン ---------- */
 .tsuzuri-copy {
-  top: 10px;
   right: 12px;
   padding: 3px 12px;
   color: var(--pre-fg);
