@@ -9,13 +9,13 @@ order: 2
 1 つの文章にまとめてあります。枠の右上の「コピー」ボタンで全文をコピーし、
 お使いの AI エージェントに貼り付けて使えます。
 
-内容は Tsuzuri v1.30.2 の時点のものです。人が読むための手順は
+内容は Tsuzuri v1.30.3 の時点のものです。人が読むための手順は
 [Getting Started](getting-started.ja.md) にあります。
 
 ````markdown
 # Tsuzuri 参考情報
 
-- 対象: Tsuzuri v1.30.2(v1 系)
+- 対象: Tsuzuri v1.30.3(v1 系)
 - 最終確認日: 2026-10-07
 - 公式ドキュメント: https://akilasatolu.github.io/tsuzuri/ja/
 - ソースコード: https://github.com/akilasatolu/tsuzuri
@@ -67,10 +67,10 @@ Tsuzuri は次の 4 つで構成されています。
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-- `#v1` は、v1 系の最新のリリースを指すタグです。`#v1.30.2` のように
+- `#v1` は、v1 系の最新のリリースを指すタグです。`#v1.30.3` のように
   完全なバージョンを書くと、そのリリースに固定されます。`#` 以降を省くと、
   リリース前の変更を含む `main` ブランチの内容が実行されます。
-- コマンドは、最初の行に `tsuzuri v1.30.2` の形で、動いているバージョンを
+- コマンドは、最初の行に `tsuzuri v1.30.3` の形で、動いているバージョンを
   表示します。
 - `init` と `preview` の画面の表示は日本語です。生成される設定ファイルと
   ワークフローのコメントも日本語です。
@@ -602,7 +602,7 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   反映されます。
 
 リポジトリにコピー済みのバージョンは、`.github/workflows/docs-pages.yml` の
-先頭のコメントに、`tsuzuri v1.30.2` の形で書かれています。更新しない限り、
+先頭のコメントに、`tsuzuri v1.30.3` の形で書かれています。更新しない限り、
 リポジトリの中のバージョンは変わりません。
 
 ## 11. つまずきやすい点

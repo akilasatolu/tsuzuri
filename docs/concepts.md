@@ -239,7 +239,7 @@ installation (v1.7.0 or later).
 ## Copy button for code
 
 A "Copy" button appears at the top right of code blocks; click it to copy the code (v1.6.0 or
-later). The button appears on hover (always on smartphones). Only pages with code blocks load
+later). The button is always shown. Only pages with code blocks load
 the small script (`tsuzuri-copy.js`). The label is "コピー" if the page language is Japanese,
 and "Copy" otherwise. So that the button never covers the code, code blocks with the button get
 extra space at the top.
