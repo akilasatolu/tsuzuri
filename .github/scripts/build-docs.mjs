@@ -628,7 +628,8 @@ async function main() {
   }
 
 
-  // サイトに出さないが実在するリンク先(LICENSE・ドットファイル・README の無いディレクトリ)は、
+  // サイトに出さないが実在するリンク先(LICENSE・ドットファイル・README の無いディレクトリ・
+  // コピーする拡張子の一覧(path-utils.mjs の isLinkedFilePath)にないファイル)は、
   // GitHub 上のファイル・一覧へのリンクにする。リポジトリのURLとコミットは、
   //   1. GitHub Actions が自動で設定する環境変数(GITHUB_SERVER_URL・GITHUB_REPOSITORY・GITHUB_SHA)
   //   2. 手元のビルドでは、git の origin のURLと今のブランチ名(push していないコミットを指して
@@ -749,6 +750,17 @@ async function main() {
     const target = pageRelOfLink(fromRel, href);
     if (target && (visitedMd.has(target) || target === fromRel)) anchorRefs.push({ from: fromRel, target, frag });
   }
+  // 画像・動画・音声として埋め込んだ先が、実在するがコピーしない種類のファイル(GitHub 上のURLにするもの)のとき、
+  // 表示・再生できないので、ビルドの最後に警告する(リンク先 <a href>・[x](y) のリンクでは記録しない)。
+  // 見出しの id 用の2回目の描画(idPass)では記録しない。同じ埋め込みが複数あれば、見出しへのリンクと同じく1回ごとに数える
+  const embedNotCopied = []; // { target, from, isDir }
+  function noteEmbed(fromRel, href) {
+    const resolved = resolveRepoRel(fromRel, href);
+    if (resolved.rejected) return;
+    const bare = resolved.repoRel.replace(/\/+$/, "");
+    const target = linkTargets.get(bare);
+    if (target?.kind === "repo") embedNotCopied.push({ target: bare, from: fromRel, isDir: target.isDir });
+  }
   function collectIds(rel, html) {
     const unescape = (v) =>
       v.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
@@ -816,8 +828,11 @@ async function main() {
     const renderer = new md.Renderer();
     // 見出しの id 用の2回目の描画(renderer.heading)のあいだは true。同じリンクを2度記録しない
     let idPass = false;
-    const linkHref = (fromRel, href) => {
-      if (!idPass) noteAnchor(fromRel, href);
+    const linkHref = (fromRel, href, { embed = false } = {}) => {
+      if (!idPass) {
+        noteAnchor(fromRel, href);
+        if (embed) noteEmbed(fromRel, href);
+      }
       return siteHref(fromRel, href);
     };
     renderer.link = function ({ href, title, tokens }) {
@@ -827,6 +842,7 @@ async function main() {
     };
     // 画像は画面に入るまで読み込まない(loading="lazy")。ページの表示を速くするため。
     renderer.image = function ({ href, title, text }) {
+      if (!idPass) noteEmbed(rel, href);
       const newHref = siteHref(rel, href);
       return `<img src="${escapeHtml(newHref)}" alt="${escapeHtml(text || "")}"${
         title ? ` title="${escapeHtml(title)}"` : ""
@@ -1153,6 +1169,14 @@ async function main() {
     for (const a of missingAnchors) console.warn(`  - ${a}`);
   }
 
+  if (embedNotCopied.length) {
+    console.warn(`コピーしないファイル・フォルダが埋め込まれているため、表示・再生できません: ${embedNotCopied.length} 件`);
+    for (const e of embedNotCopied) {
+      const what = e.isDir ? "フォルダ" : "コピーしない種類のファイル";
+      console.warn(`  - 埋め込みの先 ${e.target} は${what}のため、表示・再生できません (referenced from ${e.from})`);
+    }
+  }
+
   // ---------- 8. 画像・その他のリンク先ファイルのコピー ----------
   const missingAssets = [];
   for (const assetRel of new Set([...imageSet, ...fileSet, ...ogImageSet])) {
@@ -1268,6 +1292,9 @@ async function main() {
       ...missingAssets.map((a) => `コピーできなかったファイル: ${a}`),
       ...collisions.map((c) => `出力先の重複: ${c}`),
       ...missingAnchors.map((a) => `見出しが見つかりません: ${a}`),
+      ...embedNotCopied.map(
+        (e) => `${e.isDir ? "フォルダ" : "コピーしない種類のファイル"}の埋め込み: ${e.target} (referenced from ${e.from})`
+      ),
       ...tIndex.excluded.map((e) => `翻訳の重複: ${e.rel}(${e.keptRel} を使用)`),
     ];
     if (problems.length) {

@@ -157,6 +157,29 @@ describe("crawlSite", () => {
     assert.deepEqual([...result.fileSet].sort(), ["a.zip", "docs/manual.pdf"]);
     assert.deepEqual([...result.imageSet], ["i.png"]);
   });
+
+  test("コピーする拡張子の一覧にないファイルは fileSet に入れず、実在すれば linkTargets の repo、無ければ missing", () => {
+    const { readFile, exists } = makeFs({
+      "README.md": "[js](src/foo.js) [pkg](package.json) [nope](nope.js) [txt](notes.txt) [z](a.zip)\n",
+      "src/foo.js": "x",
+      "package.json": "{}",
+      "notes.txt": "t",
+      "a.zip": "z",
+    });
+    const result = crawlSite({
+      repoRoot: REPO_ROOT,
+      rootRel: "README.md",
+      readFile,
+      exists,
+      isDirectory: () => false,
+    });
+    assert.deepEqual([...result.fileSet], ["a.zip"]);
+    assert.deepEqual(result.linkTargets.get("src/foo.js"), { kind: "repo", isDir: false, referencedFrom: "README.md" });
+    assert.equal(result.linkTargets.get("package.json").kind, "repo");
+    assert.equal(result.linkTargets.get("notes.txt").kind, "repo");
+    assert.equal(result.linkTargets.has("nope.js"), false);
+    assert.deepEqual(result.missing, [{ rel: "nope.js", referencedFrom: "README.md" }]);
+  });
 });
 
 // 多言語用の仮想ファイルシステム。readFile/exists に加えて readDir(フォルダの実際のファイル名)・

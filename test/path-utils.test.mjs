@@ -68,15 +68,20 @@ describe("isMarkdownPath", () => {
 
 describe("isImagePath", () => {
   test("対応拡張子すべてで true", () => {
-    for (const ext of ["png", "jpg", "jpeg", "gif", "svg", "webp", "bmp", "ico"]) {
+    for (const ext of ["png", "jpg", "jpeg", "gif", "svg", "webp", "bmp", "ico", "avif", "apng", "tif", "tiff", "heic", "heif", "jxl"]) {
       assert.equal(isImagePath(`a.${ext}`), true, `.${ext} should be image`);
     }
   });
   test("大文字小文字混在(.PNG)も true", () => {
     assert.equal(isImagePath("a.PNG"), true);
   });
-  test("非対応拡張子(.tiff)は false", () => {
-    assert.equal(isImagePath("a.tiff"), false);
+  test("非対応拡張子(.psd)・拡張子の無い名前は false", () => {
+    assert.equal(isImagePath("a.psd"), false);
+    assert.equal(isImagePath("png"), false);
+    assert.equal(isImagePath("dir.png/file"), false);
+  });
+  test("追加した拡張子も大文字小文字を区別しない(.AVIF)", () => {
+    assert.equal(isImagePath("a.AVIF"), true);
   });
 });
 
@@ -212,9 +217,34 @@ describe("resolveInsideRepo", () => {
 });
 
 describe("isLinkedFilePath", () => {
-  test("拡張子のある Markdown・画像以外のファイルは対象", () => {
+  test("コピーする拡張子の一覧(文書・圧縮・動画・音声)にあるファイルは対象", () => {
     assert.equal(isLinkedFilePath("docs/manual.pdf"), true);
     assert.equal(isLinkedFilePath("downloads/sample.zip"), true);
+    const exts = [
+      ...["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "epub", "html", "htm"],
+      ...["zip", "tar", "gz", "tgz", "bz2", "xz", "7z"],
+      ...["mp4", "webm", "mov", "m4v", "ogv", "avi", "mkv"],
+      ...["mp3", "m4a", "wav", "ogg", "oga", "flac", "aac", "opus", "weba"],
+    ];
+    for (const ext of exts) assert.equal(isLinkedFilePath(`files/a.${ext}`), true, `.${ext}`);
+  });
+  test("コード・設定ファイル・テキスト・一覧にない拡張子は対象外(GitHub 上のURLになる)", () => {
+    for (const p of ["src/foo.js", "package.json", "notes.txt", "data.csv", "a.unknown", "a.", "pdf", "dir.pdf/file"]) {
+      assert.equal(isLinkedFilePath(p), false, p);
+    }
+  });
+  test("拡張子は大文字小文字を区別しない。.tar.gz は gz で当たる", () => {
+    assert.equal(isLinkedFilePath("docs/A.PDF"), true);
+    assert.equal(isLinkedFilePath("dist/app.tar.gz"), true);
+    assert.equal(isLinkedFilePath("dist/app.tar.zst"), false);
+  });
+  test("\".\" で始まるフォルダの中は、動画・音声・PDF だけ対象(追加した動画・音声を含む)", () => {
+    for (const ext of ["pdf", "mp4", "ogv", "avi", "mkv", "mp3", "flac", "aac", "opus", "weba"]) {
+      assert.equal(isLinkedFilePath(`.github/media/a.${ext}`), true, `.${ext}`);
+    }
+    for (const ext of ["zip", "docx", "html", "json"]) {
+      assert.equal(isLinkedFilePath(`.github/media/a.${ext}`), false, `.${ext}`);
+    }
   });
   test("Markdown・拡張子の無いパス(ディレクトリ)・ドットファイルは対象外", () => {
     assert.equal(isLinkedFilePath("docs/a.md"), false);
@@ -222,6 +252,7 @@ describe("isLinkedFilePath", () => {
     assert.equal(isLinkedFilePath(".env"), false);
     assert.equal(isLinkedFilePath("config/.secret.json"), false);
     assert.equal(isLinkedFilePath(".github/docs-pages.config"), false);
+    assert.equal(isLinkedFilePath(".hidden.zip"), false);
   });
 });
 

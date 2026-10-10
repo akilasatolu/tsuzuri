@@ -428,6 +428,31 @@ describe("preprocessRawHtmlPaths", () => {
     );
   });
 
+  test("hrefFor の3つ目の引数 embed は、a では false、img・video・audio・source・srcset では true", () => {
+    const calls = [];
+    const hrefFor = (from, href, opts) => {
+      calls.push([href, opts.embed]);
+      return href;
+    };
+    preprocessRawHtmlPaths(
+      '<a href="a.xyz">l</a><img src="i.xyz"><video src="v.xyz"></video><audio src="s.xyz"></audio><source src="o.xyz">' +
+        '<img srcset="p.xyz 1x, q.xyz 2x"><source srcset="r.xyz">',
+      "README.md",
+      "",
+      hrefFor,
+    );
+    assert.deepEqual(calls, [
+      ["a.xyz", false],
+      ["i.xyz", true],
+      ["v.xyz", true],
+      ["s.xyz", true],
+      ["o.xyz", true],
+      ["p.xyz", true],
+      ["q.xyz", true],
+      ["r.xyz", true],
+    ]);
+  });
+
   test("srcset の data: URL・外部 URL・#始まりは書き換えない", () => {
     const content = '<img srcset="data:image/png;base64,AAA= 1x, https://example.com/a.png 2x, //cdn.example.com/b.png 3x, #x 4x, c.png 5x">';
     assert.equal(

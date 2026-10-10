@@ -1410,7 +1410,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("この設定で作らないファイル名(robots.txt・search-index.json)へのリンクはコピーする", () => {
+  test("robots.txt・search-index.json へのリンクはコピーせず(GitHub 上のURLにする)、NAV_ENABLED=true でも出力先は重複しない", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
@@ -1418,13 +1418,39 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.writeFileSync(path.join(dir, "robots.txt"), "x");
       fs.writeFileSync(path.join(dir, "search-index.json"), "{}");
       fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[r](robots.txt) [s](search-index.json)\n");
-      let result = runBuild(dir, { STRICT_LINKS: "true" });
+      const gh = { GITHUB_SERVER_URL: "https://github.com", GITHUB_REPOSITORY: "o/r", GITHUB_SHA: "abc123" };
+      for (const nav of ["", "true"]) {
+        const result = runBuild(dir, { ...gh, STRICT_LINKS: "true", NAV_ENABLED: nav });
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(readOut(dir, "index.html"), /<a href="https:\/\/github\.com\/o\/r\/blob\/abc123\/robots\.txt">r<\/a>/);
+        assert.doesNotMatch(readOut(dir, "index.html"), /href="\/robots\.txt"/);
+        assert.ok(!fs.existsSync(path.join(dir, "_site", "robots.txt")), "コピーしない");
+        if (nav) {
+          // ナビ有効なら search-index.json は生成するファイルで、リンクの先ではない
+          assert.equal(readOut(dir, "search-index.json").startsWith("["), true);
+        } else {
+          assert.ok(!fs.existsSync(path.join(dir, "_site", "search-index.json")), "コピーしない");
+        }
+      }
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("リンクした 404.html は、先に書く 404 ページと出力先が重なるのでコピーせず、STRICT_LINKS で失敗する", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fs.writeFileSync(path.join(dir, "404.html"), "<p>hand-written</p>");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[x](404.html)\n");
+      let result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
-      assert.equal(readOut(dir, "robots.txt"), "x");
-      assert.equal(readOut(dir, "search-index.json"), "{}");
-      result = runBuild(dir, { STRICT_LINKS: "true", NAV_ENABLED: "true" });
-      assert.equal(result.status, 1, "ナビ有効なら search-index.json は生成するので重複");
-      assert.match(result.stderr, /出力先の重複: search-index\.json/);
+      assert.match(result.stderr, /出力先が 404\.md と重なるためコピーしません/);
+      assert.doesNotMatch(readOut(dir, "404.html"), /hand-written/, "生成した 404 ページのまま");
+      result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /出力先の重複: 404\.html/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1761,5 +1787,183 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
+  });
+  describe("コピーする拡張子の一覧", () => {
+    const gh = { GITHUB_SERVER_URL: "https://github.com", GITHUB_REPOSITORY: "o/r", GITHUB_SHA: "abc123" };
+
+    test("src/foo.js はコピーせず、GitHub の blob の URL(#L10-L20 の断片つき)にする", () => {
+      const dir = makeTmpDir();
+      try {
+        copyRealBaseAndThemeStyles(dir);
+        write(dir, "README.md", "# Root\n\n[code](src/foo.js#L10-L20) [pkg](package.json)\n");
+        write(dir, "src/foo.js", "x");
+        write(dir, "package.json", "{}");
+        const result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
+        assert.equal(result.status, 0, result.stderr);
+        const html = readOut(dir, "index.html");
+        assert.match(html, /<a href="https:\/\/github\.com\/o\/r\/blob\/abc123\/src\/foo\.js#L10-L20">code<\/a>/);
+        assert.match(html, /<a href="https:\/\/github\.com\/o\/r\/blob\/abc123\/package\.json">pkg<\/a>/);
+        assert.ok(!fs.existsSync(path.join(dir, "_site", "src", "foo.js")));
+        assert.ok(!fs.existsSync(path.join(dir, "_site", "package.json")));
+        assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).files, []);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test("実在しない nope.js は missing になり、STRICT_LINKS=true で失敗する", () => {
+      const dir = makeTmpDir();
+      try {
+        copyRealBaseAndThemeStyles(dir);
+        write(dir, "README.md", "# Root\n\n[x](nope.js)\n");
+        let result = runBuild(dir, gh);
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stderr, /リンク先が見つからなかったファイル: 1 件\n\s+- nope\.js \(referenced from README\.md\)/);
+        assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).missing, [{ rel: "nope.js", referencedFrom: "README.md" }]);
+        result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
+        assert.equal(result.status, 1);
+        assert.match(result.stderr, /リンク先が見つかりません: nope\.js/);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test("[demo](demo/index.html) はコピーされ、中身は変わらず、読み込む別ファイルは追わない", () => {
+      const dir = makeTmpDir();
+      try {
+        copyRealBaseAndThemeStyles(dir);
+        const demo = '<!doctype html><link rel="stylesheet" href="style.css"><a href="../README.md">r</a><img src="pic.png">\n';
+        write(dir, "README.md", "# Root\n\n[demo](demo/index.html)\n");
+        write(dir, "demo/index.html", demo);
+        write(dir, "demo/style.css", "body{}");
+        write(dir, "demo/pic.png", "png");
+        const result = runBuild(dir, { STRICT_LINKS: "true" });
+        assert.equal(result.status, 0, result.stderr);
+        assert.equal(readOut(dir, "demo", "index.html"), demo);
+        assert.ok(!fs.existsSync(path.join(dir, "_site", "demo", "style.css")));
+        assert.ok(!fs.existsSync(path.join(dir, "_site", "demo", "pic.png")));
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test("![x](a.avif) と <video src=\"m.mkv\"> はコピーされ、警告は出ない", () => {
+      const dir = makeTmpDir();
+      try {
+        copyRealBaseAndThemeStyles(dir);
+        write(dir, "README.md", '# Root\n\n![x](a.avif)\n\n<video src="m.mkv"></video>\n');
+        write(dir, "a.avif", "avif");
+        write(dir, "m.mkv", "mkv");
+        const result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
+        assert.equal(result.status, 0, result.stderr);
+        assert.equal(readOut(dir, "a.avif"), "avif");
+        assert.equal(readOut(dir, "m.mkv"), "mkv");
+        assert.match(readOut(dir, "index.html"), /<img src="\/a\.avif"/);
+        assert.match(readOut(dir, "index.html"), /<video src="\/m\.mkv">/);
+        assert.doesNotMatch(result.stderr, /表示・再生できません/);
+        const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
+        assert.deepEqual(sitemap.images, ["a.avif"]);
+        assert.deepEqual(sitemap.files, ["m.mkv"]);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test("コピーしない種類のファイルの埋め込み(![](pic.xyz)・<video src>・srcset)は警告になり、STRICT_LINKS=true で失敗する", () => {
+      const dir = makeTmpDir();
+      try {
+        copyRealBaseAndThemeStyles(dir);
+        write(dir, "README.md", '# Root\n\n![x](pic.xyz)\n\n<video src="clip.xyz"></video>\n\n<img srcset="s.xyz 1x">\n');
+        for (const name of ["pic.xyz", "clip.xyz", "s.xyz"]) write(dir, name, name);
+        let result = runBuild(dir, gh);
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stderr, /表示・再生できません: 3 件/);
+        assert.match(result.stderr, /埋め込みの先 pic\.xyz はコピーしない種類のファイルのため、表示・再生できません \(referenced from README\.md\)/);
+        assert.match(result.stderr, /埋め込みの先 clip\.xyz /);
+        assert.match(result.stderr, /埋め込みの先 s\.xyz /);
+        assert.match(readOut(dir, "index.html"), /<img src="https:\/\/github\.com\/o\/r\/blob\/abc123\/pic\.xyz"/);
+        result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
+        assert.equal(result.status, 1);
+        assert.match(result.stderr, /リンクの問題 3 件/);
+        assert.match(result.stderr, /コピーしない種類のファイルの埋め込み: clip\.xyz/);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test("追加した画像の拡張子は、ドットで始まるフォルダの中・ドットで始まるファイル名でもコピーされる", () => {
+      const dir = makeTmpDir();
+      try {
+        copyRealBaseAndThemeStyles(dir);
+        write(dir, "README.md", "# Root\n\n![a](.github/a.avif) ![b](.a.avif) ![c](.github/c.png)\n");
+        for (const rel of [".github/a.avif", ".a.avif", ".github/c.png"]) write(dir, rel, "img");
+        const result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
+        assert.equal(result.status, 0, result.stderr);
+        assert.equal(readOut(dir, "_.github", "a.avif"), "img");
+        assert.equal(readOut(dir, "_.a.avif"), "img");
+        assert.equal(readOut(dir, "_.github", "c.png"), "img");
+        assert.doesNotMatch(result.stderr, /表示・再生できません/);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test("README のないフォルダの埋め込み(![](src/))は、フォルダとして警告する", () => {
+      const dir = makeTmpDir();
+      try {
+        copyRealBaseAndThemeStyles(dir);
+        write(dir, "README.md", "# Root\n\n![x](src/)\n");
+        write(dir, "src/a.js", "x");
+        const result = runBuild(dir, gh);
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stderr, /埋め込みの先 src はフォルダのため、表示・再生できません/);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test("リンク([x](clip.xyz)・<a href>)では警告を出さない", () => {
+      const dir = makeTmpDir();
+      try {
+        copyRealBaseAndThemeStyles(dir);
+        write(dir, "README.md", '# Root\n\n[x](clip.xyz) <a href="clip.xyz">y</a>\n');
+        write(dir, "clip.xyz", "x");
+        const result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
+        assert.equal(result.status, 0, result.stderr);
+        assert.doesNotMatch(result.stderr, /表示・再生できません/);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test("絵文字を含む見出しの中の埋め込みの警告は、二重に数えない", () => {
+      const dir = makeTmpDir();
+      try {
+        copyRealBaseAndThemeStyles(dir);
+        write(dir, "README.md", "# Home\n\n## :tada: ![x](pic.xyz)\n");
+        write(dir, "pic.xyz", "x");
+        const result = runBuild(dir, gh);
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stderr, /表示・再生できません: 1 件/);
+        assert.equal(result.stderr.split("埋め込みの先 pic.xyz").length - 1, 1);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test("GitHub の URL が分からないとき(origin なし)は、これまでの警告を出してサイト内のパスのままにする", () => {
+      const dir = makeTmpDir();
+      try {
+        copyRealBaseAndThemeStyles(dir);
+        write(dir, "README.md", "# Root\n\n[code](src/foo.js)\n");
+        write(dir, "src/foo.js", "x");
+        const result = runBuild(dir);
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stderr, /README\.md から src\/foo\.js へのリンク/);
+        assert.match(readOut(dir, "index.html"), /<a href="\/src\/foo\.js">code<\/a>/);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
   });
 });
