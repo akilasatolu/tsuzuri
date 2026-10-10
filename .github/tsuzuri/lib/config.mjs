@@ -35,6 +35,9 @@ export const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @property {boolean} sitemapJson
  * @property {boolean} lastUpdated
  * @property {boolean} editLink
+ * @property {boolean} repoLink
+ * @property {string} repoVersion
+ * @property {string} repoLicense
  * @property {string} faviconFile
  * @property {string} siteName
  * @property {string} customDomain
@@ -60,6 +63,9 @@ export const CONFIG_FILE_KEYS = [
   "SITEMAP_JSON",
   "LAST_UPDATED",
   "EDIT_LINK",
+  "REPO_LINK",
+  "REPO_VERSION",
+  "REPO_LICENSE",
 ];
 
 // 設定ファイルの本文を { KEY: 値 } にする(ワークフローの Load config と同じ読み方)。
@@ -142,6 +148,12 @@ export function loadConfig(env = process.env) {
   // true のとき、各ページの末尾に「このページを GitHub で編集」のリンクを付ける
   const editLink = parseBoolean("EDIT_LINK", env.EDIT_LINK);
 
+  // 各ページの末尾に出すリポジトリ情報。GitHub のリポジトリへのリンク(true のとき)と、
+  // 設定ファイルに書いた版・ライセンスの文字列(自動では求めない)。設定したものだけが出る
+  const repoLink = parseBoolean("REPO_LINK", env.REPO_LINK);
+  const repoVersion = resolveOneLine("REPO_VERSION", env.REPO_VERSION);
+  const repoLicense = resolveOneLine("REPO_LICENSE", env.REPO_LICENSE);
+
   const siteName = resolveSiteName(env);
 
   const customDomain = resolveCustomDomain(env.CUSTOM_DOMAIN);
@@ -163,6 +175,9 @@ export function loadConfig(env = process.env) {
     sitemapJson,
     lastUpdated,
     editLink,
+    repoLink,
+    repoVersion,
+    repoLicense,
     faviconFile,
     siteName,
     customDomain,
@@ -240,6 +255,29 @@ export function resolveLanguages(raw) {
     return ["en"];
   }
   return languages;
+}
+
+/**
+ * 1行の文字列の設定値(REPO_VERSION など)を読む。前後の空白を取り、空なら空文字。
+ * 制御文字(改行・タブを含む)があるか、長さが max を超えるときは、警告して空文字にする。
+ * 文字種は絞らない(HTML に出すときは呼び出し側で escapeHtml を通す)。
+ * @param {string} name - 設定キー名(警告に使う)
+ * @param {string|undefined} raw
+ * @param {number} [max]
+ * @returns {string}
+ */
+export function resolveOneLine(name, raw, max = 64) {
+  const trimmed = (raw ?? "").trim();
+  if (!trimmed) return "";
+  if (/\p{Cc}/u.test(trimmed)) {
+    console.warn(`[config] ${name} の値に改行・タブなどの制御文字が含まれています。空文字にフォールバックします。`);
+    return "";
+  }
+  if (trimmed.length > max) {
+    console.warn(`[config] ${name} の値が長すぎます(${max}文字まで)。空文字にフォールバックします。`);
+    return "";
+  }
+  return trimmed;
 }
 
 function resolveCustomDomain(raw) {
