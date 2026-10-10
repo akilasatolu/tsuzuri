@@ -3,7 +3,7 @@
  * build-docs.mjs
  *
  * オーケストレーション層(エントリーポイント)。
- * config・crawler・frontmatter・link-extractor・path-utils・html-renderer・
+ * config・crawler・frontmatter・link-extractor・emoji・path-utils・html-renderer・
  * sitemap の各モジュールを正しい順番で呼び出し、ROOT_MD (default: README.md) を
  * 起点に「たどり着けるファイルだけ」を収集して OUT_DIR (default: _site) に
  * 静的サイトとして書き出す。
@@ -58,6 +58,7 @@ import {
   encodeUrlPath,
 } from "./lib/path-utils.mjs";
 import { extractLinks } from "./lib/link-extractor.mjs";
+import { emojiExtension, hasEmojiToken, emojiNamesAsText } from "./lib/emoji.mjs";
 import {
   escapeHtml,
   renderNav,
@@ -467,7 +468,7 @@ async function main() {
 
   // ---------- 7. HTML 変換 ----------
   // 画面の文言(メニュー・検索・前後のページ・注意書きなど)は lib/i18n.mjs の表から、ページの言語で取る。
-  // marked はこのビルド専用のインスタンスを使う(脚注の拡張機能を組み込むため)。
+  // marked はこのビルド専用のインスタンスを使う(脚注・絵文字の拡張機能を組み込むため)。
   // 脚注の見出しなどの文言が言語で変わるので、文言の言語ごとに1つ作って覚えておく。
   const markedByLang = new Map();
   function markedFor(tag) {
@@ -482,6 +483,7 @@ async function main() {
           backRefLabel: strings.footnoteBack,
         })
       );
+      instance.use(emojiExtension()); // 絵文字のショートコード(脚注の拡張の後に入れる)
       markedByLang.set(key, instance);
     }
     return markedByLang.get(key);
@@ -812,8 +814,10 @@ async function main() {
     // リンクの表示テキストや見出しはインライン要素(強調・コード等)を含みうるため、
     // this.parser.parseInline(tokens) でHTMLにする(this を使うためアロー関数にしない)。
     const renderer = new md.Renderer();
+    // 見出しの id 用の2回目の描画(renderer.heading)のあいだは true。同じリンクを2度記録しない
+    let idPass = false;
     const linkHref = (fromRel, href) => {
-      noteAnchor(fromRel, href);
+      if (!idPass) noteAnchor(fromRel, href);
       return siteHref(fromRel, href);
     };
     renderer.link = function ({ href, title, tokens }) {
@@ -867,7 +871,18 @@ async function main() {
       const inner = this.parser.parseInline(tokens);
       const text = htmlToText(inner);
       if (depth === 1 && !firstH1) firstH1 = text.trim();
-      const id = slugger.slug(text);
+      // id は、絵文字に変える前の文字(`:tada:`)から作り、絵文字の拡張を入れる前と同じ id にする。絵文字の無い見出しは今までと同じ。
+      // 2回目の描画で見出しへのリンクを記録し直さないよう、そのあいだは記録を止める(記録するのは noteAnchor だけ)
+      let idText = text;
+      if (hasEmojiToken(tokens)) {
+        idPass = true;
+        try {
+          idText = htmlToText(this.parser.parseInline(emojiNamesAsText(tokens)));
+        } finally {
+          idPass = false;
+        }
+      }
+      const id = slugger.slug(idText);
       if (!id) return `<h${depth}>${inner}</h${depth}>\n`;
       if (depth === 2 || depth === 3) headings.push({ depth, id, text });
       const anchor =

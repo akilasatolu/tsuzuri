@@ -8,12 +8,14 @@
  * 単一引用符のタイトル・山括弧(<a b.md>)・括弧を含むパスなど、描画でリンクになるものは
  * すべてたどる。コードブロック・インラインコードの中の「見せかけのリンク」は、marked が
  * コードとして扱うので自然に除外される(入れ子のバッククォートも marked の規則どおりに扱われる)。
- * 生のHTML(<a href>・<img src>)は、HTMLのトークンに extractRawHtmlLinks を適用して拾う。
+ * 生のHTML(<a href>・<img src>・<source srcset> など)は、HTMLのトークンに extractRawHtmlLinks を適用して拾う。
  */
 
 import { Marked } from "marked";
 import markedFootnote from "marked-footnote";
 import { htmlToText } from "./slugger.mjs";
+import { emojiExtension } from "./emoji.mjs";
+import { mapSrcsetUrls, SRCSET_ATTR } from "./path-utils.mjs";
 
 /**
  * Markdown 本文から、リンク・画像・生のHTMLの href/src を、描画と同じ解釈で集める。
@@ -42,12 +44,14 @@ export function extractLinks(mdContent) {
  * 本文の最初の h1 見出しの表示テキストを返す(Markdown の記号・HTMLタグは除く)。無ければ ""。
  * `# 見出し`・`見出し\n===` のほか、README でよく使われる生のHTMLの `<h1 align="center">…</h1>` も
  * 見出しとして扱う。ナビ・前後ページリンクの表示名と <title> に使う。
- * コードブロック内の "# …" は見出しとして扱われない。
+ * コードブロック内の "# …" は見出しとして扱われない。絵文字のショートコード(:tada:)は、描画と同じく絵文字に変える。
  * @param {string} mdContent
  * @returns {string}
  */
 export function firstHeadingText(mdContent) {
+  // 絵文字のショートコードは、描画と同じく変換後の文字にする(ナビの表示名が描画した見出しと揃うように)
   const marked = new Marked({ gfm: true });
+  marked.use(emojiExtension());
   for (const token of marked.lexer(mdContent)) {
     if (token.type === "heading" && token.depth === 1) {
       return htmlToText(marked.parseInline(token.text)).trim();
@@ -60,14 +64,21 @@ export function firstHeadingText(mdContent) {
   return "";
 }
 
-// 生の HTML <a href>・<img src>・<video src>・<audio src>・<source src> も拾う
-// (タグ名・属性名の大文字小文字は区別しない。対象のタグは html-renderer の書き換えと同じ)
+// 生の HTML <a href>・<img src>・<video src>・<audio src>・<source src> と、<img>・<source> の srcset の
+// 各候補の URL も拾う(タグ名・属性名の大文字小文字は区別しない。対象のタグは html-renderer の書き換えと同じ)
 export function extractRawHtmlLinks(mdContent) {
   const results = [];
   const re = /<(?:a|img|video|audio|source)\b[^>]*?\s(?:src|href)=["']([^"']+)["'][^>]*>/gi;
   let m;
   while ((m = re.exec(mdContent)) !== null) {
     results.push(m[1].trim());
+  }
+  const srcsetRe = new RegExp(SRCSET_ATTR);
+  while ((m = srcsetRe.exec(mdContent)) !== null) {
+    mapSrcsetUrls(m[2] ?? m[3], (url) => {
+      if (url) results.push(url);
+      return url;
+    });
   }
   return results;
 }

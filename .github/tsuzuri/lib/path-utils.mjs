@@ -69,6 +69,48 @@ export function splitHref(href) {
   return { pathPart: href.slice(0, cut), rest: href.slice(cut) };
 }
 
+// <img>・<source> の srcset 属性(上限付きで、入れ子の量指定子は使わない)。値は二重引用符か単一引用符で囲まれたもの。
+// link-extractor.mjs の extractRawHtmlLinks と html-renderer.mjs の preprocessRawHtmlPaths が使う(g フラグ付き。exec で使うときは new RegExp で複製する)
+export const SRCSET_ATTR = /(<(?:img|source)\b[^>]{0,2000}?\ssrcset=)(?:"([^"]{0,4000})"|'([^']{0,4000})')/gi;
+
+// srcset 属性の値の中の、候補の URL を fn で置き換えた文字列を返す。記述子(1x・480w など)と区切りは元のまま。
+// HTML の仕様どおり1文字ずつ読む(空白とカンマを飛ばす → 空白までを URL とする → URL の末尾のカンマは区切り →
+// カンマまでを記述子とする)。そのため "a.png,b.png"(空白なし)は1つの URL で、"data:image/png;base64,AAA= 1x" の
+// データ URL のカンマでも分かれない。正規表現では分けない。
+//
+// @param {string} value
+// @param {(url: string) => string} fn
+// @returns {string}
+export function mapSrcsetUrls(value, fn) {
+  const isSpace = (c) => c === " " || c === "\t" || c === "\n" || c === "\f" || c === "\r";
+  let out = "";
+  let i = 0;
+  const n = value.length;
+  while (i < n) {
+    let j = i;
+    while (j < n && (isSpace(value[j]) || value[j] === ",")) j++;
+    out += value.slice(i, j);
+    i = j;
+    if (i >= n) break;
+    while (j < n && !isSpace(value[j])) j++;
+    let url = value.slice(i, j);
+    // 末尾のカンマは、後ろから数える(正規表現の /,+$/ は、カンマが続く入力で処理時間が2乗に伸びる)
+    let k = url.length;
+    while (k > 0 && url[k - 1] === ",") k--;
+    const commas = url.slice(k);
+    url = url.slice(0, k);
+    out += fn(url) + commas;
+    i = j;
+    if (!commas) {
+      // 記述子。次のカンマまで
+      while (j < n && value[j] !== ",") j++;
+      out += value.slice(i, j);
+      i = j;
+    }
+  }
+  return out;
+}
+
 /**
  * @typedef {{ repoRel: string, rest: string }} ResolvedRepoRel
  * @typedef {{ rejected: true, reason: "external" | "anchor" | "path-traversal" | "decode-error" }} RejectedRepoRel
