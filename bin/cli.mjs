@@ -315,6 +315,11 @@ REPO_VERSION=
 # 各ページの末尾に表示するライセンス(例: MIT)。ここに書いた文字列がそのまま表示されます。空なら表示しません。
 REPO_LICENSE=
 
+# AI(LLM)向けにサイトの目次を書いた llms.txt を、サイトの直下に作るか(true/false)。書かなくても true です。
+# サイトの URL(SITE_ORIGIN)が決まっているとき(GitHub Actions でのビルド)だけ作られます。作りたくない場合は false にしてください。
+# リポジトリの直下に llms.txt を置くと、自動では作らず、それをそのままサイトに載せます。
+LLMS_TXT=true
+
 # 原因調査用の sitemap.json を出力するか(true/false)。公開サイトにも含まれるため、普段は false にしてください。
 SITEMAP_JSON=false
 `;

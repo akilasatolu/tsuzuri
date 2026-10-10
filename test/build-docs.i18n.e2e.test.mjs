@@ -50,6 +50,7 @@ const CONFIG_ENV_KEYS = [
   "REPO_LINK",
   "REPO_VERSION",
   "REPO_LICENSE",
+  "LLMS_TXT",
   "GITHUB_ACTIONS",
 ];
 
@@ -765,3 +766,98 @@ describe("build-docs.mjs :: 編集リンク(多言語)", () => {
   });
 });
 
+
+describe("build-docs.mjs :: llms.txt(多言語)", () => {
+  const FILES = {
+    "README.md": "---\ndescription: 日本語の説明\n---\n# ホーム\n\n- [a](a.md)\n- [h](hidden.md)\n",
+    "README.en.md": "---\ndescription: English description\n---\n# Home\n\n- [a](a.en.md)\n",
+    "a.md": "---\ndescription: エー\n---\n# ページA\n",
+    "a.en.md": "---\ndescription: Page A in English\n---\n# Page A\n",
+    "hidden.md": "---\nnav: false\ndescription: ナビに無い\n---\n# 隠し\n",
+    "hidden.en.md": "---\nnav: false\n---\n# Hidden\n",
+  };
+  const ENV = { LANGUAGES: "ja,en", SITE_ORIGIN: "https://owner.github.io", SITE_NAME: "サイト" };
+
+  test("基本言語のページだけを載せ、ほかの言語はトップへのリンクだけを ## Optional に載せる(ファイルは1つ)", () => {
+    withSite(null, FILES, (dir) => {
+      const result = runBuild(dir, ENV);
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(
+        readOut(dir, "llms.txt"),
+        [
+          "# サイト",
+          "",
+          "> 日本語の説明",
+          "",
+          "## Docs",
+          "",
+          "- [ホーム](https://owner.github.io/): 日本語の説明",
+          "- [ページA](https://owner.github.io/a.html): エー",
+          "",
+          "## Optional",
+          "",
+          "- [隠し](https://owner.github.io/hidden.html): ナビに無い",
+          "- [English](https://owner.github.io/en/)",
+          "",
+        ].join("\n")
+      );
+      assert.ok(!existsOut(dir, "en/llms.txt"));
+    });
+  });
+
+  test("基本言語が en のときは日本語のトップが Optional に載る。BASE_PATH は URL に入る。noindex の言語のトップは載せない", () => {
+    const files = {
+      "README.md": "---\ndescription: English description\n---\n# Home\n\n- [a](a.md)\n",
+      "README.ja.md": "---\ndescription: 日本語の説明\n---\n# ホーム\n",
+      "a.md": "# Page A\n",
+      "a.ja.md": "# ページA\n",
+    };
+    withSite(null, files, (dir) => {
+      const result = runBuild(dir, { ...ENV, LANGUAGES: "en,ja", BASE_PATH: "/repo" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(
+        readOut(dir, "llms.txt"),
+        [
+          "# サイト",
+          "",
+          "> English description",
+          "",
+          "## Docs",
+          "",
+          "- [Home](https://owner.github.io/repo/): English description",
+          "- [Page A](https://owner.github.io/repo/a.html)",
+          "",
+          "## Optional",
+          "",
+          "- [日本語](https://owner.github.io/repo/ja/)",
+          "",
+        ].join("\n")
+      );
+    });
+    withSite(null, { ...files, "README.ja.md": "---\nnoindex: true\n---\n# ホーム\n" }, (dir) => {
+      assert.equal(runBuild(dir, { ...ENV, LANGUAGES: "en,ja" }).status, 0);
+      assert.ok(!readOut(dir, "llms.txt").includes("日本語"));
+      assert.ok(!readOut(dir, "llms.txt").includes("## Optional"));
+    });
+  });
+
+  test("LLMS_TXT=false と不正な値では作らない", () => {
+    withSite(null, FILES, (dir) => {
+      assert.equal(runBuild(dir, { ...ENV, LLMS_TXT: "false" }).status, 0);
+      assert.ok(!existsOut(dir, "llms.txt"));
+      const bad = runBuild(dir, { ...ENV, LLMS_TXT: "ture" });
+      assert.equal(bad.status, 0);
+      assert.match(bad.stderr, /LLMS_TXT の値が不正です\("ture"\)/);
+      assert.ok(!existsOut(dir, "llms.txt"));
+    });
+  });
+
+  test("リポジトリ直下に手書きがあれば、多言語でも1つだけコピーする", () => {
+    withSite(null, { ...FILES, "llms.txt": "# 手書き\n" }, (dir) => {
+      const result = runBuild(dir, ENV);
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(readOut(dir, "llms.txt"), "# 手書き\n");
+      assert.ok(!existsOut(dir, "en/llms.txt"));
+    });
+  });
+});

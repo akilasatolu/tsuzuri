@@ -47,6 +47,7 @@ const CONFIG_ENV_KEYS = [
   "REPO_LINK",
   "REPO_VERSION",
   "REPO_LICENSE",
+  "LLMS_TXT",
   "GITHUB_ACTIONS",
 ];
 

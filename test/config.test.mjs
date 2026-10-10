@@ -318,6 +318,39 @@ test("REPO_LINK・REPO_VERSION・REPO_LICENSE: 既定は false・空、書いた
   });
 });
 
+test("LLMS_TXT: 既定は true(未設定・空は警告なし)、false で無効、大文字小文字は区別しない、不正値は警告して無効", () => {
+  withCapturedWarn((calls) => {
+    assert.equal(loadConfig({}).llmsTxt, true);
+    assert.equal(loadConfig({ LLMS_TXT: "" }).llmsTxt, true);
+    assert.equal(loadConfig({ LLMS_TXT: "  " }).llmsTxt, true);
+    assert.equal(loadConfig({ LLMS_TXT: "true" }).llmsTxt, true);
+    assert.equal(loadConfig({ LLMS_TXT: "TRUE" }).llmsTxt, true);
+    assert.equal(loadConfig({ LLMS_TXT: "false" }).llmsTxt, false);
+    assert.equal(loadConfig({ LLMS_TXT: "False" }).llmsTxt, false);
+    assert.equal(calls.length, 0);
+    for (const bad of ["off", "no", "ture", "0"]) {
+      calls.length = 0;
+      assert.equal(loadConfig({ LLMS_TXT: bad }).llmsTxt, false, bad);
+      assert.deepEqual(calls, [`[config] LLMS_TXT の値が不正です("${bad}")。false にフォールバックします。`]);
+    }
+  });
+});
+
+test("真偽値のキー: 既存のキーの既定は false のまま、不正値の警告の文言も変わらない", () => {
+  withCapturedWarn((calls) => {
+    const c = loadConfig({});
+    for (const key of ["navEnabled", "strictLinks", "sitemapJson", "lastUpdated", "editLink", "repoLink"]) {
+      assert.equal(c[key], false, key);
+    }
+    assert.equal(calls.length, 0);
+    for (const key of ["NAV_ENABLED", "STRICT_LINKS", "SITEMAP_JSON", "LAST_UPDATED", "EDIT_LINK", "REPO_LINK"]) {
+      calls.length = 0;
+      loadConfig({ [key]: "maybe" });
+      assert.deepEqual(calls, [`[config] ${key} の値が不正です("maybe")。false にフォールバックします。`]);
+    }
+  });
+});
+
 test("resolveOneLine: 前後の空白を取る・空は空・改行/タブ/65文字は警告して空・64文字は通る", () => {
   withCapturedWarn((calls) => {
     assert.equal(resolveOneLine("X", undefined), "");

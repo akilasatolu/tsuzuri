@@ -1,0 +1,12 @@
+# Root Page
+
+> See A and image img.
+
+## Docs
+
+- [Root Page](https://example.github.io/repo/): See A and image img.
+- [Page A](https://example.github.io/repo/docs/a.html): Back to root.
+- [Code samples](https://example.github.io/repo/docs/code.html): Inline code and a footnote.1
+- [Guide](https://example.github.io/repo/guide/): The guide folder entry page.
+- [Reference](https://example.github.io/repo/ref/index.html): The reference folder entry page (index.md).
+- [Notizen](https://example.github.io/repo/notes.de.html): Diese Seite hat ein Sprachsuffix, wird aber als normale Seite gebaut.

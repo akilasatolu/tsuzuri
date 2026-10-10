@@ -297,7 +297,7 @@ test("buildDocsPagesYml: 設定ファイルは既知のキーだけを取り込�
   const yml = buildDocsPagesYml();
   assert.match(
     yml,
-    /TRIGGER_BRANCH\|ROOT_MD\|OUT_DIR\|STYLE_FILE\|LANGUAGES\|NAV_ENABLED\|FAVICON_FILE\|SITE_NAME\|CUSTOM_DOMAIN\|OGP_DEFAULT_IMAGE\|THEME\|STRICT_LINKS\|SITEMAP_JSON\|LAST_UPDATED\|EDIT_LINK\|REPO_LINK\|REPO_VERSION\|REPO_LICENSE\)/
+    /TRIGGER_BRANCH\|ROOT_MD\|OUT_DIR\|STYLE_FILE\|LANGUAGES\|NAV_ENABLED\|FAVICON_FILE\|SITE_NAME\|CUSTOM_DOMAIN\|OGP_DEFAULT_IMAGE\|THEME\|STRICT_LINKS\|SITEMAP_JSON\|LAST_UPDATED\|EDIT_LINK\|REPO_LINK\|REPO_VERSION\|REPO_LICENSE\|LLMS_TXT\)/
   );
   assert.ok(!yml.includes("| xargs"));
   assert.ok(yml.includes("--ignore-scripts"));
@@ -1027,12 +1027,19 @@ test("createBundledConfirm: 一式は1回だけ聞いて同じ答えを使い、
   assert.match(questions[1], /docs-pages\.config は既に存在します/);
 });
 
+test("buildDocsPagesConfig: LLMS_TXT=true をコメント付きで書く", () => {
+  const config = buildDocsPagesConfig({});
+  assert.match(config, /^LLMS_TXT=true$/m);
+  assert.match(config, /# [^\n]*llms\.txt[^\n]*\n# [^\n]*SITE_ORIGIN[^\n]*\n# [^\n]*llms\.txt[^\n]*\nLLMS_TXT=true/);
+  assert.ok(config.indexOf("LLMS_TXT=true") < config.indexOf("SITEMAP_JSON=false"));
+});
+
 test("生成する設定ファイル・CSSひな形に、開発側の内部的な言い回しを含めない", () => {
   const config = buildDocsPagesConfig({});
   for (const word of ["★", "詳細設計", "後方互換", "現行", "build-docs.mjs", "ハードコード"]) {
     assert.ok(!config.includes(word), `設定ファイルに「${word}」が含まれる`);
   }
-  for (const key of ["TRIGGER_BRANCH", "ROOT_MD", "OUT_DIR", "THEME", "STYLE_FILE", "LANGUAGES", "NAV_ENABLED", "FAVICON_FILE", "SITE_NAME", "CUSTOM_DOMAIN", "OGP_DEFAULT_IMAGE", "STRICT_LINKS", "LAST_UPDATED", "EDIT_LINK", "REPO_LINK", "REPO_VERSION", "REPO_LICENSE", "SITEMAP_JSON"]) {
+  for (const key of ["TRIGGER_BRANCH", "ROOT_MD", "OUT_DIR", "THEME", "STYLE_FILE", "LANGUAGES", "NAV_ENABLED", "FAVICON_FILE", "SITE_NAME", "CUSTOM_DOMAIN", "OGP_DEFAULT_IMAGE", "STRICT_LINKS", "LAST_UPDATED", "EDIT_LINK", "REPO_LINK", "REPO_VERSION", "REPO_LICENSE", "SITEMAP_JSON", "LLMS_TXT"]) {
     assert.match(config, new RegExp(`^${key}=`, "m"), key);
   }
   assert.ok(buildStyleCssTemplate().includes("https://akilasatolu.github.io/tsuzuri/docs/theming.html"));
@@ -1049,6 +1056,9 @@ test("missingConfigKeys: 最新のひな形にあって設定ファイルに無�
   // リポジトリ情報の3キー(REPO_VERSION・REPO_LICENSE は値が空のひな形 "KEY=")も、古い設定ファイルには案内される
   for (const key of ["REPO_LINK", "REPO_VERSION", "REPO_LICENSE"]) assert.ok(missing.includes(key), key);
   assert.deepEqual(missingConfigKeys(`${old}\nREPO_LINK=true\nREPO_VERSION=\nREPO_LICENSE=MIT\n`).filter((k) => k.startsWith("REPO_")), []);
+  // LLMS_TXT は既定で有効のキー。古い設定ファイルには案内されるが、書かなくても有効で動く
+  assert.ok(missing.includes("LLMS_TXT"));
+  assert.deepEqual(missingConfigKeys(`${old}\nLLMS_TXT=false\n`).filter((k) => k === "LLMS_TXT"), []);
   // 古い設定ファイル(廃止した LANG だけ)には、LANGUAGES が「設定ファイルに無い項目」として出る
   const oldLang = missingConfigKeys("TRIGGER_BRANCH=main\nLANG=ja\nTHEME=material\n");
   assert.ok(oldLang.includes("LANGUAGES"));

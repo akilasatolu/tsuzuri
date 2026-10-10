@@ -51,6 +51,7 @@ const CONFIG_ENV_KEYS = [
   "REPO_LINK",
   "REPO_VERSION",
   "REPO_LICENSE",
+  "LLMS_TXT",
   "GITHUB_ACTIONS",
 ];
 
@@ -2111,6 +2112,268 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
         assert.match(readOut(dir, "index.html"), /<a href="\/src\/foo\.js">code<\/a>/);
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+  });
+});
+
+describe("build-docs.mjs :: llms.txt", () => {
+  const ORIGIN = "https://owner.github.io";
+  const write = (dir, rel, content) => {
+    fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
+    fs.writeFileSync(path.join(dir, rel), content);
+  };
+  const outPath = (dir, rel) => path.join(dir, "_site", rel);
+  const siteWith = (files) => {
+    const dir = makeTmpDir();
+    copyRealBaseAndThemeStyles(dir);
+    for (const [rel, content] of Object.entries(files)) write(dir, rel, content);
+    return dir;
+  };
+  const cleanup = (dir) => fs.rmSync(dir, { recursive: true, force: true });
+  // 基本の構成: 起点 → a・b・sub/(README)・noindex のページ・nav: false のページ
+  const BASIC = {
+    "README.md": "---\ndescription: ルートの説明\n---\n# Root\n\n[a](a.md) [b](b.md) [s](sub/README.md) [n](noidx.md) [h](hidden.md)\n",
+    "a.md": "# Page A\n\nAの本文です。\n",
+    "b.md": "---\ntitle: Page B\ndescription: Bの説明\norder: 1\n---\n\n# ignored\n",
+    "sub/README.md": "# Sub\n\n[c](c.md)\n",
+    "sub/c.md": "# Page C\n\nCの本文。\n",
+    "noidx.md": "---\nnoindex: true\n---\n# Hidden from search\n",
+    "hidden.md": "---\nnav: false\ndescription: ナビに無い\n---\n# Off Nav\n",
+  };
+
+  test("SITE_ORIGIN なしでは作らない", () => {
+    const dir = siteWith(BASIC);
+    try {
+      assert.equal(runBuild(dir).status, 0);
+      assert.ok(!fs.existsSync(outPath(dir, "llms.txt")));
+    } finally {
+      cleanup(dir);
+    }
+  });
+
+  test("SITE_ORIGIN があれば作る(形・並び・載せないページ・説明の無い行)。HTML の <title> と同じ題名", () => {
+    const dir = siteWith(BASIC);
+    try {
+      const result = runBuild(dir, { SITE_ORIGIN: ORIGIN, SITE_NAME: "My Docs", NAV_ENABLED: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(result.stderr, "");
+      const expected = [
+        "# My Docs",
+        "",
+        "> ルートの説明",
+        "",
+        "## Docs",
+        "",
+        "- [Page B](https://owner.github.io/b.html): Bの説明",
+        "- [Root](https://owner.github.io/): ルートの説明",
+        "- [Page A](https://owner.github.io/a.html): Aの本文です。",
+        "- [Sub](https://owner.github.io/sub/): c",
+        "- [Page C](https://owner.github.io/sub/c.html): Cの本文。",
+        "",
+        "## Optional",
+        "",
+        "- [Off Nav](https://owner.github.io/hidden.html): ナビに無い",
+        "",
+      ].join("\n");
+      const actual = fs.readFileSync(outPath(dir, "llms.txt"), "utf-8");
+      assert.equal(actual, expected);
+      // noindex・404 は載せない
+      assert.ok(!actual.includes("noidx"));
+      assert.ok(!actual.includes("404"));
+      // <title> と同じ題名
+      assert.match(readOut(dir, "b.html"), /<title>Page B<\/title>/);
+    } finally {
+      cleanup(dir);
+    }
+  });
+
+  test("ナビの順は NAV_ENABLED によらず同じ(true と false で本文が一致)", () => {
+    const dir = siteWith(BASIC);
+    try {
+      const env = { SITE_ORIGIN: ORIGIN, SITE_NAME: "My Docs" };
+      assert.equal(runBuild(dir, { ...env, NAV_ENABLED: "true" }).status, 0);
+      const on = fs.readFileSync(outPath(dir, "llms.txt"), "utf-8");
+      assert.equal(runBuild(dir, { ...env, NAV_ENABLED: "false" }).status, 0);
+      assert.equal(fs.readFileSync(outPath(dir, "llms.txt"), "utf-8"), on);
+    } finally {
+      cleanup(dir);
+    }
+  });
+
+  test("BASE_PATH があれば URL に入る(サイトの直下の llms.txt)。SITE_NAME が空なら起点の題名が H1、説明が無ければ引用なし", () => {
+    const dir = siteWith({ "README.md": "# ルート\n\n- [a](a.md)\n", "a.md": "# A\n" });
+    try {
+      const result = runBuild(dir, { SITE_ORIGIN: ORIGIN, BASE_PATH: "/repo" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(
+        fs.readFileSync(outPath(dir, "llms.txt"), "utf-8"),
+        "# ルート\n\n## Docs\n\n- [ルート](https://owner.github.io/repo/)\n- [A](https://owner.github.io/repo/a.html)\n"
+      );
+    } finally {
+      cleanup(dir);
+    }
+  });
+
+  test("404.md がページからリンクされていても載せない。出力先のパスで判定する", () => {
+    const dir = siteWith({ "README.md": "# Root\n\n[nf](404.md) [a](a.md)\n", "404.md": "# Not found\n", "a.md": "# A\n" });
+    try {
+      const result = runBuild(dir, { SITE_ORIGIN: ORIGIN, SITE_NAME: "S" });
+      assert.equal(result.status, 0, result.stderr);
+      const text = fs.readFileSync(outPath(dir, "llms.txt"), "utf-8");
+      assert.ok(fs.existsSync(outPath(dir, "404.html")));
+      assert.ok(!text.includes("404") && !text.includes("Not found"));
+      assert.ok(text.includes("[A](https://owner.github.io/a.html)"));
+    } finally {
+      cleanup(dir);
+    }
+  });
+
+  test("LLMS_TXT=false は作らない。不正な値は警告して作らない。true と空は作る", () => {
+    const dir = siteWith(BASIC);
+    try {
+      const env = { SITE_ORIGIN: ORIGIN };
+      assert.equal(runBuild(dir, { ...env, LLMS_TXT: "false" }).status, 0);
+      assert.ok(!fs.existsSync(outPath(dir, "llms.txt")));
+      const bad = runBuild(dir, { ...env, LLMS_TXT: "off" });
+      assert.equal(bad.status, 0);
+      assert.match(bad.stderr, /\[config\] LLMS_TXT の値が不正です\("off"\)。false にフォールバックします。/);
+      assert.ok(!fs.existsSync(outPath(dir, "llms.txt")));
+      for (const value of ["true", "TRUE", ""]) {
+        assert.equal(runBuild(dir, { ...env, LLMS_TXT: value }).status, 0);
+        assert.ok(fs.existsSync(outPath(dir, "llms.txt")), value);
+      }
+    } finally {
+      cleanup(dir);
+    }
+  });
+
+  test("SITE_ORIGIN の形が正しくなければ警告して作らない(sitemap.xml・robots.txt は今までどおり)", () => {
+    const dir = siteWith(BASIC);
+    try {
+      for (const origin of ["owner.github.io", "https://a b.example", "https://a.example/(x)", "https://" + "a".repeat(201)]) {
+        const result = runBuild(dir, { SITE_ORIGIN: origin });
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stderr, /SITE_ORIGIN の形が正しくないため、llms\.txt を作りません/, origin);
+        assert.ok(!fs.existsSync(outPath(dir, "llms.txt")), origin);
+        assert.ok(fs.existsSync(outPath(dir, "sitemap.xml")), origin);
+      }
+    } finally {
+      cleanup(dir);
+    }
+  });
+
+  test("題名・説明に改行や ] [ ( ) が入るページ", () => {
+    const dir = siteWith({
+      "README.md": "# Root\n\n[a](a.md) [b](b.md) [c](c.md)\n",
+      "a.md": "---\ntitle: x] [y](http://evil.example)\ndescription: d1 \\ ]\n---\n# A\n",
+      "c.md": "<h1>Multi\nline\t[t]</h1>\n",
+      "b dir/(p).md": "# B (1)\n",
+    });
+    write(dir, "b.md", "# B\n\n[p](<b dir/(p).md>)\n");
+    try {
+      const result = runBuild(dir, { SITE_ORIGIN: ORIGIN, SITE_NAME: "S" });
+      assert.equal(result.status, 0, result.stderr);
+      const text = fs.readFileSync(outPath(dir, "llms.txt"), "utf-8");
+      assert.ok(text.includes("- [x\\] \\[y\\](http://evil.example)](https://owner.github.io/a.html): d1 \\\\ \\]\n"), text);
+      assert.ok(text.includes("- [Multi line \\[t\\]](https://owner.github.io/c.html)\n"), text);
+      assert.ok(text.includes("(https://owner.github.io/b%20dir/%28p%29.html)"), text);
+      assert.equal(text.split("\n").filter((line) => line.startsWith("- [")).length, 5);
+    } finally {
+      cleanup(dir);
+    }
+  });
+
+  describe("リポジトリ直下の llms.txt", () => {
+    test("通常のファイルはそのままコピーし、自動生成しない(SITE_ORIGIN がなくてもコピーする)", () => {
+      const dir = siteWith(BASIC);
+      write(dir, "llms.txt", "# 手書き\n\n> 自分で書いた\n");
+      try {
+        const noOrigin = runBuild(dir);
+        assert.equal(noOrigin.status, 0, noOrigin.stderr);
+        assert.match(noOrigin.stdout, /llms\.txt: copied from the repository root/);
+        assert.equal(fs.readFileSync(outPath(dir, "llms.txt"), "utf-8"), "# 手書き\n\n> 自分で書いた\n");
+        const withOrigin = runBuild(dir, { SITE_ORIGIN: ORIGIN });
+        assert.equal(withOrigin.status, 0, withOrigin.stderr);
+        assert.equal(withOrigin.stderr, "");
+        assert.equal(fs.readFileSync(outPath(dir, "llms.txt"), "utf-8"), "# 手書き\n\n> 自分で書いた\n");
+        // LLMS_TXT=false ならコピーもしない
+        assert.equal(runBuild(dir, { SITE_ORIGIN: ORIGIN, LLMS_TXT: "false" }).status, 0);
+        assert.ok(!fs.existsSync(outPath(dir, "llms.txt")));
+      } finally {
+        cleanup(dir);
+      }
+    });
+
+    test("README から [x](llms.txt) とリンクしていても、コピーは1回で警告なし。STRICT_LINKS=true でも失敗しない", () => {
+      const dir = siteWith({ "README.md": "# Root\n\n[llms](llms.txt)\n" });
+      write(dir, "llms.txt", "# 手書き\n");
+      try {
+        const result = runBuild(dir, {
+          SITE_ORIGIN: ORIGIN,
+          STRICT_LINKS: "true",
+          GITHUB_SERVER_URL: "https://github.com",
+          GITHUB_REPOSITORY: "o/r",
+          GITHUB_SHA: "abc",
+        });
+        assert.equal(result.status, 0, result.stderr);
+        assert.equal(result.stderr, "");
+        assert.equal(result.stdout.split("llms.txt: copied from the repository root").length - 1, 1);
+        assert.equal(fs.readFileSync(outPath(dir, "llms.txt"), "utf-8"), "# 手書き\n");
+        // リンクは GitHub 上のファイル
+        assert.match(readOut(dir, "index.html"), /href="https:\/\/github\.com\/o\/r\/blob\/abc\/llms\.txt"/);
+      } finally {
+        cleanup(dir);
+      }
+    });
+
+    test("シンボリックリンクの llms.txt(.env を指す)は、コピーも自動生成もせず警告する。STRICT_LINKS=true でも失敗しない", () => {
+      const dir = siteWith(BASIC);
+      write(dir, ".env", "SECRET_FOR_TEST=dummy-value\n");
+      fs.symlinkSync(".env", path.join(dir, "llms.txt"));
+      try {
+        for (const env of [{}, { SITE_ORIGIN: ORIGIN }]) {
+          const result = runBuild(dir, { ...env, STRICT_LINKS: "true" });
+          assert.equal(result.status, 0, result.stderr);
+          assert.match(result.stderr, /llms\.txt がシンボリックリンク\(または通常のファイル以外\)のため、コピーも自動生成もしません/);
+          assert.ok(!fs.existsSync(outPath(dir, "llms.txt")));
+          const files = fs.readdirSync(path.join(dir, "_site"), { recursive: true });
+          assert.ok(!files.some((n) => fs.statSync(outPath(dir, n)).isFile() && fs.readFileSync(outPath(dir, n)).includes("dummy-value")));
+        }
+      } finally {
+        cleanup(dir);
+      }
+    });
+
+    test("壊れたシンボリックリンクも同じ扱い。フォルダの llms.txt/ も警告してコピーも自動生成もしない", () => {
+      const broken = siteWith(BASIC);
+      fs.symlinkSync("no-such-file", path.join(broken, "llms.txt"));
+      const folder = siteWith(BASIC);
+      write(folder, "llms.txt/x.md", "# x\n");
+      try {
+        for (const dir of [broken, folder]) {
+          const result = runBuild(dir, { SITE_ORIGIN: ORIGIN, STRICT_LINKS: "true" });
+          assert.equal(result.status, 0, result.stderr);
+          assert.match(result.stderr, /llms\.txt がシンボリックリンク/);
+          assert.ok(!fs.existsSync(outPath(dir, "llms.txt")));
+        }
+      } finally {
+        cleanup(broken);
+        cleanup(folder);
+      }
+    });
+
+    test("出力先の中に前回の llms.txt があっても、利用者の手書きとは取り違えない(前回の出力は消され、作り直す)", () => {
+      const dir = siteWith(BASIC);
+      try {
+        assert.equal(runBuild(dir, { SITE_ORIGIN: ORIGIN, SITE_NAME: "First" }).status, 0);
+        assert.equal(runBuild(dir, { SITE_ORIGIN: ORIGIN, SITE_NAME: "Second" }).status, 0);
+        const text = fs.readFileSync(outPath(dir, "llms.txt"), "utf-8");
+        assert.ok(text.startsWith("# Second\n"));
+        assert.equal(runBuild(dir, { LLMS_TXT: "true" }).status, 0);
+        assert.ok(!fs.existsSync(outPath(dir, "llms.txt")));
+      } finally {
+        cleanup(dir);
       }
     });
   });
