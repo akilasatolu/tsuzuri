@@ -134,6 +134,14 @@ to empty) by looking at `customDomain` and `siteOrigin` in the `sitemap.json` ou
 `SITEMAP_JSON=true`. See "Setting up a custom domain" in [Deployment](./deployment.md) for
 details.
 
+## I don't want `llms.txt`, or I want to use one I wrote
+
+`llms.txt` is output by default when building on GitHub Actions. To stop it, write
+`LLMS_TXT=false` in `.github/docs-pages.config`. To use your own, put a `llms.txt` right under
+the repository: it's copied to the site as it is and none is generated. A symbolic link, or
+something that isn't a regular file, isn't used (a warning is shown, and nothing is copied or
+generated). See "llms.txt" in [Concepts](./concepts.md) for details.
+
 ## Is HTML written in Markdown output as is?
 
 Yes. HTML written in Markdown (`<div>`, `<script>` and so on) and links starting with

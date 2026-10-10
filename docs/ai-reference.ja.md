@@ -9,13 +9,13 @@ order: 2
 1 つの文章にまとめてあります。枠の右上の「コピー」ボタンで全文をコピーし、
 お使いの AI エージェントに貼り付けて使えます。
 
-内容は Tsuzuri v1.33.0 の時点のものです。人が読むための手順は
+内容は Tsuzuri v1.34.0 の時点のものです。人が読むための手順は
 [Getting Started](getting-started.ja.md) にあります。
 
 ````markdown
 # Tsuzuri 参考情報
 
-- 対象: Tsuzuri v1.33.0(v1 系)
+- 対象: Tsuzuri v1.34.0(v1 系)
 - 最終確認日: 2026-10-10
 - 公式ドキュメント: https://akilasatolu.github.io/tsuzuri/ja/
 - ソースコード: https://github.com/akilasatolu/tsuzuri
@@ -67,10 +67,10 @@ Tsuzuri は次の 4 つで構成されています。
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-- `#v1` は、v1 系の最新のリリースを指すタグです。`#v1.33.0` のように
+- `#v1` は、v1 系の最新のリリースを指すタグです。`#v1.34.0` のように
   完全なバージョンを書くと、そのリリースに固定されます。`#` 以降を省くと、
   リリース前の変更を含む `main` ブランチの内容が実行されます。
-- コマンドは、最初の行に `tsuzuri v1.33.0` の形で、動いているバージョンを
+- コマンドは、最初の行に `tsuzuri v1.34.0` の形で、動いているバージョンを
   表示します。
 - `init` と `preview` の画面の表示は日本語です。生成される設定ファイルと
   ワークフローのコメントも日本語です。
@@ -221,7 +221,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
 
 ### 4.2 設定キー
 
-キーは 18 個で、すべて省略できます。「省略時」は、キーが無い場合と値が空の
+キーは 19 個で、すべて省略できます。「省略時」は、キーが無い場合と値が空の
 場合の動きです。「init の値」は、`init` が生成する設定ファイルに書かれる値です。
 
 - `TRIGGER_BRANCH`: デプロイするブランチです。このブランチへの push で
@@ -316,6 +316,17 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
   形で表示されます。値についての決まりは `REPO_VERSION` と同じです。
   省略時: 表示されない
   init の値: 空
+- `LLMS_TXT`: `true` にすると、llmstxt.org の llms.txt の提案の形の
+  `llms.txt` が出力先に書き出されます。書き出されるのは、サイトの URL が
+  分かるときだけです。GitHub Actions では常に書き出され、手元のビルドでは
+  書き出されません。
+  `true` と `false` 以外の値は、警告とともに `false` になります。リポジトリの
+  直下にある通常のファイルの `llms.txt` は、そのまま出力先にコピーされ、
+  自動では作られません。その名前のシンボリックリンクや、通常のファイル
+  でないもの(フォルダなど)があるときは、警告が出て、コピーも自動生成も
+  されません。
+  省略時: `true`
+  init の値: `true`
 - `SITEMAP_JSON`: `true` にすると、調査用の `sitemap.json` が出力先に
   書き出されます。公開されるサイトにも含まれます。
   省略時: `false`
@@ -428,20 +439,22 @@ order: 1
 
 キーは次の 10 個です。
 
-- `title`: ページのタイトルです。ナビの表示名にも使われます。
+- `title`: ページのタイトルです。ナビの表示名と、`llms.txt` での名前にも
+  使われます。
 - `description`: 説明文です。無い場合、本文の最初の段落から 120 文字までの
-  説明文が作られます。
+  説明文が作られます。同じ説明文が `llms.txt` でも使われます。
 - `ogImage`: OGP 画像です。値は、そのファイルからの相対パス、`/` で始まる
   リポジトリの直下からのパス、`https://` で始まる URL のどれかです。
 - `ogType`: `og:type` の値です。無い場合は `website` です。
 - `noindex`: `true` にすると、検索エンジン向けの `noindex` が出力され、
-  `sitemap.xml` にも載りません。
+  `sitemap.xml` と `llms.txt` にも載りません。
 - `theme`: そのページだけのテーマです。値は、8 つのテーマ名のどれかか、
   リポジトリの直下からの CSS ファイルのパスです。
 - `styleFile`: そのページだけ、`STYLE_FILE` の代わりに使われる CSS ファイルです。
   値は、リポジトリの直下からのパスです。
 - `nav`: `false` にすると、そのページはナビと前後のページへのリンクに
-  載りません。ページ自体は出力されます。
+  載りません。ページ自体は出力されます。`llms.txt` では、そのページは
+  `## Optional` に載ります。
 - `order`: ナビでの並び順を表す数値です。同じディレクトリの中で、`order` の
   あるページが小さい順に先に並びます。ディレクトリの位置は、その中の
   `README.md` か `index.md` の `order` で決まります。
@@ -588,6 +601,19 @@ URL はドメインの直下になります。DNS の設定は、GitHub Pages �
 GitHub Actions でのビルドでは、`sitemap.xml` が出力されます。サイトが
 ドメインの直下にある場合は、`robots.txt` も出力されます。
 
+GitHub Actions でのビルドでは、`llms.txt` も、サイトの直下に出力されます
+(サイトにパスがある場合は `https://<owner>.github.io/<repo>/llms.txt`)。
+llmstxt.org の llms.txt の提案の形の Markdown ファイルです。
+
+- 1 行目はサイト名で、引用の行は起点のページの説明です。
+- `## Docs` には、基本言語のページが、ナビの順に、題名・URL・説明で
+  載ります。`noindex: true` のページと 404 のページは載りません。
+- `## Optional` には、`nav: false` のページと、基本言語以外の各言語の
+  トップページが載ります。
+- 題名と説明は、`<title>` と `<meta name="description">` と同じです。
+  多言語のサイトでも `llms.txt` は 1 つです。ページの Markdown 版や、
+  全文を入れたファイルは作られません。
+
 ## 9. 手元での確認
 
 ### 9.1 preview
@@ -637,7 +663,8 @@ node .github/tsuzuri/build-docs.mjs
 
 - 手元のビルドでは、URL の先頭のパス(`/<repo>`)が付きません。
 - 手元のビルドでは、`sitemap.xml`、`robots.txt`、正規の URL のタグは
-  出力されません。
+  出力されず、`llms.txt` は自動では作られません。リポジトリの直下の
+  `llms.txt` はコピーされます。
 - 手元のビルドでは、`SITE_NAME` を省略した場合のサイト名は空になります。
 
 ## 10. 更新
@@ -657,13 +684,14 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 - `.github/docs-pages.config` と `.github/tsuzuri/styles/custom.css` は
   変更されません。
 - 設定ファイルに無いキーがある場合、`init` はそのキーの名前を表示します。
+  `LLMS_TXT` が無い場合も表示され、`true` として動きます。
 - `.github/docs-pages.config` が無いリポジトリでは、`init` は何も書き込まずに
   エラーで終了します。
 - 更新のあと、変更されたファイルをコミットして push すると、サイトに
   反映されます。
 
 リポジトリにコピー済みのバージョンは、`.github/workflows/docs-pages.yml` の
-先頭のコメントに、`tsuzuri v1.33.0` の形で書かれています。更新しない限り、
+先頭のコメントに、`tsuzuri v1.34.0` の形で書かれています。更新しない限り、
 リポジトリの中のバージョンは変わりません。
 
 ## 11. つまずきやすい点

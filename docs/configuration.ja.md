@@ -258,6 +258,26 @@ REPO_LICENSE=MIT
 | `tsuzuri-repo-version` | バージョン |
 | `tsuzuri-repo-license` | ライセンス |
 
+### LLMS_TXT
+サイトのページの一覧を書いた`llms.txt`を出力するかどうかです(v1.34.0以降)。`true`または`false`で、
+デフォルトは`true`(出力する)です。書かなくても出力されます。[llmstxt.org](https://llmstxt.org/)の
+提案の形で、出力先の直下に書き出されます。`BASE_PATH`があるとき(`https://<owner>.github.io/<repo>/`の
+ようなサイト)は`https://<owner>.github.io/<repo>/llms.txt`で、ドメインの直下ではありません。
+中身は[concepts.md](./concepts.ja.md)の「llms.txt」を参照してください。
+
+サイトのURLが分かるときだけ出力されます。GitHub Actionsでは常に出力され、手元のプレビューでは
+出力されません。`false`にすると出力されません(自分で書いた`llms.txt`もコピーされません)。
+`true`・`false`以外の値(`off`など)は、警告を表示して`false`として扱います。リポジトリの直下に
+自分で書いた`llms.txt`を置いたときは、それがそのままコピーされ、自動では作られません
+([concepts.md](./concepts.ja.md)の「llms.txt」参照)。
+
+設定ファイルに`LLMS_TXT`が無いときは、`init --update`で「設定ファイルに無い項目」として案内されます。
+追記しなくても有効で動きます(有効が既定です)。止めたいときだけ`LLMS_TXT=false`を追記してください。
+
+```
+LLMS_TXT=true
+```
+
 ### SITEMAP_JSON
 デバッグ用の`sitemap.json`(収集したページ・画像、リンク切れの一覧など)を出力するかどうかです。
 `true`または`false`で、デフォルトは`false`(出力しない)です。`true`にすると公開サイトにも
@@ -267,7 +287,7 @@ REPO_LICENSE=MIT
 ## 後方互換性について
 
 `LANGUAGES`/`NAV_ENABLED`/`FAVICON_FILE`/`SITE_NAME`/`CUSTOM_DOMAIN`/`OGP_DEFAULT_IMAGE`/
-`THEME`/`STRICT_LINKS`/`SITEMAP_JSON`/`LAST_UPDATED`/`EDIT_LINK`/`REPO_LINK`/`REPO_VERSION`/`REPO_LICENSE`の14キーは、いずれも**すべて省略可能**です。1つも指定しなかった場合、
+`THEME`/`STRICT_LINKS`/`SITEMAP_JSON`/`LAST_UPDATED`/`EDIT_LINK`/`REPO_LINK`/`REPO_VERSION`/`REPO_LICENSE`/`LLMS_TXT`の15キーは、いずれも**すべて省略可能**です。1つも指定しなかった場合、
 すべて上記のデフォルト値が適用され、これらのキーが導入される前のバージョンと
 同じ挙動になります。既存の設定ファイル(旧4キーのみ)をそのまま使い続けても、
 壊れることはありません。
@@ -276,3 +296,7 @@ REPO_LICENSE=MIT
 `ja`から`en`に変わりました。`LANGUAGES`を書いていない設定ファイル(`LANG=ja`だけを書いたものを含む)では、
 サイトが英語のサイト(`<html lang="en">`・英語の画面の文言)になります。日本語のサイトにするには
 `LANGUAGES=ja`を書き足してください。
+
+`LLMS_TXT`ももう1つの例外です。v1.34.0から、`LLMS_TXT`を書かなくても`llms.txt`が出力されます
+(既定が有効です)。出力のファイルが1つ増えるだけで、既存のページは変わりません。止めるには
+`LLMS_TXT=false`と書いてください。

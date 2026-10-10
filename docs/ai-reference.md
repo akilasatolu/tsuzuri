@@ -10,13 +10,13 @@ from installation to publishing on GitHub Pages. The "Copy" button at its top
 right copies the whole text, which can then be pasted into the AI agent of
 your choice.
 
-The content reflects Tsuzuri v1.33.0. The step-by-step guide written for
+The content reflects Tsuzuri v1.34.0. The step-by-step guide written for
 people is [Getting Started](getting-started.md).
 
 ````markdown
 # Tsuzuri reference
 
-- Covers: Tsuzuri v1.33.0 (v1 series)
+- Covers: Tsuzuri v1.34.0 (v1 series)
 - Last verified: 2026-10-10
 - Official documentation: https://akilasatolu.github.io/tsuzuri/
 - Source code: https://github.com/akilasatolu/tsuzuri
@@ -71,11 +71,11 @@ npx github:akilasatolu/tsuzuri#v1 init
 ```
 
 - `#v1` is a tag that points to the latest release of the v1 series. A full
-  version such as `#v1.33.0` pins that release. Without the part from `#`
+  version such as `#v1.34.0` pins that release. Without the part from `#`
   onward, the content of the `main` branch runs, which can include changes
   that are not released yet.
 - The command prints the running version on its first line, in the form
-  `tsuzuri v1.33.0`.
+  `tsuzuri v1.34.0`.
 - The screen output of `init` and `preview` is in Japanese. The comments in
   the generated settings file and workflow are in Japanese too.
 - `init` can be omitted. Without a subcommand, the command behaves as `init`.
@@ -236,7 +236,7 @@ follows.
 
 ### 4.2 Settings keys
 
-There are 18 keys, and every one of them can be omitted. "When omitted"
+There are 19 keys, and every one of them can be omitted. "When omitted"
 covers both a missing key and an empty value. "Value from init" is the value
 written in the settings file that `init` generates.
 
@@ -341,6 +341,17 @@ written in the settings file that `init` generates.
   pages. The rules for the value are the same as for `REPO_VERSION`.
   When omitted: not shown
   Value from init: empty
+- `LLMS_TXT`: with `true`, a `llms.txt` is written to the output directory,
+  in the form of the llms.txt proposal of llmstxt.org. It is written only
+  when the site URL is known: always on GitHub Actions, and never in local
+  builds. Any value other than `true` and `false` becomes `false` with a
+  warning. A regular file named `llms.txt` directly under the repository is
+  copied to the output directory as it is, and no file is generated. A
+  symbolic link, or something that is not a regular file (a folder, for
+  example), with that name gives a warning, and nothing is copied or
+  generated.
+  When omitted: `true`
+  Value from init: `true`
 - `SITEMAP_JSON`: with `true`, a `sitemap.json` for investigation is written
   to the output directory. It is included in the published site as well.
   When omitted: `false`
@@ -457,22 +468,25 @@ order: 1
 
 The keys are the following 10.
 
-- `title`: the page title. It is also used as the name in the navigation.
+- `title`: the page title. It is also used as the name in the navigation
+  and as the name in `llms.txt`.
 - `description`: the description. When it is missing, a description of up to
-  120 characters is made from the first paragraph of the body.
+  120 characters is made from the first paragraph of the body. The same
+  description is used in `llms.txt`.
 - `ogImage`: the OGP image. The value is one of: a path relative to the
   file, a path from the root of the repository starting with `/`, or a URL
   starting with `https://`.
 - `ogType`: the value of `og:type`. When it is missing, the value is
   `website`.
 - `noindex`: with `true`, the `noindex` tag for search engines is output,
-  and the page is left out of `sitemap.xml`.
+  and the page is left out of `sitemap.xml` and `llms.txt`.
 - `theme`: the theme for that page alone. The value is one of the eight
   theme names, or the path of a CSS file from the root of the repository.
 - `styleFile`: the CSS file used for that page alone in place of
   `STYLE_FILE`. The value is a path from the root of the repository.
 - `nav`: with `false`, the page is left out of the navigation and of the
-  links to the previous and next pages. The page itself is output.
+  links to the previous and next pages. The page itself is output. In
+  `llms.txt`, the page is under `## Optional`.
 - `order`: a number for the position in the navigation. Within one
   directory, pages with `order` come first, smallest first. The position of
   a directory is decided by the `order` of the `README.md` or `index.md`
@@ -635,6 +649,22 @@ procedure.
 Builds on GitHub Actions output `sitemap.xml`. When the site sits directly
 under a domain, `robots.txt` is output as well.
 
+Builds on GitHub Actions also output `llms.txt`, directly under the site
+(`https://<owner>.github.io/<repo>/llms.txt` when the site has a path). It is
+a Markdown file in the form of the llms.txt proposal of llmstxt.org.
+
+- The first line is the site name, and the quoted line is the description
+  of the starting page.
+- `## Docs` lists the pages in the base language, in the order of the
+  navigation, as the title, the URL and the description. Pages with
+  `noindex: true` and the 404 page are not listed.
+- `## Optional` lists the pages with `nav: false`, and the top page of each
+  language other than the base language.
+- The title and the description are the same as `<title>` and
+  `<meta name="description">`. A multilingual site has one `llms.txt`.
+  Markdown versions of the pages and a file with the full text are not
+  generated.
+
 ## 9. Checking locally
 
 ### 9.1 preview
@@ -688,7 +718,8 @@ node .github/tsuzuri/build-docs.mjs
 
 - A local build does not add the path at the start of the URL (`/<repo>`).
 - A local build does not output `sitemap.xml`, `robots.txt`, or the
-  canonical URL tag.
+  canonical URL tag, and does not generate `llms.txt`. A `llms.txt` directly
+  under the repository is copied.
 - In a local build, the site name is empty when `SITE_NAME` is omitted.
 
 ## 10. Updating
@@ -710,14 +741,14 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 - `.github/docs-pages.config` and `.github/tsuzuri/styles/custom.css` are
   not changed.
 - When the settings file lacks some keys, `init` prints the names of those
-  keys.
+  keys. A missing `LLMS_TXT` is printed as well, and works as `true`.
 - In a repository without `.github/docs-pages.config`, `init` ends with an
   error without writing anything.
 - After the update, committing the changed files and pushing them brings
   the change to the site.
 
 The version copied into the repository is written in the comment at the top
-of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.33.0`. The
+of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.34.0`. The
 version inside the repository stays the same until an update.
 
 ## 11. Common pitfalls

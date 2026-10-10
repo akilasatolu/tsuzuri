@@ -42,6 +42,9 @@ The title of the page. Where it's used, and what happens when it isn't set:
 To use different names in `<title>` and the navigation (to show a shorter name in the
 navigation, for example), write a `title`.
 
+The same title as in the `<title>` tag is used for the page's line in `llms.txt` (v1.34.0 or
+later).
+
 ### description
 The description of the page. It's used for both `<meta name="description">` and
 `<meta property="og:description">` (shown in search results and when the page is shared on
@@ -50,6 +53,8 @@ social media).
 If not set, a description of up to 120 characters is made automatically from the first
 paragraph of the text (excluding alert titles) (v1.6.0 or later; in earlier versions these tags
 aren't output at all).
+
+The same description is used for the page's line in `llms.txt` (v1.34.0 or later).
 
 ### ogImage
 The image shown when the page is shared on social media (the OGP image). You can give either a
@@ -66,6 +71,8 @@ Set to `true` if you don't want search engines to index this page. Only when it'
 `<meta name="robots" content="noindex">` output. With any other value (`false` or not set), the
 tag isn't output at all (it's case-insensitive, and only a value equal to `"true"` counts as
 true).
+
+A page with `noindex: true` isn't listed in `llms.txt` either (v1.34.0 or later).
 
 ### theme
 Set this when you want this page alone to use a theme different from `THEME` (the site-wide
@@ -124,7 +131,8 @@ If the file isn't found or points outside the repository, a warning is shown and
 ### nav
 With `false`, the page isn't listed in the navigation (sidebar) or in the "previous page / next
 page" links (v1.6.0 or later). The page itself is still output, so it opens from links on other
-pages. It's still included in site search.
+pages. It's still included in site search. In `llms.txt`, it's listed under `## Optional` instead of
+`## Docs` (v1.34.0 or later).
 
 Use it for pages that aren't worth listing in the navigation, such as sample or supplementary
 pages.

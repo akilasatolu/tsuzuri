@@ -213,6 +213,57 @@ Each page also gets a `<link rel="canonical">` and an `og:url` showing its canon
 the top page and a folder's `README.md`, the canonical URL is the top URL or the folder URL
 (`…/guide/`), not `README.html`.
 
+## llms.txt
+
+When building on GitHub Actions (when the site URL is known), a `llms.txt` is also written
+(v1.34.0 or later). It is a list of the pages of the site in the form proposed at
+[llmstxt.org](https://llmstxt.org/), and it is on by default (`LLMS_TXT`, see the
+[configuration reference](./configuration.md#llms_txt)). It's written right under the site: for
+`https://<owner>.github.io/<repo>/` it is `https://<owner>.github.io/<repo>/llms.txt`.
+
+```markdown
+# Site name
+
+> Description of the starting page
+
+## Docs
+
+- [Page title](https://owner.github.io/repo/page.html): Description of the page
+- [Another page](https://owner.github.io/repo/other.html)
+
+## Optional
+
+- [Page not in the navigation](https://owner.github.io/repo/hidden.html): Description
+- [日本語](https://owner.github.io/repo/ja/)
+```
+
+- The first line is the site name (`SITE_NAME`; if empty, the title of the starting page), and the
+  quoted line is the description of the starting page (left out if it has none).
+- `## Docs` lists the pages in the site's base language, in the same order as the navigation
+  (also with `NAV_ENABLED=false`), with the starting page first. Each line is the title, the URL
+  and the description; if a page has no description, the part after the URL is left out.
+- `## Optional` lists the pages with `nav: false`, then, on a [multilingual site](./i18n.md), a
+  link to the top page of each of the other languages (named by the language's name, without a
+  description). A section with nothing to list is left out, heading included.
+- The title and the description are the same as the page's `<title>` and
+  `<meta name="description">`. If you write `title` and `description` in the
+  [frontmatter](./frontmatter.md), they are used; if not, they are made from the first heading
+  and the first paragraph, and a long description is cut off in the middle.
+- Pages with `noindex: true`, the 404 page, and the pages in the other languages aren't listed.
+  Even on a multilingual site there is one `llms.txt`.
+- A run of whitespace and control characters (line breaks, tabs and so on) in a title or
+  description becomes one space. `\`, `[`, `]`, the backtick and `<` get a `\` in front of them.
+  A title is cut at 200 characters and a description at 300, and `(` and `)` in a URL become `%28`
+  and `%29`.
+- Only the HTML pages are linked. Markdown versions of the pages and a file with the full text
+  aren't generated.
+
+To use a `llms.txt` you wrote yourself, put it right under the repository (no link to it is
+needed). It's copied to the site as it is, and none is generated (this works without the site URL
+too). A symbolic link, or something that isn't a regular file (a folder, for example), isn't
+used: a warning is shown, and it's neither copied nor generated (so that a link can't publish
+another file in the repository). With `LLMS_TXT=false`, nothing is output or copied.
+
 ## GitHub syntax (alerts, footnotes, diagrams, task lists)
 
 The following syntax works the same as when GitHub displays a README.

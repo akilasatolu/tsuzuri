@@ -195,6 +195,54 @@ GitHub Actionsでビルドした場合(サイトのURLが分かる場合)は、�
 トップページとディレクトリの`README.md`は、`README.html`ではなくトップURL・
 ディレクトリのURL(`…/guide/`)が正規のURLになります。
 
+## llms.txt
+
+GitHub Actionsでビルドした場合(サイトのURLが分かる場合)は、`llms.txt`も出力されます
+(v1.34.0以降)。[llmstxt.org](https://llmstxt.org/)の提案の形で書いた、サイトのページの一覧です。
+既定で有効です(`LLMS_TXT`。[configuration.md](./configuration.ja.md#llms_txt)参照)。
+サイトの直下に書き出され、`https://<owner>.github.io/<repo>/`のサイトでは
+`https://<owner>.github.io/<repo>/llms.txt`になります。
+
+```markdown
+# サイト名
+
+> 起点のページの説明
+
+## Docs
+
+- [ページの題名](https://owner.github.io/repo/page.html): ページの説明
+- [別のページ](https://owner.github.io/repo/other.html)
+
+## Optional
+
+- [ナビに載せないページ](https://owner.github.io/repo/hidden.html): 説明
+- [English](https://owner.github.io/repo/en/)
+```
+
+- 1行目はサイト名(`SITE_NAME`。空なら起点のページの題名)で、引用の行は起点のページの説明です
+  (説明がなければ出しません)。
+- `## Docs`には、サイトの基本言語のページが、ナビと同じ順(`NAV_ENABLED=false`でも同じ順)で
+  載ります。先頭は起点のページです。各行は題名・URL・説明で、説明のないページはURLの後ろを
+  出しません。
+- `## Optional`には、`nav: false`のページが載り、その後に、[多言語サイト](./i18n.ja.md)では
+  基本言語以外の各言語のトップページへのリンクが載ります(表示名は言語の名前で、説明はありません)。
+  載せるものがない節は、見出しごと出しません。
+- 題名と説明は、そのページの`<title>`と`<meta name="description">`と同じです。
+  [frontmatter](./frontmatter.ja.md)に`title`と`description`を書けばそれが使われ、書かなければ
+  最初の見出しと最初の段落から作られます(長い説明は途中で切れます)。
+- `noindex: true`のページ、404ページ、基本言語以外のページは載りません。多言語のサイトでも
+  `llms.txt`は1つです。
+- 題名・説明の中の空白と制御文字(改行・タブなど)の並びは、空白1つになります。`\`・`[`・`]`・
+  バッククォート・`<`は、前に`\`が付きます。題名は200文字、説明は300文字で切れ、URLの`(`と`)`は
+  `%28`と`%29`になります。
+- リンク先はHTMLのページだけです。ページのMarkdown版や、全文を入れたファイルは作られません。
+
+自分で書いた`llms.txt`を使うときは、リポジトリの直下に置きます(リンクは要りません)。
+それがそのままサイトにコピーされ、自動では作られません(サイトのURLが分からなくてもコピーされます)。
+シンボリックリンクや、通常のファイルでないもの(フォルダなど)は使われません。警告が表示され、
+コピーも自動生成もされません(リンクをたどって、リポジトリの中の別のファイルが公開されないようにするためです)。
+`LLMS_TXT=false`のときは、出力もコピーもされません。
+
 ## GitHubの記法(注意書き・脚注・図・タスクリスト)
 
 GitHubでREADMEを表示したときと同じように、次の記法が使えます。

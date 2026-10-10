@@ -280,6 +280,28 @@ date. To change its look from your custom CSS (`STYLE_FILE`), use these class na
 | `tsuzuri-repo-version` | The version |
 | `tsuzuri-repo-license` | The license |
 
+### LLMS_TXT
+Whether to output `llms.txt`, a file that lists the pages of the site (v1.34.0 or later). `true` or
+`false`, and the default is `true` (output): you don't need to write it. It is written in the form
+proposed at [llmstxt.org](https://llmstxt.org/), at the top level of the output: with
+`BASE_PATH` (a site like `https://<owner>.github.io/<repo>/`) it is
+`https://<owner>.github.io/<repo>/llms.txt`, not right under the domain. See "llms.txt" in
+[Concepts](./concepts.md) for what is written in it.
+
+It is output only when the site URL is known: always on GitHub Actions, and not in a local
+preview. With `false` it isn't output (and a `llms.txt` you wrote yourself isn't copied either).
+Any value other than `true` and `false` (`off`, for example) is ignored with a warning and
+treated as `false`. If you put your own `llms.txt` right under the repository, it is copied as it
+is and no file is generated (see "llms.txt" in [Concepts](./concepts.md)).
+
+If your settings file doesn't have `LLMS_TXT`, `init --update` lists it under "keys missing from
+the settings file". It works without adding anything (it is on); add `LLMS_TXT=false` only when
+you want to turn it off.
+
+```
+LLMS_TXT=true
+```
+
 ### SITEMAP_JSON
 Whether to output the debugging `sitemap.json` (the collected pages and images, the list of
 broken links and so on). `true` or `false`, and the default is `false` (not output). With
@@ -289,9 +311,9 @@ investigating (see "About sitemap.json" in [Concepts](./concepts.md) for details
 
 ## Backward compatibility
 
-The fourteen keys `LANGUAGES`, `NAV_ENABLED`, `FAVICON_FILE`, `SITE_NAME`, `CUSTOM_DOMAIN`,
+The fifteen keys `LANGUAGES`, `NAV_ENABLED`, `FAVICON_FILE`, `SITE_NAME`, `CUSTOM_DOMAIN`,
 `OGP_DEFAULT_IMAGE`, `THEME`, `STRICT_LINKS`, `SITEMAP_JSON`, `LAST_UPDATED`, `EDIT_LINK`,
-`REPO_LINK`, `REPO_VERSION` and `REPO_LICENSE` are
+`REPO_LINK`, `REPO_VERSION`, `REPO_LICENSE` and `LLMS_TXT` are
 **all optional**. If you set none of them, all the defaults above apply, and the behavior is the same
 as the versions before these keys were introduced. You can keep using an existing settings file
 (with only the original four keys) without anything breaking.
@@ -300,3 +322,7 @@ The site language is the one exception. v1.28.0 removed `LANG`, and the default 
 language is written changed from `ja` to `en`. With a settings file that doesn't write
 `LANGUAGES` (including one that only writes `LANG=ja`), the site becomes an English site
 (`<html lang="en">` and English interface text). For a Japanese site, add `LANGUAGES=ja`.
+
+`LLMS_TXT` is the other exception. From v1.34.0, `llms.txt` is output even if you don't write
+`LLMS_TXT` (the default is on). The output gains one file, and the existing pages don't change.
+To stop it, write `LLMS_TXT=false`.

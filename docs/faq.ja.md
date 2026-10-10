@@ -127,6 +127,14 @@ npx github:akilasatolu/tsuzuri#v<最新のバージョン> init --update
 `SITEMAP_JSON=true`で出力した`sitemap.json`の`customDomain`/`siteOrigin`の値を確認してください。詳細は
 [deployment.md](./deployment.ja.md)の「カスタムドメインの設定」を参照してください。
 
+## `llms.txt`を作りたくない・自分で書いたものを使いたい
+
+`llms.txt`は、GitHub Actionsでビルドすると既定で出力されます。止めるには、
+`.github/docs-pages.config`に`LLMS_TXT=false`と書きます。自分で書いたものを使うには、
+リポジトリの直下に`llms.txt`を置きます。それがそのままサイトにコピーされ、自動では作られません。
+シンボリックリンクや、通常のファイルでないものは使われません(警告が表示され、コピーも自動生成もされません)。
+詳しくは[concepts.md](./concepts.ja.md)の「llms.txt」を参照してください。
+
 ## Markdownに書いたHTMLはそのまま出力される?
 
 はい。Markdownの中に書いたHTML(`<div>`・`<script>`など)や、`javascript:`で始まるリンクは、
