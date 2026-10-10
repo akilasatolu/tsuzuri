@@ -10,13 +10,13 @@ from installation to publishing on GitHub Pages. The "Copy" button at its top
 right copies the whole text, which can then be pasted into the AI agent of
 your choice.
 
-The content reflects Tsuzuri v1.31.0. The step-by-step guide written for
+The content reflects Tsuzuri v1.32.0. The step-by-step guide written for
 people is [Getting Started](getting-started.md).
 
 ````markdown
 # Tsuzuri reference
 
-- Covers: Tsuzuri v1.31.0 (v1 series)
+- Covers: Tsuzuri v1.32.0 (v1 series)
 - Last verified: 2026-10-10
 - Official documentation: https://akilasatolu.github.io/tsuzuri/
 - Source code: https://github.com/akilasatolu/tsuzuri
@@ -71,11 +71,11 @@ npx github:akilasatolu/tsuzuri#v1 init
 ```
 
 - `#v1` is a tag that points to the latest release of the v1 series. A full
-  version such as `#v1.31.0` pins that release. Without the part from `#`
+  version such as `#v1.32.0` pins that release. Without the part from `#`
   onward, the content of the `main` branch runs, which can include changes
   that are not released yet.
 - The command prints the running version on its first line, in the form
-  `tsuzuri v1.31.0`.
+  `tsuzuri v1.32.0`.
 - The screen output of `init` and `preview` is in Japanese. The comments in
   the generated settings file and workflow are in Japanese too.
 - `init` can be omitted. Without a subcommand, the command behaves as `init`.
@@ -299,9 +299,10 @@ written in the settings file that `init` generates.
   Value from init: empty
 - `STRICT_LINKS`: with `true`, the build fails when there is a link problem,
   and the site is not updated. The problems covered are broken links, links
-  pointing outside the repository, missing images and files, overlapping
-  output paths, links to a heading that the target page does not have, and
-  duplicated versions of one page in one language.
+  pointing outside the repository, missing images and files, embedded files
+  that are not copied, overlapping output paths, links to a heading that
+  the target page does not have, and duplicated versions of one page in one
+  language.
   When omitted: `false` (problems are shown as warnings, and the site is
   published as it is)
   Value from init: `false`
@@ -357,17 +358,41 @@ The workflow decides it as follows.
   has an `index.md`, the `index.md` becomes the `index.html`.
 - A link to a directory (`guide/`) becomes a link to the page of the
   `README.md` or `index.md` inside it.
-- Images (png, jpg, jpeg, gif, svg, webp, bmp, ico) are copied only when
-  they are linked.
-- Other files with an extension (PDF, zip and so on) are also copied only
-  when they are linked.
-- Files whose name starts with `.` are not copied. Inside directories whose
-  name starts with `.`, only Markdown, images, PDF, video and audio are
-  output to the site. Their output path gets a leading `_`
+- Images (png, jpg, jpeg, gif, svg, webp, bmp, ico, avif, apng, tif, tiff,
+  heic, heif, jxl) are copied only when they are linked.
+- Other files are copied only when they are linked and their extension
+  (compared ignoring case) is one of the following. `.tar.gz` matches `gz`.
+  - Documents: pdf, doc, docx, xls, xlsx, ppt, pptx, odt, ods, odp, epub,
+    html, htm
+  - Archives: zip, tar, gz, tgz, bz2, xz, 7z
+  - Video: mp4, webm, mov, m4v, ogv, avi, mkv
+  - Audio: mp3, m4a, wav, ogg, oga, flac, aac, opus, weba
+- Files with any other extension (source code, settings files, `.txt`,
+  `.csv`, extensions not in the list) are not copied. A link to such a file
+  that exists becomes a link to the file on GitHub, and a link to one that
+  does not exist appears in the build log as a broken link.
+- A linked `.html` or `.htm` file is copied without changes. The CSS,
+  JavaScript and images it loads are not copied, and the file is not in the
+  navigation, the search or `sitemap.xml`.
+- Files whose name starts with `.` are not copied, except images. Inside
+  directories whose name starts with `.`, only Markdown, images, PDF, video
+  and audio are output to the site. Their output path gets a leading `_`
   (`.github/logo.png` becomes `_.github/logo.png`).
 - Links to files without an extension (such as `LICENSE`) and to directories
   that have neither `README.md` nor `index.md` become links to the file or
   the listing on GitHub.
+- A link to GitHub opens only for a visitor who can view the repository. A
+  visitor without access, as in a private repository, cannot open it.
+- When the URL of the repository is not known (a host other than GitHub, for
+  example), a warning is shown and the link keeps its path within the site,
+  which does not open.
+- An image, video or audio embedded with `![]()`, `<img src>`, `srcset`,
+  `<video src>`, `<audio src>` or `<source src>` that points to an existing
+  file or directory that is not copied cannot be shown or played. At the end
+  of the build a warning names the embedded target and the page it is
+  referenced from. With `STRICT_LINKS=true` this is a link problem and the
+  build fails. Links written with `[x](y)` or `<a href>` do not produce this
+  warning.
 - When the target of a link does not exist, the link appears in the build
   log as a broken link.
 
@@ -666,7 +691,7 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   the change to the site.
 
 The version copied into the repository is written in the comment at the top
-of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.31.0`. The
+of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.32.0`. The
 version inside the repository stays the same until an update.
 
 ## 11. Common pitfalls
@@ -710,6 +735,12 @@ version inside the repository stays the same until an update.
   Cause: in a multilingual site, other-language versions of collected pages
   are collected automatically, even without a link.
   The symptom does not occur when: the file is not in the repository.
+- Symptom: after an update the build stops with a warning about an embedded
+  file.
+  Cause: an image, video or audio is embedded from a file whose extension is
+  not in the list of copied extensions, and `STRICT_LINKS` is `true`.
+  The symptom does not occur when: the embedded file has an extension in the
+  list, or the embed is written as a link (`[x](y)`).
 - Symptom: a site with broken links is published.
   Cause: `STRICT_LINKS` is `false`. In this case broken links are only
   warnings.

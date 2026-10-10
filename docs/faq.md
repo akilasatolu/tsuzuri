@@ -44,6 +44,38 @@ set `SITEMAP_JSON=true` to output the debugging `sitemap.json` (see [Concepts](.
 you don't want to publish with broken links, set `STRICT_LINKS=true` to make the build fail (see
 the [configuration reference](./configuration.md#strict_links)).
 
+A link to a file whose extension isn't in the list of copied files (such as `src/foo.js`) is
+checked the same way: if the file exists it becomes a link to GitHub, and if it doesn't exist it
+is reported as a link whose target wasn't found. See "Which files are copied" in
+[Concepts](./concepts.md).
+
+## The build stopped after an update, with a warning about an embedded file
+
+Since v1.32.0, only the files with the extensions listed in "Which files are copied" in
+[Concepts](./concepts.md) are copied to the site. If an image, video or audio embedded with
+`![](…)`, `<img src>`, `<video src>` and so on points to a file with another extension (or to a
+folder), it can't be shown or played, so the Build step shows a warning that "the embedded
+target X is a kind of file that isn't copied". With `STRICT_LINKS=true`, this makes the build
+fail, so it can stop a build that passed before you updated. To fix it, change the file to a
+format on the list (for example `.mp4` for video, `.png` or `.avif` for images), or replace the
+embed with a plain link such as `[clip](clip.xyz)`, which doesn't produce the warning.
+
+## Links to GitHub don't open (private repositories)
+
+Links to files that aren't copied to the site (source code, settings files, `LICENSE` and so
+on) point to the file on GitHub. Even when the site is published, a visitor who can't view the
+repository, as in a private repository, can't open those links. For files you want such visitors
+to see, use a format that is copied to the site (for example PDF), or write the contents on the
+page itself. If the build can't tell the URL of the repository (a host other than GitHub, for
+example), a warning is shown and the link keeps the path within the site, which doesn't open
+either.
+
+## How do I make a changelog page?
+
+Link `CHANGELOG.md` from the README or another page, such as `[Changelog](CHANGELOG.md)`. Like
+any other Markdown file, it becomes a page of the site, and it appears in the navigation and the
+search too.
+
 ## My styles aren't applied
 
 If the look isn't what you expect, check the following in order.

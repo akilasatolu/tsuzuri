@@ -23,10 +23,39 @@ page, just link it from an existing page and it becomes part of the site.
 The same goes for images (`.png`, `.jpg`, `.svg` and so on) and other files such as PDFs and
 zips: only those linked or embedded from Markdown are collected, and they are copied with the
 same folder structure.
-However, files starting with `.` (such as `.env`), and files inside folders starting with `.`
-(such as `.github/`) other than Markdown, images, video, audio and PDFs (settings files, for
-example), are never copied, so they aren't published by mistake (they become links to the file
-on GitHub; see the table below).
+However, files starting with `.` (such as `.env`) other than Markdown and images, and files
+inside folders starting with `.` (such as `.github/`) other than Markdown, images, video, audio
+and PDFs (settings files, for example), are never copied, so they aren't published by mistake
+(they become links to the file on GitHub; see the table below).
+
+### Which files are copied
+
+Among the linked files, the ones with the following extensions are copied (the extension is
+compared ignoring case, so `A.PDF` is copied too, and `app.tar.gz` is matched by `gz`; v1.32.0
+or later. Before that, every file with an extension was copied).
+
+| Kind | Extensions |
+|---|---|
+| Images | `png` `jpg` `jpeg` `gif` `svg` `webp` `bmp` `ico` `avif` `apng` `tif` `tiff` `heic` `heif` `jxl` |
+| Documents | `pdf` `doc` `docx` `xls` `xlsx` `ppt` `pptx` `odt` `ods` `odp` `epub` `html` `htm` |
+| Archives | `zip` `tar` `gz` `tgz` `bz2` `xz` `7z` |
+| Video | `mp4` `webm` `mov` `m4v` `ogv` `avi` `mkv` |
+| Audio | `mp3` `m4a` `wav` `ogg` `oga` `flac` `aac` `opus` `weba` |
+
+The idea is that files you open with an app or a browser are copied, while files whose contents
+you read as text (source code, settings files, `.txt`, `.csv` and so on) and files with any
+other extension become links to the file on GitHub. This keeps a kind of file Tsuzuri doesn't
+know from being published unintentionally. Inside folders starting with `.`, only the PDF, video
+and audio entries above (and images) are copied.
+
+A linked `.html` or `.htm` file is copied as it is, without changing its contents. A page that
+is complete in a single file (styles and scripts written inside it) is shown as it is. The other
+files the HTML loads (CSS, JavaScript, images) are not followed, so they aren't copied along with
+it, and the page doesn't appear in the navigation, the search or `sitemap.xml`.
+
+A link to GitHub only opens for visitors who can view the repository. In a private repository,
+for example, visitors without access can't open it, so for files you want them to see, use a
+copied format or write the contents on the page.
 
 Pages and images in folders starting with `.`, such as `.github/`, are written to a path with
 a leading `_`, like `_.github/` (e.g. `.github/logo.png` → `_.github/logo.png`; v1.4.0 or
@@ -36,17 +65,19 @@ so on), audio (`.mp3` and so on) and PDFs are written the same way (v1.5.0 or la
 they become links to the file on GitHub).
 
 If the output path of a linked file collides with a generated page or a file Tsuzuri creates
-(`index.html`, `404.html`, `sitemap.xml` and so on), the file is not copied, so the generated
+(`index.html`, `404.html` and so on), the file is not copied, so the generated
 one isn't overwritten, and a warning is shown (with `STRICT_LINKS=true` the build fails;
 v1.4.0 or later).
 
-Links to paths without an extension, or to paths starting with `.`, are handled as follows,
-depending on what actually exists in the repository.
+Links to paths without an extension, to paths starting with `.`, or to files whose extension
+isn't in the table above are handled as follows, depending on what actually exists in the
+repository.
 
 | Link target | Link in the generated site |
 |---|---|
 | A folder containing `README.md` or `index.md` (`[Guide](guide)`, `[Guide](guide/)`) | The page for that folder on the site (`…/guide/`) |
 | A file that isn't published on the site (`LICENSE`, `.env.example` and so on) | That file on GitHub (`https://github.com/<owner>/<repo>/blob/<commit>/LICENSE`) |
+| A file whose extension isn't in the copied list (`src/foo.js`, `package.json`, `notes.txt`) | That file on GitHub (`…/blob/<commit>/src/foo.js`). A line range such as `#L10-L20` is kept |
 | A folder with neither `README.md` nor `index.md` (`[Source](src/)`) | The listing of that folder on GitHub |
 | Something that doesn't exist | Left as is (treated as a broken link; with `STRICT_LINKS=true` the build fails) |
 
@@ -54,7 +85,22 @@ When building on GitHub Actions, the URL for links to GitHub is known automatica
 building locally, it's made from git's `origin` (the GitHub repository) and the current branch
 name (links to files you haven't pushed yet won't open on GitHub). If neither is known, a
 warning is shown and the link keeps the path within the site (it won't open, since the file
-isn't on the site, but the target exists, so it isn't treated as a broken link).
+isn't on the site, but the target exists, so it isn't treated as a broken link). This includes
+files such as `.js` that used to be copied: with a host other than GitHub, for example, they
+no longer open.
+
+### Embedding files that aren't copied
+
+Linking and embedding are treated differently. If an image, video or audio embedded with
+`![](…)`, `<img src>`, `srcset`, `<video src>`, `<audio src>` or `<source src>` points to a file
+that exists but isn't copied (an extension that isn't in the table, or a folder without
+`README.md` or `index.md`), the `src` becomes a link to GitHub, so it can't be shown or played.
+At the end of the build, a warning like "the embedded target X is a kind of file that isn't
+copied, so it can't be shown or played (referenced from Y)" is printed (for a folder, "is a
+folder"). With `STRICT_LINKS=true` this counts as a link problem and the build fails, so an
+update can stop a build that used to pass. To fix it, change the file to a format in the table
+or, if you don't need to embed it, turn the embed into a plain link. Plain links such as
+`[x](clip.xyz)` and `<a href>` don't produce this warning.
 
 Linking to the same file from several places doesn't process it twice, and pages that link to
 each other in a cycle, like A→B→A, don't cause an infinite loop (a file already visited is not

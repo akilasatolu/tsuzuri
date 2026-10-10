@@ -186,6 +186,9 @@ and the default is `false`.
   - A linked Markdown file doesn't exist (a broken link)
   - A link that wasn't followed, for example because it points outside the repository
   - A linked image or file doesn't exist or can't be copied
+  - An image, video or audio embedded in a page points to a file that exists but isn't copied to
+    the site (an extension that isn't in the list in [Concepts](./concepts.md), or a folder)
+    (v1.32.0 or later)
   - The output path of a linked file collides with a generated page or a file Tsuzuri creates
     (such as `index.html`) (v1.4.0 or later)
   - The heading in a link to a heading (`page.md#heading`) doesn't exist on the target page
