@@ -355,6 +355,8 @@ export function defaultNotFoundMarkdown(lang = "ja", { sections } = {}) {
 // build-docs.mjs は marked の html トークン(renderer.html)の中身にだけ適用する。
 // そのため、コードブロック・インラインコードの中に書いたHTMLの例は書き換えない。
 // hrefFor を渡すと、URLの組み立てをそれに任せる(ディレクトリ・GitHubへのリンクの置き換え用)。
+// hrefFor の3つ目の引数 { embed } は、そのURLがページに埋め込まれるもの(<a> 以外の src・srcset)かどうか
+// (コピーしない種類のファイルを埋め込んだときの警告用)。
 export function preprocessRawHtmlPaths(
   content,
   fromRel,
@@ -366,7 +368,7 @@ export function preprocessRawHtmlPaths(
       /(<(?:a|img|video|audio|source)\b[^>]*?\s(?:src|href)=["'])([^"']+)(["'])/gi,
       (whole, pre, href, post) => {
         if (isExternal(href) || href.startsWith("#")) return whole;
-        return pre + hrefFor(fromRel, href) + post;
+        return pre + hrefFor(fromRel, href, { embed: !/^<a\b/i.test(pre) }) + post;
       }
     )
     .replace(SRCSET_ATTR, (whole, pre, double, single) => {
@@ -375,7 +377,7 @@ export function preprocessRawHtmlPaths(
       // 候補ごとに、外部・#始まり・data: 以外を書き換える。属性を壊さないよう、書き換えた URL の ' は %27 にする
       const rewritten = mapSrcsetUrls(value, (url) => {
         if (!url || isExternal(url) || url.startsWith("#")) return url;
-        return hrefFor(fromRel, url).replaceAll("'", "%27");
+        return hrefFor(fromRel, url, { embed: true }).replaceAll("'", "%27");
       });
       return pre + quote + rewritten + quote;
     });

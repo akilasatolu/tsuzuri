@@ -112,13 +112,13 @@ export function crawlSite({
 }) {
   const visitedMd = new Map(); // relPath(posix) -> { content, meta, h1 }
   const imageSet = new Set(); // relPath(posix)
-  const fileSet = new Set(); // relPath(posix)。Markdown・画像以外のリンク先(PDF・zip等)
+  const fileSet = new Set(); // relPath(posix)。Markdown・画像以外で、コピーする拡張子の一覧にあるリンク先(PDF・zip等)
   const hierarchy = {}; // relPath -> { parent, children: [] }
   const missing = [];
   const rejected = [];
   // サイトのページ・ファイルにはならないが、実在するリンク先(パスの末尾の "/" は除いた形がキー)
   //   { kind: "dir", referencedFrom }         … README.md / index.md のあるディレクトリ(サイトの "dir/")
-  //   { kind: "repo", isDir, referencedFrom } … サイトに出さないファイル(LICENSE・ドットファイル等)や、
+  //   { kind: "repo", isDir, referencedFrom } … サイトに出さないファイル(LICENSE・ドットファイル・コピーする拡張子の一覧にないファイル等)や、
   //                                             README の無いディレクトリ。描画では GitHub 上の URL にする
   // referencedFrom は最初にリンクしていたページ(メッセージ用)
   const linkTargets = new Map();
@@ -297,12 +297,13 @@ export function crawlSite({
         continue;
       }
       if (isLinkedFilePath(bare) && !repoRel.endsWith("/")) {
-        fileSet.add(bare); // 存在しなければコピー時にリンク切れとして報告される
+        fileSet.add(bare); // コピーする拡張子の一覧(isLinkedFilePath)にあるもの。存在しなければコピー時にリンク切れとして報告される
         continue;
       }
 
       // ここに来るのは、ディレクトリへのリンク("guide/"・"guide")、拡張子の無いファイル(LICENSE)、
-      // ドットファイル(.env.example)。実在するものだけを扱い、無ければリンク切れにする。
+      // ドットファイル(.env.example)、コピーする拡張子の一覧にないファイル(src/foo.js・package.json)。
+      // 実在するものだけを扱い、無ければリンク切れにする。
       const abs = existsInRepo(bare);
       if (!abs) {
         missing.push({ rel: repoRel, referencedFrom: rel });

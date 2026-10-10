@@ -39,24 +39,81 @@ export function isMarkdownPath(p) {
   return /\.md$/i.test(p);
 }
 
-export function isImagePath(p) {
-  return /\.(png|jpe?g|gif|svg|webp|bmp|ico)$/i.test(p);
+// 画像として扱う拡張子(サイトにコピーし、Markdown の ![](…) などで表示する)。1行に1種類(足す・外すが1行で済む)
+const IMAGE_EXTS = [
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "svg",
+  "webp",
+  "bmp",
+  "ico",
+  "avif",
+  "apng",
+  "tif",
+  "tiff",
+  "heic",
+  "heif",
+  "jxl",
+];
+
+// 動画・音声の拡張子。リンクされていればコピーする一覧(LINKED_FILE_EXTS)と、"." で始まるディレクトリの中でも
+// コピーする一覧(PUBLISHABLE_IN_DOT_DIR_EXTS)の両方をここから作る(2つの一覧がずれないように)
+const VIDEO_EXTS = ["mp4", "webm", "mov", "m4v", "ogv", "avi", "mkv"];
+const AUDIO_EXTS = ["mp3", "m4a", "wav", "ogg", "oga", "flac", "aac", "opus", "weba"];
+
+// Markdown・画像以外で、リンクされていればサイトにコピーする拡張子。
+// アプリやブラウザで開いて使うものだけをコピーし、テキストとして中身を読むもの(コード・設定ファイル・.txt・.csv など)と
+// 一覧にない拡張子は、知らない種類のファイルを意図せず公開しないよう、GitHub 上のURLへのリンクにする。1行に1種類
+const DOCUMENT_EXTS = [
+  "pdf",
+  "doc",
+  "docx",
+  "xls",
+  "xlsx",
+  "ppt",
+  "pptx",
+  "odt",
+  "ods",
+  "odp",
+  "epub",
+  "html",
+  "htm",
+];
+const ARCHIVE_EXTS = ["zip", "tar", "gz", "tgz", "bz2", "xz", "7z"];
+
+const LINKED_FILE_EXTS = new Set([...DOCUMENT_EXTS, ...ARCHIVE_EXTS, ...VIDEO_EXTS, ...AUDIO_EXTS]);
+
+// "." で始まるディレクトリにあってもサイトにコピーする、動画・音声・PDF の拡張子
+// (設定ファイルなどを誤って公開しないよう、それ以外は "." で始まるパスならコピーしない)
+const PUBLISHABLE_IN_DOT_DIR_EXTS = new Set(["pdf", ...VIDEO_EXTS, ...AUDIO_EXTS]);
+
+const IMAGE_EXT_SET = new Set(IMAGE_EXTS);
+
+// 最後のドットより後ろの拡張子(小文字。無ければ ""。".png" のようなドットだけで始まる名前も "png" になる)
+function extOf(p) {
+  const name = p.slice(p.lastIndexOf("/") + 1);
+  const dot = name.lastIndexOf(".");
+  return dot < 0 ? "" : name.slice(dot + 1).toLowerCase();
 }
 
-// "." で始まるディレクトリにあってもサイトにコピーする、動画・音声・文書の拡張子
-// (設定ファイルなどを誤って公開しないよう、それ以外は "." で始まるパスならコピーしない)
-const PUBLISHABLE_IN_DOT_DIR = /\.(pdf|mp4|webm|mov|m4v|mp3|m4a|wav|ogg|oga)$/i;
+export function isImagePath(p) {
+  return IMAGE_EXT_SET.has(extOf(p));
+}
 
-// Markdown・画像以外で、リンクされていればサイトにコピーするファイル(PDF・zip等)か。
-//   - 拡張子の無いパスは対象外(`docs/` のようなディレクトリへのリンクの可能性があるため)
+// Markdown・画像以外で、リンクされていればサイトにコピーするファイル(PDF・zip・動画など)か。
+//   - 拡張子が LINKED_FILE_EXTS にあるものだけが対象。拡張子の無いパスは対象外
+//     (`docs/` のようなディレクトリへのリンクの可能性があるため)。対象外のものは GitHub 上のURLへのリンクになる
 //   - "." で始まるファイル(.env 等)は対象外。"." で始まるディレクトリ(.github/ 等)の中のファイルは、
 //     動画・音声・PDF だけを対象にする(誤って設定ファイルなどを公開しないため)
 export function isLinkedFilePath(p) {
   if (isMarkdownPath(p)) return false;
   const segs = p.split("/");
   if (segs[segs.length - 1].startsWith(".")) return false;
-  if (segs.some((seg) => seg.startsWith(".")) && !PUBLISHABLE_IN_DOT_DIR.test(p)) return false;
-  return posix.extname(p) !== "";
+  const ext = extOf(p);
+  if (segs.some((seg) => seg.startsWith(".")) && !PUBLISHABLE_IN_DOT_DIR_EXTS.has(ext)) return false;
+  return LINKED_FILE_EXTS.has(ext);
 }
 
 // href/src を { pathPart, rest } に分解する。rest には #anchor や ?query を含む
