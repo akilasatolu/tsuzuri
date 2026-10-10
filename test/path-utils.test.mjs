@@ -6,6 +6,7 @@ import {
   isExternal,
   isMarkdownPath,
   isImagePath,
+  mapSrcsetUrls,
   splitHref,
   resolveRepoRel,
   toSiteAbsHref,
@@ -272,5 +273,56 @@ describe("outputRelOf / encodeUrlPath / pageHref", () => {
     assert.equal(toSiteAbsHref("README.md", "docs/c%23.md#x", "/repo"), "/repo/docs/c%23.html#x");
     assert.equal(toSiteAbsHref("README.md", "docs/a%20b.png", ""), "/docs/a%20b.png");
     assert.equal(toSiteAbsHref("README.md", ".github/logo.png", ""), "/_.github/logo.png");
+  });
+});
+
+describe("mapSrcsetUrls", () => {
+  const seen = (value) => {
+    const urls = [];
+    const out = mapSrcsetUrls(value, (u) => {
+      urls.push(u);
+      return `/b/${u}`;
+    });
+    return { urls, out };
+  };
+
+  test("カンマ区切りの2つの候補。記述子と区切りは元のまま", () => {
+    assert.deepEqual(seen("a.png 1x, b.png 2x"), { urls: ["a.png", "b.png"], out: "/b/a.png 1x, /b/b.png 2x" });
+  });
+
+  test("空白の前のカンマ・先頭の空白も扱う", () => {
+    assert.deepEqual(seen(" a.png 480w ,b.png 800w"), { urls: ["a.png", "b.png"], out: " /b/a.png 480w ,/b/b.png 800w" });
+  });
+
+  test("URL の末尾のカンマは区切り(記述子なしの候補)", () => {
+    assert.deepEqual(seen("a.png, b.png"), { urls: ["a.png", "b.png"], out: "/b/a.png, /b/b.png" });
+  });
+
+  test("空白の無い a.png,b.png は、仕様どおり1つの URL", () => {
+    assert.deepEqual(seen("a.png,b.png"), { urls: ["a.png,b.png"], out: "/b/a.png,b.png" });
+  });
+
+  test("data: URL の中のカンマでは分かれない", () => {
+    const urls = [];
+    const out = mapSrcsetUrls("data:image/png;base64,AAA= 1x, c.png 2x", (u) => {
+      urls.push(u);
+      return isExternal(u) ? u : `/b/${u}`;
+    });
+    assert.deepEqual(urls, ["data:image/png;base64,AAA=", "c.png"]);
+    assert.equal(out, "data:image/png;base64,AAA= 1x, /b/c.png 2x");
+  });
+
+  test("カンマが数千個続く値を多数並べても、処理時間が2乗に伸びない", () => {
+    const value = `a${",".repeat(3990)}b`;
+    const all = Array.from({ length: 250 }, () => value).join(" ");
+    const t0 = Date.now();
+    for (let i = 0; i < 250; i++) mapSrcsetUrls(value, (u) => u);
+    mapSrcsetUrls(all, (u) => u);
+    const ms = Date.now() - t0;
+    assert.ok(ms < 2000, `${ms}ms かかった`);
+  });
+
+  test("空の値は何もしない", () => {
+    assert.deepEqual(seen(""), { urls: [], out: "" });
   });
 });

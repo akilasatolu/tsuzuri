@@ -174,11 +174,12 @@ npx github:akilasatolu/tsuzuri#<作業ブランチ名> init
 bin/cli.mjs                 セットアップCLI(init)。生成するワークフロー・設定ファイルのテンプレートもここ
 .github/scripts/
   build-docs.mjs            ビルドのエントリーポイント
-  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap / i18n
+  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap / i18n / emoji(emoji-data.mjs は gemoji から作る)
 styles/*.css                テーマCSSの原本(base + material / glass / neumorphism / editorial / minimal / blueprint / nineties)
 templates/.github/workflows/docs-pages.yml  initが生成するワークフローのひな形
 templates/tsuzuri/          initが利用者に配るビルド用の依存の package.json・package-lock.json(scripts/build-lockfiles.mjs で作る)
 scripts/release-notes.mjs   CHANGELOGからGitHubのReleaseの本文を作る(release.ymlが使う。配布対象外)
+scripts/build-emoji-data.mjs  絵文字のショートコードの表(.github/scripts/lib/emoji-data.mjs)を gemoji から作る(配布対象外)
 scripts/check-package.mjs   配布物(npm pack)から init・ビルド・init --update が通るか確かめる(CIが使う。配布対象外)
 test/                       単体テスト・E2Eテスト(test/fixtures/ にフィクスチャ)
 .github/workflows/ci.yml    lint・test・配布物の確認を行う開発用CI(Pagesへのデプロイはしない)
@@ -229,6 +230,17 @@ npmでは、乗っ取られたアカウントから不正なコードを仕込�
    作り直してほしいときは、PRに`@dependabot recreate`とコメントしてから、もう一度この手順を行います)
 
 この3つ以外の依存(ESLintなど開発用のもの)だけを更新するPRでは、完成品は変わらないので作り直しは不要です。
+
+`gemoji`は、絵文字のショートコード(`:tada:`など)の表を作るための開発用の依存で、利用者には配りません
+(`devDependencies`にだけあり、`BUILD_DEPENDENCIES`には入れません)。表は
+`.github/scripts/lib/emoji-data.mjs`にコミットしてあり、`gemoji`から作ったものです(手で編集しません)。
+そのため、`gemoji`の更新PRでは、同じPRで表も作り直してください。作り直さないと、「`emoji-data.mjs`が、
+`gemoji`から作り直したものと一致する」のテスト(`test/emoji.test.mjs`)が失敗します。
+
+1. 更新PRのブランチを手元に取り込み、`npm ci`で依存を入れる
+2. `node scripts/build-emoji-data.mjs`を実行する(`.github/scripts/lib/emoji-data.mjs`を書き直す)
+3. `emoji-data.mjs`の差分が、絵文字の追加・変更・削除だけであることを確かめる
+4. コミットして、PRのブランチにpushする(`@dependabot recreate`の扱いは上と同じ)
 
 `init`が生成するワークフローは、`templates/.github/workflows/docs-pages.yml`のひな形から作られます
 (`bin/cli.mjs`がプレースホルダーを置き換えて出力)。ひな形の中のGitHub Actionsも

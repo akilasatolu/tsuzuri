@@ -16,6 +16,15 @@
 
 ## [Unreleased]
 
+## [1.31.0] - 2026-10-10
+
+### Added
+
+- 絵文字のショートコード(`:tada:` → 🎉、`:rocket:` → 🚀、`:+1:` → 👍 など)を、絵文字に変えて表示するようにした。GitHub と同じく、README などの本文に書いた `:名前:` が、サイトでも絵文字になる(名前の表は [gemoji](https://github.com/wooorm/gemoji) 8.1.0 のもの)。本文・強調・リンクの文字・表・リスト・引用・脚注の中で変わる。見出しに書いても、見出しの id は変わらない(`# Demo :tada:` は表示が `Demo 🎉`、id が `demo-tada`。今までの id のままなので、`#demo-tada` へのリンクはそのまま動く)。目次・ページのタイトル(`<title>`・`og:title`)・説明文・検索・ナビの表示名は、絵文字に変えた文字になる。frontmatter の `title`・`description` は変えない。
+  - 語の途中も変わる(`a:tada:b` は `a🎉b`)。変えたくないときは、`\:tada:` と書くか、コード(`` `:tada:` ``)にする。
+  - 変わらない場所: コードスパン・コードブロック、インラインの `<code>`・`<kbd>`・`<pre>`・`<script>`・`<tt>`・`<samp>`・`<style>` の中、ブロックの HTML の中(`<summary>` など)、URL をそのまま書いたリンク(表示も `href` も)、画像の alt。表にない名前(`:shipit:` など GitHub 独自の画像の絵文字を含む)・大文字(`:TADA:`)・時刻(`10:30:45`)も、そのまま表示する。
+- 生の HTML の `<picture>`・`<source>`・`<img>` の `srcset` に書いた画像を、`src` と同じように扱うようにした。ダークモード用の画像の出し分け(`<picture><source media="(prefers-color-scheme: dark)" srcset="…">`)や、解像度ごとの画像(`srcset="a.png 1x, a@2x.png 2x"`)の画像が、サイトにコピーされ、リポジトリ内のパスがサイト内のパスに書き換わる。画像が存在しないときは、`src` と同じく「リンク先のファイルが見つかりません」の警告になり、`STRICT_LINKS=true` ではビルドが失敗する。`#gh-dark-mode-only` のような GitHub 独自の出し分けは扱わない。また、`src` と同じ割り切りで、引用符のない値(`srcset=a.png`)や、`=` の前後に空白のある書き方(`srcset = "a.png"`)は対象にならない。
+
 ## [1.30.5] - 2026-10-08
 
 ### Changed

@@ -408,6 +408,34 @@ describe("preprocessRawHtmlPaths", () => {
     const result = preprocessRawHtmlPaths(content, "index.md", "");
     assert.equal(result, `<img src="/pic.png" alt="x">`);
   });
+  test("srcset の各候補を書き換える(記述子はそのまま。@ は %40 にエンコード)", () => {
+    const content =
+      '<picture><source media="(prefers-color-scheme: dark)" srcset="assets/dark.png 1x, assets/dark@2x.png 2x"><img src="assets/light.png" alt="logo"></picture>';
+    assert.equal(
+      preprocessRawHtmlPaths(content, "README.md", "/repo"),
+      '<picture><source media="(prefers-color-scheme: dark)" srcset="/repo/assets/dark.png 1x, /repo/assets/dark%402x.png 2x"><img src="/repo/assets/light.png" alt="logo"></picture>'
+    );
+  });
+
+  test("単一引用符の srcset も書き換え、書き換えた URL の ' は %27 にして属性を壊さない", () => {
+    assert.equal(
+      preprocessRawHtmlPaths("<img srcset='a.png 1x, b.png 2x'>", "README.md", "/repo"),
+      "<img srcset='/repo/a.png 1x, /repo/b.png 2x'>"
+    );
+    assert.equal(
+      preprocessRawHtmlPaths(`<img srcset="it's.png 1x">`, "README.md", "/repo"),
+      `<img srcset="/repo/it%27s.png 1x">`
+    );
+  });
+
+  test("srcset の data: URL・外部 URL・#始まりは書き換えない", () => {
+    const content = '<img srcset="data:image/png;base64,AAA= 1x, https://example.com/a.png 2x, //cdn.example.com/b.png 3x, #x 4x, c.png 5x">';
+    assert.equal(
+      preprocessRawHtmlPaths(content, "README.md", ""),
+      '<img srcset="data:image/png;base64,AAA= 1x, https://example.com/a.png 2x, //cdn.example.com/b.png 3x, #x 4x, /c.png 5x">'
+    );
+  });
+
 });
 
 describe("defaultNotFoundMarkdown", () => {

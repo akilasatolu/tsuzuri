@@ -1662,3 +1662,104 @@ describe("build-docs.mjs :: 編集リンク(EDIT_LINK)", () => {
   });
 });
 
+
+describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => {
+  function write(dir, rel, content) {
+    fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
+    fs.writeFileSync(path.join(dir, rel), content);
+  }
+
+  test("見出しは絵文字で表示し、id は変換前の文字(demo-tada)から、<title> は変換後の文字になる", () => {
+    const dir = makeTmpDir();
+    try {
+      copyRealBaseAndThemeStyles(dir);
+      write(dir, "README.md", "# Demo :tada:\n\n## :rocket: Getting **started :+1:** & <b>x</b>\n\n`:tada:` と :tada:\n");
+      const result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "index.html");
+      assert.match(html, /<h1 id="demo-tada">Demo 🎉<\/h1>/);
+      assert.match(html, /<h2 id="rocket-getting-started-1--x">/);
+      assert.match(html, /<title>Demo 🎉<\/title>/);
+      assert.match(html, /<code>:tada:<\/code> と 🎉/);
+      // 見出しのリンクの aria-label(目次も同じ文字)は変換後
+      assert.match(html, /aria-label="[^"]*🚀 Getting started 👍/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("絵文字と切れた見出しリンクのある見出しでも、警告と STRICT_LINKS の問題は1件ずつ", () => {
+    const dir = makeTmpDir();
+    try {
+      copyRealBaseAndThemeStyles(dir);
+      write(dir, "README.md", "# Home\n\n## :tada: see [x](a.md#nope)\n");
+      write(dir, "a.md", "# A\n");
+      let result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stderr, /見出しが見つからないリンク: 1 件/);
+      assert.equal(result.stderr.split("a.md#nope").length - 1, 1);
+      assert.match(readOut(dir, "index.html"), /<h2 id="tada-see-x">/);
+      result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /リンクの問題 1 件/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("<picture><source srcset> と <img srcset> の画像がコピーされ、srcset がサイト内のパスになる", () => {
+    const dir = makeTmpDir();
+    try {
+      copyRealBaseAndThemeStyles(dir);
+      write(
+        dir,
+        "README.md",
+        '# Logo\n\n<picture><source media="(prefers-color-scheme: dark)" srcset="assets/dark.png 1x, assets/dark@2x.png 2x"><img src="assets/light.png" alt="logo"></picture>\n'
+      );
+      for (const name of ["dark.png", "dark@2x.png", "light.png"]) write(dir, `assets/${name}`, name);
+      const result = runBuild(dir, { BASE_PATH: "/repo", STRICT_LINKS: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "index.html");
+      assert.match(html, /srcset="\/repo\/assets\/dark\.png 1x, \/repo\/assets\/dark%402x\.png 2x"/);
+      assert.match(html, /<img src="\/repo\/assets\/light\.png"/);
+      for (const name of ["dark.png", "dark@2x.png", "light.png"]) {
+        assert.equal(readOut(dir, "assets", name), name);
+      }
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("実在しない srcset の画像は警告になり、STRICT_LINKS=true では失敗する", () => {
+    const dir = makeTmpDir();
+    try {
+      copyRealBaseAndThemeStyles(dir);
+      write(dir, "README.md", '# Logo\n\n<img src="a.png" srcset="a.png 1x, nope@2x.png 2x">\n');
+      write(dir, "a.png", "a");
+      let result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /nope@2x\.png/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('<source srcset="a.avif" type="image/avif"> の a.avif もコピーされ、srcset がサイト内のパスになる', () => {
+    const dir = makeTmpDir();
+    try {
+      copyRealBaseAndThemeStyles(dir);
+      write(dir, "README.md", '# Logo\n\n<picture><source srcset="a.avif" type="image/avif"><img src="a.png"></picture>\n');
+      write(dir, "a.avif", "avif");
+      write(dir, "a.png", "png");
+      const result = runBuild(dir, { STRICT_LINKS: "true" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(readOut(dir, "index.html"), /<source srcset="\/a\.avif" type="image\/avif">/);
+      assert.equal(readOut(dir, "a.avif"), "avif");
+      assert.equal(readOut(dir, "a.png"), "png");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

@@ -19,7 +19,7 @@
  *   renderLangSwitch  — 新規。多言語サイトの言語切り替えボタン(JavaScript を使わない普通のリンク)。
  */
 
-import { isExternal, toSiteAbsHref, pageHref } from "./path-utils.mjs";
+import { isExternal, toSiteAbsHref, pageHref, mapSrcsetUrls, SRCSET_ATTR } from "./path-utils.mjs";
 import { uiStrings, formatUi, languageName } from "./i18n.mjs";
 
 /**
@@ -361,13 +361,24 @@ export function preprocessRawHtmlPaths(
   basePath,
   hrefFor = (from, href) => toSiteAbsHref(from, href, basePath),
 ) {
-  return content.replace(
-    /(<(?:a|img|video|audio|source)\b[^>]*?\s(?:src|href)=["'])([^"']+)(["'])/gi,
-    (whole, pre, href, post) => {
-      if (isExternal(href) || href.startsWith("#")) return whole;
-      return pre + hrefFor(fromRel, href) + post;
-    }
-  );
+  return content
+    .replace(
+      /(<(?:a|img|video|audio|source)\b[^>]*?\s(?:src|href)=["'])([^"']+)(["'])/gi,
+      (whole, pre, href, post) => {
+        if (isExternal(href) || href.startsWith("#")) return whole;
+        return pre + hrefFor(fromRel, href) + post;
+      }
+    )
+    .replace(SRCSET_ATTR, (whole, pre, double, single) => {
+      const quote = double !== undefined ? '"' : "'";
+      const value = double ?? single;
+      // 候補ごとに、外部・#始まり・data: 以外を書き換える。属性を壊さないよう、書き換えた URL の ' は %27 にする
+      const rewritten = mapSrcsetUrls(value, (url) => {
+        if (!url || isExternal(url) || url.startsWith("#")) return url;
+        return hrefFor(fromRel, url).replaceAll("'", "%27");
+      });
+      return pre + quote + rewritten + quote;
+    });
 }
 
 /**

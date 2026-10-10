@@ -8,6 +8,17 @@ import {
 } from "../.github/scripts/lib/link-extractor.mjs";
 
 describe("extractRawHtmlLinks", () => {
+  test("<picture><source srcset> と <img srcset> の各候補の URL を抽出できる(記述子は含めない)", () => {
+    assert.deepEqual(
+      extractRawHtmlLinks(
+        '<picture><source media="(prefers-color-scheme: dark)" srcset="assets/dark.png 1x, assets/dark@2x.png 2x"><img src="assets/light.png" alt="logo"></picture>'
+      ),
+      ["assets/light.png", "assets/dark.png", "assets/dark@2x.png"]
+    );
+    assert.deepEqual(extractRawHtmlLinks("<img srcset='a.png 480w ,b.png 800w' src=\"c.png\">"), ["c.png", "a.png", "b.png"]);
+    assert.deepEqual(extractRawHtmlLinks('<SOURCE SRCSET="a.avif" type="image/avif">'), ["a.avif"]);
+  });
+
   test("<img src=...> を抽出できる", () => {
     assert.deepEqual(
       extractRawHtmlLinks('<img src="images/logo.png" alt="logo">'),
@@ -83,4 +94,10 @@ test("firstHeadingText: # 見出し・setext・生のHTMLの<h1>から表示テ�
   assert.equal(firstHeadingText("Setext\n===\n"), "Setext");
   assert.equal(firstHeadingText('<h1 align="center">\n  <img src="a.png"> My &amp; Proj\n</h1>\n'), "My & Proj");
   assert.equal(firstHeadingText("## h2 only\n"), "");
+});
+
+test("firstHeadingText: 絵文字のショートコードは絵文字にし、コードの中は変えない", () => {
+  assert.equal(firstHeadingText("# Demo :tada:\n"), "Demo 🎉");
+  assert.equal(firstHeadingText("# Demo <code>:x:</code> :x:\n"), "Demo :x: ❌");
+  assert.equal(firstHeadingText("# Demo `:tada:`\n"), "Demo :tada:");
 });
