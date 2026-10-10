@@ -36,6 +36,7 @@ export const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @property {boolean} lastUpdated
  * @property {boolean} editLink
  * @property {boolean} repoLink
+ * @property {boolean} llmsTxt
  * @property {string} repoVersion
  * @property {string} repoLicense
  * @property {string} faviconFile
@@ -66,6 +67,7 @@ export const CONFIG_FILE_KEYS = [
   "REPO_LINK",
   "REPO_VERSION",
   "REPO_LICENSE",
+  "LLMS_TXT",
 ];
 
 // 設定ファイルの本文を { KEY: 値 } にする(ワークフローの Load config と同じ読み方)。
@@ -154,6 +156,10 @@ export function loadConfig(env = process.env) {
   const repoVersion = resolveOneLine("REPO_VERSION", env.REPO_VERSION);
   const repoLicense = resolveOneLine("REPO_LICENSE", env.REPO_LICENSE);
 
+  // 既定で有効(空・未設定は true)。true のとき、SITE_ORIGIN があれば llms.txt を出力先に作る。
+  // false と、true・false 以外の不正な値(警告つき)は作らない
+  const llmsTxt = parseBoolean("LLMS_TXT", env.LLMS_TXT, true);
+
   const siteName = resolveSiteName(env);
 
   const customDomain = resolveCustomDomain(env.CUSTOM_DOMAIN);
@@ -178,6 +184,7 @@ export function loadConfig(env = process.env) {
     repoLink,
     repoVersion,
     repoLicense,
+    llmsTxt,
     faviconFile,
     siteName,
     customDomain,
@@ -199,11 +206,13 @@ function trimOr(raw, fallback) {
 }
 
 // true/false の設定値を読む。大文字小文字は区別しない。
-// 省略(未設定・空文字)は既定値 false として黙って扱い、不正値のときだけ warn する。
-function parseBoolean(name, raw) {
+// 省略(未設定・空文字)は emptyValue(既定は false)として黙って扱い、不正値のときだけ warn する。
+// 不正値は emptyValue によらず false(公開するものを増やさない側)にする。
+function parseBoolean(name, raw, emptyValue = false) {
   const trimmed = (raw ?? "").trim().toLowerCase();
   if (trimmed === "true") return true;
-  if (trimmed === "false" || trimmed === "") return false;
+  if (trimmed === "false") return false;
+  if (trimmed === "") return emptyValue;
   console.warn(
     `[config] ${name} の値が不正です("${raw ?? ""}")。false にフォールバックします。`
   );

@@ -24,6 +24,8 @@
  *   9. 404.html 生成(リポジトリ直下の 404.md、無ければ既定の内容)
  *   10. 画像・その他のリンク先ファイル(PDF等)のコピー
  *   11. sitemap.xml / robots.txt(SITE_ORIGIN がある場合のみ)
+ *   11.5 llms.txt(LLMS_TXT が有効なとき。リポジトリ直下の llms.txt があればそれをコピー、
+ *        無ければ SITE_ORIGIN があるときだけ自動で書き出す)
  *   12. sitemap.buildSitemap() 書き込み(デバッグ用 sitemap.json。SITEMAP_JSON=true のときだけ)
  *   13. 完了ログ
  *
@@ -74,7 +76,8 @@ import {
   renderLangSwitch,
 } from "./lib/html-renderer.mjs";
 import { buildSitemap, buildSitemapXml } from "./lib/sitemap.mjs";
-import { buildSiteTree, flattenPages } from "./lib/site-tree.mjs";
+import { buildSiteTree, flattenPages, isHiddenFromNav } from "./lib/site-tree.mjs";
+import { buildLlmsTxt } from "./lib/llms-txt.mjs";
 import { createSlugger, htmlToText } from "./lib/slugger.mjs";
 import { buildSearchIndex, SEARCH_SCRIPT } from "./lib/search.mjs";
 import { parseFrontmatter } from "./lib/frontmatter.mjs";
@@ -93,6 +96,9 @@ import {
 
 // 印の無いフォルダの入口の名前(ナビの木のフォルダの並び順に使う。今の site-tree と同じ3つ・同じ綴り)
 const PLAIN_DIR_INDEX_NAMES = ["README.md", "readme.md", "index.md"];
+
+// SITE_ORIGIN として llms.txt に書いてよい形(検証されていない値をファイルに書かないため)
+const LLMS_ORIGIN_RE = /^https?:\/\/[^\s()<>[\]"']{1,200}$/;
 
 // 出力先の目印のファイル名。これがあるディレクトリは Tsuzuri が前回出力したものなので、ビルドの前に
 // 空にしてよい(消したページ・画像が残らないように)。"." で始まるので公開サイトには含まれない。
@@ -418,6 +424,29 @@ async function main() {
     }
   }
 
+  // ---------- 5.5 llms.txt の扱いを決める(LLMS_TXT が有効なとき) ----------
+  //   - リポジトリ直下に通常のファイルの llms.txt がある → それをそのままコピーする(自動では作らない)。
+  //     シンボリックリンクをたどると、リポジトリの中のドットファイル(.env など)の中身を公開できてしまうため、
+  //     リンクはたどらず(lstat)、通常のファイルだけを対象にする。見るのはリポジトリ直下だけ(出力先の中は見ない)
+  //   - リンクや通常のファイル以外(フォルダなど)→ 警告して、コピーも自動生成もしない
+  //   - 無い → SITE_ORIGIN が(正しい形で)あるときだけ自動で作る
+  const llmsAbs = path.join(REPO_ROOT, "llms.txt");
+  let llmsMode = "none"; // "copy" | "generate" | "none"
+  if (config.llmsTxt) {
+    const llmsStat = fs.lstatSync(llmsAbs, { throwIfNoEntry: false });
+    if (llmsStat?.isFile()) {
+      llmsMode = "copy";
+    } else if (llmsStat) {
+      console.warn("[build-docs] llms.txt がシンボリックリンク(または通常のファイル以外)のため、コピーも自動生成もしません。");
+    } else if (config.siteOrigin) {
+      if (LLMS_ORIGIN_RE.test(config.siteOrigin)) {
+        llmsMode = "generate";
+      } else {
+        console.warn("[build-docs] SITE_ORIGIN の形が正しくないため、llms.txt を作りません。");
+      }
+    }
+  }
+
   // ---------- 6. 出力ディレクトリ準備 ----------
   // 出力先のパス(OUT_DIR からの相対パス)ごとに、何を書いたかを記録する。リンクされたファイルの
   // コピーが、生成したページやビルドが作るファイルを上書きしないようにするため。
@@ -431,6 +460,7 @@ async function main() {
     config.navEnabled && THEME_SCRIPT_NAME,
     config.siteOrigin && "sitemap.xml",
     config.siteOrigin && !config.basePath && "robots.txt",
+    llmsMode === "generate" && "llms.txt",
     config.sitemapJson && "sitemap.json",
   ].filter(Boolean);
   if (config.navEnabled) {
@@ -806,6 +836,9 @@ async function main() {
     return stylesheets.get(css);
   }
 
+  // ページの題名・説明(renderPage で決まった値。llms.txt の書き出しで使う)
+  const pageTexts = new Map(); // rel -> { title, description }
+
   // 本文の最初の(文字のある)段落を、説明文(meta description)用に短くする。
   // 注意書きの見出し(「補足」など)や、バッジ・画像だけの段落は使わない。
   let copyScriptUsed = false;
@@ -1003,6 +1036,8 @@ async function main() {
     // 何も設定されていないベースライン構成では意図的に呼び出し自体をスキップする)。
     // description が無いページは、本文の最初の段落から作る(検索結果・SNSでの説明文に使われる)
     const description = (typeof meta.description === "string" && meta.description) || autoDescription;
+    // llms.txt に載せる題名・説明は、<title>・meta description と同じ値(サイト名を付ける前の題名)
+    pageTexts.set(rel, { title, description });
     const ogImage = meta.ogImage
       ? resolveOgImage(meta.ogImage, rel)
       : resolveOgImage(config.ogDefaultImage, siteRootRel);
@@ -1225,6 +1260,35 @@ async function main() {
     fs.copyFileSync(src, dest);
   }
 
+  // ---------- 8.2 リポジトリ直下の llms.txt のコピー ----------
+  // lstat で通常のファイルと確かめた後も、リンクをたどらずに開き(O_NOFOLLOW)、開いたファイルが
+  // 通常のファイルであることを確かめてから読む(確認と読み込みのあいだに差し替えられても読まない。
+  // O_NONBLOCK は、FIFO に差し替えられても開く処理が相手を待って止まらないようにするため)
+  if (llmsMode === "copy") {
+    const prev = writtenBy.get("llms.txt");
+    let data = null;
+    try {
+      const fd = fs.openSync(llmsAbs, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0) | (fs.constants.O_NONBLOCK ?? 0));
+      try {
+        if (fs.fstatSync(fd).isFile()) data = fs.readFileSync(fd);
+      } finally {
+        fs.closeSync(fd);
+      }
+    } catch {
+      // 読めなければ下で警告する
+    }
+    if (!data) {
+      console.warn("[build-docs] llms.txt を通常のファイルとして読めないため、コピーも自動生成もしません。");
+    } else if (prev) {
+      console.warn(`[build-docs] リポジトリ直下の llms.txt は、出力先が ${prev} と重なるためコピーしません。`);
+      collisions.push(`llms.txt (${prev} と llms.txt)`);
+    } else {
+      writtenBy.set("llms.txt", "llms.txt");
+      fs.writeFileSync(path.join(OUT_DIR, "llms.txt"), data);
+      console.log("llms.txt: copied from the repository root (automatic generation skipped).");
+    }
+  }
+
   // ---------- 8.5 sitemap.xml / robots.txt(検索エンジン向け) ----------
   // 公開URLが分かる(SITE_ORIGIN がある)ときだけ出力する。noindex のページは含めない。
   if (config.siteOrigin) {
@@ -1242,6 +1306,37 @@ async function main() {
         `User-agent: *\nAllow: /\n\nSitemap: ${config.siteOrigin}/sitemap.xml\n`
       );
     }
+  }
+
+  // ---------- 8.6 llms.txt の自動生成(AI 向けのサイトの目次) ----------
+  // 基本言語のページだけを載せる。## Docs はナビの順(NAV_ENABLED によらず同じ木から求める)、
+  // ## Optional はナビに載せない(nav: false)ページと、基本言語以外の各言語のトップページへのリンク。
+  // noindex のページと 404 は載せない。リンク先は sitemap.xml と同じ絶対 URL
+  if (llmsMode === "generate") {
+    const urlOf = (rel) => `${config.siteOrigin}${config.basePath}/${urlPathOf(rel)}`;
+    const isListed = (rel) =>
+      visitedMd.get(rel)?.meta?.noindex !== true && outputRelOf(i18n.outputHtmlRel(rel)) !== "404.html";
+    const itemOf = (rel) => ({ url: urlOf(rel), ...pageTexts.get(rel) });
+    const baseOrder = langSites.get(i18n.base).order;
+    const docs = baseOrder.map((page) => page.rel).filter(isListed).map(itemOf);
+    const optional = [...visitedMd.keys()]
+      .filter((rel) => i18n.langOf(rel) === i18n.base && isHiddenFromNav(visitedMd.get(rel).meta) && isListed(rel))
+      .map(itemOf);
+    for (const tag of i18n.languages) {
+      const root = tag === i18n.base ? null : rootOfLang(tag);
+      if (root && isListed(root)) optional.push({ title: languageName(tag), url: urlOf(root) });
+    }
+    const home = pageTexts.get(siteRootRel);
+    fs.writeFileSync(
+      path.join(OUT_DIR, "llms.txt"),
+      buildLlmsTxt({
+        siteName: config.siteName || home?.title || "",
+        homeUrl: `${config.siteOrigin}${config.basePath}/`,
+        summary: home?.description ?? "",
+        docs,
+        optional,
+      })
+    );
   }
 
   // ---------- 9. sitemap.json 書き込み(SITEMAP_JSON=true のときだけ) ----------
