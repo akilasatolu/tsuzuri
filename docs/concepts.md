@@ -198,6 +198,54 @@ diagram's source code is shown).
 
 **Task lists**: `- [ ]` and `- [x]` become a list with checkboxes.
 
+**Emoji shortcodes**: GitHub-style shortcodes such as `:tada:` are shown as emoji (🎉). The names
+come from [gemoji](https://github.com/wooorm/gemoji), a package that lists the emoji shortcodes GitHub uses.
+
+```markdown
+Release day :tada: Thanks :+1: See you :wave:
+```
+
+This is shown as "Release day 🎉 Thanks 👍 See you 👋". Shortcodes are converted in body text,
+bold and italic text, link text, tables, lists, quotes and footnotes, and between inline HTML tags
+such as `<span>`. In headings too: the heading shows the emoji, but its link (the id) stays the
+same as when written with the name, so `# Demo :tada:` is shown as "Demo 🎉" and keeps the
+id `demo-tada`. The table of contents, the page title, the navigation and search use the emoji.
+The `title` and `description` in the frontmatter are not converted.
+
+Shortcodes are **not** converted in these places:
+
+- Code spans and code blocks.
+- Inline `<code>`, `<kbd>`, `<pre>`, `<script>`, `<tt>`, `<samp>` and `<style>`, including
+  bold text or links inside them. If a `<code>`, `<kbd>`, `<pre>` or `<script>` tag is never closed, nothing is converted until the
+  end of the page.
+- Inside block-level HTML, such as the `<summary>` line of `<details>`. To put an emoji there,
+  write the emoji character itself (🎉) instead of the shortcode.
+- Links written as a bare URL (neither the displayed text nor the `href`), and the alt text of
+  images.
+- Names that aren't in the list, such as GitHub's image-only emoji (`:shipit:`), uppercase names
+  (`:TADA:`), and text like `10:30:45`.
+
+A shortcode is converted even in the middle of a word: the `:x:` in `root:x:0` becomes ❌. To keep
+the text as it is, put a backslash before the first colon (`\:x:`) or write it as code
+(`` `root:x:0` ``).
+
+**`<picture>` and `srcset`**: the images in the `srcset` of `<img>` and `<source>` written as HTML
+are handled like `src`: they are copied to the site, and their paths are rewritten to paths on
+the site (a missing image gives the same "file not found" warning, and fails the build with
+`STRICT_LINKS=true`). For example, this switches the logo for dark mode:
+
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png 1x, assets/logo-dark@2x.png 2x">
+  <img src="assets/logo.png" alt="Logo">
+</picture>
+```
+
+The size descriptors (`1x`, `480w`) are kept as written. Values without quotes (`srcset=a.png`)
+and attributes with spaces around the `=` (`srcset = "a.png"`) are not recognized, the same as for
+`src`. The `media="(prefers-color-scheme: dark)"` follows the OS (browser) setting; it does not
+follow the site's light/dark toggle button. GitHub's `#gh-dark-mode-only` suffix is not handled.
+
 ## Links to headings and the table of contents
 
 Headings at h2 and below show a `#` link when you hover over them. Clicking it gives you the URL

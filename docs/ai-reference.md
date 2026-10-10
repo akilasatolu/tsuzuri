@@ -10,14 +10,14 @@ from installation to publishing on GitHub Pages. The "Copy" button at its top
 right copies the whole text, which can then be pasted into the AI agent of
 your choice.
 
-The content reflects Tsuzuri v1.30.5. The step-by-step guide written for
+The content reflects Tsuzuri v1.31.0. The step-by-step guide written for
 people is [Getting Started](getting-started.md).
 
 ````markdown
 # Tsuzuri reference
 
-- Covers: Tsuzuri v1.30.5 (v1 series)
-- Last verified: 2026-10-08
+- Covers: Tsuzuri v1.31.0 (v1 series)
+- Last verified: 2026-10-10
 - Official documentation: https://akilasatolu.github.io/tsuzuri/
 - Source code: https://github.com/akilasatolu/tsuzuri
 
@@ -71,11 +71,11 @@ npx github:akilasatolu/tsuzuri#v1 init
 ```
 
 - `#v1` is a tag that points to the latest release of the v1 series. A full
-  version such as `#v1.30.5` pins that release. Without the part from `#`
+  version such as `#v1.31.0` pins that release. Without the part from `#`
   onward, the content of the `main` branch runs, which can include changes
   that are not released yet.
 - The command prints the running version on its first line, in the form
-  `tsuzuri v1.30.5`.
+  `tsuzuri v1.31.0`.
 - The screen output of `init` and `preview` is in Japanese. The comments in
   the generated settings file and workflow are in Japanese too.
 - `init` can be omitted. Without a subcommand, the command behaves as `init`.
@@ -435,6 +435,22 @@ The keys are the following 10.
 - A blockquote whose first line is `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`,
   `[!WARNING]` or `[!CAUTION]` is shown as a box colored by its kind.
 - Footnotes (`[^1]`) are supported.
+- Emoji shortcodes such as `:tada:` are converted to emoji characters, using
+  the names of gemoji (the shortcodes without an emoji character, such as
+  `:shipit:`, are not converted). Conversion applies in body text, emphasis,
+  link text, tables, lists, quotes, footnotes and headings. Conversion does
+  not apply in code spans, code blocks, inline `<code>`, `<kbd>`, `<pre>`,
+  `<script>`, `<tt>`, `<samp>` and `<style>`, block-level HTML, links written
+  as a bare URL, image alt text, or after a backslash (`\:tada:`). A shortcode
+  inside a word is converted too (`root:x:0` becomes `root❌0`). The id of a
+  heading is made from the shortcode as written (`# Demo :tada:` has the id
+  `demo-tada`).
+- The images in the `srcset` of `<img>` and `<source>` (inside `<picture>`
+  too) written as HTML are copied to the site and their paths are rewritten,
+  like `src`. Values without quotes and attributes with spaces around the `=`
+  are not recognized. `media="(prefers-color-scheme: dark)"` follows the
+  setting of the OS, not the light/dark toggle button of the site.
+  `#gh-dark-mode-only` is not handled.
 - Code blocks with a language name are highlighted at build time. Each code
   block gets a button for copying.
 - A code block whose language name is `mermaid` is shown as a diagram. The
@@ -650,7 +666,7 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   the change to the site.
 
 The version copied into the repository is written in the comment at the top
-of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.30.5`. The
+of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.31.0`. The
 version inside the repository stays the same until an update.
 
 ## 11. Common pitfalls
