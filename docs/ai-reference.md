@@ -10,13 +10,13 @@ from installation to publishing on GitHub Pages. The "Copy" button at its top
 right copies the whole text, which can then be pasted into the AI agent of
 your choice.
 
-The content reflects Tsuzuri v1.32.0. The step-by-step guide written for
+The content reflects Tsuzuri v1.33.0. The step-by-step guide written for
 people is [Getting Started](getting-started.md).
 
 ````markdown
 # Tsuzuri reference
 
-- Covers: Tsuzuri v1.32.0 (v1 series)
+- Covers: Tsuzuri v1.33.0 (v1 series)
 - Last verified: 2026-10-10
 - Official documentation: https://akilasatolu.github.io/tsuzuri/
 - Source code: https://github.com/akilasatolu/tsuzuri
@@ -71,11 +71,11 @@ npx github:akilasatolu/tsuzuri#v1 init
 ```
 
 - `#v1` is a tag that points to the latest release of the v1 series. A full
-  version such as `#v1.32.0` pins that release. Without the part from `#`
+  version such as `#v1.33.0` pins that release. Without the part from `#`
   onward, the content of the `main` branch runs, which can include changes
   that are not released yet.
 - The command prints the running version on its first line, in the form
-  `tsuzuri v1.32.0`.
+  `tsuzuri v1.33.0`.
 - The screen output of `init` and `preview` is in Japanese. The comments in
   the generated settings file and workflow are in Japanese too.
 - `init` can be omitted. Without a subcommand, the command behaves as `init`.
@@ -236,7 +236,7 @@ follows.
 
 ### 4.2 Settings keys
 
-There are 15 keys, and every one of them can be omitted. "When omitted"
+There are 18 keys, and every one of them can be omitted. "When omitted"
 covers both a missing key and an empty value. "Value from init" is the value
 written in the settings file that `init` generates.
 
@@ -315,6 +315,32 @@ written in the settings file that `init` generates.
   no `origin` locally, for example), the link is not added.
   When omitted: `false`
   Value from init: `false`
+- `REPO_LINK`: with `true`, each page gets, at its end, a link to the GitHub
+  repository, labeled "GitHub repository" on English pages and "GitHub
+  リポジトリ" on Japanese pages. The URL is the URL of the repository, found
+  in the same way as for `EDIT_LINK` (from the environment on GitHub Actions,
+  from `origin` locally). When the URL is unknown, a warning is printed and
+  only the link is not added. The link is on the 404 page as well. It is in a
+  separate line from the last updated date and the edit link, after the links
+  to the previous and next pages.
+  When omitted: `false`
+  Value from init: `false`
+- `REPO_VERSION`: a version string that each page shows at its end, in the
+  form "Version: v1.2.3" on English pages and "バージョン: v1.2.3" on
+  Japanese pages. The value is shown as written, without a link, and is not
+  updated automatically. It is one line of at most 64 characters, with
+  whitespace around it removed. A value with a control character (a line
+  break or a tab, for example) or a value longer than 64 characters is
+  ignored with a warning and not shown. The line is shown together with
+  `REPO_LINK` and `REPO_LICENSE`, in the order link, version, license, and
+  only for the ones that are set.
+  When omitted: not shown
+  Value from init: empty
+- `REPO_LICENSE`: a license string that each page shows at its end, in the
+  form "License: MIT" on English pages and "ライセンス: MIT" on Japanese
+  pages. The rules for the value are the same as for `REPO_VERSION`.
+  When omitted: not shown
+  Value from init: empty
 - `SITEMAP_JSON`: with `true`, a `sitemap.json` for investigation is written
   to the output directory. It is included in the published site as well.
   When omitted: `false`
@@ -691,7 +717,7 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   the change to the site.
 
 The version copied into the repository is written in the comment at the top
-of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.32.0`. The
+of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.33.0`. The
 version inside the repository stays the same until an update.
 
 ## 11. Common pitfalls

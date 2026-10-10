@@ -220,6 +220,66 @@ The link points to the branch that was built: on GitHub Actions, the branch that
 (building a tag, or no `origin`, for example), a warning is shown and no links are added. This
 site uses `EDIT_LINK=true`.
 
+### REPO_LINK
+Whether to show a link to the GitHub repository at the end of each page (v1.33.0 or later). `true`
+or `false`, and the default is `false` (no link). You don't write the URL; the repository's URL is
+used.
+
+`REPO_LINK`, `REPO_VERSION` and `REPO_LICENSE` are independent, and only the ones you set are
+shown, in one line at the end of the page body, after the links to the previous and next pages.
+With all three set, an English page shows "GitHub repository · Version: v1.2.3 · License: MIT", and
+a Japanese page shows "GitHub リポジトリ · バージョン: v1.2.3 · ライセンス: MIT". The 404 page
+shows it too, and it appears with `NAV_ENABLED=false` as well. It is a separate line from the
+last updated date and the edit link. If none of the three is set, nothing is added to the page.
+
+The link points to the repository's URL, which is found the same way as for the edit link: on
+GitHub Actions, from the repository the workflow runs in; locally, from git's `origin`. If the URL
+isn't known (no `origin`, or a host other than GitHub, for example), a warning is shown and only
+the link is left out (the version and the license are still shown). This site uses
+`REPO_LINK=true`.
+
+```
+REPO_LINK=true
+```
+
+### REPO_VERSION
+The version to show at the end of each page (v1.33.0 or later). One line of text, and the default
+is empty (not shown). For example, `v1.2.3`.
+
+The value you write is shown as it is, as "Version: v1.2.3" ("バージョン: v1.2.3" on Japanese
+pages). **It isn't updated automatically**: it isn't read from `package.json` or a git tag, so
+change it by hand with each release. It has no link. Whitespace around the value is removed. It
+can be up to 64 characters on one line, and a value with a control character (including a line
+break or a tab) or a longer one is ignored with a warning and not shown. The value is shown with
+HTML special characters escaped.
+
+```
+REPO_VERSION=v1.2.3
+```
+
+### REPO_LICENSE
+The license to show at the end of each page (v1.33.0 or later). One line of text, and the default
+is empty (not shown). For example, `MIT`.
+
+The value you write is shown as it is, as "License: MIT" ("ライセンス: MIT" on Japanese pages),
+without a link. The kind of characters isn't restricted (a value like `Proprietary license` can be
+written). The one-line rule, the 64-character limit, the warning and the escaping are the same as
+for `REPO_VERSION`. This site uses `REPO_LICENSE=MIT`.
+
+```
+REPO_LICENSE=MIT
+```
+
+The line is `<p class="tsuzuri-updated tsuzuri-repo-info">`, so it looks the same as the last updated
+date. To change its look from your custom CSS (`STYLE_FILE`), use these class names.
+
+| Class name | Where |
+|---|---|
+| `tsuzuri-repo-info` | The whole line (the same `<p>` also has `tsuzuri-updated`) |
+| `tsuzuri-repo-link` | The link to the repository |
+| `tsuzuri-repo-version` | The version |
+| `tsuzuri-repo-license` | The license |
+
 ### SITEMAP_JSON
 Whether to output the debugging `sitemap.json` (the collected pages and images, the list of
 broken links and so on). `true` or `false`, and the default is `false` (not output). With
@@ -229,8 +289,9 @@ investigating (see "About sitemap.json" in [Concepts](./concepts.md) for details
 
 ## Backward compatibility
 
-The eleven keys `LANGUAGES`, `NAV_ENABLED`, `FAVICON_FILE`, `SITE_NAME`, `CUSTOM_DOMAIN`,
-`OGP_DEFAULT_IMAGE`, `THEME`, `STRICT_LINKS`, `SITEMAP_JSON`, `LAST_UPDATED` and `EDIT_LINK` are
+The fourteen keys `LANGUAGES`, `NAV_ENABLED`, `FAVICON_FILE`, `SITE_NAME`, `CUSTOM_DOMAIN`,
+`OGP_DEFAULT_IMAGE`, `THEME`, `STRICT_LINKS`, `SITEMAP_JSON`, `LAST_UPDATED`, `EDIT_LINK`,
+`REPO_LINK`, `REPO_VERSION` and `REPO_LICENSE` are
 **all optional**. If you set none of them, all the defaults above apply, and the behavior is the same
 as the versions before these keys were introduced. You can keep using an existing settings file
 (with only the original four keys) without anything breaking.
