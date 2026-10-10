@@ -653,7 +653,7 @@ async function main() {
     repoBaseUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}`;
     repoRef = process.env.GITHUB_SHA;
     if (String(process.env.GITHUB_REF ?? "").startsWith("refs/heads/")) editBranch = process.env.GITHUB_REF_NAME ?? "";
-  } else if (hasRepoLinks || config.editLink) {
+  } else if (hasRepoLinks || config.editLink || config.repoLink) {
     repoBaseUrl = webUrlFromGitRemote(gitOut(["remote", "get-url", "origin"]));
     editBranch = repoBaseUrl ? gitOut(["branch", "--show-current"]) : "";
     repoRef = repoBaseUrl ? editBranch || gitOut(["rev-parse", "HEAD"]) : "";
@@ -665,6 +665,11 @@ async function main() {
   if (config.editLink && !editUrlOf(siteRootRel)) {
     console.warn(
       "[build-docs] EDIT_LINK=true ですが、GitHub 上のリポジトリかブランチが分からない(git の origin が無い・ブランチ以外をビルドしている等)ため、編集リンクを付けません。"
+    );
+  }
+  if (config.repoLink && !repoBaseUrl) {
+    console.warn(
+      "[build-docs] REPO_LINK=true ですが、GitHub 上のリポジトリが分からない(git の origin が無い等)ため、リポジトリへのリンクを付けません。"
     );
   }
   function repoUrlOf(repoRel, isDir) {
@@ -952,6 +957,20 @@ async function main() {
         hrefFor,
       });
     }
+    // リポジトリ情報(REPO_LINK・REPO_VERSION・REPO_LICENSE。設定したものだけ)。404 を含む全ページの最後に付ける。
+    // 版とライセンスは設定ファイルに書かれた文字列のまま(自動では求めない)
+    const repoInfo = [
+      config.repoLink && repoBaseUrl
+        ? `<a class="tsuzuri-repo-link" href="${escapeHtml(repoBaseUrl)}">${escapeHtml(S.repoLink)}</a>`
+        : "",
+      config.repoVersion
+        ? `<span class="tsuzuri-repo-version">${escapeHtml(S.repoVersion)}: ${escapeHtml(config.repoVersion)}</span>`
+        : "",
+      config.repoLicense
+        ? `<span class="tsuzuri-repo-license">${escapeHtml(S.repoLicense)}: ${escapeHtml(config.repoLicense)}</span>`
+        : "",
+    ].filter(Boolean);
+    if (repoInfo.length) bodyHtml += `<p class="tsuzuri-updated tsuzuri-repo-info">${repoInfo.join(" · ")}</p>\n`;
 
     // 言語切り替え(多言語の、集めたページだけ。404 には出さない)。翻訳が無い言語はその言語のトップへ、
     // トップも無い言語は出さない(renderLangSwitch が href の空の言語を除く)

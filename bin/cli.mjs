@@ -306,6 +306,15 @@ LAST_UPDATED=false
 # 各ページの末尾に「このページを GitHub で編集」のリンクを付けるか(true/false)
 EDIT_LINK=false
 
+# 各ページの末尾に GitHub のリポジトリへのリンクを付けるか(true/false)。リンク先はリポジトリの URL が自動で使われます。
+REPO_LINK=false
+
+# 各ページの末尾に表示するバージョン(例: v1.2.3)。ここに書いた文字列がそのまま表示されます(自動では更新されません)。空なら表示しません。
+REPO_VERSION=
+
+# 各ページの末尾に表示するライセンス(例: MIT)。ここに書いた文字列がそのまま表示されます。空なら表示しません。
+REPO_LICENSE=
+
 # 原因調査用の sitemap.json を出力するか(true/false)。公開サイトにも含まれるため、普段は false にしてください。
 SITEMAP_JSON=false
 `;

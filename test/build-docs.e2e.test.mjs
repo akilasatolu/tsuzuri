@@ -48,6 +48,9 @@ const CONFIG_ENV_KEYS = [
   "GITHUB_REF",
   "GITHUB_REF_NAME",
   "EDIT_LINK",
+  "REPO_LINK",
+  "REPO_VERSION",
+  "REPO_LICENSE",
   "GITHUB_ACTIONS",
 ];
 
@@ -1688,6 +1691,151 @@ describe("build-docs.mjs :: 編集リンク(EDIT_LINK)", () => {
   });
 });
 
+describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REPO_LICENSE)", () => {
+  const gh = {
+    GITHUB_SERVER_URL: "https://github.com",
+    GITHUB_REPOSITORY: "o/r",
+    GITHUB_SHA: "abc123",
+    GITHUB_REF: "refs/heads/docs",
+    GITHUB_REF_NAME: "docs",
+  };
+  const withBasic = (fn) => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      fn(dir);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  };
+  const ALL = { REPO_LINK: "true", REPO_VERSION: "v1.2.3", REPO_LICENSE: "MIT" };
+
+  test("3つとも書かない・REPO_LINK=false なら出さない(出力は変わらない)", () => {
+    withBasic((dir) => {
+      assert.equal(runBuild(dir, gh).status, 0);
+      const before = readOut(dir, "docs", "a.html");
+      assert.doesNotMatch(before, /tsuzuri-repo-info/);
+      assert.equal(runBuild(dir, { ...gh, REPO_LINK: "false", REPO_VERSION: "", REPO_LICENSE: "  " }).status, 0);
+      assert.equal(readOut(dir, "docs", "a.html"), before);
+    });
+  });
+
+  test("3つとも書く: リンク・版・ライセンスの順。404 にも出る", () => {
+    withBasic((dir) => {
+      const result = runBuild(dir, { ...gh, LANGUAGES: "en", ...ALL });
+      assert.equal(result.status, 0, result.stderr);
+      const expected =
+        '<p class="tsuzuri-updated tsuzuri-repo-info"><a class="tsuzuri-repo-link" href="https://github.com/o/r">GitHub repository</a>' +
+        ' · <span class="tsuzuri-repo-version">Version: v1.2.3</span>' +
+        ' · <span class="tsuzuri-repo-license">License: MIT</span></p>\n';
+      assert.ok(readOut(dir, "index.html").includes(expected));
+      assert.ok(readOut(dir, "docs", "a.html").includes(expected));
+      assert.ok(readOut(dir, "404.html").includes(expected));
+    });
+  });
+
+  test("各キーだけでも出る。出るのは設定したものだけ", () => {
+    withBasic((dir) => {
+      const only = (env) => {
+        assert.equal(runBuild(dir, { ...gh, LANGUAGES: "en", ...env }).status, 0);
+        return readOut(dir, "docs", "a.html").match(/<p class="tsuzuri-updated tsuzuri-repo-info">.*<\/p>/)?.[0];
+      };
+      assert.equal(
+        only({ REPO_LINK: "true" }),
+        '<p class="tsuzuri-updated tsuzuri-repo-info"><a class="tsuzuri-repo-link" href="https://github.com/o/r">GitHub repository</a></p>'
+      );
+      assert.equal(
+        only({ REPO_VERSION: "v1.2.3" }),
+        '<p class="tsuzuri-updated tsuzuri-repo-info"><span class="tsuzuri-repo-version">Version: v1.2.3</span></p>'
+      );
+      assert.equal(
+        only({ REPO_LICENSE: "MIT" }),
+        '<p class="tsuzuri-updated tsuzuri-repo-info"><span class="tsuzuri-repo-license">License: MIT</span></p>'
+      );
+      assert.equal(
+        only({ REPO_VERSION: "v1", REPO_LICENSE: "MIT" }),
+        '<p class="tsuzuri-updated tsuzuri-repo-info"><span class="tsuzuri-repo-version">Version: v1</span> · <span class="tsuzuri-repo-license">License: MIT</span></p>'
+      );
+    });
+  });
+
+  test("日本語のページでは日本語の文言。最終更新・編集リンクとは別の <p>で、その後ろに付く", () => {
+    withBasic((dir) => {
+      const result = runBuild(dir, { ...gh, EDIT_LINK: "true", ...ALL });
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "docs", "a.html");
+      assert.ok(html.includes('>GitHub リポジトリ</a> · <span class="tsuzuri-repo-version">バージョン: v1.2.3</span> · <span class="tsuzuri-repo-license">ライセンス: MIT</span></p>'));
+      assert.ok(html.indexOf("tsuzuri-edit-link") < html.indexOf("tsuzuri-repo-info"));
+      assert.equal(html.match(/<p class="tsuzuri-updated/g).length, 2);
+    });
+  });
+
+  test("値の < \" & はエスケープされる", () => {
+    withBasic((dir) => {
+      const result = runBuild(dir, { ...gh, REPO_VERSION: '<b>"x"&', REPO_LICENSE: "<i>&amp;" });
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "index.html");
+      assert.ok(html.includes("バージョン: &lt;b&gt;&quot;x&quot;&amp;</span>"));
+      assert.ok(html.includes("ライセンス: &lt;i&gt;&amp;amp;</span>"));
+      assert.doesNotMatch(html, /<b>"x"/);
+    });
+  });
+
+  test("改行・タブを含む値と 65 文字の値は、警告して出さない", () => {
+    withBasic((dir) => {
+      const result = runBuild(dir, { ...gh, REPO_VERSION: "v1\nv2", REPO_LICENSE: "a".repeat(65) });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stderr, /REPO_VERSION の値に/);
+      assert.match(result.stderr, /REPO_LICENSE の値が長すぎます/);
+      assert.doesNotMatch(readOut(dir, "index.html"), /tsuzuri-repo-info/);
+      const tab = runBuild(dir, { ...gh, REPO_VERSION: "v1\tv2", REPO_LICENSE: "a".repeat(64) });
+      assert.match(tab.stderr, /REPO_VERSION の値に/);
+      assert.doesNotMatch(readOut(dir, "index.html"), /repo-version/);
+      assert.match(readOut(dir, "index.html"), /repo-license/);
+    });
+  });
+
+  test("REPO_LINK=true で URL が分からないと、1回だけ警告してリンクだけ出さない(版・ライセンスは出る)", () => {
+    withBasic((dir) => {
+      const git = (...args) => spawnSync("git", args, { cwd: dir, encoding: "utf-8" });
+      git("init", "-q", "-b", "work");
+      const result = runBuild(dir, { ...ALL });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(result.stderr.match(/REPO_LINK=true ですが/g).length, 1);
+      const html = readOut(dir, "docs", "a.html");
+      assert.doesNotMatch(html, /tsuzuri-repo-link/);
+      assert.match(html, /tsuzuri-repo-version/);
+      assert.match(html, /tsuzuri-repo-license/);
+      // 3つのうちリンクだけのとき: <p> ごと出さない
+      assert.equal(runBuild(dir, { REPO_LINK: "true" }).status, 0);
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /tsuzuri-repo-info/);
+    });
+  });
+
+  test("手元のビルドでは git の origin の URL(.git を除く)を使う", () => {
+    withBasic((dir) => {
+      const git = (...args) => spawnSync("git", args, { cwd: dir, encoding: "utf-8" });
+      git("init", "-q", "-b", "work");
+      git("remote", "add", "origin", "git@github.com:owner/repo.git");
+      const result = runBuild(dir, { REPO_LINK: "true", LANGUAGES: "en" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.doesNotMatch(result.stderr, /REPO_LINK/);
+      assert.ok(readOut(dir, "docs", "a.html").includes('<a class="tsuzuri-repo-link" href="https://github.com/owner/repo">GitHub repository</a>'));
+    });
+  });
+
+  test("NAV_ENABLED=true(前後のページがある)でも false でも出て、前後のページの後ろに付く", () => {
+    withBasic((dir) => {
+      assert.equal(runBuild(dir, { ...gh, NAV_ENABLED: "true", ...ALL }).status, 0);
+      const html = readOut(dir, "index.html");
+      assert.ok(html.includes("tsuzuri-repo-info"));
+      if (html.includes("tsuzuri-pager")) assert.ok(html.indexOf("tsuzuri-pager") < html.indexOf("tsuzuri-repo-info"));
+      assert.equal(runBuild(dir, { ...gh, NAV_ENABLED: "false", ...ALL }).status, 0);
+      assert.ok(readOut(dir, "index.html").includes("tsuzuri-repo-info"));
+    });
+  });
+});
 
 describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => {
   function write(dir, rel, content) {

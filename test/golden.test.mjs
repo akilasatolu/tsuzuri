@@ -63,6 +63,10 @@ const CONFIG_ENV_KEYS = [
   "STRICT_LINKS",
   "SITEMAP_JSON",
   "LAST_UPDATED",
+  "EDIT_LINK",
+  "REPO_LINK",
+  "REPO_VERSION",
+  "REPO_LICENSE",
 ];
 
 const CSS_HASH_RE = /tsuzuri-[0-9a-f]{10}\.css/g;

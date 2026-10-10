@@ -58,7 +58,7 @@ jobs:
             # 設定ファイル経由で注入できないようにする。
             case "$key" in
               LANG) echo "::warning::LANG は廃止しました。LANGUAGES に書いてください(例: LANGUAGES=ja。先頭が基本言語)。この行は無視します" ;;
-              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANGUAGES|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS|SITEMAP_JSON|LAST_UPDATED|EDIT_LINK)
+              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANGUAGES|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS|SITEMAP_JSON|LAST_UPDATED|EDIT_LINK|REPO_LINK|REPO_VERSION|REPO_LICENSE)
                 echo "${key}=${value}" >> "$GITHUB_ENV" ;;
               *)
                 echo "::warning::未知の設定キー ${key} を無視します" ;;
@@ -153,6 +153,9 @@ jobs:
           SITEMAP_JSON: ${{ env.SITEMAP_JSON }}
           LAST_UPDATED: ${{ env.LAST_UPDATED }}
           EDIT_LINK: ${{ env.EDIT_LINK }}
+          REPO_LINK: ${{ env.REPO_LINK }}
+          REPO_VERSION: ${{ env.REPO_VERSION }}
+          REPO_LICENSE: ${{ env.REPO_LICENSE }}
           THEME: ${{ env.THEME }}
           # THEME解決の基準ディレクトリ。initでコピーしたベンダリング先を指す。
           STYLE_DIR: __VENDOR_DIR__/styles

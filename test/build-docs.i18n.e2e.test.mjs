@@ -47,6 +47,9 @@ const CONFIG_ENV_KEYS = [
   "GITHUB_REF",
   "GITHUB_REF_NAME",
   "EDIT_LINK",
+  "REPO_LINK",
+  "REPO_VERSION",
+  "REPO_LICENSE",
   "GITHUB_ACTIONS",
 ];
 
@@ -730,6 +733,17 @@ describe("build-docs.mjs :: hreflang と SITE_ORIGIN(レビューの気づき)",
           assert.equal(stripLangParts(readOut(multi, rel)), singleOut, rel);
         }
       });
+    });
+  });
+});
+
+describe("build-docs.mjs :: リポジトリ情報(多言語)", () => {
+  test("文言はページの言語。値は全言語で同じ", () => {
+    withSite(FIXTURE_A, {}, (dir) => {
+      const gh = { GITHUB_SERVER_URL: "https://github.com", GITHUB_REPOSITORY: "o/r", GITHUB_SHA: "abc" };
+      assert.equal(runBuild(dir, { ...A_ENV, ...gh, REPO_LINK: "true", REPO_VERSION: "v1", REPO_LICENSE: "MIT" }).status, 0);
+      assert.ok(readOut(dir, "en/index.html").includes('>GitHub repository</a> · <span class="tsuzuri-repo-version">Version: v1</span> · <span class="tsuzuri-repo-license">License: MIT</span>'));
+      assert.ok(readOut(dir, "index.html").includes('>GitHub リポジトリ</a> · <span class="tsuzuri-repo-version">バージョン: v1</span> · <span class="tsuzuri-repo-license">ライセンス: MIT</span>'));
     });
   });
 });

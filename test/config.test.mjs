@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { loadConfig, CONFIG_FILE_KEYS, parseConfigText, withConfigFileDefaults, resolveLanguages } from "../.github/scripts/lib/config.mjs";
+import { loadConfig, CONFIG_FILE_KEYS, parseConfigText, withConfigFileDefaults, resolveLanguages, resolveOneLine } from "../.github/scripts/lib/config.mjs";
 
 // console.warn を一時的に黙らせつつ呼び出し回数/内容を検査するヘルパー
 function withCapturedWarn(fn) {
@@ -302,6 +302,38 @@ test("SITEMAP_JSON: 既定はfalse(省略時は警告なし)、trueで出力", (
 test("LAST_UPDATED: 既定はfalse、trueで有効", () => {
   assert.equal(loadConfig({}).lastUpdated, false);
   assert.equal(loadConfig({ LAST_UPDATED: "true" }).lastUpdated, true);
+});
+
+test("REPO_LINK・REPO_VERSION・REPO_LICENSE: 既定は false・空、書いた値を読む", () => {
+  withCapturedWarn((calls) => {
+    const d = loadConfig({});
+    assert.equal(d.repoLink, false);
+    assert.equal(d.repoVersion, "");
+    assert.equal(d.repoLicense, "");
+    const c = loadConfig({ REPO_LINK: "true", REPO_VERSION: " v1.2.3 ", REPO_LICENSE: "独自ライセンス" });
+    assert.equal(c.repoLink, true);
+    assert.equal(c.repoVersion, "v1.2.3");
+    assert.equal(c.repoLicense, "独自ライセンス");
+    assert.equal(calls.length, 0);
+  });
+});
+
+test("resolveOneLine: 前後の空白を取る・空は空・改行/タブ/65文字は警告して空・64文字は通る", () => {
+  withCapturedWarn((calls) => {
+    assert.equal(resolveOneLine("X", undefined), "");
+    assert.equal(resolveOneLine("X", "  "), "");
+    assert.equal(resolveOneLine("X", "  MIT  "), "MIT");
+    assert.equal(resolveOneLine("X", "a".repeat(64)), "a".repeat(64));
+    assert.equal(resolveOneLine("X", "<b>\"&'"), "<b>\"&'");
+    assert.equal(calls.length, 0);
+    assert.equal(resolveOneLine("X", "a\nb"), "");
+    assert.equal(resolveOneLine("X", "a\tb"), "");
+    assert.equal(resolveOneLine("X", "a\u0000b"), "");
+    assert.equal(resolveOneLine("X", "a".repeat(65)), "");
+    assert.equal(resolveOneLine("X", "a".repeat(11), 10), "");
+    assert.equal(calls.length, 5);
+    assert.match(calls[0], /X/);
+  });
 });
 
 test("ROOT_MD: ./ や \\ を含む書き方も、リンクから解決したパスと同じ表記に正規化する", () => {
