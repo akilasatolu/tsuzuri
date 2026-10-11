@@ -29,7 +29,7 @@ const REAL_STYLES_DIR = path.join(PROJECT_ROOT, "styles");
 const FIXTURE_SITE = path.join(TEST_DIR, "fixtures", "site-golden");
 const GOLDEN_DIR = path.join(TEST_DIR, "fixtures", "golden");
 
-const THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "blueprint", "nineties"];
+const THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties"];
 
 // 設定の表(name: 保存先のフォルダ名、env: ビルドするときの環境変数)。保存と比較が同じ表を使う。
 const ORIGIN_ENV = { SITE_ORIGIN: "https://example.github.io", BASE_PATH: "/repo" };

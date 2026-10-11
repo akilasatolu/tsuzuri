@@ -175,7 +175,7 @@ bin/cli.mjs                 セットアップCLI(init)。生成するワーク�
 .github/scripts/
   build-docs.mjs            ビルドのエントリーポイント
   lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap / i18n / emoji(emoji-data.mjs は gemoji から作る)
-styles/*.css                テーマCSSの原本(base + material / glass / neumorphism / editorial / minimal / blueprint / nineties)
+styles/*.css                テーマCSSの原本(base + material / glass / neumorphism / editorial / minimal / kintsugi / blueprint / nineties)
 templates/.github/workflows/docs-pages.yml  initが生成するワークフローのひな形
 templates/tsuzuri/          initが利用者に配るビルド用の依存の package.json・package-lock.json(scripts/build-lockfiles.mjs で作る)
 scripts/release-notes.mjs   CHANGELOGからGitHubのReleaseの本文を作る(release.ymlが使う。配布対象外)

@@ -49,6 +49,7 @@ export const THEME_CHOICES = [
   { key: "neumorphism", label: "ニューモーフィズム(Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする)" },
   { key: "editorial", label: "エディトリアル(雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色)" },
   { key: "minimal", label: "ミニマル(Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青)" },
+  { key: "kintsugi", label: "金継ぎ(割れた器を漆と金で継ぐ「金継ぎ」のスタイル。白磁のようなカードに金の継ぎ目が走り、コードブロックは漆の黒。ライト表示は白磁、ダーク表示は黒漆)" },
   { key: "blueprint", label: "ブループリント(設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示)" },
   { key: "nineties", label: "90年代(90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ)" },
   { key: "none", label: "装飾なし" },
@@ -269,7 +270,7 @@ ROOT_MD=${rootMd}
 # ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# テーマ: material(マテリアル) / glass(グラス) / neumorphism(ニューモーフィズム) / editorial(エディトリアル) / minimal(ミニマル) / blueprint(ブループリント) / nineties(90年代) / none(装飾なし)
+# テーマ: material(マテリアル) / glass(グラス) / neumorphism(ニューモーフィズム) / editorial(エディトリアル) / minimal(ミニマル) / kintsugi(金継ぎ) / blueprint(ブループリント) / nineties(90年代) / none(装飾なし)
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 
@@ -373,7 +374,7 @@ export function buildVendorTargets(packageRoot = PACKAGE_ROOT, fsImpl = { exists
     }
   }
 
-  // 組み込み6テーマ全て(base.css含む)をコピーする。frontmatterの`theme`キーで
+  // 組み込みテーマ全て(base.css含む)をコピーする。frontmatterの`theme`キーで
   // サイト全体のTHEMEとは違う組み込みテーマをページ単位で指定できるため、
   // 選択されたTHEME以外のCSSも含めて一式コピーしておく必要がある。
   const stylesDir = join(packageRoot, "styles");

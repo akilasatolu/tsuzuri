@@ -4,11 +4,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// 言語の切り替えボタンの CSS のかたまり(base.css と7テーマの末尾)を確かめる。
+// 言語の切り替えボタンの CSS のかたまり(base.css と8テーマの末尾)を確かめる。
 // 目印は test/golden.test.mjs と同じ文字。
 
 const STYLES_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "styles");
-const THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "blueprint", "nineties"];
+const THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties"];
 const START = "/* ---------- 言語の切り替え ここから";
 const END = "/* ---------- 言語の切り替え ここまで ---------- */";
 const LANG_SELECTOR = ":is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch";
