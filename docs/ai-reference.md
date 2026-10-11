@@ -10,13 +10,13 @@ from installation to publishing on GitHub Pages. The "Copy" button at its top
 right copies the whole text, which can then be pasted into the AI agent of
 your choice.
 
-The content reflects Tsuzuri v1.34.0. The step-by-step guide written for
+The content reflects Tsuzuri v1.35.0. The step-by-step guide written for
 people is [Getting Started](getting-started.md).
 
 ````markdown
 # Tsuzuri reference
 
-- Covers: Tsuzuri v1.34.0 (v1 series)
+- Covers: Tsuzuri v1.35.0 (v1 series)
 - Last verified: 2026-10-10
 - Official documentation: https://akilasatolu.github.io/tsuzuri/
 - Source code: https://github.com/akilasatolu/tsuzuri
@@ -71,11 +71,11 @@ npx github:akilasatolu/tsuzuri#v1 init
 ```
 
 - `#v1` is a tag that points to the latest release of the v1 series. A full
-  version such as `#v1.34.0` pins that release. Without the part from `#`
+  version such as `#v1.35.0` pins that release. Without the part from `#`
   onward, the content of the `main` branch runs, which can include changes
   that are not released yet.
 - The command prints the running version on its first line, in the form
-  `tsuzuri v1.34.0`.
+  `tsuzuri v1.35.0`.
 - The screen output of `init` and `preview` is in Japanese. The comments in
   the generated settings file and workflow are in Japanese too.
 - `init` can be omitted. Without a subcommand, the command behaves as `init`.
@@ -103,7 +103,7 @@ empty answer (Enter alone) results in the default in brackets.
 2. `? ルートとなるMarkdownファイル (ROOT_MD) [README.md]: ` (the root Markdown file)
    The Markdown file that is the entry point of the site. The default is
    `README.md`.
-3. The third question shows the themes (`THEME`) as a list numbered 1 to 8
+3. The third question shows the themes (`THEME`) as a list numbered 1 to 9
    and accepts a number. The numbers map to themes as follows.
 
    - 1: `material`
@@ -111,11 +111,12 @@ empty answer (Enter alone) results in the default in brackets.
    - 3: `neumorphism`
    - 4: `editorial`
    - 5: `minimal`
-   - 6: `blueprint`
-   - 7: `nineties`
-   - 8: `none`
+   - 6: `kintsugi`
+   - 7: `blueprint`
+   - 8: `nineties`
+   - 9: `none`
 
-   An empty answer, a number outside 1 to 8, or a non-numeric answer results
+   An empty answer, a number outside 1 to 9, or a non-numeric answer results
    in `material`.
 4. `? サイドバーのナビ・サイト内検索・ページ内の目次を表示しますか? (NAV_ENABLED) (Y/n): ` (show the sidebar navigation, the site search and the in-page table of contents?)
    The default is "show".
@@ -154,7 +155,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
   used.
 - In a non-interactive run, files that already exist are left as they are.
   With `--force`, they are overwritten.
-- An unknown option, a `--theme` other than the eight theme names, a
+- An unknown option, a `--theme` other than the nine theme names, a
   `--languages` that is not a valid language tag, and an empty `--branch`,
   `--root` or `--languages` each result in an error. In that case `init`
   generates nothing.
@@ -172,7 +173,7 @@ The other options are as follows.
 - `.github/tsuzuri/build-docs.mjs`: the build script
 - `.github/tsuzuri/lib/*.mjs`: the modules the build script uses (14 files)
 - `.github/tsuzuri/styles/*.css`: the base CSS (`base.css`) and the CSS of
-  the 7 themes
+  the 8 themes
 - `.github/tsuzuri/package.json`, `.github/tsuzuri/package-lock.json`:
   the versions and hashes of the build dependencies (marked, highlight.js,
   marked-footnote)
@@ -261,9 +262,9 @@ written in the settings file that `init` generates.
   after the theme. When the file is missing, it is not used.
   When omitted: `.github/tsuzuri/styles/custom.css`
   Value from init: `.github/tsuzuri/styles/custom.css`
-- `THEME`: the theme. The values are the eight names `material`, `glass`,
-  `neumorphism`, `editorial`, `minimal`, `blueprint`, `nineties` and `none`.
-  Any other value becomes `material` with a warning.
+- `THEME`: the theme. The values are the nine names `material`, `glass`,
+  `neumorphism`, `editorial`, `minimal`, `kintsugi`, `blueprint`, `nineties`
+  and `none`. Any other value becomes `material` with a warning.
   When omitted: `material`
   Value from init: the answer to question 3.
 - `LANGUAGES`: the site languages. The value is a comma-separated list of
@@ -480,7 +481,7 @@ The keys are the following 10.
   `website`.
 - `noindex`: with `true`, the `noindex` tag for search engines is output,
   and the page is left out of `sitemap.xml` and `llms.txt`.
-- `theme`: the theme for that page alone. The value is one of the eight
+- `theme`: the theme for that page alone. The value is one of the nine
   theme names, or the path of a CSS file from the root of the repository.
 - `styleFile`: the CSS file used for that page alone in place of
   `STYLE_FILE`. The value is a path from the root of the repository.
@@ -567,8 +568,9 @@ generated.
   `--border`, `--accent`, `--code-bg`, `--font` and `--content-width`.
 - `theme` and `styleFile` in the frontmatter change the appearance per page.
 - `nineties` has a light display only, and `blueprint` has one display for
-  both. The five themes `material`, `glass`, `neumorphism`, `editorial` and
-  `minimal` switch between light and dark following the OS setting.
+  both. The six themes `material`, `glass`, `neumorphism`, `editorial`,
+  `minimal` and `kintsugi` switch between light and dark following the OS
+  setting.
 
 ## 8. Publishing
 
@@ -748,7 +750,7 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   the change to the site.
 
 The version copied into the repository is written in the comment at the top
-of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.34.0`. The
+of `.github/workflows/docs-pages.yml`, in the form `tsuzuri v1.35.0`. The
 version inside the repository stays the same until an update.
 
 ## 11. Common pitfalls

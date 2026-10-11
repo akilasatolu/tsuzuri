@@ -16,6 +16,7 @@ Tsuzuriの組み込みテーマの見た目を、実際に生成されたペー�
 | [ニューモーフィズム(neumorphism)](gallery/neumorphism.ja.md) | `THEME=neumorphism` | Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。 |
 | [エディトリアル(editorial)](gallery/editorial.ja.md) | `THEME=editorial` | 雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色。 |
 | [ミニマル(minimal)](gallery/minimal.ja.md) | `THEME=minimal` | Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青。 |
+| [金継ぎ(kintsugi)](gallery/kintsugi.ja.md) | `THEME=kintsugi` | 割れた器を漆と金で継ぐ「金継ぎ」のスタイル。白磁のようなカードに金の継ぎ目が走り、コードブロックは漆の黒。ライト表示は白磁、ダーク表示は黒漆。 |
 | [ブループリント(blueprint)](gallery/blueprint.ja.md) | `THEME=blueprint` | 設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示。 |
 | [90年代(nineties)](gallery/nineties.ja.md) | `THEME=nineties` | 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。 |
 | [装飾なし(none)](gallery/none.ja.md) | `THEME=none` | テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。 |

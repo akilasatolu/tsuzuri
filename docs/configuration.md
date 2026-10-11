@@ -60,8 +60,8 @@ path, or a symbolic link pointing outside the repository) is ignored with a warn
 [Theming](./theming.md) for details.
 
 ### THEME
-Chooses a built-in theme (a set of colors and decoration). The eight possible values are
-`material` (the default), `glass`, `neumorphism`, `editorial`, `minimal`, `blueprint`,
+Chooses a built-in theme (a set of colors and decoration). The nine possible values are
+`material` (the default), `glass`, `neumorphism`, `editorial`, `minimal`, `kintsugi`, `blueprint`,
 `nineties` (90s) and `none` (no decoration). If left out (no key, or an empty value), it's
 `material` without a warning. Any other value (a name that doesn't exist, such as `sepia`)
 falls back to `material` with a warning. See [Theming](./theming.md) for what each theme looks

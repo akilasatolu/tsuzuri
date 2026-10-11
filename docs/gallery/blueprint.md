@@ -13,7 +13,7 @@ To use this theme for the whole site, set `THEME=blueprint` in `.github/docs-pag
 To use it for a single page, write `theme: blueprint` in that page's frontmatter
 (see [Theming](../theming.md)).
 
-[← Minimal (minimal)](minimal.md) · [Gallery](../gallery.md) · [90s (nineties) →](nineties.md)
+[← Kintsugi (kintsugi)](kintsugi.md) · [Gallery](../gallery.md) · [90s (nineties) →](nineties.md)
 
 ## Heading level 2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../../assets/favicon.svg)
 
-[← Minimal (minimal)](minimal.md) · [Gallery](../gallery.md) · [90s (nineties) →](nineties.md)
+[← Kintsugi (kintsugi)](kintsugi.md) · [Gallery](../gallery.md) · [90s (nineties) →](nineties.md)

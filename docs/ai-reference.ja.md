@@ -9,13 +9,13 @@ order: 2
 1 つの文章にまとめてあります。枠の右上の「コピー」ボタンで全文をコピーし、
 お使いの AI エージェントに貼り付けて使えます。
 
-内容は Tsuzuri v1.34.0 の時点のものです。人が読むための手順は
+内容は Tsuzuri v1.35.0 の時点のものです。人が読むための手順は
 [Getting Started](getting-started.ja.md) にあります。
 
 ````markdown
 # Tsuzuri 参考情報
 
-- 対象: Tsuzuri v1.34.0(v1 系)
+- 対象: Tsuzuri v1.35.0(v1 系)
 - 最終確認日: 2026-10-10
 - 公式ドキュメント: https://akilasatolu.github.io/tsuzuri/ja/
 - ソースコード: https://github.com/akilasatolu/tsuzuri
@@ -67,10 +67,10 @@ Tsuzuri は次の 4 つで構成されています。
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-- `#v1` は、v1 系の最新のリリースを指すタグです。`#v1.34.0` のように
+- `#v1` は、v1 系の最新のリリースを指すタグです。`#v1.35.0` のように
   完全なバージョンを書くと、そのリリースに固定されます。`#` 以降を省くと、
   リリース前の変更を含む `main` ブランチの内容が実行されます。
-- コマンドは、最初の行に `tsuzuri v1.34.0` の形で、動いているバージョンを
+- コマンドは、最初の行に `tsuzuri v1.35.0` の形で、動いているバージョンを
   表示します。
 - `init` と `preview` の画面の表示は日本語です。生成される設定ファイルと
   ワークフローのコメントも日本語です。
@@ -97,7 +97,7 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
    分からなければ今のブランチ、それも分からなければ `main` です。
 2. `? ルートとなるMarkdownファイル (ROOT_MD) [README.md]: `
    サイトの起点になる Markdown ファイルです。既定値は `README.md` です。
-3. 3 番目の質問は、テーマ(`THEME`)の一覧を 1 から 8 の番号付きで表示し、
+3. 3 番目の質問は、テーマ(`THEME`)の一覧を 1 から 9 の番号付きで表示し、
    番号の入力を受け付けます。番号とテーマの対応は次のとおりです。
 
    - 1: `material`
@@ -105,11 +105,12 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
    - 3: `neumorphism`
    - 4: `editorial`
    - 5: `minimal`
-   - 6: `blueprint`
-   - 7: `nineties`
-   - 8: `none`
+   - 6: `kintsugi`
+   - 7: `blueprint`
+   - 8: `nineties`
+   - 9: `none`
 
-   何も入力しない場合、1 から 8 以外の番号を入力した場合、数字以外を
+   何も入力しない場合、1 から 9 以外の番号を入力した場合、数字以外を
    入力した場合は、`material` になります。
 4. `? サイドバーのナビ・サイト内検索・ページ内の目次を表示しますか? (NAV_ENABLED) (Y/n): `
    既定値は「表示する」です。
@@ -145,7 +146,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
   それが分からなければ `main` です。今のブランチは使われません。
 - 対話なしの場合、すでにあるファイルは上書きされずに残ります。`--force` を
   付けると上書きされます。
-- 知らないオプション、8 つのテーマ名以外の `--theme`、言語タグとして正しくない
+- 知らないオプション、9 つのテーマ名以外の `--theme`、言語タグとして正しくない
   `--languages`、空の `--branch`・`--root`・`--languages` は、エラーになります。
   この場合、`init` は何も生成しません。
 
@@ -161,7 +162,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
 - `.github/docs-pages.config`: 設定ファイル
 - `.github/tsuzuri/build-docs.mjs`: ビルドスクリプト
 - `.github/tsuzuri/lib/*.mjs`: ビルドスクリプトが使うモジュール(14 個)
-- `.github/tsuzuri/styles/*.css`: 基礎の CSS(`base.css`)と 7 つのテーマの CSS
+- `.github/tsuzuri/styles/*.css`: 基礎の CSS(`base.css`)と 8 つのテーマの CSS
 - `.github/tsuzuri/package.json`、`.github/tsuzuri/package-lock.json`:
   ビルドに使う依存(marked、highlight.js、marked-footnote)のバージョンと
   ハッシュ
@@ -245,7 +246,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
   省略時: `.github/tsuzuri/styles/custom.css`
   init の値: `.github/tsuzuri/styles/custom.css`
 - `THEME`: テーマです。値は `material`、`glass`、`neumorphism`、`editorial`、
-  `minimal`、`blueprint`、`nineties`、`none` の 8 つです。それ以外の値は、
+  `minimal`、`kintsugi`、`blueprint`、`nineties`、`none` の 9 つです。それ以外の値は、
   警告のうえで `material` になります。
   省略時: `material`
   init の値: 質問 3 の答えです。
@@ -448,7 +449,7 @@ order: 1
 - `ogType`: `og:type` の値です。無い場合は `website` です。
 - `noindex`: `true` にすると、検索エンジン向けの `noindex` が出力され、
   `sitemap.xml` と `llms.txt` にも載りません。
-- `theme`: そのページだけのテーマです。値は、8 つのテーマ名のどれかか、
+- `theme`: そのページだけのテーマです。値は、9 つのテーマ名のどれかか、
   リポジトリの直下からの CSS ファイルのパスです。
 - `styleFile`: そのページだけ、`STYLE_FILE` の代わりに使われる CSS ファイルです。
   値は、リポジトリの直下からのパスです。
@@ -526,7 +527,7 @@ order: 1
   `--content-width` などの CSS 変数を上書きできます。
 - 見た目は、frontmatter の `theme` と `styleFile` で、ページごとに変わります。
 - `nineties` はライト表示だけ、`blueprint` は常に同じ表示です。`material`、
-  `glass`、`neumorphism`、`editorial`、`minimal` の 5 つのテーマは、OS の設定に
+  `glass`、`neumorphism`、`editorial`、`minimal`、`kintsugi` の 6 つのテーマは、OS の設定に
   合わせてライトとダークが切り替わります。
 
 ## 8. 公開
@@ -691,7 +692,7 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   反映されます。
 
 リポジトリにコピー済みのバージョンは、`.github/workflows/docs-pages.yml` の
-先頭のコメントに、`tsuzuri v1.34.0` の形で書かれています。更新しない限り、
+先頭のコメントに、`tsuzuri v1.35.0` の形で書かれています。更新しない限り、
 リポジトリの中のバージョンは変わりません。
 
 ## 11. つまずきやすい点

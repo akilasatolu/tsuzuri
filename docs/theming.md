@@ -50,6 +50,9 @@ the navigation on cards with the theme's texture. If `THEME` is left out, it's M
   accent.
 - **Minimal (`minimal`)**: a calm look in only white, black and gray, like the Vercel or Linear
   docs. Only links are blue.
+- **Kintsugi (`kintsugi`)**: a style after kintsugi, the craft of mending broken pottery with
+  lacquer and gold. Gold seams run across porcelain-like cards, and code blocks are lacquer
+  black. Porcelain in light mode, black lacquer in dark mode (v1.35.0 or later).
 - **Blueprint (`blueprint`)**: like a blueprint, with a white grid and fine lines on blue, and
   headings with dimension lines. Always looks the same.
 - **90s (`nineties`)**: 90s nostalgia. A Windows 95-style teal desktop with gray windows and

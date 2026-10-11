@@ -110,7 +110,7 @@ body > nav {
 @media (min-width: 960px) {
   body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }
   body > nav { top: 16px; height: calc(100vh - 32px); margin: 16px 0 16px 16px; padding: 28px 20px; border: var(--card-border); }
-  body:has(> nav) > main { width: auto; margin: 16px 24px 48px; max-width: var(--content-width); justify-self: center; }
+  body:has(> nav) > main { width: auto; margin: 16px 24px 48px; max-width: min(var(--content-width), 100% - 48px); justify-self: center; }
 }
 
 /* 見出し */
@@ -165,7 +165,7 @@ main { padding: 56px 40px 40px; }
 body > nav { background: transparent; border: 0; box-shadow: none; border-radius: 0; }
 @media (min-width: 960px) {
   body > nav { margin: 0; height: 100vh; top: 0; padding: 48px 28px; border: 0; border-right: 1px solid var(--border); }
-  body:has(> nav) > main { margin: 0 auto; }
+  body:has(> nav) > main { margin: 0 auto; max-width: min(var(--content-width), 100%); }
 }
 
 /* ---- 見出し ---- */

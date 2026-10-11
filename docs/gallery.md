@@ -16,6 +16,7 @@ can compare them and choose a theme.
 | [Neumorphism (neumorphism)](gallery/neumorphism.md) | `THEME=neumorphism` | Neumorphism. Parts in the same color as the background, raised or pressed in with light and shadow. |
 | [Editorial (editorial)](gallery/editorial.md) | `THEME=editorial` | A style that relies on typography and white space, like a magazine or a polished document. Large serif headings with chapter numbers, and a vermilion accent. |
 | [Minimal (minimal)](gallery/minimal.md) | `THEME=minimal` | A calm look in only white, black and gray, like the Vercel or Linear docs. Only links are blue. |
+| [Kintsugi (kintsugi)](gallery/kintsugi.md) | `THEME=kintsugi` | A style after kintsugi, the craft of mending broken pottery with lacquer and gold. Gold seams run across porcelain-like cards, and code blocks are lacquer black. Porcelain in light mode, black lacquer in dark mode. |
 | [Blueprint (blueprint)](gallery/blueprint.md) | `THEME=blueprint` | Like a blueprint, with a white grid and fine lines on blue, and headings with dimension lines. Always looks the same. |
 | [90s (nineties)](gallery/nineties.md) | `THEME=nineties` | 90s nostalgia. A Windows 95-style teal desktop with gray windows and raised buttons. Light only. |
 | [No decoration (none)](gallery/none.md) | `THEME=none` | No theme layer; only the base CSS and the browser's default look. |

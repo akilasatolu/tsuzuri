@@ -35,7 +35,7 @@ it's the version you intended (`npx` can run an old version from its cache).
 | `-y`, `--yes` | Generate the files with all defaults, without questions |
 | `--branch <name>` | The trigger branch (`TRIGGER_BRANCH`). Default: the repository's default branch (the default branch of `origin`, or `main` if unknown; up to v1.3.0 it could be the current branch) |
 | `--root <path>` | The starting Markdown file (`ROOT_MD`). Default: `README.md` |
-| `--theme <name>` | The theme (`THEME`). `material` / `glass` / `neumorphism` / `editorial` / `minimal` / `blueprint` / `nineties` / `none`. Default: `material` |
+| `--theme <name>` | The theme (`THEME`). `material` / `glass` / `neumorphism` / `editorial` / `minimal` / `kintsugi` / `blueprint` / `nineties` / `none`. Default: `material` |
 | `--languages <list>` | The site languages (`LANGUAGES`), comma-separated, with the base language first (e.g. `en`, `en,ja`). Default: `en` (v1.28.0 or later) |
 | `--site-name <name>` | The site name (`SITE_NAME`). Default: empty (the repository name is used at build time) |
 | `--no-nav` | Don't show the navigation, site search and table of contents (`NAV_ENABLED=false`). Default: shown |
@@ -106,9 +106,9 @@ pressing Enter).
    - The path of the Markdown file that is the entrance to the site. If left empty, it's
      `README.md`.
 3. **Theme (`THEME`)**
-   - The eight choices `material` (recommended) / `glass` / `neumorphism` / `editorial` /
-     `minimal` / `blueprint` / `nineties` / `none` (no decoration) are shown with numbers
-     (1–8); type a number. If left empty, it's `1` (`material`).
+   - The nine choices `material` (recommended) / `glass` / `neumorphism` / `editorial` /
+     `minimal` / `kintsugi` / `blueprint` / `nineties` / `none` (no decoration) are shown with
+     numbers (1–9); type a number. If left empty, it's `1` (`material`).
    - See [Theming](./theming.md) for what each theme looks like.
 4. **Show the navigation? (`NAV_ENABLED`) (Y/n)** (v1.7.0 or later)
    - Whether to show the sidebar, site search, the in-page table of contents and the links to
@@ -140,7 +140,7 @@ Based on your answers, the following files are generated.
 | `.github/docs-pages.config` | Always | The settings file. `TRIGGER_BRANCH` / `ROOT_MD` / `THEME` / `NAV_ENABLED` / `LANGUAGES` / `SITE_NAME` reflect your answers; the other keys are written with their defaults |
 | `.github/tsuzuri/build-docs.mjs` | Always | The build script itself (identical to `.github/scripts/build-docs.mjs` in the Tsuzuri repository) |
 | `.github/tsuzuri/lib/*.mjs` | Always | The modules the build script depends on (config, copy-button, crawler, frontmatter, html-renderer, i18n, image-size, link-extractor, path-utils, site-tree, slugger, search, sitemap, theme-toggle) |
-| `.github/tsuzuri/styles/*.css` | Always | The CSS of the built-in themes (`base.css` plus `material` / `glass` / `neumorphism` / `editorial` / `minimal` / `blueprint` / `nineties`). All themes are always copied, in case a page uses a theme other than the selected one through the frontmatter `theme` key ([see here](./frontmatter.md#theme)) |
+| `.github/tsuzuri/styles/*.css` | Always | The CSS of the built-in themes (`base.css` plus `material` / `glass` / `neumorphism` / `editorial` / `minimal` / `kintsugi` / `blueprint` / `nineties`). All themes are always copied, in case a page uses a theme other than the selected one through the frontmatter `theme` key ([see here](./frontmatter.md#theme)) |
 | `.github/tsuzuri/package.json`, `package-lock.json` | Always (v1.7.0 or later) | The versions of the build dependencies (marked and others) and the hashes used to verify the downloaded contents. The workflow and `preview` install them exactly as listed, with `npm ci` |
 | `.github/tsuzuri/.gitignore` | Always | Keeps the dependencies installed for local previews (`node_modules/`) out of commits |
 | `.github/tsuzuri/styles/custom.css` | Only if you answered "y" to the last question | An empty custom CSS template containing only comments, placed in the same folder as the built-in theme CSS |

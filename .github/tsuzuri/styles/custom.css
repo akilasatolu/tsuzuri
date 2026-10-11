@@ -142,7 +142,7 @@ body > nav {
 @media (min-width: 960px) {
   body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }
   body > nav { top: 16px; height: calc(100vh - 32px); margin: 16px 0 16px 16px; padding: 28px 20px; border: var(--card-border); }
-  body:has(> nav) > main { width: auto; margin: 16px 24px 48px; max-width: var(--content-width); justify-self: center; }
+  body:has(> nav) > main { width: auto; margin: 16px 24px 48px; max-width: min(var(--content-width), 100% - 48px); justify-self: center; }
 }
 
 /* 見出し */

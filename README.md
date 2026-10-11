@@ -48,7 +48,7 @@ https://akilasatolu.github.io/tsuzuri/
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>Themes and custom CSS</h3>
-<p>Pick one of seven themes such as Material, Glass, Editorial and Minimal, then fine-tune it with your own CSS. This site is built with custom CSS too.</p>
+<p>Pick one of eight themes such as Material, Glass, Editorial and Minimal, then fine-tune it with your own CSS. This site is built with custom CSS too.</p>
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">探</span><span class="tsuzuri-sep">】</span>Navigation, search and table of contents</h3>

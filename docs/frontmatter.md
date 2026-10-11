@@ -79,9 +79,9 @@ Set this when you want this page alone to use a theme different from `THEME` (th
 theme) in `.github/docs-pages.config`. Two kinds of values are accepted.
 
 - **A built-in theme name**: `material` / `glass` / `neumorphism` / `editorial` / `minimal` /
-  `blueprint` / `nineties` / `none` (see [Theming](theming.md) for what they mean; with `none`,
-  the theme layer isn't applied to this page)
-- **The path of a custom CSS file**: any value that doesn't match one of the eight names above
+  `kintsugi` / `blueprint` / `nineties` / `none` (see [Theming](theming.md) for what they mean;
+  with `none`, the theme layer isn't applied to this page)
+- **The path of a custom CSS file**: any value that doesn't match one of the nine names above
   is treated as a custom CSS file, given as a path relative to the repository root. Prepare the
   file yourself and write its path as is. Paths outside the repository (a path starting with
   `../`, an absolute path, or a symbolic link pointing outside the repository) aren't allowed;

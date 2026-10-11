@@ -13,7 +13,7 @@ To use this theme for the whole site, set `THEME=minimal` in `.github/docs-pages
 To use it for a single page, write `theme: minimal` in that page's frontmatter
 (see [Theming](../theming.md)).
 
-[← Editorial (editorial)](editorial.md) · [Gallery](../gallery.md) · [Blueprint (blueprint) →](blueprint.md)
+[← Editorial (editorial)](editorial.md) · [Gallery](../gallery.md) · [Kintsugi (kintsugi) →](kintsugi.md)
 
 ## Heading level 2
 
@@ -50,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../../assets/favicon.svg)
 
-[← Editorial (editorial)](editorial.md) · [Gallery](../gallery.md) · [Blueprint (blueprint) →](blueprint.md)
+[← Editorial (editorial)](editorial.md) · [Gallery](../gallery.md) · [Kintsugi (kintsugi) →](kintsugi.md)

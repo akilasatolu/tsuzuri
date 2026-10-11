@@ -15,7 +15,7 @@ import { normalizeBasePath } from "./path-utils.mjs";
 // frontmatterの `theme` キー(ページ単位のテーマ上書き)からも参照するため export する。
 // この配列に含まれない値は「組み込みテーマ名ではなく、リポジトリルートからの
 // 相対パスで指定された独自CSSファイル」とみなされる(build-docs.mjs側の判定基準)。
-export const ALLOWED_THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "blueprint", "nineties", "none"];
+export const ALLOWED_THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties", "none"];
 const HOSTNAME_RE = /^[a-zA-Z0-9.-]+$/;
 // BCP 47 形式の言語タグ(例: "ja" / "en" / "en-US" / "zh-Hant-TW")の簡易チェック。
 // "en_US" のような書き間違いを弾く。
