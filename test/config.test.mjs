@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { loadConfig, CONFIG_FILE_KEYS, parseConfigText, withConfigFileDefaults, resolveLanguages, resolveOneLine } from "../.github/scripts/lib/config.mjs";
+import { loadConfig, CONFIG_FILE_KEYS, VENDOR_DIR, WORKFLOW_PATH, CONFIG_FILE_PATH, parseConfigText, withConfigFileDefaults, resolveLanguages, resolveOneLine } from "../.github/scripts/lib/config.mjs";
 
 // console.warn を一時的に黙らせつつ呼び出し回数/内容を検査するヘルパー
 function withCapturedWarn(fn) {
@@ -453,4 +453,10 @@ test('THEME="glass"(月) → 正常反映', () => {
 test("CONFIG_FILE_KEYS: LANG は無く、LANGUAGES がある", () => {
   assert.ok(!CONFIG_FILE_KEYS.includes("LANG"));
   assert.ok(CONFIG_FILE_KEYS.includes("LANGUAGES"));
+});
+
+test("利用者のリポジトリでの Tsuzuri のファイルの置き場所", () => {
+  assert.equal(VENDOR_DIR, ".github/tsuzuri");
+  assert.equal(WORKFLOW_PATH, ".github/workflows/docs-pages.yml");
+  assert.equal(CONFIG_FILE_PATH, ".github/docs-pages.config");
 });

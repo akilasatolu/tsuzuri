@@ -46,10 +46,18 @@ import { Marked } from "marked";
 import markedFootnote from "marked-footnote";
 import hljs from "highlight.js/lib/common";
 
-import { loadConfig, ALLOWED_THEMES, parseConfigText, withConfigFileDefaults } from "./lib/config.mjs";
+import {
+  loadConfig,
+  ALLOWED_THEMES,
+  parseConfigText,
+  withConfigFileDefaults,
+  VENDOR_DIR,
+  CONFIG_FILE_PATH,
+} from "./lib/config.mjs";
 import { crawlSite } from "./lib/crawler.mjs";
 import {
   isMarkdownPath,
+  DIR_INDEX_NAMES,
   toSiteAbsHref,
   resolveInsideRepo,
   resolveRepoRel,
@@ -95,9 +103,6 @@ import {
   notFoundLangScript,
 } from "./lib/i18n.mjs";
 
-// 印の無いフォルダの入口の名前(ナビの木のフォルダの並び順に使う。今の site-tree と同じ3つ・同じ綴り)
-const PLAIN_DIR_INDEX_NAMES = ["README.md", "readme.md", "index.md"];
-
 // SITE_ORIGIN として llms.txt に書いてよい形(検証されていない値をファイルに書かないため)
 const LLMS_ORIGIN_RE = /^https?:\/\/[^\s()<>[\]"']{1,200}$/;
 
@@ -125,13 +130,13 @@ export function removeCjkLineBreaks(html) {
 function localBuildEnv(env, repoRoot) {
   if (env.GITHUB_ACTIONS === "true") return env;
   let merged = env;
-  const configAbs = path.join(repoRoot, ".github", "docs-pages.config");
+  const configAbs = path.join(repoRoot, CONFIG_FILE_PATH);
   if (fs.existsSync(configAbs)) {
     merged = withConfigFileDefaults(env, parseConfigText(fs.readFileSync(configAbs, "utf-8")));
-    console.log("Config file loaded: .github/docs-pages.config (環境変数で指定したキーは環境変数を優先)");
+    console.log(`Config file loaded: ${CONFIG_FILE_PATH} (環境変数で指定したキーは環境変数を優先)`);
   }
   // リポジトリ直下の styles/ は利用者のアプリの CSS の可能性があるため、init でコピーした方を優先する
-  const vendoredStyles = ".github/tsuzuri/styles";
+  const vendoredStyles = `${VENDOR_DIR}/styles`;
   if (merged.STYLE_DIR === undefined && fs.existsSync(path.join(repoRoot, vendoredStyles, "base.css"))) {
     merged = { ...merged, STYLE_DIR: vendoredStyles };
   }
@@ -525,7 +530,7 @@ async function main() {
   // 印付きは README 型 readme.<tag>.md・index 型 index.<tag>.md を足す。印付きが無いサイトでは今と同じ並び
   function isDirIndexRel(rel) {
     const name = path.posix.basename(rel);
-    if (PLAIN_DIR_INDEX_NAMES.includes(name)) return true;
+    if (DIR_INDEX_NAMES.includes(name)) return true;
     const tag = i18n.markerOf(rel);
     if (tag === null) return false;
     const { isReadme, isIndex } = i18n.dirIndexNames(i18n.langOf(rel));

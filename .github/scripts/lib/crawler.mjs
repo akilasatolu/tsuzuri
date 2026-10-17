@@ -32,7 +32,14 @@
  */
 
 import fs from "node:fs";
-import { resolveRepoRel, resolveInsideRepo, isMarkdownPath, isImagePath, isLinkedFilePath } from "./path-utils.mjs";
+import {
+  resolveRepoRel,
+  resolveInsideRepo,
+  isMarkdownPath,
+  isImagePath,
+  isLinkedFilePath,
+  DIR_INDEX_NAMES,
+} from "./path-utils.mjs";
 import { extractLinks, firstHeadingText } from "./link-extractor.mjs";
 import { parseFrontmatter } from "./frontmatter.mjs";
 
@@ -41,9 +48,6 @@ import { parseFrontmatter } from "./frontmatter.mjs";
  * @typedef {{ rel: string, referencedFrom: string|null }} MissingEntry
  * @typedef {{ rel: string, referencedFrom: string|null, reason: "path-traversal"|"decode-error"|"outside-repo" }} RejectedEntry
  */
-
-// ディレクトリへのリンクのとき、たどるページ(優先順)
-const DIR_INDEX_NAMES = ["README.md", "readme.md", "index.md"];
 
 function defaultReadDir(abs) {
   try {

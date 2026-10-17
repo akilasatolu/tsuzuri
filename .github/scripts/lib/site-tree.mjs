@@ -25,6 +25,7 @@
  */
 
 import path from "node:path";
+import { DIR_INDEX_NAMES } from "./path-utils.mjs";
 
 const posix = path.posix;
 
@@ -60,8 +61,6 @@ export function pageOrder(meta) {
 export function isHiddenFromNav(meta) {
   return String(meta?.nav ?? "").trim().toLowerCase() === "false";
 }
-
-const DIR_INDEX_NAMES = ["README.md", "readme.md", "index.md"];
 
 // isDirIndex を渡さないときの「フォルダの入口(README.md / readme.md / index.md)か」の判定
 function defaultIsDirIndex(rel) {

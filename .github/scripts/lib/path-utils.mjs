@@ -28,6 +28,10 @@ export function normalizeBasePath(raw) {
   return p;
 }
 
+// フォルダへのリンクのとき入口になるページの名前(優先順)。印の無い名前(言語の印付きの入口は i18n.mjs が決める)。
+// crawler(たどるページ)・site-tree(フォルダの並び順)・build-docs(同)が共有する
+export const DIR_INDEX_NAMES = ["README.md", "readme.md", "index.md"];
+
 export function isExternal(link) {
   if (!link) return true;
   if (/^[a-z][a-z0-9+.-]*:/i.test(link)) return true; // http:, https:, mailto:, tel: ...

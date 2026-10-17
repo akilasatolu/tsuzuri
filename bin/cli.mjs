@@ -16,7 +16,14 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { execFileSync } from "node:child_process";
 import { runPreview } from "./preview.mjs";
-import { LANG_TAG_RE, resolveLanguages } from "../.github/scripts/lib/config.mjs";
+import {
+  LANG_TAG_RE,
+  resolveLanguages,
+  ALLOWED_THEMES,
+  VENDOR_DIR,
+  WORKFLOW_PATH,
+  CONFIG_FILE_PATH,
+} from "../.github/scripts/lib/config.mjs";
 
 // 実リポジトリ作成時に確定させる固定値。
 // 「今動いているセットアップコマンド自体がどのバージョンか」を利用者に案内する際や、
@@ -30,10 +37,10 @@ export const OSS_REPO = "akilasatolu/tsuzuri";
 // `.github/scripts/`・`styles/`配下の実ファイルをそのまま利用者側へコピーできる。
 export const PACKAGE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 
-// 利用者リポジトリ側でビルドスクリプト一式を配置するディレクトリ。
+// 利用者リポジトリ側でビルドスクリプト一式を配置するディレクトリ(.github/tsuzuri)。
 // 利用者が独自に使っている可能性のある `.github/scripts/` と衝突しないよう、
-// tsuzuri専用の名前空間を切っている。
-export const VENDOR_DIR = ".github/tsuzuri";
+// tsuzuri専用の名前空間を切っている。値は lib/config.mjs で定義し、ここから再 export する。
+export { VENDOR_DIR };
 
 // 利用者向けドキュメント(tsuzuri 自身で公開しているサイト)のURL。生成するファイルの案内に使う。
 export const DOCS_URL = "https://akilasatolu.github.io/tsuzuri/";
@@ -41,18 +48,21 @@ export const DOCS_URL = "https://akilasatolu.github.io/tsuzuri/";
 // init が生成するワークフローのひな形(PACKAGE_ROOT からの相対パス)。
 export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.yml";
 
-// THEME選択肢(番号選択、1始まり)。
-export const THEME_CHOICES = [
-  { key: "material", label: "マテリアル(推奨。Material Design 3 風。青系の配色、角丸のカードと影、トーンのついたナビの選択)" },
-  { key: "glass", label: "グラス(Glassmorphism。ゆっくり揺れて流れるオーロラの地に、色がそのまま透ける薄い透明なガラスのカード)" },
-  { key: "neumorphism", label: "ニューモーフィズム(Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする)" },
-  { key: "editorial", label: "エディトリアル(雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色)" },
-  { key: "minimal", label: "ミニマル(Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青)" },
-  { key: "kintsugi", label: "金継ぎ(割れた器を漆と金で継ぐ「金継ぎ」のスタイル。白磁のようなカードに金の継ぎ目が走り、コードブロックは漆の黒。ライト表示は白磁、ダーク表示は黒漆)" },
-  { key: "blueprint", label: "ブループリント(設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示)" },
-  { key: "nineties", label: "90年代(90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ)" },
-  { key: "none", label: "装飾なし" },
-];
+// THEME選択肢の説明(キーは lib/config.mjs の ALLOWED_THEMES と同じ。テーマを足すときは両方に足す)。
+const THEME_LABELS = {
+  material: "マテリアル(推奨。Material Design 3 風。青系の配色、角丸のカードと影、トーンのついたナビの選択)",
+  glass: "グラス(Glassmorphism。ゆっくり揺れて流れるオーロラの地に、色がそのまま透ける薄い透明なガラスのカード)",
+  neumorphism: "ニューモーフィズム(Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする)",
+  editorial: "エディトリアル(雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色)",
+  minimal: "ミニマル(Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青)",
+  kintsugi: "金継ぎ(割れた器を漆と金で継ぐ「金継ぎ」のスタイル。白磁のようなカードに金の継ぎ目が走り、コードブロックは漆の黒。ライト表示は白磁、ダーク表示は黒漆)",
+  blueprint: "ブループリント(設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示)",
+  nineties: "90年代(90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ)",
+  none: "装飾なし",
+};
+
+// THEME選択肢(番号選択、1始まり。順番は ALLOWED_THEMES の順)。
+export const THEME_CHOICES = ALLOWED_THEMES.map((key) => ({ key, label: THEME_LABELS[key] }));
 
 const DEFAULT_ANSWERS = {
   triggerBranch: "main",
@@ -245,6 +255,14 @@ export function buildDocsPagesYml(
 }
 
 /**
+ * 生成するワークフロー(docs-pages.yml)の生成対象({name, relPath, content})。
+ * init と init --update の両方が使う。
+ */
+export function buildWorkflowTarget() {
+  return { name: "docs-pages.yml", relPath: WORKFLOW_PATH, content: buildDocsPagesYml() };
+}
+
+/**
  * docs-pages.config の内容を組み立てる。
  * 対話結果(TRIGGER_BRANCH/ROOT_MD/THEME など)を埋め込み、
  * それ以外のキーはデフォルト値のまま出力する。
@@ -417,14 +435,10 @@ export function buildVendorTargets(packageRoot = PACKAGE_ROOT, fsImpl = { exists
 export function buildTargets(answers) {
   const merged = { ...DEFAULT_ANSWERS, ...answers };
   const targets = [
-    {
-      name: "docs-pages.yml",
-      relPath: ".github/workflows/docs-pages.yml",
-      content: buildDocsPagesYml(),
-    },
+    buildWorkflowTarget(),
     {
       name: "docs-pages.config",
-      relPath: ".github/docs-pages.config",
+      relPath: CONFIG_FILE_PATH,
       content: buildDocsPagesConfig(merged),
     },
     ...buildVendorTargets(),
@@ -609,14 +623,14 @@ export async function runUpdate({
   fsImpl = { existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync, readFileSync },
   targets,
 }) {
-  const configRel = ".github/docs-pages.config";
+  const configRel = CONFIG_FILE_PATH;
   if (!fsImpl.existsSync(join(cwd, configRel))) {
     throw new Error(
       `${configRel} が見つかりません。初回は --update を付けずに init を実行してください`,
     );
   }
   const updateTargets = targets ?? [
-    { name: "docs-pages.yml", relPath: ".github/workflows/docs-pages.yml", content: buildDocsPagesYml() },
+    buildWorkflowTarget(),
     ...buildVendorTargets(),
   ];
   // 新しいバージョンで増えた設定項目のうち、利用者の設定ファイルに無いものを案内する
@@ -967,7 +981,7 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
  * @param {string} relPath
  */
 export function isBundledPath(relPath) {
-  return relPath === ".github/workflows/docs-pages.yml" ||
+  return relPath === WORKFLOW_PATH ||
     (relPath.startsWith(`${VENDOR_DIR}/`) && relPath !== `${VENDOR_DIR}/styles/custom.css`);
 }
 

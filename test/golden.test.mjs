@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { ALLOWED_THEMES } from "../.github/scripts/lib/config.mjs";
 
 /**
  * ゴールデンテスト: いくつかの設定で作ったサイトの出力をまるごと保存しておき(test/fixtures/golden/)、
@@ -29,7 +30,7 @@ const REAL_STYLES_DIR = path.join(PROJECT_ROOT, "styles");
 const FIXTURE_SITE = path.join(TEST_DIR, "fixtures", "site-golden");
 const GOLDEN_DIR = path.join(TEST_DIR, "fixtures", "golden");
 
-const THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties"];
+const THEMES = ALLOWED_THEMES.filter((t) => t !== "none"); // 組み込みテーマ(CSSがあるもの)
 
 // 設定の表(name: 保存先のフォルダ名、env: ビルドするときの環境変数)。保存と比較が同じ表を使う。
 const ORIGIN_ENV = { SITE_ORIGIN: "https://example.github.io", BASE_PATH: "/repo" };

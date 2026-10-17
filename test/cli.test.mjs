@@ -17,6 +17,7 @@ import {
   buildStyleCssTemplate,
   buildVendorTargets,
   buildTargets,
+  buildWorkflowTarget,
   writeGeneratedFiles,
   resolveThemeChoice,
   parseYesNo,
@@ -46,7 +47,7 @@ import {
   checkSetupLocation,
   guessDefaultBranch,
 } from "../bin/cli.mjs";
-import { parseConfigText, loadConfig } from "../.github/scripts/lib/config.mjs";
+import { parseConfigText, loadConfig, ALLOWED_THEMES } from "../.github/scripts/lib/config.mjs";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
 
@@ -673,6 +674,13 @@ test("isUpdateMode: --update が含まれるときだけ true", () => {
   assert.equal(isUpdateMode([]), false);
 });
 
+test("buildWorkflowTarget: init と init --update が使うワークフローの生成対象", () => {
+  const target = buildWorkflowTarget();
+  assert.equal(target.relPath, ".github/workflows/docs-pages.yml");
+  assert.equal(target.content, buildDocsPagesYml());
+  assert.deepEqual(buildTargets({}).find((t) => t.name === "docs-pages.yml"), target);
+});
+
 test("runUpdate: ワークフローとビルドスクリプトは上書き・追加し、設定ファイルと独自CSSは変更しない", async () => {
   const dir = makeTmpDir();
   try {
@@ -706,6 +714,18 @@ test("THEME_CHOICES: 組み込みテーマの一覧", () => {
   assert.deepEqual(keys, ["material", "glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties", "none"]);
   assert.ok(buildDocsPagesConfig({}).includes("nineties(90年代)"));
   assert.ok(buildDocsPagesConfig({}).includes("kintsugi(金継ぎ)"));
+});
+
+test("THEME_CHOICES: ALLOWED_THEMES と同じ順で、すべてに説明がある", () => {
+  assert.deepEqual(THEME_CHOICES.map((c) => c.key), ALLOWED_THEMES);
+  for (const choice of THEME_CHOICES) assert.ok(choice.label, `${choice.key} の説明`);
+});
+
+test("設定ファイルのひな形のテーマの一覧に、ALLOWED_THEMES のすべてのテーマが載っている", () => {
+  const config = buildDocsPagesConfig({});
+  const line = config.split("\n").find((l) => l.startsWith("# テーマ:"));
+  assert.ok(line, "テーマの一覧の行");
+  for (const theme of ALLOWED_THEMES) assert.ok(line.includes(`${theme}(`), `${theme} が載っていない`);
 });
 
 test("runUpdate: 設定ファイルが無い(未init)リポジトリではエラーにして何も書き込まない", async () => {

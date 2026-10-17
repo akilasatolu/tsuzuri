@@ -13,10 +13,7 @@ import { createServer } from "node:http";
 import { existsSync, readFileSync, statSync, createReadStream, realpathSync, watch } from "node:fs";
 import { join, resolve, sep, extname, relative } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
-import { parseConfigText } from "../.github/scripts/lib/config.mjs";
-
-const VENDOR_DIR = ".github/tsuzuri";
-const WORKFLOW_PATH = ".github/workflows/docs-pages.yml";
+import { parseConfigText, VENDOR_DIR, WORKFLOW_PATH, CONFIG_FILE_PATH } from "../.github/scripts/lib/config.mjs";
 
 const CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -266,7 +263,7 @@ export async function runPreview({
   }
 
   // 3. 配信
-  const configAbs = join(cwd, ".github", "docs-pages.config");
+  const configAbs = join(cwd, CONFIG_FILE_PATH);
   const config = existsSync(configAbs) ? parseConfigText(readFileSync(configAbs, "utf-8")) : {};
   const outDir = resolve(cwd, config.OUT_DIR || "_site");
   const server = createPreviewServer(outDir, { liveReload: watchFiles });

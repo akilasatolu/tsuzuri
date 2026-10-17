@@ -44,6 +44,11 @@ export const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @property {string} styleDir
  */
 
+// 利用者のリポジトリでの、Tsuzuri のファイルの置き場所
+export const VENDOR_DIR = ".github/tsuzuri"; // ビルドスクリプト一式・組み込みテーマCSS・ビルド用の依存
+export const WORKFLOW_PATH = ".github/workflows/docs-pages.yml"; // 生成するワークフロー
+export const CONFIG_FILE_PATH = ".github/docs-pages.config"; // 設定ファイル
+
 // 設定ファイル(.github/docs-pages.config)に書けるキー。ワークフローの Load config と同じ一覧
 export const CONFIG_FILE_KEYS = [
   "TRIGGER_BRANCH",

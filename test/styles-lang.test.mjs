@@ -3,12 +3,13 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { ALLOWED_THEMES } from "../.github/scripts/lib/config.mjs";
 
 // 言語の切り替えボタンの CSS のかたまり(base.css と8テーマの末尾)を確かめる。
 // 目印は test/golden.test.mjs と同じ文字。
 
 const STYLES_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "styles");
-const THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties"];
+const THEMES = ALLOWED_THEMES.filter((t) => t !== "none"); // 組み込みテーマ(CSSがあるもの)
 const START = "/* ---------- 言語の切り替え ここから";
 const END = "/* ---------- 言語の切り替え ここまで ---------- */";
 const LANG_SELECTOR = ":is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch";
