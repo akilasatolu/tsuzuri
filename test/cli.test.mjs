@@ -320,7 +320,9 @@ test("package.jsonのmarkedとpackage-lock.jsonで実際に入る版が一致し
 });
 
 test("buildDocsPagesYml: ワークフローのコメントは、ビルド用の依存の版が書いてある package.json を指す", () => {
-  assert.ok(buildDocsPagesYml().includes(`ビルド用の依存は ${VENDOR_DIR}/node_modules に入れる(版は ${VENDOR_DIR}/package.json に書いてある)`));
+  const yml = buildDocsPagesYml();
+  assert.ok(yml.includes(`ビルド用の依存は ${VENDOR_DIR}/node_modules に入れ、`));
+  assert.ok(yml.includes(`版は ${VENDOR_DIR}/package.json に書いてあり、`));
 });
 
 test("ビルド用の依存の package.json・package-lock.json を、本体の lockfile の版とハッシュで作る", () => {
@@ -833,9 +835,11 @@ test("runUpdate: 配布対象に無くなった lib/*.mjs は削除し、styles/
   }
 });
 
-test("STRICT_LINKS: 設定ファイルのひな形に既定値falseで含まれ、ワークフローからビルドへ渡される", () => {
+test("STRICT_LINKS: 設定ファイルのひな形に既定値falseで含まれ、ワークフローの許可リストを通って環境変数になる", () => {
   assert.ok(buildDocsPagesConfig({}).includes("\nSTRICT_LINKS=false\n"));
-  assert.ok(buildDocsPagesYml().includes("          STRICT_LINKS: ${{ env.STRICT_LINKS }}\n"));
+  const yml = buildDocsPagesYml();
+  assert.match(yml, /\|STRICT_LINKS\|/);
+  assert.ok(!yml.includes("STRICT_LINKS: ${{ env.STRICT_LINKS }}"), "Build の env には書き写さない");
 });
 
 // --- コマンドライン引数・バージョン表示 ---
@@ -979,7 +983,6 @@ test("LAST_UPDATED=true のときだけ git の全履歴を取得するステッ
         "        run: git fetch --unshallow --quiet || true"
     )
   );
-  assert.ok(yml.includes("          LAST_UPDATED: ${{ env.LAST_UPDATED }}\n"));
   assert.ok(buildDocsPagesConfig({}).includes("\nLAST_UPDATED=false\n"));
 });
 

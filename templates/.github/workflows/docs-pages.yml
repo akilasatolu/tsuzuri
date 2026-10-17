@@ -125,8 +125,8 @@ jobs:
         with:
           node-version: 24
 
-      # ビルド用の依存は .github/tsuzuri/node_modules に入れる(版は .github/tsuzuri/package.json に書いてある)
-      # (利用者の package.json とは切り離す)。.github/tsuzuri/package-lock.json のとおりに npm ci で入れるので、
+      # ビルド用の依存は .github/tsuzuri/node_modules に入れ、利用者の package.json とは切り離す。
+      # 版は .github/tsuzuri/package.json に書いてあり、.github/tsuzuri/package-lock.json のとおりに npm ci で入れるので、
       # ダウンロードした中身のハッシュが違えば止まる。インストールスクリプトは実行しない。
       # 続けて、依存が npm の正規の署名付きで配布されたものかも確認する。
       - name: Install build dependency
@@ -137,27 +137,9 @@ jobs:
 
       - name: Build
         if: steps.trigger.outputs.should_deploy != 'false'
+        # 設定ファイルの値(Load config の手順が $GITHUB_ENV に書いたもの)と BASE_PATH・SITE_ORIGIN
+        # (Determine base path / site origin の手順が書いたもの)は、そのまま環境変数として渡る。
         env:
-          ROOT_MD: ${{ env.ROOT_MD }}
-          OUT_DIR: ${{ env.OUT_DIR }}
-          STYLE_FILE: ${{ env.STYLE_FILE }}
-          BASE_PATH: ${{ env.BASE_PATH }}
-          SITE_ORIGIN: ${{ env.SITE_ORIGIN }}
-          LANGUAGES: ${{ env.LANGUAGES }}
-          NAV_ENABLED: ${{ env.NAV_ENABLED }}
-          FAVICON_FILE: ${{ env.FAVICON_FILE }}
-          SITE_NAME: ${{ env.SITE_NAME }}
-          CUSTOM_DOMAIN: ${{ env.CUSTOM_DOMAIN }}
-          OGP_DEFAULT_IMAGE: ${{ env.OGP_DEFAULT_IMAGE }}
-          STRICT_LINKS: ${{ env.STRICT_LINKS }}
-          SITEMAP_JSON: ${{ env.SITEMAP_JSON }}
-          LAST_UPDATED: ${{ env.LAST_UPDATED }}
-          EDIT_LINK: ${{ env.EDIT_LINK }}
-          REPO_LINK: ${{ env.REPO_LINK }}
-          REPO_VERSION: ${{ env.REPO_VERSION }}
-          REPO_LICENSE: ${{ env.REPO_LICENSE }}
-          LLMS_TXT: ${{ env.LLMS_TXT }}
-          THEME: ${{ env.THEME }}
           # THEME解決の基準ディレクトリ。initでコピーしたベンダリング先を指す。
           STYLE_DIR: __VENDOR_DIR__/styles
         run: node __VENDOR_DIR__/build-docs.mjs

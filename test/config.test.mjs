@@ -417,16 +417,16 @@ test("CONFIG_FILE_KEYS はワークフローの Load config が受け付ける�
   assert.deepEqual(m[1].split("|").sort(), [...CONFIG_FILE_KEYS].sort());
 });
 
-test("ワークフローの Build の env: CONFIG_FILE_KEYS のうち TRIGGER_BRANCH 以外がすべてあり、LANG が無い", () => {
+test("ワークフローの Build の env: STYLE_DIR だけ(設定ファイルの値と BASE_PATH・SITE_ORIGIN は $GITHUB_ENV 経由で渡る)", () => {
   const yml = fs.readFileSync(new URL("../templates/.github/workflows/docs-pages.yml", import.meta.url), "utf-8");
   const m = yml.match(/- name: Build\n(?: {8}.*\n)*? {8}env:\n((?: {10}.*\n)+)/);
   assert.ok(m, "Build ステップの env");
   const envKeys = [...m[1].matchAll(/^ {10}([A-Z_]+):/gm)].map((x) => x[1]);
-  for (const key of CONFIG_FILE_KEYS.filter((k) => k !== "TRIGGER_BRANCH")) {
-    assert.ok(envKeys.includes(key), `Build の env に ${key} がある`);
-  }
-  assert.ok(!envKeys.includes("LANG"), "Build の env に LANG が無い");
-  assert.match(m[1], /^ {10}LANGUAGES: \$\{\{ env\.LANGUAGES \}\}$/m);
+  assert.deepEqual(envKeys, ["STYLE_DIR"]);
+  // 設定ファイルの値は Load config が、BASE_PATH・SITE_ORIGIN はその次の手順が $GITHUB_ENV に書く
+  assert.ok(yml.includes('echo "${key}=${value}" >> "$GITHUB_ENV"'));
+  assert.ok(yml.includes('echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"'));
+  assert.ok(yml.includes('echo "SITE_ORIGIN=$SITE_ORIGIN" >> "$GITHUB_ENV"'));
 });
 
 test("ワークフローの Load config: LANG の行には廃止の警告を出す(許可リストより前)", () => {
