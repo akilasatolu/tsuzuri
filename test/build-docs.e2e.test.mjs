@@ -64,7 +64,7 @@ function copyBasicSite(dir) {
   fs.cpSync(FIXTURE_SITE, dir, { recursive: true, filter: (src) => !src.includes("styles-fixture") });
 }
 
-// 実プロジェクトの styles/base.css・styles/material.css (T-010成果物) を
+// 実プロジェクトの styles/base.css・styles/material.css を
 // tmp dir 内の既定 STYLE_DIR ("styles") にコピーする(=既定THEME="material"での
 // 実運用と同じ構成を再現する)。
 function copyRealBaseAndThemeStyles(dir, themeFile = "material.css") {
@@ -75,8 +75,8 @@ function copyRealBaseAndThemeStyles(dir, themeFile = "material.css") {
 }
 
 // フィクスチャ専用の STYLE_DIR ("styles-fixture") を tmp dir にコピーする。
-// マーカーコメントのみの base.css / nineties.css を持ち、T-012(styles/nineties.css)の
-// 完成有無に依存せずテーマカスケードの挙動を検証できる。
+// マーカーコメントのみの base.css / nineties.css を持ち、実際のテーマCSSの中身に
+// 依存せずテーマカスケードの挙動を検証できる。
 function copyFixtureStyleDir(dir) {
   fs.cpSync(path.join(FIXTURE_SITE, "styles-fixture"), path.join(dir, "styles-fixture"), {
     recursive: true,
@@ -151,8 +151,8 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.equal(readOut(dir, ".nojekyll"), "");
 
       // sitemap.json: 後方互換フィールド(pageRels/images/hierarchy/missing/root/basePath)が
-      // 旧版の該当フィールドと同一内容であること。新規フィールド(pages/theme等)の追加は
-      // T-008(sitemap.mjs)側で確定済みの仕様であり、本テストの対象外とする。
+      // 旧版の該当フィールドと同一内容であること。新規フィールド(pages/theme等)は
+      // test/sitemap.test.mjs で確かめるため、本テストの対象外とする。
       const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
       assert.equal(sitemap.root, "README.md");
       assert.equal(sitemap.basePath, "");

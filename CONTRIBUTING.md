@@ -67,7 +67,11 @@ npm run lint
 **開発者が編集する「ソース」**
 
 - `bin/cli.mjs` — セットアップCLI本体。ワークフロー・設定ファイル・ベンダリング対象の
-  生成ロジックはすべてここにある(利用者が受け取る内容の唯一の正)。
+  生成ロジックはここにある(利用者が受け取る内容の唯一の正)。ワークフローの本文は
+  `templates/.github/workflows/docs-pages.yml`のひな形にあり、ここでプレースホルダーを置き換えて出力する。
+- `bin/preview.mjs` — `preview`コマンドの本体。
+- `templates/` — ワークフローのひな形と、利用者に配るビルド用の依存の`package.json`・`package-lock.json`の完成品。
+- `scripts/` — 開発・CI用のスクリプト(配布対象外)。
 - `.github/scripts/build-docs.mjs` + `.github/scripts/lib/*.mjs` — ビルド本体。
 - `styles/*.css` — テーマCSSの原本。
 - `test/**` — テスト。`README.md`・本ファイル・`CHANGELOG.md` — 開発者向けドキュメント。
@@ -92,7 +96,7 @@ npm run lint
 
 | イベント | 起動するワークフロー | 内容 |
 |---|---|---|
-| `main`へのpush・PR | `ci.yml` | `npm run lint`と`npm test`のみ。権限は`contents: read`だけで、GitHub Pagesには一切触れない |
+| `main`へのpush・PR | `ci.yml` | `lint-and-test`(`npm run lint`・`npm test`。Node.js 20/22/24・署名の確認)・`actionlint`・`verify-cdn`(mermaidのハッシュの確認)・`package-check`(配布物の確認)。権限は`contents: read`だけで、GitHub Pagesには一切触れない |
 | `main`へのpushでCIが成功 | `sync-docs.yml` | `docs`ブランチで`init --update`を実行し、変更があれば`docs`へpush(デプロイキーを使用) |
 | `docs`へのpush | `docs-pages.yml`(`docs`にのみ存在) | `docs`の利用者向けサイトをビルドし、本リポジトリのGitHub Pagesにデプロイ(自己ドッグフーディング) |
 

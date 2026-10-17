@@ -37,7 +37,7 @@ pushでデプロイしてください。
 
 ### `docs`ブランチへの自動反映
 
-`main`へのpushでCI(lint・test)が成功すると、`.github/workflows/sync-docs.yml`が
+`main`へのpushでCIが成功すると、`.github/workflows/sync-docs.yml`が
 そのコミットのTsuzuriで`docs`ブランチに`init --update`を実行し、変更があれば`docs`へ
 pushします。そのpushで`docs`の`docs-pages.yml`が動き、サイトが公開し直されます。
 
@@ -124,8 +124,10 @@ STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
 - GitHub Actionsの外では、`.github/docs-pages.config`があればその値を使います。環境変数で
   指定したキー(例: `THEME=nineties`)は環境変数の値が優先されます。サイトの言語は`LANGUAGES`で
   決まり、OSの`LANG`(`ja_JP.UTF-8`など)は使いません(例: `LANGUAGES=ja,en`で多言語のサイトを試せます)。
-- 出力先は`_site/`です(`OUT_DIR`で変更可)。前回の出力は消さないので、ページを消した・
-  名前を変えたときは`_site/`を消してからビルドしてください。
+- 出力先は`_site/`です(`OUT_DIR`で変更可)。出力先に前回のビルドが置いた目印のファイル
+  `.tsuzuri-build`があれば、ビルドの前に中身をすべて消すので、消した・名前を変えたページが
+  残ることはありません。目印のないディレクトリは利用者のファイルの可能性があるため、
+  消さずに上書きします。
 
 `init`済みのディレクトリなら、作業ツリーのCLIの`preview`で、ビルドから配信までまとめて試せます
 (`node ~/dev/tsuzuri/bin/cli.mjs preview`。ビルドにはそのディレクトリの`.github/tsuzuri/`が使われます)。
@@ -171,10 +173,11 @@ npx github:akilasatolu/tsuzuri#<作業ブランチ名> init
 ## ディレクトリ構成
 
 ```
-bin/cli.mjs                 セットアップCLI(init)。生成するワークフロー・設定ファイルのテンプレートもここ
+bin/cli.mjs                 セットアップCLI(init・init --update・preview の振り分けと init の処理)。設定ファイルのひな形もここ(ワークフローのひな形は templates/)
+bin/preview.mjs             preview の本体(ビルドして手元に配信し、変更を見張って自動でビルドし直す)
 .github/scripts/
   build-docs.mjs            ビルドのエントリーポイント
-  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap / i18n / emoji(emoji-data.mjs は gemoji から作る)
+  lib/*.mjs                 config / crawler / frontmatter / link-extractor / path-utils / html-renderer / site-tree / slugger / search / sitemap / i18n / emoji(emoji-data.mjs は gemoji から作る) / image-size / llms-txt / copy-button / theme-toggle
 styles/*.css                テーマCSSの原本(base + material / glass / neumorphism / editorial / minimal / kintsugi / blueprint / nineties)
 templates/.github/workflows/docs-pages.yml  initが生成するワークフローのひな形
 templates/tsuzuri/          initが利用者に配るビルド用の依存の package.json・package-lock.json(scripts/build-lockfiles.mjs で作る)
@@ -182,7 +185,7 @@ scripts/release-notes.mjs   CHANGELOGからGitHubのReleaseの本文を作る(re
 scripts/build-emoji-data.mjs  絵文字のショートコードの表(.github/scripts/lib/emoji-data.mjs)を gemoji から作る(配布対象外)
 scripts/check-package.mjs   配布物(npm pack)から init・ビルド・init --update が通るか確かめる(CIが使う。配布対象外)
 test/                       単体テスト・E2Eテスト(test/fixtures/ にフィクスチャ)
-.github/workflows/ci.yml    lint・test・配布物の確認を行う開発用CI(Pagesへのデプロイはしない)
+.github/workflows/ci.yml    lint・test・actionlint・mermaid のハッシュ確認・配布物の確認を行う開発用CI(Pagesへのデプロイはしない)
 ```
 
 `init`は`.github/scripts/`と`styles/`の中身を、利用者リポジトリの`.github/tsuzuri/`配下へ

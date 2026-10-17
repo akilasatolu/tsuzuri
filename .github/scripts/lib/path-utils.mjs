@@ -4,10 +4,10 @@
  * パスの正規化・外部リンク判定・リポジトリ相対パス解決・サイト絶対パス変換を
  * 担当するモジュール。
  *
- * 既存 build-docs.mjs (旧45〜110行目相当) からロジック変更なしで移動したもの:
+ * 主な関数:
  *   normalizeBasePath / isExternal / isMarkdownPath / isImagePath / splitHref
  *
- * セキュリティ強化のため仕様変更したもの:
+ * セキュリティ上の方針:
  *   resolveRepoRel — 戻り値を判別可能なユニオン型に変更し、
  *     パストラバーサル・デコードエラーを「辿らない」方針で明示的に拒否する。
  *   toSiteAbsHref — basePath を明示引数化(モジュール内グローバル定数への

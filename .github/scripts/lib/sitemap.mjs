@@ -3,8 +3,7 @@
  *
  * sitemap.json (デバッグ・可視化用の出力物) を組み立てるモジュール。
  *
- * 既存 build-docs.mjs (旧333〜350行目相当) のインライン処理を
- * `buildSitemap(opts): object` として関数化したもの。
+ * `buildSitemap(opts): object` で組み立てる。
  *
  * v2 での拡張点:
  *   - 新規フィールド `lang` / `siteName` / `siteOrigin` / `customDomain` /

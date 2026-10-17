@@ -4,19 +4,17 @@
  * ROOT_MD を起点に、Markdown内のリンクをBFS(幅優先探索)でたどり、
  * 到達可能な md ファイル・画像ファイルだけを収集し、階層構造を構築するモジュール。
  *
- * 既存 build-docs.mjs (旧136〜178行目相当の `bfs` 関数) を移動したもの。
- * 元の実装との違い:
- *   - グローバル変数・トップレベル即時実行だったものを `crawlSite(options)` という
- *     1つの関数にまとめ、`readFile`/`exists` をDI(依存注入)可能にしてテストしやすくした。
+ * `crawlSite(options)` の1つの関数にまとめ、`readFile`/`exists` などをDI(依存注入)可能にして
+ * テストしやすくしている。
  *   - ファイル読み込み直後に `frontmatter.parseFrontmatter` を適用し、
- *     `visitedMd` の各エントリを `{ content, meta }` の形にした
+ *     `visitedMd` の各エントリを `{ content, meta }` の形にする
  *     (`content` はfrontmatterブロックを除いた本文)。以降のリンク抽出は
  *     この本文に対して行う。
  *   - リンクの抽出は link-extractor.extractLinks(描画と同じ marked の解析結果を使う)で行い、
  *     参照リンク・バッジ等もたどる。コードブロック内の見せかけのリンクは自然に除外される。
  *   - ディレクトリへのリンク("guide/")は、中の README.md / index.md をたどる。
- *   - `path-utils.resolveRepoRel` が判別可能な戻り値
- *     (`{ repoRel, rest }` または `{ rejected: true, reason }`) を返すようになったため、
+ *   - `path-utils.resolveRepoRel` は判別可能な戻り値
+ *     (`{ repoRel, rest }` または `{ rejected: true, reason }`) を返すので、
  *     `reason` で分岐する:
  *       - "external" / "anchor" → 正常な非対象リンクとして黙って無視する
  *         (`missing`にも`rejected`にも記録しない)。

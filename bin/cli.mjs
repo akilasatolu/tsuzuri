@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 // npx github:akilasatolu/tsuzuri [init] のエントリーポイント。
 // 利用者リポジトリに配布用ファイル(docs-pages.yml / docs-pages.config /
-// 任意でdocs-pages.style.css)に加えて、ビルドスクリプト本体
+// 任意で独自CSSの空ひな形 custom.css)に加えて、ビルドスクリプト本体
 // (build-docs.mjs / lib/*.mjs / styles/*.css)一式を `.github/tsuzuri/` 配下に
 // コピー(ベンダリング)する。これにより、生成後のワークフローは実行のたびに
 // OSS本体リポジトリ(tsuzuri)を参照する必要がなくなり、利用者リポジトリの中だけで
 // ビルド・デプロイが完結する。
 //
-// 追加npm依存は増やさない方針のため、node:readline/promises と
-// node:fs(existsSync/mkdirSync/writeFileSync/readFileSync/readdirSync)のみを使用する。
+// 追加の npm 依存は使わない(Node.js の標準モジュールだけを使う)。
 
 import { createInterface } from "node:readline/promises";
 import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, realpathSync, unlinkSync } from "node:fs";
@@ -247,7 +246,7 @@ export function buildDocsPagesYml(
 
 /**
  * docs-pages.config の内容を組み立てる。
- * T-015で確定したフォーマットに対話結果(TRIGGER_BRANCH/ROOT_MD/THEME)を埋め込み、
+ * 対話結果(TRIGGER_BRANCH/ROOT_MD/THEME など)を埋め込み、
  * それ以外のキーはデフォルト値のまま出力する。
  */
 export function buildDocsPagesConfig(answers) {
@@ -327,7 +326,7 @@ SITEMAP_JSON=false
 }
 
 /**
- * docs-pages.style.css の空ひな形(コメントのみ)を組み立てる。
+ * 独自CSS(custom.css)の空ひな形(コメントのみ)を組み立てる。
  */
 export function buildStyleCssTemplate() {
   return `/* 独自のCSSをここに書くと、テーマの後に読み込まれて最優先で反映されます。
@@ -410,8 +409,8 @@ export function buildVendorTargets(packageRoot = PACKAGE_ROOT, fsImpl = { exists
  * 生成対象ファイルの一覧(パス・中身)を組み立てる。
  * ファイル生成ロジックをテストしやすくするため、対話ロジックとは分離している。
  *
- * v3で、ワークフロー/設定ファイルに加えてビルドスクリプト本体一式
- * (buildVendorTargets)も生成対象に含めるようにした。これにより、
+ * ワークフロー/設定ファイルに加えて、ビルドスクリプト本体一式
+ * (buildVendorTargets)も生成対象に含める。これにより、
  * 生成されたワークフローは実行時にOSS本体リポジトリへ依存せず、
  * 利用者リポジトリの中だけでビルド・デプロイが完結する。
  */
@@ -865,7 +864,7 @@ export function guessDefaultBranch(
 }
 
 /**
- * CLI本体。サブコマンドは init のみ(省略しても init 相当)。
+ * CLI本体。サブコマンドは init(省略しても init 相当)と preview。
  *   --version / --help … 表示して終了
  *   --update           … 対話なしの更新モード(runUpdate)
  *   --yes 等           … 対話なしで生成(既存ファイルは --force が無ければスキップ)

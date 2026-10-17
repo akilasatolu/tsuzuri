@@ -130,7 +130,7 @@ test("buildSitemapXml: lastmod 付きの項目は <lastmod> を出力する", ()
   assert.match(xml, /<url><loc>https:\/\/example\.com\/b\.html<\/loc><\/url>/);
 });
 
-// ---- 多言語の情報(T-011) ----
+// ---- 多言語の情報 ----
 
 const LANG_KEYS = ["languages", "trees"];
 

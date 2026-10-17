@@ -8,7 +8,7 @@ import { spawnSync } from "node:child_process";
 
 /**
  * build-docs.mjs の E2E テスト: 多言語のサイト(設計のテスト観点 7-A・7-B・7-C。言語切り替えボタンと
- * hreflang は T-015 で足す)。
+ * hreflang もここで確かめる)。
  *
  * fixture A(test/fixtures/site-i18n-ja)は日本語が基本(LANGUAGES=ja,en)、
  * fixture B(test/fixtures/site-i18n-en)は英語が基本(LANGUAGES=en,ja)。

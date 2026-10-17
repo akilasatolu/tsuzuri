@@ -3,10 +3,8 @@
  *
  * 実際のHTMLページを組み立てる部分を担当するモジュール。
  *
- * 既存 build-docs.mjs (旧212〜287行目相当) からロジック変更なしで移動したもの:
+ * 主な関数:
  *   escapeHtml
- *
- * 仕様変更・新規追加したもの:
  *   renderNav         — 新規。navEnabled=true のときのみ呼び出し側が呼ぶ。
  *                        site-tree.mjs のサイトツリー(ディレクトリ階層)をそのまま <ul> の入れ子にする。
  *   renderMetaTags    — 新規。SEO用メタタグ(description/OGP/canonical/robots/favicon/og:site_name)を生成する。

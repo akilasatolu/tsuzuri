@@ -8,26 +8,27 @@
  * 起点に「たどり着けるファイルだけ」を収集して OUT_DIR (default: _site) に
  * 静的サイトとして書き出す。
  *
- * 処理順序 (設計書「モジュール別詳細設計 > build-docs.mjs(エントリーポイント)」節):
- *   1. config.loadConfig()
- *   2. ROOT_MD 存在チェック(不在なら console.error + 致命的エラー・終了コード1)
- *   3. ${styleDir}/base.css 読み込み(不在なら致命的エラー。OSS本体自身の欠陥であり
- *      利用者側の設定ミスではないため STYLE_FILE 不在時とは扱いを分ける)
- *   4. THEME !== "none" なら ${styleDir}/${theme}.css 読み込み
- *      (不在なら console.warn + themeCss="" にフォールバック。fail-open)
- *   5. crawler.crawlSite()
- *   6. STYLE_FILE / FAVICON_FILE 読み込み(不在なら console.warn のみ・非致命的)
- *   7. 出力ディレクトリ作成・.nojekyll・(customDomain時)CNAME・
- *      (faviconFile時)favicon本体コピー
- *   8. 各ページの HTML 生成ループ(見出しid付与。ROOT_MD と各ディレクトリの README.md は
- *      index.html としても出力)
- *   9. 404.html 生成(リポジトリ直下の 404.md、無ければ既定の内容)
- *   10. 画像・その他のリンク先ファイル(PDF等)のコピー
- *   11. sitemap.xml / robots.txt(SITE_ORIGIN がある場合のみ)
- *   11.5 llms.txt(LLMS_TXT が有効なとき。リポジトリ直下の llms.txt があればそれをコピー、
- *        無ければ SITE_ORIGIN があるときだけ自動で書き出す)
- *   12. sitemap.buildSitemap() 書き込み(デバッグ用 sitemap.json。SITEMAP_JSON=true のときだけ)
- *   13. 完了ログ
+ * 処理の順序(実際のセクション見出しに合わせた概要):
+ *   - OUT_DIR・ROOT_MD の確認(不正・不在なら console.error + 致命的エラー・終了コード1)
+ *   - ${styleDir}/base.css の読み込み(不在なら致命的エラー。OSS本体自身の欠陥であり
+ *     利用者側の設定ミスではないため STYLE_FILE 不在時とは扱いを分ける)
+ *   - THEME !== "none" なら ${styleDir}/${theme}.css の読み込み
+ *     (不在なら console.warn + themeCss="" にフォールバック。fail-open)
+ *   - crawler.crawlSite() と、翻訳の対応表の作成
+ *   - STYLE_FILE / FAVICON_FILE の読み込み(不在なら console.warn のみ・非致命的)
+ *   - llms.txt の扱い(コピー・自動生成・なし)の決定
+ *   - 出力ディレクトリの準備(目印のある前回の出力を消す・.nojekyll・CNAME・favicon のコピー)
+ *   - 各ページの HTML 生成と書き出し(見出しid付与。ROOT_MD と各ディレクトリの README.md は
+ *     index.html としても出力)
+ *   - 404.html 生成(リポジトリ直下の 404.md、無ければ既定の内容)
+ *   - コードブロックのコピーボタン・サイト内検索・ライト/ダーク切り替えのスクリプトと索引の書き出し
+ *   - 見出しへのリンクの確認
+ *   - 画像・その他のリンク先ファイル(PDF等)のコピー
+ *   - リポジトリ直下の llms.txt のコピー
+ *   - sitemap.xml / robots.txt(SITE_ORIGIN がある場合のみ)
+ *   - llms.txt の自動生成(LLMS_TXT が有効で、SITE_ORIGIN があるときだけ)
+ *   - sitemap.json の書き込み(デバッグ用。SITEMAP_JSON=true のときだけ)
+ *   - STRICT_LINKS の判定と完了ログ
  *
  * エラーハンドリング方針:
  *   main() 全体を呼び出し元(本ファイル末尾)で catch し、未分類の例外は

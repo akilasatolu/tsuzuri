@@ -1,6 +1,6 @@
 name: Sync docs branch
 
-# mainブランチへのpushでCI(lint・test)が成功したら、そのコミットのtsuzuriで
+# mainブランチへのpushでCIが成功したら、そのコミットのtsuzuriで
 # docsブランチに `init --update` を実行し、変更があればdocsブランチへpushする。
 # docsへのpushをきっかけに、docsブランチ側の docs-pages.yml がGitHub Pagesへ公開する。
 #

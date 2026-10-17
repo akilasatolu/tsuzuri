@@ -1,6 +1,6 @@
 // ESLint flat config (ESM)
 //
-// 方針(設計書「OSS化に伴うCI設計」節): eslint:recommended をベースに、
+// 方針: eslint:recommended をベースに、
 // ESM/Node.js向けの最小限の設定を追加するミニマル構成。独自ルールの作り込みは行わない。
 //
 // eslint:recommended 相当を有効化するため、公式パッケージ `@eslint/js` の
