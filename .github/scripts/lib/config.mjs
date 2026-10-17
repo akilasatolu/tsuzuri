@@ -25,7 +25,6 @@ export const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @property {string} styleFile
  * @property {string} basePath
  * @property {string} siteOrigin
- * @property {string} lang - 基本言語(languages の先頭)
  * @property {string[]} languages - サイトの言語(1つ以上。先頭が基本言語)
  * @property {boolean} navEnabled
  * @property {boolean} strictLinks
@@ -135,7 +134,6 @@ export function loadConfig(env = process.env) {
 
   // OS の環境変数 LANG("ja_JP.UTF-8" など)は読まない(設定キー LANG は廃止した)
   const languages = resolveLanguages(env.LANGUAGES);
-  const lang = languages[0];
 
   const navEnabled = parseBoolean("NAV_ENABLED", env.NAV_ENABLED);
 
@@ -176,7 +174,6 @@ export function loadConfig(env = process.env) {
     styleFile,
     basePath,
     siteOrigin,
-    lang,
     languages,
     navEnabled,
     strictLinks,

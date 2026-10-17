@@ -215,9 +215,10 @@ npmでは、乗っ取られたアカウントから不正なコードを仕込�
   - CI(署名の確認を含む)がすべて通っているか
 
 `marked`・`highlight.js`・`marked-footnote`は、利用者側のワークフローでも使うビルド用の依存です
-(`bin/cli.mjs`の`BUILD_DEPENDENCIES`)。`init`が生成する
-ワークフローは`package.json`の`devDependencies`にあるこれらの版をそのまま埋め込みます。このためこれらの版は
-`^`などの範囲ではなく`12.0.2`のような完全一致で書いてください(範囲指定だと`init`がエラーになります)。
+(`bin/cli.mjs`の`BUILD_DEPENDENCIES`)。利用者に配る`package.json`・`package-lock.json`の完成品
+(次の段落)は、`package.json`の`devDependencies`にあるこれらの版から作ります。このためこれらの版は
+`^`などの範囲ではなく`12.0.2`のような完全一致で書いてください(範囲指定だと、完成品を作る
+`node scripts/build-lockfiles.mjs`と、そのテストがエラーになります)。
 
 利用者には、これらの依存(とその依存)の版とハッシュを書いた`package.json`・`package-lock.json`の完成品
 (`templates/tsuzuri/`)を配ります。npm はパッケージを作るときにルートの`package-lock.json`を外すため、

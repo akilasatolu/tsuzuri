@@ -6,6 +6,7 @@ import {
   renderNav,
   renderMetaTags,
   pageTemplate,
+  composeCss,
   preprocessRawHtmlPaths,
   defaultNotFoundMarkdown,
   renderPager,
@@ -241,48 +242,48 @@ describe("renderMetaTags", () => {
 });
 
 describe("pageTemplate", () => {
-  test("navHtml=''・metaTagsHtml=''・lang='ja'時、リファクタリング前と互換の構造を保つ(回帰テスト)", () => {
-    // リファクタリング前の pageTemplate が出力していた <style> ブロックの中身
-    // (v1でハードコードされていた配色+構造CSS)を baseCss として渡すことで、
-    // 出力構造(タグの並び・空行の有無)がリファクタリング前と一致することを確認する。
-    // ※ styles/base.css・styles/material.css を用いたバイト単位の最終確認は build-docs のE2Eとゴールデンテストで行う。
-    const legacyStyleBlock = `  :root {
-    color-scheme: light dark;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; }
-  main { max-width: 860px; margin: 0 auto; }
-`;
+  const SHEET = "/tsuzuri-abc.css";
+  const LINK = `<link rel="stylesheet" href="${SHEET}">`;
+
+  test("navHtml=''・metaTagsHtml=''・lang='ja'時の構造(タグの並び・空行の有無)を保つ(回帰テスト)", () => {
     const html = pageTemplate({
       title: "タイトル",
       body: "<p>本文</p>",
-      baseCss: legacyStyleBlock,
-      themeCss: "",
-      customCss: "",
-      styleFileRel: undefined,
+      stylesheetHref: SHEET,
       lang: "ja",
       navHtml: "",
       metaTagsHtml: "",
     });
 
-    // metaTagsHtml="" のとき <title> の直後に余計な空行を挟まず <style> が続く
-    assert.match(html, /<title>タイトル<\/title>\n<style>/);
+    // metaTagsHtml="" のとき <title> の直後に余計な空行を挟まず <link> が続く
+    assert.match(html, new RegExp(`<title>タイトル</title>\\n${LINK.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\n</head>`));
     // navHtml="" のとき <body> の直後に余計な空行を挟まず <main> が続く
     assert.match(html, /<body>\n<main>/);
     assert.match(html, /^<!DOCTYPE html>\n<html lang="ja">/);
     assert.match(html, /<p>本文<\/p>/);
-    assert.match(html, new RegExp(legacyStyleBlock.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.doesNotMatch(html, /<style>/, "CSS は埋め込まない");
+  });
+
+  test("stylesheetHref はエスケープして <link> に入れる", () => {
+    const html = pageTemplate({ title: "t", body: "b", stylesheetHref: '/a"b.css' });
+    assert.match(html, /<link rel="stylesheet" href="\/a&quot;b\.css">/);
+  });
+
+  test("headHtml は <head> の最後(</head> の直前)に入る", () => {
+    const html = pageTemplate({ title: "t", body: "b", stylesheetHref: SHEET, headHtml: "<script>x</script>" });
+    assert.match(html, /<script>x<\/script>\n<\/head>/);
   });
 
   test("metaTagsHtmlが非空なら<title>直後に挿入される", () => {
     const html = pageTemplate({
       title: "t",
       body: "b",
+      stylesheetHref: SHEET,
       metaTagsHtml: '<meta name="description" content="d">',
     });
     assert.match(
       html,
-      /<title>t<\/title>\n<meta name="description" content="d">\n<style>/
+      /<title>t<\/title>\n<meta name="description" content="d">\n<link rel="stylesheet"/
     );
   });
 
@@ -290,6 +291,7 @@ describe("pageTemplate", () => {
     const html = pageTemplate({
       title: "t",
       body: "b",
+      stylesheetHref: SHEET,
       lang: "ja",
       navHtml: "<nav>NAV</nav>",
     });
@@ -297,84 +299,61 @@ describe("pageTemplate", () => {
   });
 
   test("skipLabel を省略すると lang の文言になる(既定の lang は en)", () => {
-    const en = pageTemplate({ title: "t", body: "b", navHtml: "<nav>NAV</nav>" });
+    const en = pageTemplate({ title: "t", body: "b", stylesheetHref: SHEET, navHtml: "<nav>NAV</nav>" });
     assert.match(en, /^<!DOCTYPE html>\n<html lang="en">/);
     assert.match(en, /<a class="tsuzuri-skip" href="#tsuzuri-main">Skip to content<\/a>/);
-    const custom = pageTemplate({ title: "t", body: "b", lang: "ja", navHtml: "<nav>NAV</nav>", skipLabel: "<飛ぶ>" });
+    const custom = pageTemplate({ title: "t", body: "b", stylesheetHref: SHEET, lang: "ja", navHtml: "<nav>NAV</nav>", skipLabel: "<飛ぶ>" });
     assert.match(custom, />&lt;飛ぶ&gt;<\/a>/);
   });
 
   test("langBarHtml が空なら出力は省略時と同じ(回帰テスト)", () => {
     for (const navHtml of ["", "<nav>NAV</nav>"]) {
-      const opts = { title: "t", body: "<p>b</p>", lang: "ja", navHtml, metaTagsHtml: "<meta>" };
+      const opts = { title: "t", body: "<p>b</p>", stylesheetHref: SHEET, lang: "ja", navHtml, metaTagsHtml: "<meta>" };
       assert.equal(pageTemplate({ ...opts, langBarHtml: "" }), pageTemplate(opts));
     }
   });
 
   test("langBarHtml を指定すると <main…> の直後(本文の前)に入る", () => {
     const bar = '<div class="tsuzuri-lang-bar">LANG</div>';
-    const withNav = pageTemplate({ title: "t", body: "<p>b</p>", navHtml: "<nav>NAV</nav>", langBarHtml: bar });
+    const withNav = pageTemplate({ title: "t", body: "<p>b</p>", stylesheetHref: SHEET, navHtml: "<nav>NAV</nav>", langBarHtml: bar });
     assert.match(withNav, /<main id="tsuzuri-main">\n<div class="tsuzuri-lang-bar">LANG<\/div>\n<p>b<\/p>\n<\/main>/);
-    const noNav = pageTemplate({ title: "t", body: "<p>b</p>", langBarHtml: bar });
+    const noNav = pageTemplate({ title: "t", body: "<p>b</p>", stylesheetHref: SHEET, langBarHtml: bar });
     assert.match(noNav, /<body>\n<main>\n<div class="tsuzuri-lang-bar">LANG<\/div>\n<p>b<\/p>/);
     assert.equal(withNav.split(bar).length, 2); // 1回だけ
   });
 
+  test("lang引数が<html lang>に反映される", () => {
+    const html = pageTemplate({ title: "t", body: "b", stylesheetHref: SHEET, lang: "en" });
+    assert.match(html, /<html lang="en">/);
+  });
+});
+
+describe("composeCss", () => {
   test("3層カスケードの追記順序: base→theme→customの順で出現する", () => {
-    const html = pageTemplate({
-      title: "t",
-      body: "b",
-      baseCss: "/*base*/",
-      themeCss: "/*theme*/",
-      customCss: "/*custom*/",
-    });
-    const baseIdx = html.indexOf("/*base*/");
-    const themeIdx = html.indexOf("/*theme*/");
-    const customIdx = html.indexOf("/*custom*/");
+    const css = composeCss({ baseCss: "/*base*/", themeCss: "/*theme*/", customCss: "/*custom*/" });
+    const baseIdx = css.indexOf("/*base*/");
+    const themeIdx = css.indexOf("/*theme*/");
+    const customIdx = css.indexOf("/*custom*/");
     assert.ok(baseIdx >= 0 && themeIdx >= 0 && customIdx >= 0, "3つ全てが出現する");
     assert.ok(baseIdx < themeIdx, "baseはthemeより前");
     assert.ok(themeIdx < customIdx, "themeはcustomより前");
   });
 
   test("themeCss=''(THEME=none相当)のとき/*theme*/相当の内容は一切出現しない", () => {
-    const html = pageTemplate({
-      title: "t",
-      body: "b",
-      baseCss: "/*base*/",
-      themeCss: "",
-      customCss: "/*custom*/",
-    });
-    assert.doesNotMatch(html, /\/\*theme\*\//);
-    assert.match(html, /\/\*base\*\//);
-    assert.match(html, /\/\*custom\*\//);
-  });
-
-  test("lang引数が<html lang>に反映される", () => {
-    const html = pageTemplate({ title: "t", body: "b", lang: "en" });
-    assert.match(html, /<html lang="en">/);
+    const css = composeCss({ baseCss: "/*base*/", themeCss: "", customCss: "/*custom*/" });
+    assert.doesNotMatch(css, /\/\*theme\*\//);
+    assert.match(css, /\/\*base\*\//);
+    assert.match(css, /\/\*custom\*\//);
   });
 
   test("customCssが非空ならstyleFileRelを使ったコメントがcustomCssの直前に挿入される", () => {
-    const html = pageTemplate({
-      title: "t",
-      body: "b",
-      customCss: "/*custom*/",
-      styleFileRel: "styles/my-style.css",
-    });
-    assert.match(
-      html,
-      /\/\* ---- Custom style: styles\/my-style\.css ---- \*\/\n\/\*custom\*\//
-    );
+    const css = composeCss({ customCss: "/*custom*/", styleFileRel: "styles/my-style.css" });
+    assert.match(css, /\/\* ---- Custom style: styles\/my-style\.css ---- \*\/\n\/\*custom\*\//);
   });
 
   test("customCssが空文字ならstyleFileRelのコメントも出力されない", () => {
-    const html = pageTemplate({
-      title: "t",
-      body: "b",
-      customCss: "",
-      styleFileRel: "styles/my-style.css",
-    });
-    assert.doesNotMatch(html, /Custom style/);
+    const css = composeCss({ baseCss: "/*base*/", customCss: "", styleFileRel: "styles/my-style.css" });
+    assert.doesNotMatch(css, /Custom style/);
   });
 });
 
@@ -607,14 +586,13 @@ describe("renderAlert", () => {
   const expected = (type, title, body = "<p>本文</p>\n") =>
     `<div class="markdown-alert markdown-alert-${type}"><p class="markdown-alert-title">${title}</p>\n${body}</div>\n`;
 
-  test("true(省略時)は日本語の見出し、false は英語の見出し(変更前と同じ)", () => {
+  test("日本語の表は日本語の見出し、英語の表は英語の見出し", () => {
     const ja = { note: "補足", tip: "ヒント", important: "重要", warning: "警告", caution: "注意" };
     const en = { note: "Note", tip: "Tip", important: "Important", warning: "Warning", caution: "Caution" };
     for (const type of Object.keys(ja)) {
       const html = `<p>[!${type.toUpperCase()}]\n本文</p>\n`;
-      assert.equal(renderAlert(html), expected(type, ja[type]));
-      assert.equal(renderAlert(html, true), expected(type, ja[type]));
-      assert.equal(renderAlert(html, false), expected(type, en[type]));
+      assert.equal(renderAlert(html, uiStrings("ja").alerts), expected(type, ja[type]));
+      assert.equal(renderAlert(html, uiStrings("en").alerts), expected(type, en[type]));
     }
   });
 
@@ -629,14 +607,14 @@ describe("renderAlert", () => {
   });
 
   test("注意書きでない・未知の種類は null(変更前と同じ)", () => {
-    for (const labels of [true, false, uiStrings("ja").alerts]) {
+    for (const labels of [uiStrings("en").alerts, uiStrings("ja").alerts]) {
       assert.equal(renderAlert("<p>ふつうの引用</p>\n", labels), null);
       assert.equal(renderAlert("<p>[!DANGER]\n本文</p>\n", labels), null);
     }
   });
 
   test("見出しだけの行のあとの空の段落は除く", () => {
-    assert.equal(renderAlert("<p>[!WARNING]</p>\n<p>本文</p>\n", false), expected("warning", "Warning", "<p>本文</p>\n"));
+    assert.equal(renderAlert("<p>[!WARNING]</p>\n<p>本文</p>\n", uiStrings("en").alerts), expected("warning", "Warning", "<p>本文</p>\n"));
   });
 });
 

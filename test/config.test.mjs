@@ -22,7 +22,6 @@ test("全キー未設定+GITHUB_REPOSITORY未設定 → 全デフォルト値", 
   assert.equal(config.styleFile, ".github/tsuzuri/styles/custom.css");
   assert.equal(config.basePath, "");
   assert.equal(config.siteOrigin, "");
-  assert.equal(config.lang, "en");
   assert.deepEqual(config.languages, ["en"]);
   assert.equal(config.navEnabled, false);
   assert.equal(config.faviconFile, "");
@@ -54,7 +53,6 @@ test("全キー設定済みで正しく反映される", () => {
   assert.equal(config.styleFile, "custom.css");
   assert.equal(config.basePath, "/my-repo");
   assert.equal(config.siteOrigin, "https://example.com");
-  assert.equal(config.lang, "en");
   assert.deepEqual(config.languages, ["en"]);
   assert.equal(config.navEnabled, true);
   assert.equal(config.faviconFile, "favicon.ico");
@@ -113,9 +111,8 @@ test('CUSTOM_DOMAIN="https://example.com/path" → warnして空文字', () => {
   });
 });
 
-test('LANGUAGES="" → ["en"]、lang は "en"', () => {
+test('LANGUAGES="" → ["en"]', () => {
   const config = loadConfig({ LANGUAGES: "" });
-  assert.equal(config.lang, "en");
   assert.deepEqual(config.languages, ["en"]);
 });
 
@@ -176,7 +173,7 @@ test("回帰テスト: 旧4キーのみの設定オブジェクトで新規キ�
     STYLE_FILE: ".github/docs-pages.style.css",
     BASE_PATH: "",
   });
-  assert.equal(config.lang, "en");
+  assert.deepEqual(config.languages, ["en"]);
   assert.equal(config.navEnabled, false);
   assert.equal(config.faviconFile, "");
   assert.equal(config.siteName, "");
@@ -207,7 +204,6 @@ test("NAV_ENABLED・THEME・LANGUAGESを省略(未設定・空文字)してもwa
     for (const config of [unset, empty, blank]) {
       assert.equal(config.navEnabled, false);
       assert.equal(config.theme, "material");
-      assert.equal(config.lang, "en");
       assert.deepEqual(config.languages, ["en"]);
     }
     assert.deepEqual(calls, []);
@@ -219,18 +215,15 @@ test('LANGUAGES="en-US" などBCP 47形式の言語タグはそのまま使う',
   assert.deepEqual(loadConfig({ LANGUAGES: "zh-Hant-TW" }).languages, ["zh-Hant-TW"]);
 });
 
-test("LANGUAGES: 1つ・複数・前後の空白・空要素。先頭が lang(基本言語)", () => {
+test("LANGUAGES: 1つ・複数・前後の空白・空要素。先頭が基本言語", () => {
   withCapturedWarn((calls) => {
     assert.deepEqual(loadConfig({ LANGUAGES: "ja" }).languages, ["ja"]);
-    assert.equal(loadConfig({ LANGUAGES: "ja" }).lang, "ja");
     for (const raw of ["ja,en", " ja , en ", "ja,,en", ",ja,en,"]) {
       const config = loadConfig({ LANGUAGES: raw });
       assert.deepEqual(config.languages, ["ja", "en"], raw);
-      assert.equal(config.lang, "ja", raw);
     }
     const enJa = loadConfig({ LANGUAGES: "en,ja" });
     assert.deepEqual(enJa.languages, ["en", "ja"]);
-    assert.equal(enJa.lang, "en");
     assert.deepEqual(calls, []);
   });
 });
@@ -271,7 +264,6 @@ test("環境変数 LANG(OS の値・言語タグ)は languages に影響しな�
   withCapturedWarn((calls) => {
     for (const LANG of ["ja_JP.UTF-8", "ja"]) {
       assert.deepEqual(loadConfig({ LANG }).languages, ["en"], LANG);
-      assert.equal(loadConfig({ LANG }).lang, "en", LANG);
       assert.deepEqual(loadConfig({ LANG, LANGUAGES: "fr" }).languages, ["fr"], LANG);
     }
     assert.deepEqual(calls, []);

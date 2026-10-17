@@ -13,7 +13,7 @@ import {
   RELOAD_EVENTS_PATH,
   browserCommand,
 } from "../bin/preview.mjs";
-import { buildDocsPagesYml, buildDependencySpecs, readPackageVersion } from "../bin/cli.mjs";
+import { buildDocsPagesYml, BUILD_DEPENDENCIES, readDependencyVersion, readPackageVersion } from "../bin/cli.mjs";
 
 function makeSite() {
   const dir = mkdtempSync(join(tmpdir(), "tsuzuri-preview-"));
@@ -72,8 +72,9 @@ test("createPreviewServer: ページを返し、無いURLは 404.html、末尾�
 test("生成ワークフローから、ビルド用の依存とコピー済みのバージョンを読める", () => {
   const yml = buildDocsPagesYml();
   // v1.6.0 以前のワークフロー(npm install の行に版を並べていた)から読む
-  const legacy = `        run: npm install --prefix .github/tsuzuri ${buildDependencySpecs()} --no-save --no-audit --no-fund --ignore-scripts\n`;
-  assert.deepEqual(dependencySpecsFromWorkflow(legacy), buildDependencySpecs().split(" "));
+  const specs = BUILD_DEPENDENCIES.map((name) => `${name}@${readDependencyVersion(name)}`);
+  const legacy = `        run: npm install --prefix .github/tsuzuri ${specs.join(" ")} --no-save --no-audit --no-fund --ignore-scripts\n`;
+  assert.deepEqual(dependencySpecsFromWorkflow(legacy), specs);
   assert.equal(vendoredVersionOf(yml), readPackageVersion());
   assert.deepEqual(dependencySpecsFromWorkflow("no install"), []);
 });

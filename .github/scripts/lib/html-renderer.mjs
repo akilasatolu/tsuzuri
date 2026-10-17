@@ -5,16 +5,13 @@
  *
  * 主な関数:
  *   escapeHtml
- *   renderNav         — 新規。navEnabled=true のときのみ呼び出し側が呼ぶ。
+ *   renderNav         — サイト内ナビ。NAV_ENABLED=true のときのみ呼び出し側が呼ぶ。
  *                        site-tree.mjs のサイトツリー(ディレクトリ階層)をそのまま <ul> の入れ子にする。
- *   renderMetaTags    — 新規。SEO用メタタグ(description/OGP/canonical/robots/favicon/og:site_name)を生成する。
- *   pageTemplate      — シグネチャを `{ ..., customCss }` から
- *                        `{ ..., baseCss, themeCss, customCss, navHtml, metaTagsHtml }` に変更。
- *                        v1でハードコードされていた配色ブロックは削除し、
- *                        `<style>` タグ内は `baseCss + themeCss + customCss` の順で連結する
- *                        (基礎CSS→THEME→STYLE_FILE の3層カスケード)。
- *   preprocessRawHtmlPaths — basePath をモジュール内グローバル定数ではなく明示引数化。
- *   renderLangSwitch  — 新規。多言語サイトの言語切り替えボタン(JavaScript を使わない普通のリンク)。
+ *   renderMetaTags    — SEO用メタタグ(description/OGP/canonical/robots/favicon/og:site_name)を生成する。
+ *   composeCss        — 基礎CSS・THEME・STYLE_FILE を、この順(3層カスケード)につなげる。
+ *   pageTemplate      — ページ全体のHTML。CSS は composeCss の結果を書き出したファイルを <link> で読み込む。
+ *   preprocessRawHtmlPaths — 生のHTMLの <a href>・<img src> などのリンク先を書き換える(basePath は引数で渡す)。
+ *   renderLangSwitch  — 多言語サイトの言語切り替えボタン(JavaScript を使わない普通のリンク)。
  */
 
 import { isExternal, toSiteAbsHref, pageHref, mapSrcsetUrls, SRCSET_ATTR } from "./path-utils.mjs";
@@ -209,17 +206,14 @@ export function renderToc(headings, label = "目次") {
  * 種類ごとの枠のHTMLを返す。注意書きでなければ null を返す(呼び出し側で通常の引用にする)。
  *
  * @param {string} innerHtml - 引用ブロックの中身のHTML
- * @param {boolean | Record<string, string>} [jaOrLabels] - 見出しの文言。
- *   真偽値なら見出しを日本語にするか(true=日本語・false=英語)。
- *   オブジェクトなら種類ごとの見出し({ note, tip, important, warning, caution }。i18n.mjs の alerts)
+ * @param {Record<string, string>} labels - 種類ごとの見出し({ note, tip, important, warning, caution }。
+ *   i18n.mjs の alerts)。渡した表にその種類が無ければ英語の見出しにする
  * @returns {string | null}
  */
-export function renderAlert(innerHtml, jaOrLabels = true) {
+export function renderAlert(innerHtml, labels) {
   const m = innerHtml.match(/^<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*(?:<br>)?\n?/i);
   if (!m) return null;
   const type = m[1].toLowerCase();
-  const labels =
-    jaOrLabels && typeof jaOrLabels === "object" ? jaOrLabels : uiStrings(jaOrLabels ? "ja" : "en").alerts;
   const title = labels[type] ?? uiStrings("en").alerts[type]; // 渡された表にその種類が無ければ英語
   const body = ("<p>" + innerHtml.slice(m[0].length)).replace(/^<p>\s*<\/p>\n?/, "");
   return (
@@ -381,18 +375,23 @@ export function preprocessRawHtmlPaths(
     });
 }
 
+// ページに適用するCSS(基礎CSS → テーマ → 独自CSS の順につなげたもの)。
+// build-docs.mjs が内容ごとに共通のCSSファイルへ書き出し、pageTemplate の stylesheetHref で読み込む。
+export function composeCss({ baseCss = "", themeCss = "", customCss = "", styleFileRel }) {
+  return `${baseCss}${themeCss}${customCss ? `/* ---- Custom style: ${styleFileRel} ---- */\n${customCss}` : ""}`;
+}
+
 /**
  * ページ全体のHTMLテンプレートを組み立てる。
- * `<style>` タグ内は `baseCss + themeCss + customCss` の順で連結し、
- * 「基礎CSS→THEME→STYLE_FILE」の3層カスケードを実現する。
+ * CSS は <style> で埋め込まず、stylesheetHref のCSSファイルを <link> で読み込む
+ * (全ページで同じファイルを使うので、2ページ目以降はブラウザのキャッシュが効く)。
+ * headHtml は <head> の最後に入れるHTML(ライト/ダークの切り替えを表示前に反映するスクリプトなど)。
  *
  * @param {{
  *   title: string,
  *   body: string,
- *   baseCss?: string,
- *   themeCss?: string,
- *   customCss?: string,
- *   styleFileRel?: string,
+ *   stylesheetHref: string,  // 読み込むCSSファイルのURL(composeCss の結果を書き出したもの)
+ *   headHtml?: string,
  *   lang?: string,
  *   navHtml?: string,
  *   metaTagsHtml?: string,
@@ -401,23 +400,10 @@ export function preprocessRawHtmlPaths(
  * }} opts
  * @returns {string}
  */
-// ページに適用するCSS(基礎CSS → テーマ → 独自CSS の順につなげたもの)。
-// pageTemplate の <style> と、build-docs.mjs が書き出す共通のCSSファイルで同じ内容にする。
-export function composeCss({ baseCss = "", themeCss = "", customCss = "", styleFileRel }) {
-  return `${baseCss}${themeCss}${customCss ? `/* ---- Custom style: ${styleFileRel} ---- */\n${customCss}` : ""}`;
-}
-
-// stylesheetHref を渡すと、CSS を <style> で埋め込む代わりに、そのCSSファイルを <link> で読み込む
-// (全ページで同じファイルを使うので、2ページ目以降はブラウザのキャッシュが効く)。
-// headHtml は <head> の最後に入れるHTML(ライト/ダークの切り替えを表示前に反映するスクリプトなど)。
 export function pageTemplate({
   title,
   body,
-  baseCss = "",
-  themeCss = "",
-  customCss = "",
-  styleFileRel,
-  stylesheetHref = "",
+  stylesheetHref,
   headHtml = "",
   lang = "en",
   navHtml = "",
@@ -436,11 +422,7 @@ export function pageTemplate({
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escapeHtml(title)}</title>
-${metaTagsHtml ? metaTagsHtml + "\n" : ""}${
-    stylesheetHref
-      ? `<link rel="stylesheet" href="${escapeHtml(stylesheetHref)}">`
-      : `<style>\n${composeCss({ baseCss, themeCss, customCss, styleFileRel })}\n</style>`
-  }
+${metaTagsHtml ? metaTagsHtml + "\n" : ""}<link rel="stylesheet" href="${escapeHtml(stylesheetHref)}">
 ${headHtml ? headHtml + "\n" : ""}</head>
 <body>
 ${skipLink}${navHtml ? navHtml + "\n" : ""}${mainTag}

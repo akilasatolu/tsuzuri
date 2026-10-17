@@ -12,7 +12,6 @@ import {
   PACKAGE_ROOT,
   THEME_CHOICES,
   buildDocsPagesYml,
-  readMarkedVersion,
   buildDocsPagesConfig,
   buildStyleCssTemplate,
   buildVendorTargets,
@@ -24,7 +23,6 @@ import {
   promptAnswers,
   reportFatalError,
   createAsker,
-  isUpdateMode,
   runUpdate,
   isDirectRunOf,
   WORKFLOW_TEMPLATE_PATH,
@@ -35,7 +33,6 @@ import {
   readDependencyVersion,
   HELP_TEXT,
   BUILD_DEPENDENCIES,
-  buildDependencySpecs,
   buildBuildLockfiles,
   readBuildLockfiles,
   BUILD_LOCKFILES_DIR,
@@ -230,7 +227,6 @@ test("buildDocsPagesConfig: LANG の行は無く、LANGUAGES と説明があり�
   );
   const loaded = loadConfig(parseConfigText(config));
   assert.deepEqual(loaded.languages, ["ja", "en"]);
-  assert.equal(loaded.lang, "ja");
   assert.deepEqual(loadConfig(parseConfigText(buildDocsPagesConfig({}))).languages, ["en"], "既定は en");
 });
 
@@ -304,28 +300,27 @@ test("buildDocsPagesYml: 設定ファイルは既知のキーだけを取り込�
   assert.ok(yml.includes("--ignore-scripts"));
 });
 
-test("readMarkedVersion: package.jsonのdevDependencies.markedをそのまま返す", () => {
+test("readDependencyVersion: package.jsonのdevDependenciesの版をそのまま返す", () => {
   const pkg = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package.json"), "utf8"));
-  assert.equal(readMarkedVersion(), pkg.devDependencies.marked);
+  assert.equal(readDependencyVersion("marked"), pkg.devDependencies.marked);
 });
 
-test("readMarkedVersion: ^や~などの範囲指定は受け付けない", () => {
+test("readDependencyVersion: ^や~などの範囲指定は受け付けない", () => {
   for (const range of ["^12.0.2", "~12.0.2", "12.x", undefined]) {
     const fsImpl = {
       readFileSync: () => JSON.stringify({ devDependencies: { marked: range } }),
     };
-    assert.throws(() => readMarkedVersion("/pkg", fsImpl), /完全一致/);
+    assert.throws(() => readDependencyVersion("marked", "/pkg", fsImpl), /完全一致/);
   }
 });
 
 test("package.jsonのmarkedとpackage-lock.jsonで実際に入る版が一致している(テストと配布物の版が揃う)", () => {
   const lock = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package-lock.json"), "utf8"));
-  assert.equal(lock.packages["node_modules/marked"].version, readMarkedVersion());
+  assert.equal(lock.packages["node_modules/marked"].version, readDependencyVersion("marked"));
 });
 
-test("buildDocsPagesYml: ワークフローのコメントに、利用者側でインストールするmarkedの版を書く", () => {
-  assert.ok(buildDocsPagesYml().includes(`ビルド用の依存(marked@${readMarkedVersion()} `));
-  assert.ok(buildDocsPagesYml("99.1.0").includes(`ビルド用の依存(marked@99.1.0 `));
+test("buildDocsPagesYml: ワークフローのコメントは、ビルド用の依存の版が書いてある package.json を指す", () => {
+  assert.ok(buildDocsPagesYml().includes(`ビルド用の依存は ${VENDOR_DIR}/node_modules に入れる(版は ${VENDOR_DIR}/package.json に書いてある)`));
 });
 
 test("ビルド用の依存の package.json・package-lock.json を、本体の lockfile の版とハッシュで作る", () => {
@@ -667,13 +662,6 @@ test("実ファイルシステムで書き込み権限がない場合、非ゼ�
 
 // --- init --update / 直接実行判定 ---
 
-test("isUpdateMode: --update が含まれるときだけ true", () => {
-  assert.equal(isUpdateMode(["init", "--update"]), true);
-  assert.equal(isUpdateMode(["--update"]), true);
-  assert.equal(isUpdateMode(["init"]), false);
-  assert.equal(isUpdateMode([]), false);
-});
-
 test("buildWorkflowTarget: init と init --update が使うワークフローの生成対象", () => {
   const target = buildWorkflowTarget();
   assert.equal(target.relPath, ".github/workflows/docs-pages.yml");
@@ -975,17 +963,12 @@ test("package.json の engines で対応する Node.js の最低バージョン�
   assert.equal(pkg.engines.node, ">=20");
 });
 
-test("ビルド用の依存(BUILD_DEPENDENCIES)はすべて package.json の版(完全一致)がワークフローに埋め込まれ、lockfileと一致している", () => {
+test("ビルド用の依存(BUILD_DEPENDENCIES)はすべて package.json の版(完全一致)で、lockfileと一致している", () => {
   const lock = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package-lock.json"), "utf8"));
-  const specs = [];
   for (const name of BUILD_DEPENDENCIES) {
-    const version = readDependencyVersion(name);
-    assert.equal(lock.packages[`node_modules/${name}`].version, version, name);
-    specs.push(`${name}@${version}`);
+    assert.equal(lock.packages[`node_modules/${name}`].version, readDependencyVersion(name), name);
   }
   assert.deepEqual(BUILD_DEPENDENCIES, ["marked", "highlight.js", "marked-footnote"]);
-  assert.equal(buildDependencySpecs(), specs.join(" "));
-  assert.ok(buildDocsPagesYml().includes(`ビルド用の依存(${specs.join(" ")})`));
 });
 
 test("LAST_UPDATED=true のときだけ git の全履歴を取得するステップがある", () => {

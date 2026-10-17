@@ -78,12 +78,12 @@ const DEFAULT_ANSWERS = {
 };
 
 /**
- * package.json の devDependencies から、生成するワークフローで利用者側にインストールする
- * ビルド用パッケージ(marked・highlight.js)のバージョンを返す。
+ * package.json の devDependencies から、ビルド用パッケージ(marked など)のバージョンを返す。
+ * 利用者に配る、ビルド用の依存の package.json・package-lock.json の完成品を組み立てる
+ * (buildBuildLockfiles。scripts/build-lockfiles.mjs が使う)ときに使う。
  *
  * 範囲指定ではなく "12.0.2" のような完全一致で書かれている前提で、その値をそのまま使うことで、
- * テストで使っている版と利用者に配る版を常に一致させる。Dependabot が package.json を
- * 更新すると、その PR 1つで生成ワークフローの版も追従する。
+ * テストで使っている版と利用者に配る版を常に一致させる。
  *
  * @param {string} name - パッケージ名
  * @param {string} [packageRoot] - 既定は`PACKAGE_ROOT`。テスト時に差し替え可能にするため引数化している。
@@ -101,22 +101,10 @@ export function readDependencyVersion(name, packageRoot = PACKAGE_ROOT, fsImpl =
   return version;
 }
 
-// 利用者側のワークフローでインストールする、ビルド用のパッケージ。
+// 利用者に配る、ビルド用の依存の package.json・package-lock.json の完成品に入れるパッケージ
+// (利用者側のワークフローが npm ci でインストールする)。
 // バージョンは package.json の devDependencies(完全一致)から読む。
 export const BUILD_DEPENDENCIES = ["marked", "highlight.js", "marked-footnote"];
-
-/**
- * 生成ワークフローの `npm install` に渡す "name@version ..." を組み立てる。
- * @param {{ packageRoot?: string, fsImpl?: {readFileSync}, markedVersion?: string }} [opts]
- * @returns {string}
- */
-export function buildDependencySpecs({ packageRoot = PACKAGE_ROOT, fsImpl = { readFileSync }, markedVersion } = {}) {
-  return BUILD_DEPENDENCIES.map((name) => {
-    const version =
-      name === "marked" && markedVersion ? markedVersion : readDependencyVersion(name, packageRoot, fsImpl);
-    return `${name}@${version}`;
-  }).join(" ");
-}
 
 // ビルド用の依存を入れる package.json の名前(${VENDOR_DIR}/package.json)
 const BUILD_PACKAGE_NAME = "tsuzuri-build";
@@ -193,11 +181,6 @@ export function readBuildLockfiles(packageRoot = PACKAGE_ROOT, fsImpl = { exists
   };
 }
 
-/** marked のバージョン(readDependencyVersion("marked") の短縮形) */
-export function readMarkedVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFileSync }) {
-  return readDependencyVersion("marked", packageRoot, fsImpl);
-}
-
 /**
  * バージョン("1.2.3")からメジャーバージョンのタグ("v1")を作る。
  * 利用者に案内する npx コマンドは、未リリースの main ではなくこのタグを指定する。
@@ -226,18 +209,16 @@ export function readPackageVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFi
  * 自己完結型のワークフロー。ビルドスクリプト本体(build-docs.mjs等)は `init` 実行時に
  * `${VENDOR_DIR}/` 配下へコピー済みであることが前提。
  * 本体は templates/.github/workflows/docs-pages.yml に置いたひな形で、ここでは
- * プレースホルダー(__OSS_REPO__ / __VENDOR_DIR__ / __BUILD_DEPENDENCIES__ / __TSUZURI_VERSION__)を
+ * プレースホルダー(__OSS_REPO__ / __VENDOR_DIR__ / __TSUZURI_VERSION__ / __MAJOR_TAG__)を
  * 置き換えるだけ。
  * ひな形を独立したYAMLファイルにしているのは、中で使う actions のバージョンを
  * Dependabot で自動更新できるようにするため。
  *
- * @param {string} [markedVersion] - marked のバージョン(テスト時の差し替え用。既定は package.json の値)
  * @param {string} [packageRoot] - テスト時に差し替え可能にするため引数化している
  * @param {{readFileSync}} [fsImpl] - テスト用差し替え
  * @returns {string}
  */
 export function buildDocsPagesYml(
-  markedVersion = readMarkedVersion(),
   packageRoot = PACKAGE_ROOT,
   fsImpl = { readFileSync },
   { tsuzuriVersion = readPackageVersion(packageRoot, fsImpl) } = {},
@@ -249,7 +230,6 @@ export function buildDocsPagesYml(
   return template
     .replaceAll("__OSS_REPO__", OSS_REPO)
     .replaceAll("__VENDOR_DIR__", VENDOR_DIR)
-    .replaceAll("__BUILD_DEPENDENCIES__", buildDependencySpecs({ packageRoot, fsImpl, markedVersion }))
     .replaceAll("__TSUZURI_VERSION__", tsuzuriVersion)
     .replaceAll("__MAJOR_TAG__", majorTagOf(tsuzuriVersion));
 }
@@ -588,14 +568,6 @@ export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
   const createStyleFile = parseYesNo(createStyleFileInput, false);
 
   return { triggerBranch, rootMd, theme, navEnabled, languages, siteName, createStyleFile };
-}
-
-/**
- * コマンドライン引数に `--update` が含まれるかを判定する。
- * @param {string[]} argv - process.argv.slice(2) 相当
- */
-export function isUpdateMode(argv = []) {
-  return argv.includes("--update");
 }
 
 /**

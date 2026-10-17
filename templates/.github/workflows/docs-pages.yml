@@ -1,6 +1,6 @@
 # このファイルは tsuzuri の init が利用者リポジトリに生成するワークフローのひな形。
 # bin/cli.mjs の buildDocsPagesYml() が読み込み、次のプレースホルダーを置き換えて出力する。
-#   __OSS_REPO__ / __VENDOR_DIR__ / __BUILD_DEPENDENCIES__ / __TSUZURI_VERSION__ / __MAJOR_TAG__
+#   __OSS_REPO__ / __VENDOR_DIR__ / __TSUZURI_VERSION__ / __MAJOR_TAG__
 # (この先頭のコメントブロックは出力に含まれない)
 # templates/ 配下に .github/workflows/ の形で置いているのは、Dependabot に
 # actions のバージョン更新の対象として認識させるため(ここでワークフローとして実行はされない)。
@@ -125,7 +125,7 @@ jobs:
         with:
           node-version: 24
 
-      # ビルド用の依存(__BUILD_DEPENDENCIES__)は .github/tsuzuri/node_modules に入れる
+      # ビルド用の依存は .github/tsuzuri/node_modules に入れる(版は .github/tsuzuri/package.json に書いてある)
       # (利用者の package.json とは切り離す)。.github/tsuzuri/package-lock.json のとおりに npm ci で入れるので、
       # ダウンロードした中身のハッシュが違えば止まる。インストールスクリプトは実行しない。
       # 続けて、依存が npm の正規の署名付きで配布されたものかも確認する。
