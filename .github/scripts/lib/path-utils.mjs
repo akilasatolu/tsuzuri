@@ -234,11 +234,6 @@ export function encodeUrlPath(p) {
   return p.split("/").map(encodeURIComponent).join("/");
 }
 
-// ページ(リポジトリ内の .md のパス)の、サイト上の絶対パス。ナビ・前後ページのリンク用。
-export function pageHref(rel, basePath) {
-  return `${basePath}/${encodeUrlPath(outputRelOf(rel.replace(/\.md$/i, ".html")))}`;
-}
-
 // 出力 HTML に書き込む最終的な絶対パスを組み立てる
 // (.md は .html に変換し、outputRelOf・encodeUrlPath を通したうえで basePath を先頭に付与する)
 //

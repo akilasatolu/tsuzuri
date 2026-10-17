@@ -992,7 +992,7 @@ async function main() {
     if (config.navEnabled && site.orderIndex.has(rel)) {
       const i = site.orderIndex.get(rel);
       const pagerLabels = { prev: S.pagerPrev, next: S.pagerNext, nav: S.pagerNav };
-      bodyHtml += renderPager(site.order[i - 1] ?? null, site.order[i + 1] ?? null, config.basePath, pagerLabels, {
+      bodyHtml += renderPager(site.order[i - 1] ?? null, site.order[i + 1] ?? null, pagerLabels, {
         hrefFor,
       });
     }
@@ -1030,7 +1030,7 @@ async function main() {
     }
 
     const navHtml = config.navEnabled
-      ? renderNav(site.tree, rel, config.basePath, config.siteName, S.menu, site.search, S.navLabel, {
+      ? renderNav(site.tree, rel, config.siteName, S.menu, site.search, S.navLabel, {
           hrefFor,
           langSwitchHtml: langSwitch,
         })

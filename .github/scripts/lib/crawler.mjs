@@ -21,14 +21,13 @@
  *       - "path-traversal" / "decode-error" → セキュリティ上疑わしい入力として
  *         `rejected` 配列に記録する。
  *
- * 多言語対応(`i18n` に言語の決まり lib/i18n.mjs の createLangContext の戻り値を渡したとき):
+ * 多言語対応(`i18n` に言語の決まり lib/i18n.mjs の createLangContext の戻り値を渡す。必須):
  *   手順0(1言語でも): queue に Markdown を入れるとき、印の無いファイルで、同じフォルダに
  *         基本言語の印付きの版(実際のファイル名)があれば、印付きの方を入れる(`shadowed` に記録)。
  *   手順1(多言語だけ): 読んだページの別の言語版を、フォルダの実際のファイル名から探して集める。
  *   手順2(多言語だけ): サイト直下へのリンクは、リンク元の言語のトップを指す。
  *   手順3(1言語でも): フォルダへのリンクの入口を、言語の決まりの順番(candidates)で探す。
  *   手順4(多言語だけ): 他の言語の URL の先頭と同じ名前の一番上のフォルダのページを `prefixConflicts` に入れる。
- *   `i18n` を渡さなければ今と同じ動き。
  */
 
 import fs from "node:fs";
@@ -38,7 +37,6 @@ import {
   isMarkdownPath,
   isImagePath,
   isLinkedFilePath,
-  DIR_INDEX_NAMES,
 } from "./path-utils.mjs";
 import { extractLinks, firstHeadingText } from "./link-extractor.mjs";
 import { parseFrontmatter } from "./frontmatter.mjs";
@@ -84,7 +82,7 @@ function defaultIsDirectory(abs) {
  * @param {(path: string) => boolean} [options.exists] - DI: ファイル存在確認(既定 fs.existsSync)
  * @param {(path: string) => string} [options.realpath] - DI: シンボリックリンク解決(既定 fs.realpathSync)
  * @param {(path: string) => boolean} [options.isDirectory] - DI: ディレクトリか(既定 fs.statSync)
- * @param {import("./i18n.mjs").LangContext} [options.i18n] - 言語の決まり。省略時は今と同じ動き
+ * @param {import("./i18n.mjs").LangContext} options.i18n - 言語の決まり(1言語のサイトでも渡す)
  * @param {(path: string) => string[]} [options.readDir] - DI: フォルダの中のファイル名一覧
  *   (既定 fs.readdirSync。読めなければ・例外なら [])
  * @returns {{
@@ -99,7 +97,7 @@ function defaultIsDirectory(abs) {
  *   rootRel: string,
  * }}
  *   prefixConflicts: 他の言語の URL の先頭と同じ名前の一番上のフォルダにあるページ(多言語でなければ空)
- *   shadowed: 印の無い rel → 代わりに集めた基本言語の印付きの rel(i18n を渡さなければ空)
+ *   shadowed: 印の無い rel → 代わりに集めた基本言語の印付きの rel
  *   rootRel: 手順0の置き換え後の起点
  */
 export function crawlSite({
@@ -109,7 +107,7 @@ export function crawlSite({
   exists = fs.existsSync,
   realpath = fs.realpathSync,
   isDirectory = defaultIsDirectory,
-  i18n = null,
+  i18n,
   readDir = defaultReadDir,
 }) {
   const visitedMd = new Map(); // relPath(posix) -> { content, meta, h1 }
@@ -129,7 +127,7 @@ export function crawlSite({
     return abs && exists(abs) ? abs : null;
   };
 
-  const multi = Boolean(i18n && i18n.enabled);
+  const multi = i18n.enabled;
   const shadowed = new Map();
   // フォルダの中の実際のファイル名(フォルダごとに1度だけ読む)。リポジトリの外は読まない
   const dirCache = new Map();
@@ -171,7 +169,7 @@ export function crawlSite({
     );
   /** 手順0: 印の無い Markdown なら、基本言語の印付きの版(実在すれば)に置き換える */
   const preferMarked = (rel) => {
-    if (!i18n || i18n.markerOf(rel) !== null) return rel;
+    if (i18n.markerOf(rel) !== null) return rel;
     const { dir, name } = splitRel(rel);
     const marked = findVariant(dir, name, i18n.base);
     if (!marked) return rel;
@@ -290,8 +288,7 @@ export function crawlSite({
       }
 
       if (isMarkdownPath(bare)) {
-        if (i18n) pushMd(bare, rel);
-        else queue.push({ rel: bare, parent: rel });
+        pushMd(bare, rel);
         continue;
       }
       if (isImagePath(bare)) {
@@ -314,15 +311,13 @@ export function crawlSite({
       if (isDirectory(abs)) {
         // ディレクトリ: 中の README.md / index.md をたどり、サイトの "dir/" へのリンクにする。
         // どちらも無ければ、GitHub 上のディレクトリ一覧へのリンクにする。
-        // 手順3: i18n があれば、言語の決まりの順番で実際のファイル名から探す
-        const indexRel = i18n
-          ? findDirIndex(bare, i18n.langOf(rel))
-          : DIR_INDEX_NAMES.map((name) => `${bare}/${name}`).find((c) => existsInRepo(c));
+        // 手順3: 言語の決まりの順番で実際のファイル名から探す
+        const indexRel = findDirIndex(bare, i18n.langOf(rel));
         if (indexRel) {
           // 入口は candidates の順で基本言語の印付きを先に探してあるので、手順0の置き換えは通さない
           // (置き換えると、入口の名前の決まりに合わない印付き(Index.en.md)を拾うことがある)
           queue.push({ rel: indexRel, parent: rel });
-          if (i18n) recordShadowedDirIndex(bare, indexRel);
+          recordShadowedDirIndex(bare, indexRel);
           if (!linkTargets.has(bare)) linkTargets.set(bare, { kind: "dir", referencedFrom: rel });
         } else if (!linkTargets.has(bare)) {
           linkTargets.set(bare, { kind: "repo", isDir: true, referencedFrom: rel });

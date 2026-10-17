@@ -14,7 +14,7 @@
  *   renderLangSwitch  — 多言語サイトの言語切り替えボタン(JavaScript を使わない普通のリンク)。
  */
 
-import { isExternal, toSiteAbsHref, pageHref, mapSrcsetUrls, SRCSET_ATTR } from "./path-utils.mjs";
+import { isExternal, toSiteAbsHref, mapSrcsetUrls, SRCSET_ATTR } from "./path-utils.mjs";
 import { uiStrings, formatUi, languageName } from "./i18n.mjs";
 
 /**
@@ -43,15 +43,14 @@ export function escapeHtml(s) {
  *
  * @param {import("./site-tree.mjs").DirNode} tree - buildSiteTree の戻り値(ルートディレクトリ)
  * @param {string} currentRel - 現在描画中のページのrel(aria-current付与判定用)
- * @param {string} basePath
  * @param {string} [siteName]
  * @param {string} [menuLabel] - 狭い画面で表示する開閉ボタンの文言
  * @param {{ indexUrl: string, scriptUrl: string, placeholder: string, empty: string } | null} [search]
  *   - サイト内検索の設定。指定すると検索欄の置き場所と検索スクリプトの読み込みを出力する
  *     (検索欄そのものはスクリプトが作るため、JavaScriptが動かない環境では何も表示されない)
  * @param {string} [navLabel] - <nav> の aria-label
- * @param {{ hrefFor?: (rel: string) => string, langSwitchHtml?: string }} [opts]
- *   - hrefFor: ページへのリンク先の組み立て(省略時は pageHref(rel, basePath))
+ * @param {{ hrefFor: (rel: string) => string, langSwitchHtml?: string }} opts
+ *   - hrefFor: ページへのリンク先の組み立て(必須。言語ごとの URL の決まりを知っている呼び出し側が渡す)
  *   - langSwitchHtml: 言語切り替えボタンのHTML。見出し(サイト名)と「メニュー」ラベルの間に入れる
  *     (ライト/ダーク切り替えは「メニュー」ラベルの手前に差し込まれるので、並びは サイト名・言語・☾・メニュー)
  * @returns {string}
@@ -59,12 +58,11 @@ export function escapeHtml(s) {
 export function renderNav(
   tree,
   currentRel,
-  basePath,
   siteName,
   menuLabel = "メニュー",
   search = null,
   navLabel = "サイト内ページ",
-  { hrefFor = (rel) => pageHref(rel, basePath), langSwitchHtml = "" } = {},
+  { hrefFor, langSwitchHtml = "" },
 ) {
   // ディレクトリは <details> で折りたためるようにする(JavaScript は不要)。
   // どのページを見ていても全ページへのリンクが見えるよう、最初はすべて開いておく。
@@ -150,17 +148,15 @@ export function renderLangSwitch({ current, entries, strings, placement }) {
  *
  * @param {{ rel: string, title: string } | null} prev
  * @param {{ rel: string, title: string } | null} next
- * @param {string} basePath
- * @param {{ prev: string, next: string, nav: string }} [labels]
- * @param {{ hrefFor?: (rel: string) => string }} [opts] - hrefFor: リンク先の組み立て(省略時は pageHref(rel, basePath))
+ * @param {{ prev: string, next: string, nav: string }} labels
+ * @param {{ hrefFor: (rel: string) => string }} opts - hrefFor: リンク先の組み立て(必須)
  * @returns {string}
  */
 export function renderPager(
   prev,
   next,
-  basePath,
   labels = { prev: "前のページ", next: "次のページ", nav: "前後のページ" },
-  { hrefFor = (rel) => pageHref(rel, basePath) } = {},
+  { hrefFor },
 ) {
   if (!prev && !next) return "";
   const link = (page, rel, label) =>

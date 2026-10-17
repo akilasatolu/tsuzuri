@@ -21,6 +21,11 @@ function makeFs(files) {
   };
 }
 
+// 1言語(ja。印付きのファイルを使わない)のサイトとして集める。crawlSite は i18n が必須なので、補って呼ぶ
+function crawlPlain(opts) {
+  return crawlSite({ i18n: createLangContext({ languages: ["ja"], rootMd: opts.rootRel }), ...opts });
+}
+
 describe("crawlSite", () => {
   test("root→リンク先md→画像まで到達可能なものだけ収集する", () => {
     const { readFile, exists } = makeFs({
@@ -28,7 +33,7 @@ describe("crawlSite", () => {
       "docs/a.md": "# A\n![img](img.png)\n",
       "docs/img.png": "binary",
     });
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
 
     assert.deepEqual([...result.visitedMd.keys()].sort(), ["README.md", "docs/a.md"]);
     assert.deepEqual([...result.imageSet], ["docs/img.png"]);
@@ -40,7 +45,7 @@ describe("crawlSite", () => {
       "docs/a.md": "# A\n",
       "docs/unrelated.md": "# Unrelated\n",
     });
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
 
     assert.equal(result.visitedMd.has("docs/unrelated.md"), false);
   });
@@ -50,7 +55,7 @@ describe("crawlSite", () => {
       "README.md": "# Root\n[missing](docs/missing.md)\n[b](docs/b.md)\n",
       "docs/b.md": "# B\n",
     });
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
 
     assert.deepEqual(result.missing, [{ rel: "docs/missing.md", referencedFrom: "README.md" }]);
     // missing があっても後続の探索は継続する
@@ -63,7 +68,7 @@ describe("crawlSite", () => {
       "a.md": "# A\n[b](b.md)\n",
       "b.md": "# B\n[back to a](a.md)\n",
     });
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
 
     assert.deepEqual([...result.visitedMd.keys()].sort(), ["README.md", "a.md", "b.md"]);
   });
@@ -73,7 +78,7 @@ describe("crawlSite", () => {
       "README.md": "# Root\n[a1](a.md) [a2](a.md) [a3](./a.md)\n",
       "a.md": "# A\n",
     });
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
 
     assert.equal(result.visitedMd.size, 2);
     // a.md の子として README.md → a.md のエッジは1つだけ登録される
@@ -84,7 +89,7 @@ describe("crawlSite", () => {
     const { readFile, exists } = makeFs({
       "README.md": "# Root\n```\n[fake](evil.md)\n```\n`[inline-fake](evil2.md)`\n",
     });
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
 
     assert.equal(result.visitedMd.has("evil.md"), false);
     assert.equal(result.visitedMd.has("evil2.md"), false);
@@ -95,7 +100,7 @@ describe("crawlSite", () => {
     const { readFile, exists } = makeFs({
       "README.md": "# Root\n[bad1](../../../etc/passwd)\n[bad2](%)\n",
     });
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
 
     assert.equal(result.rejected.length, 2);
     const reasons = result.rejected.map((r) => r.reason).sort();
@@ -111,7 +116,7 @@ describe("crawlSite", () => {
     const { readFile, exists } = makeFs({
       "README.md": "# Root\n[ext](https://example.com/a.md)\n[anchor](#section)\n",
     });
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
 
     assert.deepEqual(result.rejected, []);
     assert.deepEqual(result.missing, []);
@@ -123,7 +128,7 @@ describe("crawlSite", () => {
       "README.md": "---\ntitle: My Title\ndescription: My Desc\n---\n# Root\n[a](a.md)\n",
       "a.md": "# A (no frontmatter)\n",
     });
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
 
     const rootEntry = result.visitedMd.get("README.md");
     assert.deepEqual(rootEntry.meta, { title: "My Title", description: "My Desc" });
@@ -142,7 +147,7 @@ describe("crawlSite", () => {
       if (p === path.join(REPO_ROOT, "secret.md")) return "/home/user/.ssh/id_rsa.md";
       return p;
     };
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists, realpath });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists, realpath });
     assert.deepEqual([...result.visitedMd.keys()], ["README.md"]);
     assert.deepEqual(result.rejected, [
       { rel: "secret.md", referencedFrom: "README.md", reason: "outside-repo" },
@@ -153,7 +158,7 @@ describe("crawlSite", () => {
     const { readFile, exists } = makeFs({
       "README.md": "[pdf](docs/manual.pdf) [zip](a.zip) [dir](docs/) [env](.env) [cfg](.github/x.json) ![i](i.png)\n",
     });
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
     assert.deepEqual([...result.fileSet].sort(), ["a.zip", "docs/manual.pdf"]);
     assert.deepEqual([...result.imageSet], ["i.png"]);
   });
@@ -166,7 +171,7 @@ describe("crawlSite", () => {
       "notes.txt": "t",
       "a.zip": "z",
     });
-    const result = crawlSite({
+    const result = crawlPlain({
       repoRoot: REPO_ROOT,
       rootRel: "README.md",
       readFile,
@@ -573,26 +578,18 @@ describe("crawlSite(手順3: 1言語のフォルダの入口)", () => {
   });
 });
 
-describe("crawlSite(i18n 省略)", () => {
+describe("crawlSite(1言語で印付きのファイルが無いサイト)", () => {
   test("新しい戻り値は空・起点はそのまま", () => {
     const { readFile, exists } = makeFs({ "README.md": "# Root\n", "README.en.md": "# EN\n" });
-    const result = crawlSite({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
+    const result = crawlPlain({ repoRoot: REPO_ROOT, rootRel: "README.md", readFile, exists });
     assert.deepEqual(result.prefixConflicts, []);
     assert.equal(result.shadowed.size, 0);
     assert.equal(result.rootRel, "README.md");
     assert.deepEqual([...result.visitedMd.keys()], ["README.md"]);
   });
-});
 
-// 1言語で印付きのファイルが無いサイトは、i18n を渡しても渡さなくても同じ結果(新しく足した3つを除く)
-function withoutNewKeys(result) {
-  const { prefixConflicts, shadowed, rootRel, ...rest } = result;
-  return { rest, prefixConflicts, shadowed: [...shadowed], rootRel };
-}
-
-describe("crawlSite(1言語の i18n は今と同じ結果)", () => {
-  // 既存のテストと同じ材料: フォルダへのリンク(README.md・readme.md・index.md・入口の無いもの・
-  // 大文字・小文字の違う入口)・サイト直下・画像・ファイル・missing・rejected
+  // フォルダへのリンクの入口(README.md・readme.md・index.md・入口の無いもの・大文字・小文字の違う入口)・
+  // サイト直下・画像・ファイル・missing・rejected・LANGUAGES に無い印のファイル
   const files = {
     "README.md": [
       "# Root",
@@ -614,30 +611,43 @@ describe("crawlSite(1言語の i18n は今と同じ結果)", () => {
   };
 
   for (const caseInsensitive of [false, true]) {
-    test(`偽物の fs(大文字・小文字を${caseInsensitive ? "区別しない" : "区別する"})`, () => {
+    test(`偽物の fs(大文字・小文字を${caseInsensitive ? "区別しない" : "区別する"}): フォルダの入口・サイト直下・画像・ファイル・リンク切れ`, () => {
       const fsx = makeI18nFs(files, { caseInsensitive });
-      const opts = {
+      const result = crawlSite({
         repoRoot: REPO_ROOT,
         rootRel: "README.md",
         readFile: fsx.readFile,
         exists: fsx.exists,
         isDirectory: fsx.isDirectory,
         readDir: fsx.readDir,
-      };
-      const plain = crawlSite(opts);
-      const withI18n = crawlSite({ ...opts, i18n: createLangContext({ languages: ["ja"], rootMd: "README.md" }) });
-      const got = withoutNewKeys(withI18n);
-      assert.deepEqual(got.rest, withoutNewKeys(plain).rest);
-      assert.deepEqual(got.prefixConflicts, []);
-      assert.deepEqual(got.shadowed, []);
-      assert.equal(got.rootRel, "README.md");
-      // 区別する環境では mixed/Readme.md・cap/Index.md は今と同じく入口ではない(GitHub へのリンク)
+        i18n: createLangContext({ languages: ["ja"], rootMd: "README.md" }),
+      });
+      assert.deepEqual(result.prefixConflicts, []);
+      assert.equal(result.shadowed.size, 0);
+      assert.equal(result.rootRel, "README.md");
+      // README.md・readme.md・index.md の入口があるフォルダは dir、入口の無いフォルダは repo(GitHub へのリンク)
+      for (const dir of ["guide", "lower", "idx"]) assert.equal(result.linkTargets.get(dir).kind, "dir", dir);
+      assert.deepEqual(result.linkTargets.get("noindex"), { kind: "repo", isDir: true, referencedFrom: "README.md" });
+      assert.equal(result.linkTargets.get("LICENSE").kind, "repo");
+      assert.deepEqual([...result.imageSet], ["docs/img.png"]);
+      assert.deepEqual([...result.fileSet], ["docs/m.pdf"]);
+      assert.deepEqual(result.missing, [{ rel: "docs/missing.md", referencedFrom: "README.md" }]);
+      assert.equal(result.rejected.length, 1);
+      assert.equal(result.rejected[0].reason, "path-traversal");
+      // LANGUAGES に無い印(cli.en.md)は、普通のページとして集める
+      assert.ok(result.visitedMd.has("cli.en.md"));
+      const common = ["README.md", "cli.en.md", "docs/a.md", "guide/README.md", "idx/index.md"];
       if (!caseInsensitive) {
-        assert.equal(withI18n.linkTargets.get("mixed").kind, "repo");
-        assert.equal(withI18n.linkTargets.get("cap").kind, "repo");
+        // 区別する環境では mixed/Readme.md・cap/Index.md は入口ではない(GitHub へのリンク)
+        assert.equal(result.linkTargets.get("mixed").kind, "repo");
+        assert.equal(result.linkTargets.get("cap").kind, "repo");
+        assert.deepEqual(keys(result), [...common, "lower/readme.md"]);
       } else {
-        // 区別しない環境では今と同じく候補の綴り(cap/index.md)で集まる
-        assert.ok(withI18n.visitedMd.has("cap/index.md"));
+        // 区別しない環境では候補の綴り(lower/README.md・mixed/README.md・cap/index.md)で集まる
+        assert.equal(result.linkTargets.get("mixed").kind, "dir");
+        assert.equal(result.linkTargets.get("cap").kind, "dir");
+        assert.ok(result.visitedMd.has("cap/index.md"));
+        assert.deepEqual(keys(result), [...common, "cap/index.md", "lower/README.md", "mixed/README.md"].sort());
       }
     });
   }
@@ -645,11 +655,11 @@ describe("crawlSite(1言語の i18n は今と同じ結果)", () => {
   test("本物の fs: ゴールデンの fixture(test/fixtures/site-golden)", () => {
     const repoRoot = fileURLToPath(new URL("./fixtures/site-golden", import.meta.url));
     for (const languages of [["ja"], ["en"], ["fr"]]) {
-      const plain = crawlSite({ repoRoot, rootRel: "README.md" });
-      const withI18n = crawlSite({ repoRoot, rootRel: "README.md", i18n: createLangContext({ languages, rootMd: "README.md" }) });
-      assert.ok(plain.visitedMd.size > 1);
-      assert.deepEqual(withoutNewKeys(withI18n).rest, withoutNewKeys(plain).rest, languages.join(","));
-      assert.equal(withI18n.shadowed.size, 0);
+      const result = crawlSite({ repoRoot, rootRel: "README.md", i18n: createLangContext({ languages, rootMd: "README.md" }) });
+      assert.ok(result.visitedMd.size > 1, languages.join(","));
+      assert.equal(result.shadowed.size, 0, languages.join(","));
+      assert.deepEqual(result.prefixConflicts, []);
+      assert.equal(result.rootRel, "README.md");
     }
   });
 });

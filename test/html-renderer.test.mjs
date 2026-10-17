@@ -15,7 +15,22 @@ import {
 } from "../.github/scripts/lib/html-renderer.mjs";
 import { uiStrings } from "../.github/scripts/lib/i18n.mjs";
 import { buildSiteTree } from "../.github/scripts/lib/site-tree.mjs";
-import { pageHref } from "../.github/scripts/lib/path-utils.mjs";
+import { encodeUrlPath, outputRelOf } from "../.github/scripts/lib/path-utils.mjs";
+
+// ページ(.md)のサイト上の絶対パス。renderNav / renderPager の hrefFor の代わりに、テストで使う
+// (本体は言語ごとの URL の決まりで hrefFor を組み立てる)
+const pageHref = (rel, basePath) => `${basePath}/${encodeUrlPath(outputRelOf(rel.replace(/\.md$/i, ".html")))}`;
+
+// renderNav / renderPager は hrefFor が必須なので、basePath から hrefFor を作って渡す
+function nav(tree, currentRel, basePath, siteName, menuLabel, search, navLabel, opts = {}) {
+  return renderNav(tree, currentRel, siteName, menuLabel, search, navLabel, {
+    hrefFor: (rel) => pageHref(rel, basePath),
+    ...opts,
+  });
+}
+function pager(prev, next, basePath, labels, opts = {}) {
+  return renderPager(prev, next, labels, { hrefFor: (rel) => pageHref(rel, basePath), ...opts });
+}
 
 describe("escapeHtml", () => {
   test("& < > \" のみをエスケープする", () => {
@@ -36,14 +51,14 @@ describe("renderNav", () => {
   ]);
 
   test("全ページがリンクとして出現する", () => {
-    const html = renderNav(tree, "README.md", "", "");
+    const html = nav(tree, "README.md", "", "");
     for (const href of ["/README.html", "/docs/a.html", "/guide.html", "/docs/deep/b.html"]) {
       assert.match(html, new RegExp(`<a href="${href}"`));
     }
   });
 
   test("ディレクトリは折りたためる<details>+入れ子の<ul>。どのページでも最初はすべて開いておく", () => {
-    const html = renderNav(tree, "README.md", "", "");
+    const html = nav(tree, "README.md", "", "");
     assert.match(
       html,
       /<li><details open><summary>docs<\/summary><ul><li><a href="\/docs\/a\.html">ページA<\/a><\/li><li><details open><summary>deep<\/summary><ul><li><a href="\/docs\/deep\/b\.html">b\.md<\/a><\/li><\/ul><\/details><\/li><\/ul><\/details><\/li>/
@@ -53,36 +68,36 @@ describe("renderNav", () => {
 
 
   test("表示名はfrontmatterのtitle、無ければファイル名", () => {
-    const html = renderNav(tree, "README.md", "", "");
+    const html = nav(tree, "README.md", "", "");
     assert.match(html, />ホーム<\/a>/);
     assert.match(html, />guide\.md<\/a>/);
     assert.doesNotMatch(html, />docs\/deep\/b\.md</);
   });
 
   test("currentRelに一致する項目にのみaria-currentが付与される", () => {
-    const html = renderNav(tree, "guide.md", "", "");
+    const html = nav(tree, "guide.md", "", "");
     assert.match(html, /<a href="\/guide\.html" aria-current="page">/);
     assert.equal(html.match(/aria-current/g).length, 1);
   });
 
   test("basePathがhrefに反映される", () => {
-    const html = renderNav(tree, "README.md", "/my-repo", "");
+    const html = nav(tree, "README.md", "/my-repo", "");
     assert.match(html, /<a href="\/my-repo\/README\.html"/);
   });
 
   test("siteNameが設定されていればnav先頭に見出しとして表示する", () => {
-    const html = renderNav(tree, "README.md", "", "My Site");
+    const html = nav(tree, "README.md", "", "My Site");
     assert.match(html, /<div class="tsuzuri-nav-head"><p>My Site<\/p><label/);
   });
 
   test("siteName未設定なら見出しは出力されない", () => {
-    const html = renderNav(tree, "README.md", "", "");
+    const html = nav(tree, "README.md", "", "");
     assert.match(html, /<div class="tsuzuri-nav-head"><label/);
     assert.doesNotMatch(html, /<p>/);
   });
 
   test("狭い画面用の開閉チェックボックスとラベル(既定の文言は「メニュー」)を出力する", () => {
-    const html = renderNav(tree, "README.md", "", "");
+    const html = nav(tree, "README.md", "", "");
     assert.match(
       html,
       /^<nav aria-label="サイト内ページ"><input type="checkbox" id="tsuzuri-nav-toggle" class="tsuzuri-nav-toggle"><div class="tsuzuri-nav-head"><label for="tsuzuri-nav-toggle" class="tsuzuri-nav-label">メニュー<\/label><\/div><ul>/
@@ -91,21 +106,21 @@ describe("renderNav", () => {
 
   test("searchを指定すると検索欄の置き場所とスクリプトの読み込みを出力する(未指定なら出力しない)", () => {
     const search = { indexUrl: "/r/search-index.json", scriptUrl: "/r/tsuzuri-search.js", placeholder: "検索", empty: "なし" };
-    const html = renderNav(tree, "README.md", "/r", "", "メニュー", search);
+    const html = nav(tree, "README.md", "/r", "", "メニュー", search);
     assert.match(
       html,
       /<div class="tsuzuri-search" data-index="\/r\/search-index\.json" data-placeholder="検索" data-empty="なし"><\/div><script src="\/r\/tsuzuri-search\.js" defer><\/script><ul>/
     );
-    assert.doesNotMatch(renderNav(tree, "README.md", "/r", ""), /tsuzuri-search/);
+    assert.doesNotMatch(nav(tree, "README.md", "/r", ""), /tsuzuri-search/);
   });
 
   test("開閉ボタンの文言は指定でき、エスケープされる", () => {
-    const html = renderNav(tree, "README.md", "", "", "Menu <x>");
+    const html = nav(tree, "README.md", "", "", "Menu <x>");
     assert.match(html, />Menu &lt;x&gt;<\/label>/);
   });
 
   test("titleはエスケープされる", () => {
-    const html = renderNav(buildSiteTree([["x.md", { meta: { title: "<b>&" } }]]), "x.md", "", "");
+    const html = nav(buildSiteTree([["x.md", { meta: { title: "<b>&" } }]]), "x.md", "", "");
     assert.match(html, />&lt;b&gt;&amp;<\/a>/);
   });
 });
@@ -117,16 +132,21 @@ describe("renderNav の組み立て用の引数", () => {
   ]);
   const args = [tree, "docs/a.md", "/repo", "サイト", "メニュー", null, "サイト内ページ"];
 
-  test("8番目を省略・空のオブジェクト・既定と同じ値 → 今と同じ文字列", () => {
-    const base = renderNav(...args);
-    assert.equal(renderNav(...args, {}), base);
-    assert.equal(renderNav(...args, { langSwitchHtml: "" }), base);
-    assert.equal(renderNav(...args, { hrefFor: (rel) => pageHref(rel, "/repo") }), base);
-    assert.match(base, /<div class="tsuzuri-nav-head"><p>サイト<\/p><label /);
+  test("renderNav は hrefFor を必須の引数として受け取る(basePath は受け取らない)", () => {
+    const html = renderNav(tree, "docs/a.md", "サイト", "メニュー", null, "サイト内ページ", {
+      hrefFor: (rel) => pageHref(rel, "/repo"),
+    });
+    assert.equal(html, nav(...args));
+    assert.match(html, /<div class="tsuzuri-nav-head"><p>サイト<\/p><label /);
+    assert.throws(() => renderNav(tree, "docs/a.md", "サイト"), TypeError);
+  });
+
+  test("langSwitchHtml が空の文字列なら、指定しないときと同じ文字列", () => {
+    assert.equal(nav(...args, { langSwitchHtml: "" }), nav(...args));
   });
 
   test("hrefFor を渡すとページへのリンク先がそれで決まる(エスケープもする)", () => {
-    const html = renderNav(...args, { hrefFor: (rel) => `/x/en/${rel}?a&b` });
+    const html = nav(...args, { hrefFor: (rel) => `/x/en/${rel}?a&b` });
     assert.match(html, /<a href="\/x\/en\/README\.md\?a&amp;b">ホーム<\/a>/);
     assert.match(html, /<a href="\/x\/en\/docs\/a\.md\?a&amp;b" aria-current="page">ページA<\/a>/);
     assert.doesNotMatch(html, /href="\/repo\//);
@@ -134,11 +154,11 @@ describe("renderNav の組み立て用の引数", () => {
 
   test("langSwitchHtml はサイト名と「メニュー」ラベルの間に入る(サイト名が無ければ先頭)", () => {
     const sw = '<a class="tsuzuri-lang-switch" href="/en/">English</a>';
-    const html = renderNav(...args, { langSwitchHtml: sw });
+    const html = nav(...args, { langSwitchHtml: sw });
     assert.ok(
       html.includes(`<div class="tsuzuri-nav-head"><p>サイト</p>${sw}<label for="tsuzuri-nav-toggle" class="tsuzuri-nav-label">メニュー</label></div>`),
     );
-    const noName = renderNav(tree, "", "", undefined, "Menu", null, "Site pages", { langSwitchHtml: sw });
+    const noName = nav(tree, "", "", undefined, "Menu", null, "Site pages", { langSwitchHtml: sw });
     assert.ok(noName.includes(`<div class="tsuzuri-nav-head">${sw}<label `));
   });
 });
@@ -543,28 +563,29 @@ describe("renderPager", () => {
   const b = { rel: "docs/b.md", title: "<B>" };
 
   test("前後のページへのリンクを rel=prev/next 付きで出力し、タイトルはエスケープする", () => {
-    const html = renderPager(a, b, "/repo");
+    const html = pager(a, b, "/repo");
     assert.match(html, /^<nav class="tsuzuri-pager" aria-label="前後のページ">/);
     assert.match(html, /<a class="tsuzuri-pager-prev" rel="prev" href="\/repo\/docs\/a\.html"><span>前のページ<\/span>ページA<\/a>/);
     assert.match(html, /<a class="tsuzuri-pager-next" rel="next" href="\/repo\/docs\/b\.html"><span>次のページ<\/span>&lt;B&gt;<\/a>/);
   });
   test("片方だけのときはその片方だけ、どちらも無ければ空文字", () => {
-    assert.doesNotMatch(renderPager(null, b, ""), /rel="prev"/);
-    assert.doesNotMatch(renderPager(a, null, ""), /rel="next"/);
-    assert.equal(renderPager(null, null, ""), "");
+    assert.doesNotMatch(pager(null, b, ""), /rel="prev"/);
+    assert.doesNotMatch(pager(a, null, ""), /rel="next"/);
+    assert.equal(pager(null, null, ""), "");
   });
   test("文言は指定できる", () => {
-    const html = renderPager(a, null, "", { prev: "Previous", next: "Next", nav: "Pager" });
+    const html = pager(a, null, "", { prev: "Previous", next: "Next", nav: "Pager" });
     assert.match(html, /aria-label="Pager"/);
     assert.match(html, /<span>Previous<\/span>/);
   });
-  test("5番目を省略・空のオブジェクト → 今と同じ。labels が undefined でも既定の文言", () => {
-    const base = renderPager(a, b, "/repo");
-    assert.equal(renderPager(a, b, "/repo", undefined, {}), base);
-    assert.equal(renderPager(a, b, "/repo", undefined, { hrefFor: (rel) => pageHref(rel, "/repo") }), base);
+  test("renderPager は hrefFor を必須の引数として受け取る(basePath は受け取らない)。labels が undefined でも既定の文言", () => {
+    const html = renderPager(a, b, undefined, { hrefFor: (rel) => pageHref(rel, "/repo") });
+    assert.equal(html, pager(a, b, "/repo"));
+    assert.match(html, /aria-label="前後のページ"/);
+    assert.throws(() => renderPager(a, b), TypeError);
   });
   test("hrefFor を渡すとリンク先がそれで決まる(エスケープもする)", () => {
-    const html = renderPager(a, b, "/repo", undefined, { hrefFor: (rel) => `/repo/en/${rel.replace(/\.md$/, ".html")}?q="1"` });
+    const html = pager(a, b, "/repo", undefined, { hrefFor: (rel) => `/repo/en/${rel.replace(/\.md$/, ".html")}?q="1"` });
     assert.match(html, /rel="prev" href="\/repo\/en\/docs\/a\.html\?q=&quot;1&quot;"/);
     assert.match(html, /rel="next" href="\/repo\/en\/docs\/b\.html\?q=&quot;1&quot;"/);
   });
