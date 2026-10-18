@@ -7,13 +7,13 @@
 
 `main`(Tsuzuri 本体)と `docs`(利用者向けサイト)は、履歴を共有しない独立したブランチです。**互いにマージしないでください。**
 
-`main` への push で CI が成功するたびに、`.github/workflows/sync-docs.yml` が、そのコミットの Tsuzuri で `docs` ブランチに `init --update` を実行し、変更があれば `docs` へ push します。その push で、`docs` にだけある `docs-pages.yml` が動き、サイトが公開し直されます。
+`main` への push で CI が成功するたびに、`.github/workflows/sync-docs.yml` が、そのコミットの Tsuzuri で `docs` ブランチに `init --update` を実行し、変更があれば `docs` へ push します。その push で、`docs` にだけある `tsuzuri-pages.yml` が動き、サイトが公開し直されます。
 
 ```
-push to main → CI passes → sync-docs.yml → push to docs → docs-pages.yml → GitHub Pages
+push to main → CI passes → sync-docs.yml → push to docs → tsuzuri-pages.yml → GitHub Pages
 ```
 
-- 更新されるのは、`docs` の `.github/workflows/docs-pages.yml` と `.github/tsuzuri/` 配下だけです。`.github/docs-pages.config`・独自 CSS・README・`docs/` は変更されません。更新されるファイルは、手で編集しないでください。
+- 更新されるのは、`docs` のワークフロー(`.github/workflows/tsuzuri-pages.yml`)と、`.github/tsuzuri/` 配下のうち tsuzuri が配るファイル(ビルドスクリプト、`lib/`、組み込みテーマ CSS、`package.json`・`package-lock.json`、`.gitignore`)だけです。`.github/tsuzuri/config`・`.github/tsuzuri/styles/` に置いた独自 CSS(`custom.css` や `plain.css` など)・README・`docs/` は変更されません。更新されるファイルは、手で編集しないでください。
 - CI が失敗したときや、PR の CI では動きません。反映する変更が無いときはコミットしません。
 - `docs` への手動の push と重なったときは、`git pull --rebase` してから push し直してください。
 - 利用者向けドキュメントの修正は、`main` ではなく `docs` への PR で行います。
@@ -27,9 +27,9 @@ push to main → CI passes → sync-docs.yml → push to docs → docs-pages.yml
 1. `Settings > Pages` の `Source` を `GitHub Actions` にする(`github-pages` 環境が作成される)。
 2. `Settings > Environments > github-pages` の `Deployment branches and tags` に `docs` を追加する。
 
-2 を忘れると、デプロイのジョブが `Branch "docs" is not allowed to deploy to github-pages due to environment protection rules.` で失敗します。また、`docs-pages.yml` は `docs` にしか無いため、Actions タブに「Run workflow」ボタンは表示されません。`docs` への push でデプロイしてください。
+2 を忘れると、デプロイのジョブが `Branch "docs" is not allowed to deploy to github-pages due to environment protection rules.` で失敗します。また、`tsuzuri-pages.yml` は `docs` にしか無いため、Actions タブに「Run workflow」ボタンは表示されません。`docs` への push でデプロイしてください。
 
-**`sync-docs.yml` 用のデプロイキー。** `docs` への push に、既定の `GITHUB_TOKEN` は使えません。そのトークンで push すると、`docs-pages.yml` が起動しないためです。書き込み権限付きのデプロイキーを使います。
+**`sync-docs.yml` 用のデプロイキー。** `docs` への push に、既定の `GITHUB_TOKEN` は使えません。そのトークンで push すると、`tsuzuri-pages.yml` が起動しないためです。書き込み権限付きのデプロイキーを使います。
 
 1. パスフレーズなしで鍵ペアを作る。
 
@@ -80,7 +80,7 @@ Dependabot が週 1 回、`package.json` の依存パッケージ、ワークフ
 3. `emoji-data.mjs` の差分が、絵文字の追加・変更・削除だけであることを確かめる。
 4. コミットして push する(`@dependabot recreate` の扱いは上と同じ)。
 
-**GitHub Actions。** `init` が生成するワークフローは `templates/.github/workflows/docs-pages.yml` のひな形から作られ、その中の action も Dependabot が更新します。`ci.yml`・`sync-docs.yml`・ひな形で同じ action の版がずれるとテストが失敗するので、片方だけ更新されたら、ほかも合わせてください。
+**GitHub Actions。** `init` が生成するワークフローは `templates/.github/workflows/tsuzuri-pages.yml` のひな形から作られ、その中の action も Dependabot が更新します。`ci.yml`・`sync-docs.yml`・ひな形で同じ action の版がずれるとテストが失敗するので、片方だけ更新されたら、ほかも合わせてください。
 
 **mermaid。** 生成ページが CDN から読み込む版は、`.github/scripts/lib/html-renderer.mjs` の `MERMAID_VERSION` です。`deps/mermaid/package.json` は Dependabot に監視させるために同じ版を書いているだけです(インストールはしません)。このファイルの更新 PR が来たら、同じ PR で次を行います。
 
@@ -97,7 +97,7 @@ Dependabot が週 1 回、`package.json` の依存パッケージ、ワークフ
 手順:
 
 1. `main` で `npm test` と `npm run lint` が通り、CI が成功していることを確認する。
-2. `node scripts/check-package.mjs` を実行する。利用者が受け取るのと同じ、パッケージにまとめた中身を確かめる(内容はスクリプトの先頭のコメントを参照)。`init --update` が設定ファイルと独自 CSS(`.github/tsuzuri/styles/custom.css`)を保持することも含まれる。
+2. `node scripts/check-package.mjs` を実行する。利用者が受け取るのと同じ、パッケージにまとめた中身を確かめる(内容はスクリプトの先頭のコメントを参照)。`init --update` が設定ファイル(`.github/tsuzuri/config`)と独自 CSS(`.github/tsuzuri/styles/custom.css`)を保持することも含まれる。
 3. タグを付ける前に `CHANGELOG.md` を書く。`[Unreleased]` に、前回のタグから今回までの利用者に見える変更をまとめる(材料は、マージした PR と `git log v<前回の版>..main`。`v<前回の版>` の部分は前回のリリースのタグにする)。カテゴリは `CHANGELOG.md` の冒頭の説明に従う。見出しを `## [X.Y.Z] - YYYY-MM-DD` に改め、その上に空の `[Unreleased]` を追加する。各リリースの節には、英語のブロック、`<!-- ja -->` の行、日本語のカテゴリ名を使った日本語のブロックの順に書く(`CHANGELOG.md` の冒頭を参照)。`scripts/release-notes.mjs` は `## [X.Y.Z]` の節が無い、または空のとき、`<!-- ja -->` の行が無いとき、どちらかのブロックが空のときにエラーで止まり、`release.yml` はタグの push のあとにこれを実行する。
 4. `package.json` と `package-lock.json` の `version` を `X.Y.Z` にする(先頭の `version` と `packages[""].version`。依存パッケージの版は変えない)。
 5. コミットして `main` に push し、タグを付けて push する。
@@ -113,4 +113,4 @@ Dependabot が週 1 回、`package.json` の依存パッケージ、ワークフ
    - メジャーバージョンのタグ(`vX`)をこのコミットに付け替え
 
    手元の `vX` タグは古いままです。必要なら `git fetch --tags --force` で取り込みます。
-7. リリースのあと、`docs` のサイトが正しく公開されていることを確認する(CI の成功、`sync-docs.yml`、`docs-pages.yml` の順に動く)。
+7. リリースのあと、`docs` のサイトが正しく公開されていることを確認する(CI の成功、`sync-docs.yml`、`tsuzuri-pages.yml` の順に動く)。

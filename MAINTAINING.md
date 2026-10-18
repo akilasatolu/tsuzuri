@@ -7,13 +7,13 @@ This document is for people who can push to `main`: how the `docs` branch is kep
 
 `main` (Tsuzuri itself) and `docs` (the user-facing site) are independent branches with no shared history. **Never merge one into the other.**
 
-Every time CI succeeds on a push to `main`, `.github/workflows/sync-docs.yml` runs `init --update` with that commit's Tsuzuri on the `docs` branch and pushes the result if anything changed. That push triggers `docs-pages.yml` (which exists only on `docs`) and the site is published again.
+Every time CI succeeds on a push to `main`, `.github/workflows/sync-docs.yml` runs `init --update` with that commit's Tsuzuri on the `docs` branch and pushes the result if anything changed. That push triggers `tsuzuri-pages.yml` (which exists only on `docs`) and the site is published again.
 
 ```
-push to main → CI passes → sync-docs.yml → push to docs → docs-pages.yml → GitHub Pages
+push to main → CI passes → sync-docs.yml → push to docs → tsuzuri-pages.yml → GitHub Pages
 ```
 
-- Only `.github/workflows/docs-pages.yml` and `.github/tsuzuri/` on `docs` are updated. `.github/docs-pages.config`, custom CSS, the README and `docs/` are left alone. Do not edit the updated files by hand.
+- Only the workflow (`.github/workflows/tsuzuri-pages.yml`) and the files under `.github/tsuzuri/` that Tsuzuri ships (the build script, `lib/`, the built-in theme CSS, `package.json`, `package-lock.json` and `.gitignore`) on `docs` are updated. `.github/tsuzuri/config`, the custom CSS under `.github/tsuzuri/styles/` (such as `custom.css` and `plain.css`), the README and `docs/` are left alone. Do not edit the updated files by hand.
 - Nothing runs when CI fails or for PR builds. If nothing changed, no commit is made.
 - If a manual push to `docs` collides with a sync, run `git pull --rebase` and push again.
 - User-facing documentation fixes are PRs to `docs`, not `main`.
@@ -27,9 +27,9 @@ Done once when the repository is created.
 1. `Settings > Pages`: set `Source` to `GitHub Actions` (this creates the `github-pages` environment).
 2. `Settings > Environments > github-pages`: add `docs` to `Deployment branches and tags`.
 
-If you skip 2, the deploy job fails with `Branch "docs" is not allowed to deploy to github-pages due to environment protection rules.` Also, because `docs-pages.yml` exists only on `docs`, the Actions tab shows no "Run workflow" button; push to `docs` to deploy.
+If you skip 2, the deploy job fails with `Branch "docs" is not allowed to deploy to github-pages due to environment protection rules.` Also, because `tsuzuri-pages.yml` exists only on `docs`, the Actions tab shows no "Run workflow" button; push to `docs` to deploy.
 
-**Deploy key for `sync-docs.yml`.** The default `GITHUB_TOKEN` cannot be used to push to `docs`, because a push made with it does not start `docs-pages.yml`. Use a deploy key with write access:
+**Deploy key for `sync-docs.yml`.** The default `GITHUB_TOKEN` cannot be used to push to `docs`, because a push made with it does not start `tsuzuri-pages.yml`. Use a deploy key with write access:
 
 1. Create a key pair without a passphrase.
 
@@ -80,7 +80,7 @@ Updates to dev-only dependencies (ESLint and so on) do not change these files.
 3. Check that the diff of `emoji-data.mjs` contains only emoji additions, changes and removals.
 4. Commit and push (`@dependabot recreate` works as above).
 
-**GitHub Actions.** The workflow that `init` generates comes from `templates/.github/workflows/docs-pages.yml`, and Dependabot updates the actions in it too. The versions of the same action in `ci.yml`, `sync-docs.yml` and the template must match or a test fails, so update the others when only one was bumped.
+**GitHub Actions.** The workflow that `init` generates comes from `templates/.github/workflows/tsuzuri-pages.yml`, and Dependabot updates the actions in it too. The versions of the same action in `ci.yml`, `sync-docs.yml` and the template must match or a test fails, so update the others when only one was bumped.
 
 **mermaid.** The version that generated pages load from the CDN is `MERMAID_VERSION` in `.github/scripts/lib/html-renderer.mjs`. `deps/mermaid/package.json` repeats it only so that Dependabot watches it (nothing is installed). When Dependabot updates that file, in the same PR:
 
@@ -97,7 +97,7 @@ Versions follow [Semantic Versioning](https://semver.org/). Two kinds of tags go
 Steps:
 
 1. Check that `npm test` and `npm run lint` pass on `main` and that CI is green.
-2. Run `node scripts/check-package.mjs`. It checks the packed package the way users get it; see the comment at the top of the script. This includes that `init --update` keeps the config file and the custom CSS (`.github/tsuzuri/styles/custom.css`).
+2. Run `node scripts/check-package.mjs`. It checks the packed package the way users get it; see the comment at the top of the script. This includes that `init --update` keeps the config file (`.github/tsuzuri/config`) and the custom CSS (`.github/tsuzuri/styles/custom.css`).
 3. Write `CHANGELOG.md` before tagging. Under `[Unreleased]`, summarize the user-visible changes since the previous tag (the source is the merged PRs and `git log v<previous version>..main`, with the tag of the previous release in place of `v<previous version>`), using the categories described at the top of `CHANGELOG.md`. Rename the heading to `## [X.Y.Z] - YYYY-MM-DD` and add an empty `[Unreleased]` above it. In each release section, write the English block first, then the line `<!-- ja -->`, then the Japanese block with the Japanese category names (see the top of `CHANGELOG.md`). `scripts/release-notes.mjs` fails if the `## [X.Y.Z]` section is missing or empty, if the `<!-- ja -->` line is missing, or if either block is empty, and `release.yml` runs it after you push the tag.
 4. Set `version` to `X.Y.Z` in `package.json` and `package-lock.json` (the top-level `version` and `packages[""].version`; leave dependency versions alone).
 5. Commit, push to `main`, then tag and push the tag.
@@ -113,4 +113,4 @@ Steps:
    - moves the major tag (`vX`) to this commit.
 
    Your local `vX` tag stays old; run `git fetch --tags --force` if you need it.
-7. After the release, check that the `docs` site is published correctly (CI passes, then `sync-docs.yml`, then `docs-pages.yml`).
+7. After the release, check that the `docs` site is published correctly (CI passes, then `sync-docs.yml`, then `tsuzuri-pages.yml`).

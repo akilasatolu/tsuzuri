@@ -94,7 +94,7 @@ function updateTargets() {
 }
 
 function setConfig(dir, text) {
-  mkdirSync(join(dir, ".github"), { recursive: true });
+  mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
   writeFileSync(join(dir, CONFIG_FILE_PATH), text);
 }
 
@@ -201,7 +201,7 @@ test("main: -y は、生成の一覧と完了メッセージを出し、警告�
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.stderr, "");
     assert.equal(result.stdout, BANNER + created(buildTargets(answers)) + buildCompletionMessage(answers) + "\n");
-    assert.equal(read(dir, ".github/docs-pages.config"), buildDocsPagesConfig(answers));
+    assert.equal(read(dir, ".github/tsuzuri/config"), buildDocsPagesConfig(answers));
   });
 });
 
@@ -224,7 +224,7 @@ test("main: -y に付けたオプション(--branch など)が、生成物と完
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.stderr, warnNoRoot("docs/index.md"));
     assert.equal(result.stdout, BANNER + created(buildTargets(answers)) + buildCompletionMessage(answers) + "\n");
-    assert.equal(read(dir, ".github/docs-pages.config"), buildDocsPagesConfig(answers));
+    assert.equal(read(dir, ".github/tsuzuri/config"), buildDocsPagesConfig(answers));
     assert.match(buildCompletionMessage(answers), /docs ブランチへ push/);
   });
 });
@@ -235,7 +235,7 @@ test("main: -y で既存ファイルがあると、--force が無ければスキ
     const answers = defaultAnswers();
     const targets = buildTargets(answers);
     runCli(["-y"], { cwd: dir });
-    writeFileSync(join(dir, ".github/docs-pages.config"), "KEEP\n");
+    writeFileSync(join(dir, ".github/tsuzuri/config"), "KEEP\n");
 
     const result = runCli(["-y"], { cwd: dir });
     assert.equal(result.status, 0, result.stderr);
@@ -246,7 +246,7 @@ test("main: -y で既存ファイルがあると、--force が無ければスキ
         : `⏭ ${t.relPath} をスキップしました(既存ファイルを保持)\n`,
     );
     assert.equal(result.stdout, BANNER + lines.join("") + buildCompletionMessage(answers) + "\n");
-    assert.equal(read(dir, ".github/docs-pages.config"), "KEEP\n");
+    assert.equal(read(dir, ".github/tsuzuri/config"), "KEEP\n");
   });
 });
 
@@ -274,7 +274,7 @@ test("main: 対話の init は、見出し・質問・生成の一覧・作成�
       "セットアップが完了しました",
     ]);
     assert.ok(result.stdout.endsWith(buildCompletionMessage(answers) + "\n"));
-    assert.equal(read(dir, ".github/docs-pages.config"), buildDocsPagesConfig(answers));
+    assert.equal(read(dir, ".github/tsuzuri/config"), buildDocsPagesConfig(answers));
   });
 });
 
@@ -293,7 +293,7 @@ test("main: 対話の init で答えた内容が、設定ファイルと完了�
     const result = runCli([], { cwd: dir, input });
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.stderr, warnNoRoot("docs/index.md"));
-    assert.equal(read(dir, ".github/docs-pages.config"), buildDocsPagesConfig(answers));
+    assert.equal(read(dir, ".github/tsuzuri/config"), buildDocsPagesConfig(answers));
     assert.ok(result.stdout.endsWith(buildCompletionMessage(answers) + "\n"));
   });
 });
@@ -306,7 +306,7 @@ test("main: 対話の init は、git の外だと場所の警告を出して続�
     assert.equal(result.stderr, WARN_NO_GIT + warnNoRoot("README.md"));
     assert.ok(result.stdout.startsWith(BANNER + HEADING + "このまま続けますか? (y/N): ? トリガーブランチ"), result.stdout);
     assert.ok(result.stdout.endsWith(buildCompletionMessage(answers) + "\n"));
-    assert.equal(read(dir, ".github/docs-pages.config"), buildDocsPagesConfig(answers));
+    assert.equal(read(dir, ".github/tsuzuri/config"), buildDocsPagesConfig(answers));
   });
 });
 
@@ -330,11 +330,11 @@ test("main: 対話の init で既存ファイルがあると、一式は1回だ�
   withTmpDir((dir) => {
     setupRepo(dir);
     const answers = defaultAnswers();
-    const workflow = buildTargets(answers).find((t) => t.relPath === ".github/workflows/docs-pages.yml");
+    const workflow = buildTargets(answers).find((t) => t.relPath === ".github/workflows/tsuzuri-pages.yml");
     assert.ok(workflow);
     runCli([], { cwd: dir, input: BLANK_ANSWERS });
-    writeFileSync(join(dir, ".github/workflows/docs-pages.yml"), "KEEP-WORKFLOW\n");
-    writeFileSync(join(dir, ".github/docs-pages.config"), "KEEP-CONFIG\n");
+    writeFileSync(join(dir, ".github/workflows/tsuzuri-pages.yml"), "KEEP-WORKFLOW\n");
+    writeFileSync(join(dir, ".github/tsuzuri/config"), "KEEP-CONFIG\n");
 
     // 一式も設定ファイルも「いいえ」: どちらも残る
     let result = runCli([], { cwd: dir, input: `${BLANK_ANSWERS}n\nn\n` });
@@ -342,19 +342,19 @@ test("main: 対話の init で既存ファイルがあると、一式は1回だ�
     assert.equal(result.stdout.split(BUNDLE_QUESTION).length - 1, 1, result.stdout);
     assertInOrder(result.stdout, [
       BUNDLE_QUESTION,
-      "⏭ .github/workflows/docs-pages.yml をスキップしました(既存ファイルを保持)",
-      ".github/docs-pages.config は既に存在します。上書きしますか? (y/N): ",
-      "⏭ .github/docs-pages.config をスキップしました(既存ファイルを保持)",
+      "⏭ .github/workflows/tsuzuri-pages.yml をスキップしました(既存ファイルを保持)",
+      ".github/tsuzuri/config は既に存在します。上書きしますか? (y/N): ",
+      "⏭ .github/tsuzuri/config をスキップしました(既存ファイルを保持)",
     ]);
-    assert.equal(read(dir, ".github/workflows/docs-pages.yml"), "KEEP-WORKFLOW\n");
-    assert.equal(read(dir, ".github/docs-pages.config"), "KEEP-CONFIG\n");
+    assert.equal(read(dir, ".github/workflows/tsuzuri-pages.yml"), "KEEP-WORKFLOW\n");
+    assert.equal(read(dir, ".github/tsuzuri/config"), "KEEP-CONFIG\n");
 
     // 一式だけ「はい」: 一式は上書きされ、設定ファイルは残る
     result = runCli([], { cwd: dir, input: `${BLANK_ANSWERS}y\nn\n` });
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.stdout.split(BUNDLE_QUESTION).length - 1, 1, result.stdout);
-    assert.equal(read(dir, ".github/workflows/docs-pages.yml"), workflow.content);
-    assert.equal(read(dir, ".github/docs-pages.config"), "KEEP-CONFIG\n");
+    assert.equal(read(dir, ".github/workflows/tsuzuri-pages.yml"), workflow.content);
+    assert.equal(read(dir, ".github/tsuzuri/config"), "KEEP-CONFIG\n");
   });
 });
 

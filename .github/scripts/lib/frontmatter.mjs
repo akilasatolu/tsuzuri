@@ -26,7 +26,7 @@
  *     (fail-open。ビルドを止めない)。
  *
  * ページの言語はfrontmatterでは指定しない。`<html lang="...">` は
- * `.github/docs-pages.config` の `LANGUAGES` とファイル名(言語の印)で決まる。
+ * `.github/tsuzuri/config` の `LANGUAGES` とファイル名(言語の印)で決まる。
  */
 
 const FRONTMATTER_DELIMITER = "---";

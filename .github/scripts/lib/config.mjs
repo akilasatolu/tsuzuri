@@ -46,11 +46,11 @@ export const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  */
 
 // 利用者のリポジトリでの、Tsuzuri のファイルの置き場所
-export const VENDOR_DIR = ".github/tsuzuri"; // ビルドスクリプト一式・組み込みテーマCSS・ビルド用の依存
-export const WORKFLOW_PATH = ".github/workflows/docs-pages.yml"; // 生成するワークフロー
-export const CONFIG_FILE_PATH = ".github/docs-pages.config"; // 設定ファイル
+export const VENDOR_DIR = ".github/tsuzuri"; // ビルドスクリプト一式・組み込みテーマCSS・ビルド用の依存、設定ファイル(config)、独自CSS(styles/custom.css)
+export const WORKFLOW_PATH = ".github/workflows/tsuzuri-pages.yml"; // 生成するワークフロー
+export const CONFIG_FILE_PATH = `${VENDOR_DIR}/config`; // 設定ファイル(利用者が編集する。VENDOR_DIR の中で編集してよいのは、これと、styles/ に置く独自CSS(既定は custom.css)だけ。組み込みのテーマCSSとスクリプトは編集しない)
 
-// 設定ファイル(.github/docs-pages.config)に書けるキー。ワークフローの Load config と同じ一覧
+// 設定ファイル(.github/tsuzuri/config)に書けるキー。ワークフローの Load config と同じ一覧
 export const CONFIG_FILE_KEYS = [
   "TRIGGER_BRANCH",
   "ROOT_MD",

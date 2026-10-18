@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // npx github:akilasatolu/tsuzuri [init] のエントリーポイント。
-// 利用者リポジトリに配布用ファイル(docs-pages.yml / docs-pages.config /
+// 利用者リポジトリに配布用ファイル(tsuzuri-pages.yml / .github/tsuzuri/config /
 // 独自CSSの空ひな形 custom.css)に加えて、ビルドスクリプト本体
 // (build-docs.mjs / lib/*.mjs / styles/*.css)一式を `.github/tsuzuri/` 配下に
 // コピー(ベンダリング)する。これにより、生成後のワークフローは実行のたびに
@@ -46,7 +46,7 @@ export { VENDOR_DIR };
 export const DOCS_URL = "https://akilasatolu.github.io/tsuzuri/";
 
 // init が生成するワークフローのひな形(PACKAGE_ROOT からの相対パス)。
-export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/docs-pages.yml";
+export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/tsuzuri-pages.yml";
 
 // THEME選択肢の説明(キーは lib/config.mjs の ALLOWED_THEMES と同じ。テーマを足すときは両方に足す)。
 const THEME_LABELS = {
@@ -203,11 +203,11 @@ export function readPackageVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFi
 }
 
 /**
- * docs-pages.yml の内容を組み立てる。
+ * tsuzuri-pages.yml の内容を組み立てる。
  *
  * 自己完結型のワークフロー。ビルドスクリプト本体(build-docs.mjs等)は `init` 実行時に
  * `${VENDOR_DIR}/` 配下へコピー済みであることが前提。
- * 本体は templates/.github/workflows/docs-pages.yml に置いたひな形で、ここでは
+ * 本体は templates/.github/workflows/tsuzuri-pages.yml に置いたひな形で、ここでは
  * プレースホルダー(__OSS_REPO__ / __VENDOR_DIR__ / __TSUZURI_VERSION__ / __MAJOR_TAG__)を
  * 置き換えるだけ。
  * ひな形を独立したYAMLファイルにしているのは、中で使う actions のバージョンを
@@ -234,15 +234,15 @@ export function buildDocsPagesYml(
 }
 
 /**
- * 生成するワークフロー(docs-pages.yml)の生成対象({name, relPath, content})。
+ * 生成するワークフロー(tsuzuri-pages.yml)の生成対象({name, relPath, content})。
  * init と init --update の両方が使う。
  */
 export function buildWorkflowTarget() {
-  return { name: "docs-pages.yml", relPath: WORKFLOW_PATH, content: buildDocsPagesYml() };
+  return { name: "tsuzuri-pages.yml", relPath: WORKFLOW_PATH, content: buildDocsPagesYml() };
 }
 
 /**
- * docs-pages.config の内容を組み立てる。
+ * .github/tsuzuri/config の内容を組み立てる。
  * 対話結果(TRIGGER_BRANCH/ROOT_MD/THEME など)を埋め込み、
  * それ以外のキーはデフォルト値のまま出力する。
  */
@@ -251,7 +251,7 @@ export function buildDocsPagesConfig(answers) {
   return `# Tsuzuri の設定ファイル
 #
 # 「KEY=VALUE」の形で1行に1項目を書きます。# で始まる行と空行は無視されます。
-# ワークフロー(.github/workflows/docs-pages.yml)を編集しなくても、ここを変えるだけで動作を変えられます。
+# ワークフロー(.github/workflows/tsuzuri-pages.yml)を編集しなくても、ここを変えるだけで動作を変えられます。
 # 各項目の詳しい説明: ${DOCS_URL}docs/configuration.html
 
 # 公開(デプロイ)するブランチ。このブランチに push したときだけサイトが更新されます。
@@ -432,7 +432,7 @@ export function buildTargets(answers) {
   const targets = [
     buildWorkflowTarget(),
     {
-      name: "docs-pages.config",
+      name: "config",
       relPath: CONFIG_FILE_PATH,
       content: buildDocsPagesConfig(merged),
     },
@@ -582,8 +582,8 @@ export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
 /**
  * `init --update`: 対話なしで、既存の利用者リポジトリの tsuzuri を最新化する。
  *
- * - ワークフロー(docs-pages.yml)とビルドスクリプト一式(VENDOR_DIR 配下)は上書きする
- * - 設定ファイル(docs-pages.config)は一切触らない
+ * - ワークフロー(tsuzuri-pages.yml)とビルドスクリプト一式(VENDOR_DIR 配下)は上書きする
+ * - 設定ファイル(.github/tsuzuri/config)は一切触らない
  * - 独自CSS(custom.css)は、既にあれば触らない。無ければ空のひな形を作る
  * - 新しく増えたビルドスクリプトは追加される
  * - 本体側で削除されたビルドスクリプト(VENDOR_DIR/lib/*.mjs のうち配布対象に無いもの)は削除する
@@ -989,13 +989,16 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
 }
 
 /**
- * ワークフロー(docs-pages.yml)とビルドスクリプト一式(VENDOR_DIR 配下)の組か。
+ * ワークフロー(tsuzuri-pages.yml)とビルドスクリプト一式(VENDOR_DIR 配下。設定ファイルと独自CSSを除く)の組か。
  * これらは同じバージョンでそろっていないと動かないため、上書きするかどうかをまとめて決める。
+ * 設定ファイル(VENDOR_DIR/config)と独自CSS(VENDOR_DIR/styles/custom.css。styles/ に利用者が足した CSS も同様)は、利用者が編集するので対象外。
  * @param {string} relPath
  */
 export function isBundledPath(relPath) {
   return relPath === WORKFLOW_PATH ||
-    (relPath.startsWith(`${VENDOR_DIR}/`) && relPath !== `${VENDOR_DIR}/styles/custom.css`);
+    (relPath.startsWith(`${VENDOR_DIR}/`) &&
+      relPath !== CONFIG_FILE_PATH &&
+      relPath !== `${VENDOR_DIR}/styles/custom.css`);
 }
 
 /**
@@ -1013,7 +1016,7 @@ export function createBundledConfirm(ask) {
     if (isBundledPath(relPath)) {
       if (bundleAnswer === null) {
         bundleAnswer = await ask(
-          `ワークフローとビルドスクリプト一式(${VENDOR_DIR}/ 配下)は既に存在します。最新版で上書きしますか? (y/N): `,
+          `ワークフローとビルドスクリプト一式(${VENDOR_DIR}/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N): `,
         );
       }
       return bundleAnswer;
@@ -1044,6 +1047,7 @@ export function buildCompletionMessage(answers = {}) {
     "push すると Actions タブでワークフローが動き、完了すると Settings > Pages に公開URLが表示されます。",
     `ビルドスクリプト本体(${VENDOR_DIR}/ 配下)もこのリポジトリにコピー済みのため、`,
     "実行時に外部リポジトリを参照することはありません。",
+    `(${VENDOR_DIR}/ 配下で編集してよいのは、設定ファイル config と、styles/ に置く独自CSS(既定は custom.css)だけです。組み込みのテーマCSSとスクリプトは編集しないでください)`,
     "",
     `最新版に更新するときは npx github:${OSS_REPO}#${majorTagOf(readPackageVersion())} init --update を実行してください`,
     "(設定ファイルと、既にある独自CSSはそのままに、ワークフローとスクリプトが更新されます。独自CSSが無ければ空のひな形が作られます)。",

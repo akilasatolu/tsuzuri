@@ -2,10 +2,10 @@ name: Sync docs branch
 
 # mainブランチへのpushでCIが成功したら、そのコミットのtsuzuriで
 # docsブランチに `init --update` を実行し、変更があればdocsブランチへpushする。
-# docsへのpushをきっかけに、docsブランチ側の docs-pages.yml がGitHub Pagesへ公開する。
+# docsへのpushをきっかけに、docsブランチ側の tsuzuri-pages.yml がGitHub Pagesへ公開する。
 #
 # docsへのpushには、書き込み権限付きのデプロイキー(Secret: DOCS_DEPLOY_KEY)を使う。
-# 既定の GITHUB_TOKEN でpushすると、そのpushでは docs-pages.yml が起動しないため。
+# 既定の GITHUB_TOKEN でpushすると、そのpushでは tsuzuri-pages.yml が起動しないため。
 # デプロイキーの登録手順は MAINTAINING.md の「One-time repository setup」を参照。
 
 on:

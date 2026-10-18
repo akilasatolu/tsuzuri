@@ -45,7 +45,7 @@ import {
   checkSetupLocation,
   guessDefaultBranch,
 } from "../bin/cli.mjs";
-import { parseConfigText, loadConfig, ALLOWED_THEMES } from "../.github/scripts/lib/config.mjs";
+import { parseConfigText, loadConfig, ALLOWED_THEMES, CONFIG_FILE_PATH } from "../.github/scripts/lib/config.mjs";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
 
@@ -200,7 +200,7 @@ test("CLI: --yes --languages ja で、設定ファイルに LANGUAGES=ja を書�
     writeFileSync(join(dir, "README.md"), "# x\n");
     const result = spawnSync(process.execPath, [join(PACKAGE_ROOT, "bin/cli.mjs"), "-y", "--languages", "ja"], { cwd: dir, encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr);
-    const config = readFileSync(join(dir, ".github/docs-pages.config"), "utf8");
+    const config = readFileSync(join(dir, ".github/tsuzuri/config"), "utf8");
     assert.match(config, /^LANGUAGES=ja$/m);
     assert.doesNotMatch(config, /^LANG=/m);
   } finally {
@@ -451,10 +451,10 @@ test("writeGeneratedFiles: 空ディレクトリに全てデフォルト値で�
     assert.ok(results.every((r) => r.status === "created"));
     assert.equal(results.length, targets.length);
 
-    const yml = readFileSync(join(dir, ".github/workflows/docs-pages.yml"), "utf8");
+    const yml = readFileSync(join(dir, ".github/workflows/tsuzuri-pages.yml"), "utf8");
     assert.ok(!yml.includes(`uses: ${OSS_REPO}/.github/workflows/build.yml`));
 
-    const config = readFileSync(join(dir, ".github/docs-pages.config"), "utf8");
+    const config = readFileSync(join(dir, ".github/tsuzuri/config"), "utf8");
     assert.ok(config.includes("TRIGGER_BRANCH=main"));
     assert.ok(config.includes("ROOT_MD=README.md"));
     assert.ok(config.includes("THEME=material"));
@@ -507,7 +507,7 @@ test("writeGeneratedFiles: 既存の custom.css は、確認もせず上書き�
 test("writeGeneratedFiles: 既存ファイルはconfirmOverwriteがfalse(デフォルトN)ならスキップされ内容は変わらない", async () => {
   const dir = makeTmpDir();
   try {
-    const ymlPath = join(dir, ".github/workflows/docs-pages.yml");
+    const ymlPath = join(dir, ".github/workflows/tsuzuri-pages.yml");
     mkdirSync(join(dir, ".github/workflows"), { recursive: true });
     const original = "# 既存のユーザーカスタム内容\n";
     writeFileSync(ymlPath, original);
@@ -520,19 +520,19 @@ test("writeGeneratedFiles: 既存ファイルはconfirmOverwriteがfalse(デフ�
     };
     const results = await writeGeneratedFiles(targets, { cwd: dir, confirmOverwrite });
 
-    assert.deepEqual(promptedFor, [".github/workflows/docs-pages.yml"]);
+    assert.deepEqual(promptedFor, [".github/workflows/tsuzuri-pages.yml"]);
     assert.equal(
-      results.find((r) => r.relPath === ".github/workflows/docs-pages.yml").status,
+      results.find((r) => r.relPath === ".github/workflows/tsuzuri-pages.yml").status,
       "skipped",
     );
     assert.equal(readFileSync(ymlPath, "utf8"), original);
 
     // 他のファイル(config)は確認なしで新規作成されている
     assert.equal(
-      results.find((r) => r.relPath === ".github/docs-pages.config").status,
+      results.find((r) => r.relPath === ".github/tsuzuri/config").status,
       "created",
     );
-    assert.ok(readFileSync(join(dir, ".github/docs-pages.config"), "utf8").includes("THEME=material"));
+    assert.ok(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8").includes("THEME=material"));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -541,7 +541,7 @@ test("writeGeneratedFiles: 既存ファイルはconfirmOverwriteがfalse(デフ�
 test("writeGeneratedFiles: 既存ファイルにyで応答すると上書きされる", async () => {
   const dir = makeTmpDir();
   try {
-    const ymlPath = join(dir, ".github/workflows/docs-pages.yml");
+    const ymlPath = join(dir, ".github/workflows/tsuzuri-pages.yml");
     mkdirSync(join(dir, ".github/workflows"), { recursive: true });
     writeFileSync(ymlPath, "# 古い内容\n");
 
@@ -552,7 +552,7 @@ test("writeGeneratedFiles: 既存ファイルにyで応答すると上書きさ�
     });
 
     assert.equal(
-      results.find((r) => r.relPath === ".github/workflows/docs-pages.yml").status,
+      results.find((r) => r.relPath === ".github/workflows/tsuzuri-pages.yml").status,
       "overwritten",
     );
     const newContent = readFileSync(ymlPath, "utf8");
@@ -566,8 +566,8 @@ test("writeGeneratedFiles: 既存ファイルにyで応答すると上書きさ�
 test("writeGeneratedFiles: 全対象のうち1つだけ既存の場合、その1つのみ確認プロンプトが出て残りは確認なしで新規作成される", async () => {
   const dir = makeTmpDir();
   try {
-    mkdirSync(join(dir, ".github"), { recursive: true });
-    writeFileSync(join(dir, ".github/docs-pages.config"), "# 既存のconfig\n");
+    mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
+    writeFileSync(join(dir, ".github/tsuzuri/config"), "# 既存のconfig\n");
 
     const targets = buildTargets({});
 
@@ -578,15 +578,15 @@ test("writeGeneratedFiles: 全対象のうち1つだけ既存の場合、その1
     };
     const results = await writeGeneratedFiles(targets, { cwd: dir, confirmOverwrite });
 
-    assert.deepEqual(promptedFor, [".github/docs-pages.config"]);
+    assert.deepEqual(promptedFor, [".github/tsuzuri/config"]);
     assert.equal(results.length, targets.length);
     assert.equal(
-      results.find((r) => r.relPath === ".github/docs-pages.config").status,
+      results.find((r) => r.relPath === ".github/tsuzuri/config").status,
       "overwritten",
     );
     assert.ok(
       results
-        .filter((r) => r.relPath !== ".github/docs-pages.config")
+        .filter((r) => r.relPath !== ".github/tsuzuri/config")
         .every((r) => r.status === "created"),
     );
   } finally {
@@ -680,17 +680,17 @@ test("実ファイルシステムで書き込み権限がない場合、非ゼ�
 
 test("buildWorkflowTarget: init と init --update が使うワークフローの生成対象", () => {
   const target = buildWorkflowTarget();
-  assert.equal(target.relPath, ".github/workflows/docs-pages.yml");
+  assert.equal(target.relPath, ".github/workflows/tsuzuri-pages.yml");
   assert.equal(target.content, buildDocsPagesYml());
-  assert.deepEqual(buildTargets({}).find((t) => t.name === "docs-pages.yml"), target);
+  assert.deepEqual(buildTargets({}).find((t) => t.name === "tsuzuri-pages.yml"), target);
 });
 
 test("runUpdate: ワークフローとビルドスクリプトは上書き・追加し、設定ファイルと既存の独自CSSは変更しない", async () => {
   const dir = makeTmpDir();
   try {
-    const configPath = join(dir, ".github/docs-pages.config");
+    const configPath = join(dir, ".github/tsuzuri/config");
     const customCssPath = join(dir, VENDOR_DIR, "styles/custom.css");
-    const ymlPath = join(dir, ".github/workflows/docs-pages.yml");
+    const ymlPath = join(dir, ".github/workflows/tsuzuri-pages.yml");
     mkdirSync(join(dir, ".github/workflows"), { recursive: true });
     mkdirSync(join(dir, VENDOR_DIR, "styles"), { recursive: true });
     writeFileSync(configPath, "TRIGGER_BRANCH=docs\nFAVICON_FILE=assets/favicon.svg\n");
@@ -704,9 +704,9 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
     assert.equal(readFileSync(ymlPath, "utf8"), buildDocsPagesYml());
     assert.ok(existsSync(join(dir, VENDOR_DIR, "build-docs.mjs")));
     assert.ok(existsSync(join(dir, VENDOR_DIR, "lib/site-tree.mjs")));
-    assert.ok(!results.some((r) => r.relPath.endsWith("docs-pages.config")));
+    assert.ok(!results.some((r) => r.relPath.endsWith("tsuzuri/config")));
     assert.equal(results.find((r) => r.relPath.endsWith("custom.css")).status, "skipped", "既存の独自CSSは保持する");
-    assert.equal(results.find((r) => r.relPath === ".github/workflows/docs-pages.yml").status, "overwritten");
+    assert.equal(results.find((r) => r.relPath === ".github/workflows/tsuzuri-pages.yml").status, "overwritten");
     assert.deepEqual(results.filter((r) => r.status === "skipped").map((r) => r.relPath), [`${VENDOR_DIR}/styles/custom.css`]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -735,8 +735,8 @@ test("設定ファイルのひな形のテーマの一覧に、ALLOWED_THEMES �
 test("runUpdate: 独自CSS(custom.css)が無ければ、空のひな形を作る", async () => {
   const dir = makeTmpDir();
   try {
-    mkdirSync(join(dir, ".github"), { recursive: true });
-    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=main\n");
+    mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
+    writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=main\n");
     const results = await runUpdate({ cwd: dir });
     assert.equal(readFileSync(join(dir, VENDOR_DIR, "styles/custom.css"), "utf8"), buildStyleCssTemplate());
     assert.equal(results.find((r) => r.relPath === `${VENDOR_DIR}/styles/custom.css`).status, "created");
@@ -748,7 +748,7 @@ test("runUpdate: 独自CSS(custom.css)が無ければ、空のひな形を作る
 test("runUpdate: 設定ファイルが無い(未init)リポジトリではエラーにして何も書き込まない", async () => {
   const dir = makeTmpDir();
   try {
-    await assert.rejects(() => runUpdate({ cwd: dir }), /docs-pages\.config が見つかりません/);
+    await assert.rejects(() => runUpdate({ cwd: dir }), /\.github\/tsuzuri\/config が見つかりません/);
     assert.ok(!existsSync(join(dir, ".github")));
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -774,14 +774,14 @@ test("isDirectRunOf: シンボリックリンク経由(npxの.bin)でも直接�
 test("シンボリックリンク経由で実行した init --update が実際にファイルを更新する", () => {
   const dir = makeTmpDir();
   try {
-    mkdirSync(join(dir, ".github"), { recursive: true });
-    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=main\n");
+    mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
+    writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=main\n");
     const linkPath = join(dir, "tsuzuri-bin");
     symlinkSync(join(PACKAGE_ROOT, "bin/cli.mjs"), linkPath);
 
     const result = spawnSync(process.execPath, [linkPath, "init", "--update"], { cwd: dir, encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr);
-    assert.ok(existsSync(join(dir, ".github/workflows/docs-pages.yml")));
+    assert.ok(existsSync(join(dir, ".github/workflows/tsuzuri-pages.yml")));
     assert.ok(existsSync(join(dir, VENDOR_DIR, "build-docs.mjs")));
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -794,7 +794,8 @@ test("buildDocsPagesYml: ひな形のプレースホルダーとヘッダーコ�
   const yml = buildDocsPagesYml();
   assert.doesNotMatch(yml, /__[A-Z_]+__/);
   assert.doesNotMatch(yml, /template start/);
-  assert.ok(yml.startsWith("name: Deploy Docs to GitHub Pages\n"));
+  assert.ok(yml.startsWith('name: "Tsuzuri: Deploy to GitHub Pages"\n'));
+  assert.ok(yml.includes(`CONFIG_FILE="${CONFIG_FILE_PATH}"\n`), "Load config が読む設定ファイルは CONFIG_FILE_PATH と同じ");
   assert.ok(yml.includes(`STYLE_DIR: ${VENDOR_DIR}/styles`));
 });
 
@@ -837,8 +838,8 @@ test("buildCompletionMessage: 選んだトリガーブランチ・起点のMarkd
 test("runUpdate: 配布対象に無くなった lib/*.mjs は削除し、styles/ の独自CSSは残す", async () => {
   const dir = makeTmpDir();
   try {
-    mkdirSync(join(dir, ".github"), { recursive: true });
-    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=main\n");
+    mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
+    writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=main\n");
     mkdirSync(join(dir, VENDOR_DIR, "lib"), { recursive: true });
     mkdirSync(join(dir, VENDOR_DIR, "styles"), { recursive: true });
     writeFileSync(join(dir, VENDOR_DIR, "lib/removed-module.mjs"), "// old");
@@ -860,6 +861,44 @@ test("runUpdate: 配布対象に無くなった lib/*.mjs は削除し、styles/
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("runUpdate: 利用者が編集する config と styles/ の独自CSSは書き換えず、VENDOR_DIR 直下の未知のファイルも削除しない", async () => {
+  const dir = makeTmpDir();
+  try {
+    mkdirSync(join(dir, VENDOR_DIR, "styles"), { recursive: true });
+    writeFileSync(join(dir, CONFIG_FILE_PATH), "TRIGGER_BRANCH=keep\nTHEME=material\n");
+    writeFileSync(join(dir, VENDOR_DIR, "styles/custom.css"), "/* mine */");
+    writeFileSync(join(dir, VENDOR_DIR, "styles/plain.css"), "/* mine 2 */");
+    writeFileSync(join(dir, VENDOR_DIR, "stray.txt"), "keep");
+
+    const results = await runUpdate({ cwd: dir });
+
+    assert.equal(readFileSync(join(dir, CONFIG_FILE_PATH), "utf8"), "TRIGGER_BRANCH=keep\nTHEME=material\n");
+    assert.equal(readFileSync(join(dir, VENDOR_DIR, "styles/custom.css"), "utf8"), "/* mine */");
+    assert.equal(readFileSync(join(dir, VENDOR_DIR, "styles/plain.css"), "utf8"), "/* mine 2 */", "styles/ に足した独自CSSも残る");
+    assert.ok(existsSync(join(dir, VENDOR_DIR, "stray.txt")));
+    assert.ok(!results.some((r) => r.relPath === CONFIG_FILE_PATH), "config は更新の結果に出ない");
+    assert.ok(!results.some((r) => r.status === "deleted"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("buildCompletionMessage: VENDOR_DIR の中で編集してよいのは config と styles/ の独自CSSだけ、と案内する", () => {
+  const msg = buildCompletionMessage({});
+  assert.ok(msg.includes(`(${VENDOR_DIR}/ 配下で編集してよいのは、設定ファイル config と、styles/ に置く独自CSS(既定は custom.css)だけです。組み込みのテーマCSSとスクリプトは編集しないでください)`));
+});
+
+test("init の生成物: VENDOR_DIR の外に作られるのはワークフローだけで、旧名のファイルは作らない", () => {
+  const rels = buildTargets({}).map((t) => t.relPath);
+  assert.deepEqual(
+    rels.filter((r) => !r.startsWith(`${VENDOR_DIR}/`)),
+    [".github/workflows/tsuzuri-pages.yml"]
+  );
+  assert.ok(rels.includes(CONFIG_FILE_PATH));
+  assert.ok(!rels.includes(".github/docs-pages.config"));
+  assert.ok(!rels.includes(".github/workflows/docs-pages.yml"));
 });
 
 test("STRICT_LINKS: 設定ファイルのひな形に既定値falseで含まれ、ワークフローの許可リストを通って環境変数になる", () => {
@@ -971,15 +1010,15 @@ test("CLIを実行すると最初にバージョンを表示し、--yes で対�
     result = spawnSync(process.execPath, [cli, "init", "--yes", "--branch", "docs"], { cwd: dir, encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr);
     assert.ok(result.stdout.startsWith(`tsuzuri v${version}\n`));
-    assert.match(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), /^TRIGGER_BRANCH=docs$/m);
+    assert.match(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8"), /^TRIGGER_BRANCH=docs$/m);
 
-    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=keep\n");
+    writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=keep\n");
     result = spawnSync(process.execPath, [cli, "-y"], { cwd: dir, encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr);
-    assert.equal(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), "TRIGGER_BRANCH=keep\n");
+    assert.equal(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8"), "TRIGGER_BRANCH=keep\n");
 
     result = spawnSync(process.execPath, [cli, "-y", "--force"], { cwd: dir, encoding: "utf8" });
-    assert.match(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), /^TRIGGER_BRANCH=main$/m);
+    assert.match(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8"), /^TRIGGER_BRANCH=main$/m);
 
     result = spawnSync(process.execPath, [cli, "--bogus"], { cwd: dir, encoding: "utf8" });
     assert.equal(result.status, 1);
@@ -1023,7 +1062,7 @@ test("生成ワークフロー: 依存は利用者の package.json と切り離�
 test("生成ワークフロー: 実行はブランチごとに順番に進め(他ブランチは別グループ)、公開は全体で1つずつ", () => {
   const yml = buildDocsPagesYml();
   const [top, jobs] = yml.split("\njobs:\n");
-  assert.ok(top.includes("concurrency:\n  group: docs-pages-${{ github.ref }}\n  cancel-in-progress: false\n"));
+  assert.ok(top.includes("concurrency:\n  group: tsuzuri-pages-${{ github.ref }}\n  cancel-in-progress: false\n"));
   const [buildJob, deployJob] = jobs.split("\n  deploy:\n");
   assert.doesNotMatch(buildJob, /concurrency:/);
   assert.ok(deployJob.includes("    concurrency:\n      group: pages\n      cancel-in-progress: false\n"));
@@ -1038,10 +1077,11 @@ test("更新の案内はメジャーバージョンのタグ付き(未リリー�
 });
 
 test("isBundledPath: ワークフローとビルドスクリプト一式だけが対象(設定ファイル・独自CSSは対象外)", () => {
-  assert.equal(isBundledPath(".github/workflows/docs-pages.yml"), true);
+  assert.equal(isBundledPath(".github/workflows/tsuzuri-pages.yml"), true);
   assert.equal(isBundledPath(`${VENDOR_DIR}/build-docs.mjs`), true);
   assert.equal(isBundledPath(`${VENDOR_DIR}/styles/material.css`), true);
-  assert.equal(isBundledPath(".github/docs-pages.config"), false);
+  assert.equal(isBundledPath(CONFIG_FILE_PATH), false);
+  assert.equal(isBundledPath(".github/tsuzuri/config"), false);
   assert.equal(isBundledPath(`${VENDOR_DIR}/styles/custom.css`), false);
 });
 
@@ -1052,13 +1092,14 @@ test("createBundledConfirm: 一式は1回だけ聞いて同じ答えを使い、
     questions.push(q);
     return answers.shift();
   });
-  assert.equal(await confirm(".github/workflows/docs-pages.yml"), true);
+  assert.equal(await confirm(".github/workflows/tsuzuri-pages.yml"), true);
   assert.equal(await confirm(`${VENDOR_DIR}/build-docs.mjs`), true);
   assert.equal(await confirm(`${VENDOR_DIR}/lib/config.mjs`), true);
-  assert.equal(await confirm(".github/docs-pages.config"), false);
+  assert.equal(await confirm(".github/tsuzuri/config"), false);
   assert.equal(questions.length, 2);
   assert.match(questions[0], /ワークフローとビルドスクリプト一式/);
-  assert.match(questions[1], /docs-pages\.config は既に存在します/);
+  assert.match(questions[0], /config と独自 CSS を除く/);
+  assert.match(questions[1], /\.github\/tsuzuri\/config は既に存在します/);
 });
 
 test("buildDocsPagesConfig: LLMS_TXT=true をコメント付きで書く", () => {
@@ -1102,13 +1143,13 @@ test("missingConfigKeys: 最新のひな形にあって設定ファイルに無�
 test("runUpdate: 設定ファイルに無い新しい項目を案内する(設定ファイルは書き換えない)", async () => {
   const dir = makeTmpDir();
   try {
-    mkdirSync(join(dir, ".github"), { recursive: true });
-    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=main\nTHEME=material\n");
+    mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
+    writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=main\nTHEME=material\n");
     const logs = [];
     await runUpdate({ cwd: dir, log: (m) => logs.push(m) });
     const notice = logs.find((m) => m.includes("設定ファイルに無い項目"));
     assert.ok(notice && notice.includes("LAST_UPDATED") && notice.includes("configuration.html"));
-    assert.equal(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), "TRIGGER_BRANCH=main\nTHEME=material\n");
+    assert.equal(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8"), "TRIGGER_BRANCH=main\nTHEME=material\n");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -1161,7 +1202,7 @@ test("CLI: リポジトリ直下以外・ROOT_MDが無いときは警告し、--
     assert.equal(result.status, 0, result.stderr);
     assert.doesNotMatch(result.stderr, /直下ではありません|まだありません/);
     // origin が無いので、作業中のブランチ(pages)ではなく main になる
-    assert.match(readFileSync(join(dir, ".github/docs-pages.config"), "utf8"), /^TRIGGER_BRANCH=main$/m);
+    assert.match(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8"), /^TRIGGER_BRANCH=main$/m);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -1177,9 +1218,9 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     assert.ok(m, "Load config ステップを取り出せること");
     const script = m[1].split("\n").map((line) => line.slice(10)).join("\n");
     writeFileSync(join(dir, "load.sh"), script);
-    mkdirSync(join(dir, ".github"));
+    mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
     writeFileSync(
-      join(dir, ".github/docs-pages.config"),
+      join(dir, ".github/tsuzuri/config"),
       "# comment\r\nSITE_NAME = Bob's \"docs\"  \r\nOGP_DEFAULT_IMAGE=https://x.example/a.png?w=1&h=2\r\n\r\nNODE_OPTIONS=--require x\nTHEME=nineties  # 暗い配色\nLANG=en\nLANGUAGES=en"
     );
     const envFile = join(dir, "github.env");
@@ -1206,8 +1247,8 @@ test("生成ワークフローの Load config: 値が空の TRIGGER_BRANCH= は�
     const m = buildDocsPagesYml().match(/- name: Load config\n {8}run: \|\n((?: {10}.*\n|\n)+?)(?= {6}[-#])/);
     assert.ok(m, "Load config ステップを取り出せること");
     writeFileSync(join(dir, "load.sh"), m[1].split("\n").map((line) => line.slice(10)).join("\n"));
-    mkdirSync(join(dir, ".github"));
-    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=  \nTHEME=material\n");
+    mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
+    writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=  \nTHEME=material\n");
     const envFile = join(dir, "github.env");
     const result = spawnSync("bash", ["-e", "load.sh"], { cwd: dir, encoding: "utf8", env: { ...process.env, GITHUB_ENV: envFile } });
     assert.equal(result.status, 0, result.stderr);

@@ -498,7 +498,7 @@ describe("build-docs.mjs :: 多言語 C(異常系・言語の追加)", () => {
   });
 
   test("設定ファイルに LANG=ja と LANGUAGES=ja,en → LANG は読まれず、結果は A と同じ", () => {
-    withSite(FIXTURE_A, { ".github/docs-pages.config": "LANG=ja\nLANGUAGES=ja,en\nNAV_ENABLED=true\n" }, (withFile) => {
+    withSite(FIXTURE_A, { ".github/tsuzuri/config": "LANG=ja\nLANGUAGES=ja,en\nNAV_ENABLED=true\n" }, (withFile) => {
       withSite(FIXTURE_A, {}, (plain) => {
         const result = runBuild(withFile, { LANGUAGES: null });
         assert.equal(result.status, 0, result.stderr);

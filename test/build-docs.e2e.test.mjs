@@ -1379,7 +1379,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("手元のビルドでは .github/docs-pages.config を読み、init でコピーしたテーマCSSを使う", () => {
+  test("手元のビルドでは .github/tsuzuri/config を読み、init でコピーしたテーマCSSを使う", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
@@ -1388,7 +1388,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(vendored, "base.css"));
       fs.copyFileSync(path.join(REAL_STYLES_DIR, "nineties.css"), path.join(vendored, "nineties.css"));
       fs.writeFileSync(
-        path.join(dir, ".github", "docs-pages.config"),
+        path.join(dir, ".github", "tsuzuri", "config"),
         "# c\nTHEME=nineties\nSITE_NAME=FromFile\nLANGUAGES=ja\nNAV_ENABLED=true\n"
       );
       // 設定ファイルの LANGUAGES=ja が使われ、OS の LANG(言語タグでない値)は影響しない

@@ -251,7 +251,7 @@ describe("isLinkedFilePath", () => {
     assert.equal(isLinkedFilePath("docs"), false);
     assert.equal(isLinkedFilePath(".env"), false);
     assert.equal(isLinkedFilePath("config/.secret.json"), false);
-    assert.equal(isLinkedFilePath(".github/docs-pages.config"), false);
+    assert.equal(isLinkedFilePath(".github/tsuzuri/config"), false);
     assert.equal(isLinkedFilePath(".hidden.zip"), false);
   });
 });

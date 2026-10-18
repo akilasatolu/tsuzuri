@@ -5,7 +5,7 @@ name: CI
 # pages/id-token権限は不要(contents: readのみで完結する)。
 # このワークフローはmainブランチ(tsuzuri本体の開発ブランチ)にのみ存在する。
 # このリポジトリ自身のPagesデプロイは、docsブランチ(tsuzuriで作ったユーザー向けサイト)
-# 側の docs-pages.yml が単独で担当しており、このワークフローとは競合しない。
+# 側の tsuzuri-pages.yml が単独で担当しており、このワークフローとは競合しない。
 #
 # 開発者が任意のブランチにpushしても、ここで実行されるのは上の確認だけであり、
 # GitHub Pagesや外部リポジトリに影響する処理は一切走らない。
@@ -53,13 +53,13 @@ jobs:
         with:
           node-version: 24
       - name: Render generated workflow
-        run: node -e 'import("./bin/cli.mjs").then((m) => process.stdout.write(m.buildDocsPagesYml()))' > "$RUNNER_TEMP/docs-pages.yml"
+        run: node -e 'import("./bin/cli.mjs").then((m) => process.stdout.write(m.buildDocsPagesYml()))' > "$RUNNER_TEMP/tsuzuri-pages.yml"
       - name: Run actionlint
         env:
           ACTIONLINT_VERSION: 1.7.12
         run: |
           bash <(curl -sSfL "https://raw.githubusercontent.com/rhysd/actionlint/v${ACTIONLINT_VERSION}/scripts/download-actionlint.bash") "$ACTIONLINT_VERSION" "$RUNNER_TEMP"
-          "$RUNNER_TEMP/actionlint" -color .github/workflows/*.yml "$RUNNER_TEMP/docs-pages.yml"
+          "$RUNNER_TEMP/actionlint" -color .github/workflows/*.yml "$RUNNER_TEMP/tsuzuri-pages.yml"
 
   # 生成ページが CDN から読み込む mermaid のファイルのハッシュが、MERMAID_INTEGRITY(SRI)と
   # 一致しているか確かめる(mermaid の版を上げたときの更新漏れを見つける)。

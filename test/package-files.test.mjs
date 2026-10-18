@@ -28,7 +28,7 @@ test("利用者に入る中身: 実行に要るファイルがあり、テスト
     ".github/scripts/lib/i18n.mjs",
     "styles/base.css",
     "styles/material.css",
-    "templates/.github/workflows/docs-pages.yml",
+    "templates/.github/workflows/tsuzuri-pages.yml",
     // npm はルートの package-lock.json を必ず外すので、init が使う完成品はこちらで届ける
     "templates/tsuzuri/package.json",
     "templates/tsuzuri/package-lock.json",

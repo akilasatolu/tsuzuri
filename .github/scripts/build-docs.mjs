@@ -126,7 +126,7 @@ export function removeCjkLineBreaks(html) {
 }
 
 // 手元でビルドするときの環境変数。GitHub Actions の外では、
-//   - .github/docs-pages.config の値を、環境変数で指定していないキーの既定値にする
+//   - .github/tsuzuri/config の値を、環境変数で指定していないキーの既定値にする
 //   - STYLE_DIR を指定せず、init でコピーしたテーマCSS(.github/tsuzuri/styles)があればそれを使う
 // ことで、公開サイトと同じ設定でプレビューできるようにする。
 function localBuildEnv(env, repoRoot) {

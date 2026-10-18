@@ -5,7 +5,7 @@
 # templates/ 配下に .github/workflows/ の形で置いているのは、Dependabot に
 # actions のバージョン更新の対象として認識させるため(ここでワークフローとして実行はされない)。
 # --- template start ---
-name: Deploy Docs to GitHub Pages
+name: "Tsuzuri: Deploy to GitHub Pages"
 
 # tsuzuri v__TSUZURI_VERSION__ の npx github:__OSS_REPO__#__MAJOR_TAG__ init によって生成された、自己完結型のワークフローです。
 # ビルドスクリプト本体(__VENDOR_DIR__/ 配下)もこのリポジトリにコピー済みのため、
@@ -25,7 +25,7 @@ permissions:
 # 上書きされないように)。ブランチごとにグループを分けるので、TRIGGER_BRANCH 以外のブランチへの
 # push が、待機中の公開を押しのけて取り消すことはない。
 concurrency:
-  group: docs-pages-${{ github.ref }}
+  group: tsuzuri-pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
 
       - name: Load config
         run: |
-          CONFIG_FILE=".github/docs-pages.config"
+          CONFIG_FILE="__VENDOR_DIR__/config"
           if [ ! -f "$CONFIG_FILE" ]; then
             echo "::error::設定ファイル $CONFIG_FILE が見つかりません。パッケージ一式が正しく配置されているか確認してください。"
             exit 1

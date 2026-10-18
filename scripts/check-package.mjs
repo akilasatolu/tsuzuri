@@ -58,8 +58,8 @@ try {
   fs.writeFileSync(path.join(site, "docs/guide.md"), "# Guide\n\n[Home](../README.md)\n");
   run("npm", ["exec", "--yes", `--package=${tgz}`, "--", "tsuzuri", "init", "--yes", "--languages", "en"], site);
   for (const rel of [
-    ".github/workflows/docs-pages.yml",
-    ".github/docs-pages.config",
+    ".github/workflows/tsuzuri-pages.yml",
+    ".github/tsuzuri/config",
     ".github/tsuzuri/build-docs.mjs",
     ".github/tsuzuri/lib/i18n.mjs",
     ".github/tsuzuri/styles/base.css",
@@ -70,10 +70,13 @@ try {
   ]) {
     check(exists(rel), `init が ${rel} を作った`);
   }
+  for (const rel of [".github/docs-pages.config", ".github/workflows/docs-pages.yml"]) {
+    check(!exists(rel), `init は旧名の ${rel} を作らない`);
+  }
 
   // 3. 生成ワークフローと同じ方法で依存を入れてビルド
   check(
-    read(".github/workflows/docs-pages.yml").includes("npm ci --prefix"),
+    read(".github/workflows/tsuzuri-pages.yml").includes("npm ci --prefix"),
     "生成ワークフローは npm ci で依存を入れる"
   );
   run("npm", ["ci", "--prefix", ".github/tsuzuri", "--ignore-scripts", "--no-audit", "--no-fund"], site);
@@ -85,7 +88,7 @@ try {
   // 4. init --update は設定ファイルと、既にある独自CSSを変えない
   const customCssRel = ".github/tsuzuri/styles/custom.css";
   fs.writeFileSync(path.join(site, customCssRel), "/* my custom css */\n");
-  const configRel = ".github/docs-pages.config";
+  const configRel = ".github/tsuzuri/config";
   const edited = read(configRel).replace(/^THEME=.*$/m, "THEME=nineties");
   check(edited.includes("THEME=nineties"), "設定ファイルを書き換えた(THEME=nineties)");
   fs.writeFileSync(path.join(site, configRel), edited);

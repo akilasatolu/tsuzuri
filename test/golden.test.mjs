@@ -165,13 +165,13 @@ function buildSite(dir, overrides) {
   return runGoldenBuild(dir, overrides).outDir;
 }
 
-// buildSite と同じ。configText を渡すと .github/docs-pages.config に書いてからビルドし、
+// buildSite と同じ。configText を渡すと .github/tsuzuri/config に書いてからビルドし、
 // 出力先と子プロセスの結果(警告の確かめ用)を返す
 function runGoldenBuild(dir, overrides, configText) {
   fs.cpSync(FIXTURE_SITE, dir, { recursive: true });
   if (configText !== undefined) {
-    fs.mkdirSync(path.join(dir, ".github"), { recursive: true });
-    fs.writeFileSync(path.join(dir, ".github", "docs-pages.config"), configText);
+    fs.mkdirSync(path.join(dir, ".github", "tsuzuri"), { recursive: true });
+    fs.writeFileSync(path.join(dir, ".github", "tsuzuri", "config"), configText);
   }
   fs.cpSync(REAL_STYLES_DIR, path.join(dir, "styles"), { recursive: true });
   const env = { ...process.env };

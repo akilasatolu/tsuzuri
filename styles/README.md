@@ -12,7 +12,7 @@
 
 ## 使い方
 
-1. `.github/docs-pages.config` の `THEME` に、下表の中から好きなテーマ名
+1. `.github/tsuzuri/config` の `THEME` に、下表の中から好きなテーマ名
    (`material` / `glass` / `neumorphism` / `editorial` / `minimal` / `kintsugi` / `blueprint` / `nineties` / `none`)を指定する
 
    ```
@@ -43,7 +43,7 @@
 
 ## 自分でスタイルをカスタマイズしたい場合
 
-`.github/tsuzuri/styles/` の中に独自の CSS ファイルを置き、`.github/docs-pages.config` の
+`.github/tsuzuri/styles/` の中に独自の CSS ファイルを置き、`.github/tsuzuri/config` の
 `STYLE_FILE` にそのファイル名だけ(例: `custom.css`。フォルダは書きません)を指定すると、
 選んだ THEME の後に読み込まれる第3層として追記されます(THEME の内容を
 上書きしたい場合はこちらを使います)。`init` が空の `custom.css` を作るので、

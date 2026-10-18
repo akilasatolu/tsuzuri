@@ -35,7 +35,7 @@ STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
 ```
 
 - `STYLE_DIR` makes the build use the theme CSS from your working tree.
-- Outside GitHub Actions, `.github/docs-pages.config` is read if present, and environment variables win (for example `THEME=nineties`). The site language comes from `LANGUAGES`, not from the OS `LANG`.
+- Outside GitHub Actions, `.github/tsuzuri/config` is read if present, and environment variables win (for example `THEME=nineties`). The site language comes from `LANGUAGES`, not from the OS `LANG`.
 - The output goes to `_site/`. If it contains the `.tsuzuri-build` marker from a previous build, everything in it is deleted before the build; a directory without the marker is only overwritten.
 
 In a directory where `init` has already run, `node ~/dev/tsuzuri/bin/cli.mjs preview` builds, serves and rebuilds on changes.
@@ -92,7 +92,7 @@ Never save it again just to make the test pass. That hides unintended changes.
 Edit these:
 
 - `bin/`: the setup CLI. `bin/cli.mjs` is the single source of what users receive (workflow, config file, vendored files); `bin/preview.mjs` is `preview`.
-- `templates/`: the workflow template (`.github/workflows/docs-pages.yml`) and the ready-made `package.json` and `package-lock.json` of the build dependencies given to users.
+- `templates/`: the workflow template (`.github/workflows/tsuzuri-pages.yml`) and the ready-made `package.json` and `package-lock.json` of the build dependencies given to users.
 - `.github/scripts/`: the build (`build-docs.mjs` and `lib/`).
 - `styles/`: the theme CSS.
 - `test/`: the tests, with fixtures in `test/fixtures/`.
@@ -104,7 +104,7 @@ The user documentation (`docs/`) is on the `docs` branch.
 
 `init` copies `.github/scripts/` and `styles/` as they are into the user's repository, so anything you put there is shipped to users.
 
-`init` also generates `.github/workflows/docs-pages.yml`, `.github/docs-pages.config` and `.github/tsuzuri/` in the **user's** repository. Do not commit these to `main`; `test/cli.test.mjs` tests the generation and `test/build-docs.e2e.test.mjs` tests the build.
+`init` also generates `.github/workflows/tsuzuri-pages.yml` and `.github/tsuzuri/` (which includes the settings file `config`) in the **user's** repository. Do not commit these to `main`; `test/cli.test.mjs` tests the generation and `test/build-docs.e2e.test.mjs` tests the build.
 
 Known limitations that users see (the frontmatter format, the mermaid CDN) are documented on the user site, not here: [Frontmatter limitations](https://akilasatolu.github.io/tsuzuri/docs/frontmatter.html#limitations), [Externally loaded files](https://akilasatolu.github.io/tsuzuri/docs/concepts.html#externally-loaded-files-and-dependency-safety).
 

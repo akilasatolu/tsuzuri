@@ -35,7 +35,7 @@ STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
 ```
 
 - `STYLE_DIR` を指定すると、作業ツリーのテーマ CSS が使われます。
-- GitHub Actions の外では、`.github/docs-pages.config` があれば読みます。環境変数で指定した値が優先されます(例: `THEME=nineties`)。サイトの言語は `LANGUAGES` で決まり、OS の `LANG` は使いません。
+- GitHub Actions の外では、`.github/tsuzuri/config` があれば読みます。環境変数で指定した値が優先されます(例: `THEME=nineties`)。サイトの言語は `LANGUAGES` で決まり、OS の `LANG` は使いません。
 - 出力先は `_site/` です。前回のビルドが置いた目印のファイル `.tsuzuri-build` があれば、ビルドの前に中身をすべて消します。目印のないディレクトリは、消さずに上書きするだけです。
 
 `init` 済みのディレクトリでは、`node ~/dev/tsuzuri/bin/cli.mjs preview` で、ビルドから配信と変更時の再ビルドまでまとめて試せます。
@@ -92,7 +92,7 @@ npm run lint
 編集してよいものは次のとおりです。
 
 - `bin/`: セットアップ CLI。`bin/cli.mjs` は、利用者が受け取る内容(ワークフロー・設定ファイル・取り込む対象)の唯一の正で、`bin/preview.mjs` は `preview` の本体です。
-- `templates/`: ワークフローのひな形(`.github/workflows/docs-pages.yml`)と、利用者に配るビルド用の依存の `package.json`・`package-lock.json` の完成品。
+- `templates/`: ワークフローのひな形(`.github/workflows/tsuzuri-pages.yml`)と、利用者に配るビルド用の依存の `package.json`・`package-lock.json` の完成品。
 - `.github/scripts/`: ビルド本体(`build-docs.mjs` と `lib/`)。
 - `styles/`: テーマ CSS。
 - `test/`: テスト。フィクスチャは `test/fixtures/` にあります。
@@ -104,7 +104,7 @@ npm run lint
 
 `init` は `.github/scripts/` と `styles/` の中身をそのまま利用者のリポジトリへコピーするので、ここに置いたファイルは利用者に配られます。
 
-また、`init` は**利用者の**リポジトリに `.github/workflows/docs-pages.yml`・`.github/docs-pages.config`・`.github/tsuzuri/` を生成します。これらを `main` にコミットしないでください。生成は `test/cli.test.mjs` が、ビルドは `test/build-docs.e2e.test.mjs` が検証します。
+また、`init` は**利用者の**リポジトリに `.github/workflows/tsuzuri-pages.yml` と `.github/tsuzuri/`(設定ファイル `config` を含む)を生成します。これらを `main` にコミットしないでください。生成は `test/cli.test.mjs` が、ビルドは `test/build-docs.e2e.test.mjs` が検証します。
 
 利用者に見える既知の限界(frontmatter の書式、mermaid の CDN 依存)は、ここではなく利用者向けサイトに書いてあります: [frontmatter の制限事項](https://akilasatolu.github.io/tsuzuri/ja/docs/frontmatter.html#制限事項)、[外部から読み込むファイル](https://akilasatolu.github.io/tsuzuri/ja/docs/concepts.html#外部から読み込むファイルと依存の安全性)。
 

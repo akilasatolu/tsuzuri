@@ -404,14 +404,14 @@ test("withConfigFileDefaults: 環境変数を優先し、無いキーは設定�
 });
 
 test("CONFIG_FILE_KEYS はワークフローの Load config が受け付けるキーと同じ", () => {
-  const yml = fs.readFileSync(new URL("../templates/.github/workflows/docs-pages.yml", import.meta.url), "utf-8");
+  const yml = fs.readFileSync(new URL("../templates/.github/workflows/tsuzuri-pages.yml", import.meta.url), "utf-8");
   const m = yml.match(/^\s*((?:[A-Z_]+\|)+[A-Z_]+)\)\s*$/m);
   assert.ok(m, "Load config の case 文");
   assert.deepEqual(m[1].split("|").sort(), [...CONFIG_FILE_KEYS].sort());
 });
 
 test("ワークフローの Build の env: STYLE_DIR だけ(設定ファイルの値と BASE_PATH・SITE_ORIGIN は $GITHUB_ENV 経由で渡る)", () => {
-  const yml = fs.readFileSync(new URL("../templates/.github/workflows/docs-pages.yml", import.meta.url), "utf-8");
+  const yml = fs.readFileSync(new URL("../templates/.github/workflows/tsuzuri-pages.yml", import.meta.url), "utf-8");
   const m = yml.match(/- name: Build\n(?: {8}.*\n)*? {8}env:\n((?: {10}.*\n)+)/);
   assert.ok(m, "Build ステップの env");
   const envKeys = [...m[1].matchAll(/^ {10}([A-Z_]+):/gm)].map((x) => x[1]);
@@ -433,8 +433,8 @@ test("CONFIG_FILE_KEYS: LANG は無く、LANGUAGES がある", () => {
 
 test("利用者のリポジトリでの Tsuzuri のファイルの置き場所", () => {
   assert.equal(VENDOR_DIR, ".github/tsuzuri");
-  assert.equal(WORKFLOW_PATH, ".github/workflows/docs-pages.yml");
-  assert.equal(CONFIG_FILE_PATH, ".github/docs-pages.config");
+  assert.equal(WORKFLOW_PATH, ".github/workflows/tsuzuri-pages.yml");
+  assert.equal(CONFIG_FILE_PATH, ".github/tsuzuri/config");
 });
 
 test("STYLE_FILE: ファイル名だけ。未設定・空は既定の custom.css、前後の空白は取る", () => {
