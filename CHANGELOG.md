@@ -19,12 +19,14 @@
 ### Changed
 
 - 生成するワークフロー(`.github/workflows/docs-pages.yml`)の「Build」ステップで、設定ファイルの値を 1 つずつ書き写していた `env:` の列挙(20 項目)を整理し、`STYLE_DIR` だけにした。設定ファイルの値と `BASE_PATH`・`SITE_ORIGIN` は、前のステップが環境変数として渡すので、動作は変わらない。あわせて、ワークフローのコメント(ビルド用の依存の説明)を、依存の名前と版を書かない文面にした。`init --update` で反映される。設定ファイルを書き換える必要はない。
+- `init` が独自 CSS の空ひな形 `.github/tsuzuri/styles/custom.css` を必ず作るようにした(質問は無くなった)。既にあれば上書きしない(`--yes --force` でも)。`init --update` でも、無ければ作る。
 
 ### Removed
 
 - `sitemap.json` の `pageRels` を削除した。同じ内容が `pages[].rel` にある。`sitemap.json` はデバッグ用の出力で、`SITEMAP_JSON=true` のときだけ出る。
 - v1.7.0 より前に `init` したリポジトリで、`preview` がワークフローの `npm install` の行から依存を読む処理をやめた。`package-lock.json` が無いときは(依存が入っていても)、`init --update` を案内して終了する。
 - 廃止した設定キー `LANG` 専用の警告を削除した。`LANG` の行は、ほかの未知のキーと同じ扱いになる(生成ワークフローは「未知の設定キー」の警告を出して無視する。手元のビルドは黙って無視する)。言語は `LANGUAGES` だけで決まる。
+- `init` の `--style` オプションと、独自 CSS のひな形についての質問を削除した。
 
 ## [1.35.0] - 2026-10-11
 

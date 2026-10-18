@@ -16,6 +16,7 @@ import {
   buildStyleCssTemplate,
   buildVendorTargets,
   buildTargets,
+  buildCustomCssTarget,
   buildWorkflowTarget,
   writeGeneratedFiles,
   resolveThemeChoice,
@@ -66,10 +67,10 @@ function fakeRl(answers) {
 
 // --- 対話ロジック(promptAnswers)のテスト ---
 // 標準入力を直接モックする代わりに、question()を差し替えたrlオブジェクトを注入する。
-// 質問の順番: TRIGGER_BRANCH / ROOT_MD / THEME / NAV_ENABLED / LANGUAGES / SITE_NAME / 独自CSSのひな形
+// 質問の順番: TRIGGER_BRANCH / ROOT_MD / THEME / NAV_ENABLED / LANGUAGES / SITE_NAME(独自CSSのひな形は聞かない。常に作る)
 
 test("promptAnswers: 全てデフォルト値で応答すると既定値が返る", async () => {
-  const rl = fakeRl(["", "", "", "", "", "", ""]);
+  const rl = fakeRl(["", "", "", "", "", ""]);
   const answers = await promptAnswers(rl);
   assert.deepEqual(answers, {
     triggerBranch: "main",
@@ -78,32 +79,27 @@ test("promptAnswers: 全てデフォルト値で応答すると既定値が返�
     navEnabled: true,
     languages: "en",
     siteName: "",
-    createStyleFile: false,
   });
 });
 
 test("promptAnswers: THEME番号入力(8)でninetiesが選ばれる", async () => {
-  const rl = fakeRl(["", "", "8", "", "", "", ""]);
+  const rl = fakeRl(["", "", "8", "", "", ""]);
   const answers = await promptAnswers(rl);
   assert.equal(answers.theme, "nineties");
   assert.equal(THEME_CHOICES[7].key, "nineties");
 });
 
-test("promptAnswers: STYLE_FILEひな形作成をyで応答するとtrueになる", async () => {
-  const rl = fakeRl(["", "", "", "", "", "", "y"]);
+test("promptAnswers: 独自CSSのひな形は聞かない(6つの質問で終わる。7つ目を聞くと答えが足りずに失敗する)", async () => {
+  const asked = [];
+  const rl = { question: async (prompt) => (asked.push(prompt), "") };
   const answers = await promptAnswers(rl);
-  assert.equal(answers.createStyleFile, true);
-});
-
-test("promptAnswers: STYLE_FILEひな形作成をNまたは無入力で応答するとfalseになる", async () => {
-  const rl1 = fakeRl(["", "", "", "", "", "", "N"]);
-  assert.equal((await promptAnswers(rl1)).createStyleFile, false);
-  const rl2 = fakeRl(["", "", "", "", "", "", ""]);
-  assert.equal((await promptAnswers(rl2)).createStyleFile, false);
+  assert.equal(asked.length, 6);
+  assert.ok(!asked.some((q) => /独自CSS|custom\.css/.test(q)));
+  assert.equal("createStyleFile" in answers, false);
 });
 
 test("promptAnswers: ナビ(n で無効)とサイト名を聞き、設定ファイルに書く", async () => {
-  const answers = await promptAnswers(fakeRl(["", "", "", "n", "", "  My Docs  ", ""]));
+  const answers = await promptAnswers(fakeRl(["", "", "", "n", "", "  My Docs  "]));
   assert.equal(answers.navEnabled, false);
   assert.equal(answers.siteName, "My Docs");
   const config = buildDocsPagesConfig(answers);
@@ -133,7 +129,7 @@ test("promptAnswers: サイトの言語(LANGUAGES)をサイト名の前に聞き
   ];
   for (const [input, expected] of cases) {
     const prompts = [];
-    const rl = fakeRl(["", "", "", "", input, "Site", ""]);
+    const rl = fakeRl(["", "", "", "", input, "Site"]);
     const { result: answers, calls } = await captureWarn(() =>
       promptAnswers({ question: (q) => (prompts.push(q), rl.question(q)) }),
     );
@@ -150,7 +146,7 @@ test("promptAnswers: サイトの言語(LANGUAGES)をサイト名の前に聞き
 });
 
 test("promptAnswers: 不正な言語タグ(ja_JP)は警告して en にする", async () => {
-  const { result: answers, calls } = await captureWarn(() => promptAnswers(fakeRl(["", "", "", "", "ja_JP", "", ""])));
+  const { result: answers, calls } = await captureWarn(() => promptAnswers(fakeRl(["", "", "", "", "ja_JP", ""])));
   assert.equal(answers.languages, "en");
   assert.deepEqual(calls, [
     '[config] LANGUAGES の "ja_JP" は言語タグとして不正なため無視します。',
@@ -423,21 +419,18 @@ test("buildVendorTargets: build-docs.mjs・lib/*.mjs・styles/*.cssが実ファ�
   assert.ok(!targets.some((t) => t.relPath.includes("fixtures")));
 });
 
-test("buildTargets: createStyleFile=falseならstyle.cssは生成対象に含まれないが、ベンダリング対象は含まれる", () => {
-  const targets = buildTargets({ createStyleFile: false });
-  const vendorCount = buildVendorTargets().length;
-  assert.equal(targets.length, 2 + vendorCount);
-  assert.ok(!targets.some((t) => t.relPath === `${VENDOR_DIR}/styles/custom.css`));
-  assert.ok(targets.some((t) => t.relPath === `${VENDOR_DIR}/build-docs.mjs`));
-});
-
-test("buildTargets: createStyleFile=trueならcustom.cssも生成対象に含まれる(VENDOR_DIR/styles/配下)", () => {
-  const targets = buildTargets({ createStyleFile: true });
+test("buildTargets: 独自CSSのひな形(custom.css)は常に生成対象に含まれ、既にあれば保持する(VENDOR_DIR/styles/配下)", () => {
+  const targets = buildTargets({});
   const vendorCount = buildVendorTargets().length;
   assert.equal(targets.length, 3 + vendorCount);
   const styleTarget = targets.find((t) => t.relPath === `${VENDOR_DIR}/styles/custom.css`);
   assert.ok(styleTarget, "組み込みテーマCSSと同じ.github/tsuzuri/styles/配下に生成されること");
   assert.equal(styleTarget.content, buildStyleCssTemplate());
+  assert.equal(styleTarget.keepExisting, true);
+  assert.deepEqual(buildCustomCssTarget(), styleTarget);
+  assert.ok(targets.some((t) => t.relPath === `${VENDOR_DIR}/build-docs.mjs`));
+  // ほかの対象は、既にあれば確認する(keepExisting ではない)
+  assert.ok(targets.filter((t) => t !== styleTarget).every((t) => !t.keepExisting));
 });
 
 // --- ファイル書き出し(writeGeneratedFiles)のテスト ---
@@ -449,7 +442,6 @@ test("writeGeneratedFiles: 空ディレクトリに全てデフォルト値で�
       triggerBranch: "main",
       rootMd: "README.md",
       theme: "material",
-      createStyleFile: false,
     });
     const confirmOverwrite = async () => {
       throw new Error("既存ファイルが無いので呼ばれないはず");
@@ -478,13 +470,35 @@ test("writeGeneratedFiles: 空ディレクトリに全てデフォルト値で�
   }
 });
 
-test("writeGeneratedFiles: createStyleFile=trueでコメントのみの空ファイルが生成される", async () => {
+test("writeGeneratedFiles: コメントのみの空の custom.css が生成される", async () => {
   const dir = makeTmpDir();
   try {
-    const targets = buildTargets({ createStyleFile: true });
+    const targets = buildTargets({});
     await writeGeneratedFiles(targets, { cwd: dir, confirmOverwrite: async () => true });
     const css = readFileSync(join(dir, VENDOR_DIR, "styles/custom.css"), "utf8");
     assert.equal(css, buildStyleCssTemplate());
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("writeGeneratedFiles: 既存の custom.css は、確認もせず上書きもしない(confirmOverwrite が true でも)", async () => {
+  const dir = makeTmpDir();
+  try {
+    const cssPath = join(dir, VENDOR_DIR, "styles/custom.css");
+    mkdirSync(join(dir, VENDOR_DIR, "styles"), { recursive: true });
+    writeFileSync(cssPath, "/* mine */");
+    const asked = [];
+    const logs = [];
+    const results = await writeGeneratedFiles([buildCustomCssTarget()], {
+      cwd: dir,
+      confirmOverwrite: async (relPath) => (asked.push(relPath), true),
+      log: (m) => logs.push(m),
+    });
+    assert.equal(readFileSync(cssPath, "utf8"), "/* mine */");
+    assert.deepEqual(asked, [], "確認しない");
+    assert.equal(results[0].status, "skipped");
+    assert.ok(logs.some((m) => m.includes("保持しました")));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -498,7 +512,7 @@ test("writeGeneratedFiles: 既存ファイルはconfirmOverwriteがfalse(デフ�
     const original = "# 既存のユーザーカスタム内容\n";
     writeFileSync(ymlPath, original);
 
-    const targets = buildTargets({ createStyleFile: false });
+    const targets = buildTargets({});
     let promptedFor = [];
     const confirmOverwrite = async (relPath) => {
       promptedFor.push(relPath);
@@ -531,7 +545,7 @@ test("writeGeneratedFiles: 既存ファイルにyで応答すると上書きさ�
     mkdirSync(join(dir, ".github/workflows"), { recursive: true });
     writeFileSync(ymlPath, "# 古い内容\n");
 
-    const targets = buildTargets({ createStyleFile: false });
+    const targets = buildTargets({});
     const results = await writeGeneratedFiles(targets, {
       cwd: dir,
       confirmOverwrite: async () => true,
@@ -555,7 +569,7 @@ test("writeGeneratedFiles: 全対象のうち1つだけ既存の場合、その1
     mkdirSync(join(dir, ".github"), { recursive: true });
     writeFileSync(join(dir, ".github/docs-pages.config"), "# 既存のconfig\n");
 
-    const targets = buildTargets({ createStyleFile: true });
+    const targets = buildTargets({});
 
     const promptedFor = [];
     const confirmOverwrite = async (relPath) => {
@@ -583,7 +597,7 @@ test("writeGeneratedFiles: 全対象のうち1つだけ既存の場合、その1
 test("writeGeneratedFiles: I/Oエラー(書き込み不可)時は例外が送出される", async () => {
   const dir = makeTmpDir();
   try {
-    const targets = buildTargets({ createStyleFile: false });
+    const targets = buildTargets({});
     const fsImpl = {
       existsSync: () => false,
       mkdirSync: () => {
@@ -646,7 +660,7 @@ test("実ファイルシステムで書き込み権限がない場合、非ゼ�
   const dir = makeTmpDir();
   try {
     chmodSync(dir, 0o500); // 書き込み不可(読み取り+実行のみ)
-    const targets = buildTargets({ createStyleFile: false });
+    const targets = buildTargets({});
     let caught = null;
     try {
       await writeGeneratedFiles(targets, { cwd: dir, confirmOverwrite: async () => false });
@@ -671,7 +685,7 @@ test("buildWorkflowTarget: init と init --update が使うワークフローの
   assert.deepEqual(buildTargets({}).find((t) => t.name === "docs-pages.yml"), target);
 });
 
-test("runUpdate: ワークフローとビルドスクリプトは上書き・追加し、設定ファイルと独自CSSは変更しない", async () => {
+test("runUpdate: ワークフローとビルドスクリプトは上書き・追加し、設定ファイルと既存の独自CSSは変更しない", async () => {
   const dir = makeTmpDir();
   try {
     const configPath = join(dir, ".github/docs-pages.config");
@@ -691,9 +705,9 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
     assert.ok(existsSync(join(dir, VENDOR_DIR, "build-docs.mjs")));
     assert.ok(existsSync(join(dir, VENDOR_DIR, "lib/site-tree.mjs")));
     assert.ok(!results.some((r) => r.relPath.endsWith("docs-pages.config")));
-    assert.ok(!results.some((r) => r.relPath.endsWith("custom.css")));
+    assert.equal(results.find((r) => r.relPath.endsWith("custom.css")).status, "skipped", "既存の独自CSSは保持する");
     assert.equal(results.find((r) => r.relPath === ".github/workflows/docs-pages.yml").status, "overwritten");
-    assert.ok(results.every((r) => r.status !== "skipped"));
+    assert.deepEqual(results.filter((r) => r.status === "skipped").map((r) => r.relPath), [`${VENDOR_DIR}/styles/custom.css`]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -716,6 +730,19 @@ test("設定ファイルのひな形のテーマの一覧に、ALLOWED_THEMES �
   const line = config.split("\n").find((l) => l.startsWith("# テーマ:"));
   assert.ok(line, "テーマの一覧の行");
   for (const theme of ALLOWED_THEMES) assert.ok(line.includes(`${theme}(`), `${theme} が載っていない`);
+});
+
+test("runUpdate: 独自CSS(custom.css)が無ければ、空のひな形を作る", async () => {
+  const dir = makeTmpDir();
+  try {
+    mkdirSync(join(dir, ".github"), { recursive: true });
+    writeFileSync(join(dir, ".github/docs-pages.config"), "TRIGGER_BRANCH=main\n");
+    const results = await runUpdate({ cwd: dir });
+    assert.equal(readFileSync(join(dir, VENDOR_DIR, "styles/custom.css"), "utf8"), buildStyleCssTemplate());
+    assert.equal(results.find((r) => r.relPath === `${VENDOR_DIR}/styles/custom.css`).status, "created");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("runUpdate: 設定ファイルが無い(未init)リポジトリではエラーにして何も書き込まない", async () => {
@@ -854,7 +881,7 @@ test("parseCliArgs: 引数なし・init だけなら対話モード", () => {
 
 test("parseCliArgs: --yes や値の指定があれば対話なし。値は answersFromArgs で回答になる", () => {
   assert.equal(parseCliArgs(["-y"]).nonInteractive, true);
-  const args = parseCliArgs(["init", "--branch", "docs", "--root", "index.md", "--theme", "nineties", "--style"]);
+  const args = parseCliArgs(["init", "--branch", "docs", "--root", "index.md", "--theme", "nineties"]);
   assert.equal(args.nonInteractive, true);
   assert.deepEqual(answersFromArgs(args), {
     triggerBranch: "docs",
@@ -863,7 +890,6 @@ test("parseCliArgs: --yes や値の指定があれば対話なし。値は answe
     navEnabled: true,
     languages: "en",
     siteName: "",
-    createStyleFile: true,
   });
   assert.deepEqual(answersFromArgs(parseCliArgs(["--yes"])), {
     triggerBranch: "main",
@@ -872,12 +898,12 @@ test("parseCliArgs: --yes や値の指定があれば対話なし。値は answe
     navEnabled: true,
     languages: "en",
     siteName: "",
-    createStyleFile: false,
   });
 });
 
 test("parseCliArgs: 不明なオプション・サブコマンド、不正なテーマ、空の値はエラー", () => {
   assert.throws(() => parseCliArgs(["--bogus"]), /引数が正しくありません/);
+  assert.throws(() => parseCliArgs(["--style"]), /引数が正しくありません/, "--style は削除した(独自CSSのひな形は常に作る)");
   assert.throws(() => parseCliArgs(["deploy"]), /不明なサブコマンド/);
   assert.throws(() => parseCliArgs(["--theme", "sepia"]), /--theme には/);
   assert.throws(() => parseCliArgs(["--branch", " "]), /--branch に空の値/);
@@ -917,9 +943,10 @@ test("parseCliArgs: -v / -h / --update / --force", () => {
 });
 
 test("HELP_TEXT: 主なオプションとテーマ名を説明している", () => {
-  for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--style", "--force", "--version", "nineties"]) {
+  for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--force", "--version", "nineties"]) {
     assert.ok(HELP_TEXT.includes(word), word);
   }
+  assert.ok(!HELP_TEXT.includes("--style"));
 });
 
 test("readPackageVersion / readDependencyVersion: package.json の値を返す", () => {

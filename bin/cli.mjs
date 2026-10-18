@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // npx github:akilasatolu/tsuzuri [init] のエントリーポイント。
 // 利用者リポジトリに配布用ファイル(docs-pages.yml / docs-pages.config /
-// 任意で独自CSSの空ひな形 custom.css)に加えて、ビルドスクリプト本体
+// 独自CSSの空ひな形 custom.css)に加えて、ビルドスクリプト本体
 // (build-docs.mjs / lib/*.mjs / styles/*.css)一式を `.github/tsuzuri/` 配下に
 // コピー(ベンダリング)する。これにより、生成後のワークフローは実行のたびに
 // OSS本体リポジトリ(tsuzuri)を参照する必要がなくなり、利用者リポジトリの中だけで
@@ -74,7 +74,6 @@ const DEFAULT_ANSWERS = {
   languages: "en",
   // 空ならビルド時にリポジトリ名になる
   siteName: "",
-  createStyleFile: false,
 };
 
 /**
@@ -333,6 +332,21 @@ export function buildStyleCssTemplate() {
 }
 
 /**
+ * 独自CSS(custom.css)の空ひな形の生成対象({name, relPath, content, keepExisting})。
+ * 組み込みテーマCSS一式(${VENDOR_DIR}/styles/)と同じディレクトリに置く。
+ * テーマCSSを参考にしながら独自CSSを書けるよう、あえて同じ場所にまとめている。
+ * keepExisting: 既にあれば上書きしない(確認もしない。--force でも、init --update でも)。
+ */
+export function buildCustomCssTarget() {
+  return {
+    name: "custom.css",
+    relPath: `${VENDOR_DIR}/styles/custom.css`,
+    content: buildStyleCssTemplate(),
+    keepExisting: true,
+  };
+}
+
+/**
  * ベンダリング対象のビルドスクリプト一式(build-docs.mjs / lib/*.mjs / styles/*.css)を
  * `packageRoot`(このパッケージ自身の実ファイル)から読み取り、生成ターゲット形式
  * ({name, relPath, content})の配列として返す。
@@ -423,15 +437,7 @@ export function buildTargets(answers) {
     },
     ...buildVendorTargets(),
   ];
-  if (merged.createStyleFile) {
-    targets.push({
-      name: "custom.css",
-      // 組み込みテーマCSS一式(${VENDOR_DIR}/styles/)と同じディレクトリに置く。
-      // テーマCSSを参考にしながら独自CSSを書けるよう、あえて同じ場所にまとめている。
-      relPath: `${VENDOR_DIR}/styles/custom.css`,
-      content: buildStyleCssTemplate(),
-    });
-  }
+  targets.push(buildCustomCssTarget());
   return targets;
 }
 
@@ -439,8 +445,9 @@ export function buildTargets(answers) {
  * ファイル単位で既存ファイルを検出しつつ書き出す。
  * ファイル単位で個別にexistsSyncをチェックし、既存ファイルは上書き確認を行う。
  * 1ファイルのスキップ(N回答)が他ファイルの処理を止めないようにする。
+ * keepExisting が真の対象(独自CSSのひな形)は、既にあれば確認せずに保持する。
  *
- * @param {Array<{name:string, relPath:string, content:string}>} targets
+ * @param {Array<{name:string, relPath:string, content:string, keepExisting?:boolean}>} targets
  * @param {object} opts
  * @param {string} opts.cwd - 書き出し先のルートディレクトリ
  * @param {(relPath: string) => Promise<boolean>|boolean} opts.confirmOverwrite -
@@ -461,6 +468,12 @@ export async function writeGeneratedFiles(targets, opts) {
   for (const target of targets) {
     const fullPath = join(cwd, target.relPath);
     const alreadyExists = fsImpl.existsSync(fullPath);
+
+    if (alreadyExists && target.keepExisting) {
+      log(`⏭ ${target.relPath} を保持しました(既にあるため上書きしません)`);
+      results.push({ ...target, status: "skipped" });
+      continue;
+    }
 
     if (alreadyExists) {
       const overwrite = await confirmOverwrite(target.relPath);
@@ -526,7 +539,7 @@ export function createAsker(rl) {
 }
 
 /**
- * 対話プロンプトで7項目(TRIGGER_BRANCH/ROOT_MD/THEME/NAV_ENABLED/LANGUAGES/SITE_NAME/STYLE_FILEひな形作成有無)を収集する。
+ * 対話プロンプトで6項目(TRIGGER_BRANCH/ROOT_MD/THEME/NAV_ENABLED/LANGUAGES/SITE_NAME)を収集する。
  * readlineインターフェースは呼び出し側から注入する(テスト時は標準入力をモックしたものを渡す)。
  */
 export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
@@ -562,19 +575,15 @@ export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
   const siteNameInput = await rl.question("? サイト名 (SITE_NAME。空ならリポジトリ名) []: ");
   const siteName = siteNameInput.trim();
 
-  const createStyleFileInput = await rl.question(
-    `? 独自CSS用の空ひな形ファイル(${VENDOR_DIR}/styles/custom.css)を作成しますか? (y/N): `,
-  );
-  const createStyleFile = parseYesNo(createStyleFileInput, false);
-
-  return { triggerBranch, rootMd, theme, navEnabled, languages, siteName, createStyleFile };
+  return { triggerBranch, rootMd, theme, navEnabled, languages, siteName };
 }
 
 /**
  * `init --update`: 対話なしで、既存の利用者リポジトリの tsuzuri を最新化する。
  *
  * - ワークフロー(docs-pages.yml)とビルドスクリプト一式(VENDOR_DIR 配下)は上書きする
- * - 設定ファイル(docs-pages.config)と独自CSS(custom.css)は一切触らない
+ * - 設定ファイル(docs-pages.config)は一切触らない
+ * - 独自CSS(custom.css)は、既にあれば触らない。無ければ空のひな形を作る
  * - 新しく増えたビルドスクリプトは追加される
  * - 本体側で削除されたビルドスクリプト(VENDOR_DIR/lib/*.mjs のうち配布対象に無いもの)は削除する
  *   (VENDOR_DIR/styles/ は利用者の独自CSSも置かれるため、削除の対象にしない)
@@ -604,6 +613,7 @@ export async function runUpdate({
   const updateTargets = targets ?? [
     buildWorkflowTarget(),
     ...buildVendorTargets(),
+    buildCustomCssTarget(),
   ];
   // 新しいバージョンで増えた設定項目のうち、利用者の設定ファイルに無いものを案内する
   // (設定ファイルは書き換えないので、無い項目は既定値で動く)
@@ -648,8 +658,8 @@ init: オプションを付けずに実行すると、対話形式で設定を�
 preview: 公開時と同じ設定でサイトを手元にビルドし、ブラウザで確認できるように配信します
          (init 済みのリポジトリの直下で実行します)。ファイルを保存すると自動でビルドし直します。
 
-  --update           対話なしで最新版に更新する(ワークフローとビルドスクリプトだけを上書きし、
-                     設定ファイル・独自CSSは変更しない)
+  --update           対話なしで最新版に更新する(ワークフローとビルドスクリプトを上書きし、
+                     設定ファイルは変更しない。独自CSSは既にあれば変更せず、無ければ空のひな形を作る)
   -y, --yes          対話なしで、すべて既定値(または下のオプションで指定した値)で生成する
       --branch <名前> トリガーブランチ(TRIGGER_BRANCH)。既定: リポジトリの既定ブランチ
                      (origin/HEAD。分からなければ main)
@@ -660,7 +670,6 @@ preview: 公開時と同じ設定でサイトを手元にビルドし、ブラ�
       --site-name <名前>
                      サイト名(SITE_NAME)。既定: 空(ビルド時にリポジトリ名になる)
       --no-nav       ナビ・サイト内検索・目次を表示しない(NAV_ENABLED=false)。既定: 表示する
-      --style        独自CSSの空ひな形(${VENDOR_DIR}/styles/custom.css)も作る
       --force        対話なしのとき、既存ファイルも上書きする(既定では既存ファイルはスキップ)
       --port <番号>   preview で使うポート番号。既定: 4000
       --no-watch     preview で、ファイルの変更を見張らない(自動でビルドし直さない)
@@ -668,13 +677,13 @@ preview: 公開時と同じ設定でサイトを手元にビルドし、ブラ�
   -v, --version      バージョンを表示する
   -h, --help         この説明を表示する
 
---branch / --root / --theme / --languages / --site-name / --no-nav / --style のいずれかを指定した場合も、対話なしで実行します。`;
+--branch / --root / --theme / --languages / --site-name / --no-nav のいずれかを指定した場合も、対話なしで実行します。`;
 
 /**
  * コマンドライン引数を解析する。不明なオプション・サブコマンドや不正なテーマ名はエラーにする。
  *
  * @param {string[]} argv - process.argv.slice(2) 相当
- * @returns {{ update: boolean, yes: boolean, force: boolean, style: boolean, version: boolean,
+ * @returns {{ update: boolean, yes: boolean, force: boolean, version: boolean,
  *   help: boolean, branch?: string, root?: string, theme?: string, languages?: string, port: number, command: "init" | "preview",
  *   nonInteractive: boolean }}
  */
@@ -708,7 +717,6 @@ function parseCliArgsRaw(argv) {
       languages: { type: "string" },
       "site-name": { type: "string" },
       "no-nav": { type: "boolean", default: false },
-      style: { type: "boolean", default: false },
       port: { type: "string" },
       "no-watch": { type: "boolean", default: false },
       open: { type: "boolean", default: false },
@@ -745,7 +753,6 @@ function parseCliArgsRaw(argv) {
   }
   const nonInteractive =
     values.yes ||
-    values.style ||
     values["no-nav"] ||
     ["branch", "root", "theme", "languages", "site-name"].some((k) => values[k] !== undefined);
   return { ...values, command, port, nonInteractive };
@@ -770,7 +777,6 @@ export function answersFromArgs(args, defaults = DEFAULT_ANSWERS) {
     navEnabled: !args["no-nav"],
     languages: args.languages !== undefined ? resolveLanguages(args.languages).join(",") : DEFAULT_ANSWERS.languages,
     siteName: args["site-name"]?.trim() ?? DEFAULT_ANSWERS.siteName,
-    createStyleFile: args.style,
   };
 }
 
@@ -880,7 +886,7 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
   }
 
   if (args.update) {
-    console.log("最新版に更新します(設定ファイル・独自CSSは変更しません)\n");
+    console.log("最新版に更新します(設定ファイルは変更しません。独自CSSは、既にあれば変更しません)\n");
     await runUpdate({ cwd, log: console.log });
     console.log("\n更新が完了しました。変更内容は 'git diff' で確認できます。");
     return;
@@ -961,7 +967,7 @@ export function isBundledPath(relPath) {
  * 対話形式の init で使う上書き確認を作る。
  *   - ワークフローとビルドスクリプト一式は、最初に既存ファイルが見つかったときに1回だけ聞き、
  *     その答えを一式すべてに適用する(一部だけ上書きしてバージョンがずれるのを防ぐ)
- *   - 設定ファイル・独自CSSは、ファイルごとに聞く
+ *   - 設定ファイルは、ファイルごとに聞く(独自CSSは、既にあれば聞かずに保持する)
  *
  * @param {(question: string) => Promise<boolean>} ask
  * @returns {(relPath: string) => Promise<boolean>}

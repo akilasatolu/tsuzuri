@@ -8,7 +8,7 @@
 //   1. npm pack で配布物と同じファイル(tgz)を作る
 //   2. 空のリポジトリで、その tgz から init を実行する(npx と同じく npm exec で、インストールしてから起動する)
 //   3. 生成されたワークフローと同じ方法で依存を入れ(npm ci --ignore-scripts)、ビルドする
-//   4. 設定ファイルを書き換えてから init --update を実行し、設定ファイルが保持されることを確かめる
+//   4. 設定ファイルと独自CSSを書き換えてから init --update を実行し、どちらも保持されることを確かめる
 // のどこかで失敗したら、終了コード 1 で止まる。npm の一時的なキャッシュは作業用の一時フォルダに置く。
 
 import { execFileSync } from "node:child_process";
@@ -66,6 +66,7 @@ try {
     ".github/tsuzuri/package.json",
     ".github/tsuzuri/package-lock.json",
     ".github/tsuzuri/.gitignore",
+    ".github/tsuzuri/styles/custom.css",
   ]) {
     check(exists(rel), `init が ${rel} を作った`);
   }
@@ -81,13 +82,16 @@ try {
     check(exists(rel), `ビルドが ${rel} を書き出した`);
   }
 
-  // 4. init --update は設定ファイルを変えない
+  // 4. init --update は設定ファイルと、既にある独自CSSを変えない
+  const customCssRel = ".github/tsuzuri/styles/custom.css";
+  fs.writeFileSync(path.join(site, customCssRel), "/* my custom css */\n");
   const configRel = ".github/docs-pages.config";
   const edited = read(configRel).replace(/^THEME=.*$/m, "THEME=nineties");
   check(edited.includes("THEME=nineties"), "設定ファイルを書き換えた(THEME=nineties)");
   fs.writeFileSync(path.join(site, configRel), edited);
   run("npm", ["exec", "--yes", `--package=${tgz}`, "--", "tsuzuri", "init", "--update"], site);
   check(read(configRel) === edited, "init --update の後も設定ファイルはそのまま");
+  check(read(customCssRel) === "/* my custom css */\n", "init --update の後も独自CSS(custom.css)はそのまま");
   check(exists(".github/tsuzuri/package-lock.json"), "init --update の後も package-lock.json がある");
 
   console.log("\n配布物の確認はすべて通りました。");
