@@ -1,19 +1,24 @@
 <!--
-PRの宛先ブランチ:
-  - Tsuzuri本体(CLI・ビルドスクリプト・テーマCSS)の変更 → main
-  - 利用者向けドキュメント(docsブランチのREADME・docs/)の変更 → docs
+Target branch / 宛先ブランチ:
+  main = Tsuzuri itself (CLI, build scripts, theme CSS) / 本体(CLI・ビルドスクリプト・テーマCSS)
+  docs = the user-facing docs site / 利用者向けドキュメント
+Guide / ガイド:
+  https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.md
+  https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.ja.md
 -->
 
-## 変更内容の説明
+## What and why / 変更内容と理由
 
-<!-- このPRで何を変更したか、なぜ変更したかを説明してください -->
+<!-- What did you change, and why? / 何を、なぜ変更したか -->
 
-## 関連Issue
+## Related issues / 関連 Issue
 
-<!-- 関連するIssue番号があれば記載してください (例: Closes #123) -->
+<!-- e.g. Closes #123 / 例: Closes #123 -->
 
-## チェックリスト
+## Checklist / チェックリスト
 
-- [ ] (main宛ての場合)`npm test` が通ることを確認した
-- [ ] (main宛ての場合)`npm run lint` が通ることを確認した
-- [ ] このPRを送ることでMITライセンスでの提供に同意します
+- [ ] (main) `npm test` passes / `npm test` が通る
+- [ ] (main) `npm run lint` passes / `npm run lint` が通る
+- [ ] If I re-saved the golden files, I explained why and what changed / ゴールデンを保存し直した場合は、理由と差分の内容を説明した
+- [ ] If I edited CONTRIBUTING, MAINTAINING or README, I updated both the English and Japanese files / CONTRIBUTING・MAINTAINING・README を直した場合は、英語版と日本語版の両方を直した
+- [ ] I agree to provide this change under the MIT License / この変更を MIT ライセンスで提供することに同意する

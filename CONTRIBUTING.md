@@ -1,165 +1,130 @@
-# コントリビューションガイド
+# Contributing to Tsuzuri
+English | [日本語](CONTRIBUTING.ja.md)
 
-このプロジェクト(tsuzuri)への貢献に興味を持っていただきありがとうございます。
-このドキュメントでは、開発環境のセットアップ方法とPRを送る際のお願いをまとめています。
+Thank you for your interest in Tsuzuri. This guide covers everything up to opening a pull request. Releases and other maintainer tasks are in [MAINTAINING.md](MAINTAINING.md). Please also read our [Code of Conduct](CODE_OF_CONDUCT.md) (Japanese only).
 
-## ブランチについて
+## Which branch?
 
-- **`main`**(既定ブランチ): Tsuzuri本体(CLI・ビルドスクリプト・テーマCSS)の開発ブランチです。
-  本体への変更PRは`main`宛てに送ってください。
-- **`docs`**: Tsuzuri自身を使って作った利用者向けサイトです。利用者向け
-  ドキュメント(`docs/`)の修正PRは`docs`宛てに送ってください。
+| Branch | What it holds | Send PRs about |
+|---|---|---|
+| `main` (default) | Tsuzuri itself: CLI, build scripts, theme CSS, tests | the code |
+| `docs` | The user-facing site, built with Tsuzuri itself | the user documentation (`docs/`) |
 
-2つのブランチは履歴を共有しない独立したブランチです。互いにマージしないでください。
+The two branches share no history. Do not merge one into the other.
 
-## 開発環境のセットアップ
+To get your own site listed on the examples page of the user site, open an issue with the URL of the site and the URL of its source. If it is accepted, a maintainer adds it to `docs/examples.md` and `docs/examples.ja.md` on the `docs` branch.
 
-Node.jsがインストールされていれば、以下のコマンドで依存パッケージをインストールできます。
+## Setting up
+
+You need Node.js 20 or later.
 
 ```sh
 npm ci
 ```
 
-`npm install`ではなく`npm ci`を使うことで、`package-lock.json`に記録された
-バージョンどおりに依存関係を再現できます。
+Use `npm ci` rather than `npm install`: it installs exactly the versions recorded in `package-lock.json`.
 
-## テストの実行方法
+## Trying your changes
+
+You do not need to push. Run your working tree directly. The examples assume you cloned this repository to `~/dev/tsuzuri` and ran `npm ci`.
+
+**Build a site.** In a directory that has Markdown files (the `docs` branch checked out with `git worktree add ../tsuzuri-docs docs` works well):
+
+```sh
+STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
+```
+
+- `STYLE_DIR` makes the build use the theme CSS from your working tree.
+- Outside GitHub Actions, `.github/docs-pages.config` is read if present, and environment variables win (for example `THEME=nineties`). The site language comes from `LANGUAGES`, not from the OS `LANG`.
+- The output goes to `_site/`. If it contains the `.tsuzuri-build` marker from a previous build, everything in it is deleted before the build; a directory without the marker is only overwritten.
+
+In a directory where `init` has already run, `node ~/dev/tsuzuri/bin/cli.mjs preview` builds, serves and rebuilds on changes.
+
+**View it.** Links are absolute from the site root, so opening `_site/index.html` as a file breaks them. Serve it instead, and do not set `BASE_PATH`:
+
+```sh
+python3 -m http.server --directory _site 8000
+```
+
+**Try `init`.** Run the CLI of your working tree in an empty directory (`init --update` works the same way):
+
+```sh
+mkdir /tmp/tsuzuri-init-test && cd /tmp/tsuzuri-init-test
+node ~/dev/tsuzuri/bin/cli.mjs
+```
+
+To build with the generated `.github/tsuzuri/`, first run the `npm install --prefix .github/tsuzuri ...` line from the generated workflow's "Install build dependency" step, then `node .github/tsuzuri/build-docs.mjs`.
+
+**Try it on GitHub.** Push your branch and run `init` from it in a separate test repository, then check that it publishes to GitHub Pages:
+
+```sh
+npx github:akilasatolu/tsuzuri#<your-branch> init
+```
+
+## Tests and lint
 
 ```sh
 npm test
+npm run lint
 ```
 
-内部的には`node --test`が実行され、`test/`配下のテストファイルがすべて実行されます。
+`npm test` runs `node --test`, which runs every test under `test/`. `npm run lint` runs ESLint. Both must pass before you open a PR.
 
-### ゴールデンテスト(生成されるサイトの出力の比較)
+### Golden tests
 
-`test/golden.test.mjs`は、いくつかの設定で作ったサイトの出力(HTML・CSS・スクリプトなど)を
-`test/fixtures/golden/`にまるごと保存しておき、今のコードの出力と1文字ずつ比べます。
-出力が**意図せず**変わったことに気づくためのテストです。
+`test/golden.test.mjs` builds sites with several configurations, keeps the complete output (HTML, CSS, scripts, and so on) in `test/fixtures/golden/`, and compares it character by character with what the current code produces. It exists to catch output that changes **unintentionally**.
 
-出力を**意図して**変えたとき(新しい機能・見た目の変更・文言の変更など)は、このテストが落ちます。
-そのときは次の手順で保存し直してください。
+When you change the output **on purpose** (a new feature, a visual or wording change), this test fails. Save the output again:
 
-1. 保存し直す
+1. Save it again.
 
    ```sh
    UPDATE_GOLDEN=1 node --test test/golden.test.mjs
    ```
 
-2. 差分を確かめる。`git diff test/fixtures/golden/`の変更が、意図した変更だけであることを確認する
-   (例: 見出しの見た目を変えたなら CSS だけ、文言を変えたならその文言だけ)。CSS の中身が変わると
-   ファイル名(`tsuzuri-<ハッシュ>.css`)も変わるので、各ページの`<link>`の行が変わるのは正常です
-3. 保存し直した`test/fixtures/golden/`を、コードの変更と同じPRに入れる。PRの説明に
-   「ゴールデンを保存し直した理由」と「差分で何が変わったか」を書き、レビューでも差分を確かめてもらう
+2. Check `git diff test/fixtures/golden/` and make sure it contains only the change you intended (only CSS for a style change, only the wording for a text change). When the CSS changes, its file name (`tsuzuri-<hash>.css`) changes too, so the `<link>` lines of every page change; that is expected.
+3. Include the saved `test/fixtures/golden/` in the same PR as the code change, and explain in the PR why you saved it again and what changed.
 
-テストを通すためだけに保存し直すことはしないでください。意図しない変化を見逃すことになります。
+Never save it again just to make the test pass. That hides unintended changes.
 
-## ESLintの実行方法
+## Repository layout
 
-```sh
-npm run lint
-```
+Edit these:
 
-コードスタイルのチェックを行います。PRを送る前に、エラーが出ないことを確認してください。
+- `bin/`: the setup CLI. `bin/cli.mjs` is the single source of what users receive (workflow, config file, vendored files); `bin/preview.mjs` is `preview`.
+- `templates/`: the workflow template (`.github/workflows/docs-pages.yml`) and the ready-made `package.json` and `package-lock.json` of the build dependencies given to users.
+- `.github/scripts/`: the build (`build-docs.mjs` and `lib/`).
+- `styles/`: the theme CSS.
+- `test/`: the tests, with fixtures in `test/fixtures/`.
+- `scripts/`, `deps/`: development and CI helpers, not shipped to users. Each script starts with a comment that explains it.
+- `.github/workflows/`, `.github/dependabot.yml`, `.github/PULL_REQUEST_TEMPLATE.md`, `.npmrc`: this repository's own CI, release, docs sync, dependency policy and PR template.
+- `README.md`, `CONTRIBUTING.md`, `MAINTAINING.md`, `CHANGELOG.md`: documentation for developers.
 
-## リポジトリの構成(編集してよい範囲・生成物との境界)
+The user documentation (`docs/`) is on the `docs` branch.
 
-**開発者が編集する「ソース」**
+`init` copies `.github/scripts/` and `styles/` as they are into the user's repository, so anything you put there is shipped to users.
 
-- `bin/cli.mjs` — セットアップCLI本体。ワークフロー・設定ファイル・ベンダリング対象の
-  生成ロジックはここにある(利用者が受け取る内容の唯一の正)。ワークフローの本文は
-  `templates/.github/workflows/docs-pages.yml`のひな形にあり、ここでプレースホルダーを置き換えて出力する。
-- `bin/preview.mjs` — `preview`コマンドの本体。
-- `templates/` — ワークフローのひな形と、利用者に配るビルド用の依存の`package.json`・`package-lock.json`の完成品。
-- `scripts/` — 開発・CI用のスクリプト(配布対象外)。
-- `.github/scripts/build-docs.mjs` + `.github/scripts/lib/*.mjs` — ビルド本体。
-- `styles/*.css` — テーマCSSの原本。
-- `test/**` — テスト。`README.md`・本ファイル・`CHANGELOG.md` — 開発者向けドキュメント。
-- `.github/workflows/ci.yml` — このリポジトリ自身の開発用CI(後述)。
-- `.github/workflows/sync-docs.yml` — CI成功後に`docs`ブランチへ`init --update`を反映するワークフロー(後述)。
+`init` also generates `.github/workflows/docs-pages.yml`, `.github/docs-pages.config` and `.github/tsuzuri/` in the **user's** repository. Do not commit these to `main`; `test/cli.test.mjs` tests the generation and `test/build-docs.e2e.test.mjs` tests the build.
 
-利用者向けドキュメント(`docs/**`)は`docs`ブランチにあります。
+Known limitations that users see (the frontmatter format, the mermaid CDN) are documented on the user site, not here: [Frontmatter limitations](https://akilasatolu.github.io/tsuzuri/docs/frontmatter.html#limitations), [Externally loaded files](https://akilasatolu.github.io/tsuzuri/docs/concepts.html#externally-loaded-files-and-dependency-safety).
 
-**「ワークフローの実行物」(利用者リポジトリだけに存在するもの)**
+## What CI does
 
-`npx github:akilasatolu/tsuzuri init` を実行すると生成される
-`.github/workflows/docs-pages.yml`・`.github/docs-pages.config`・`.github/tsuzuri/`配下は、
-**利用者リポジトリのためだけの生成物**です。`main`ブランチにはこれらのファイルを
-コミットしないでください(`docs`ブランチには、利用者と同じ手順で生成したものが置かれています)。生成内容の正しさは `test/cli.test.mjs`(生成ロジックの
-テスト)と `test/build-docs.e2e.test.mjs`(ビルド本体のE2Eテスト)で検証します。
-実機で動作確認したい場合は、別のテスト用リポジトリ(本プロジェクト外)で`init`を
-実行してください(詳しくは後述の「リリース手順」)。
-(過去にはこのリポジトリのルート直下に生成物の古い例を置いていましたが、実際の
-生成テンプレートと乖離して混乱の元になっていたため削除しました。)
+`.github/workflows/ci.yml` runs on every PR and on pushes to `main`. It only reads the repository (`contents: read`) and never touches GitHub Pages, so pushing a branch is safe.
 
-**pushしたときに何が起きるか**
+- `lint-and-test`: `npm run lint` and `npm test` on Node.js 20, 22 and 24, plus a signature check of the dependencies.
+- `actionlint`: static checks of the workflows, including the workflow `init` generates.
+- `verify-cdn`: checks the hash of the mermaid file that generated pages load.
+- `package-check`: runs `init`, install, build and `init --update` from the packed package (`scripts/check-package.mjs`).
 
-| イベント | 起動するワークフロー | 内容 |
-|---|---|---|
-| `main`へのpush・PR | `ci.yml` | `lint-and-test`(`npm run lint`・`npm test`。Node.js 20/22/24・署名の確認)・`actionlint`・`verify-cdn`(mermaidのハッシュの確認)・`package-check`(配布物の確認)。権限は`contents: read`だけで、GitHub Pagesには一切触れない |
-| `main`へのpushでCIが成功 | `sync-docs.yml` | `docs`ブランチで`init --update`を実行し、変更があれば`docs`へpush(デプロイキーを使用) |
-| `docs`へのpush | `docs-pages.yml`(`docs`にのみ存在) | `docs`の利用者向けサイトをビルドし、本リポジトリのGitHub Pagesにデプロイ(自己ドッグフーディング) |
+Syncing the `docs` branch and releasing are done by maintainers; see [MAINTAINING.md](MAINTAINING.md).
 
-開発中のブランチにpushしても、GitHub Pagesへのデプロイや外部リポジトリへの影響は
-発生しません。安心してpush・ワークフロー実行してください。
+## Opening a pull request
 
-## PRを送る際のお願い
-
-- 変更はできるだけ小さく分けてください。1つのPRで複数の関心事を混ぜないようにお願いします。
-- PRを送る前に、`npm test`と`npm run lint`の両方が通ることを確認してください。
-- 変更内容がわかるように、PRの説明には「何を」「なぜ」変更したかを簡潔に書いてください。
-- 既存の挙動を変更する場合は、その理由と影響範囲を書いてください。
-- ゴールデンテストの保存データ(`test/fixtures/golden/`)を保存し直した場合は、その理由と差分で何が変わったかを書いてください
-  ([ゴールデンテスト](#ゴールデンテスト生成されるサイトの出力の比較)参照)。
-
-## ライセンスについて
-
-本プロジェクトはMITライセンスで公開されています。
-**PRを送ることで、その変更内容をMITライセンスの下で提供することに同意したものとみなします。**
-
-## リリース手順
-
-バージョン番号は[Semantic Versioning](https://semver.org/lang/ja/)に従います。タグは次の2種類を
-`main`ブランチのコミットに付けます。
-
-- `vX.Y.Z`(例: `v1.0.0`): そのリリースを指す固定のタグ。以後は動かさない
-- `vX`(例: `v1`): 同じメジャーバージョンの最新リリースを指すタグ。リリースのたびに付け替える
-  (`vX.Y.Z`のタグをpushすると`release.yml`が自動で付け替える)
-  (利用者は`npx github:akilasatolu/tsuzuri#v1 init`で、互換性を保ったまま最新版を使える)。
-  破壊的変更を含むリリースでは新しいメジャー(`v2`)を作る
-
-1. `main`で`npm test`・`npm run lint`が通り、CIが成功していることを確認する
-2. 実際の利用と同じ流れが通ることを確認する。CIの`package-check`ジョブが、`node scripts/check-package.mjs`で
-   次を自動で確かめる(手元でも同じコマンドで実行できる)
-   - `npm pack`で配布物と同じファイルを作り、そこから`npx`と同じ方法(`npm exec`)で`init`を実行して、
-     ワークフロー・設定ファイル・`.github/tsuzuri/`(`package.json`・`package-lock.json`を含む)が作られること
-     (作業ツリーを直接使うと、npm がパッケージから外すファイル(`package.json`の`files`に無いもの、
-     ルートの`package-lock.json`)も見えてしまい、配布物の漏れに気づけないため)
-   - 生成されたワークフローと同じく`npm ci --ignore-scripts`で依存を入れ、`STRICT_LINKS=true`でビルドできること
-   - 設定ファイルを書き換えてから`init --update`を実行し、設定ファイルが保持されること
-3. `CHANGELOG.md`の`[Unreleased]`を`[X.Y.Z] - YYYY-MM-DD`に改め、空の`[Unreleased]`を追加する
-4. `package.json`・`package-lock.json`の`version`を`X.Y.Z`にする(依存パッケージの`version`は変えない)
-5. コミットして`main`にpushし、`vX.Y.Z`のタグを付けてpushする
-
-   ```sh
-   git tag vX.Y.Z
-   git push origin main vX.Y.Z
-   ```
-
-6. タグのpushで`.github/workflows/release.yml`が動き、次を自動で行う(Actionsタブで結果を確認する)
-   - タグと`package.json`の`version`が一致し、タグのコミットが`main`にあることの確認
-   - `CHANGELOG.md`の該当する節からGitHubのReleaseを作成(本文は`scripts/release-notes.mjs`で作る)
-   - メジャーバージョンのタグ(`vX`)をこのリリースのコミットに付け替える
-
-   手元の`vX`タグは古いままになるので、必要なら`git fetch --tags --force`で取り込む。
-
-実際のGitHub Pagesへの公開と`init --update`による更新は、このリポジトリの`docs`ブランチ
-(`main`のCI成功時に`sync-docs.yml`が`init --update`を実行し、Pagesへ公開する)で
-継続的に確認されます。リリース後、`docs`のサイトが正しく公開されていることも確認してください。
-
-## 既知の限界
-
-- frontmatterは`key: value`形式のフラットな行だけを読む簡易パーサです(YAMLの配列・入れ子・
-  複数行の値には対応していません)。
-- mermaidの図は閲覧時にCDN(jsDelivr)から読み込むため、CDNに接続できない環境では図が表示されません
-  (図の元のコードが表示されます)。
+- Keep it small. Do not mix several concerns in one PR.
+- Make sure `npm test` and `npm run lint` pass.
+- Describe what you changed and why. If you change existing behavior, give the reason and what it affects.
+- If you saved `test/fixtures/golden/` again, say why and what changed in the diff (see [Golden tests](#golden-tests)).
+- You do not need to write `CHANGELOG.md`. The maintainers write it when they release.
+- Do not change dependency versions in a PR. Open an issue first if you think one needs updating; the maintainers and Dependabot update them (see [MAINTAINING.md](MAINTAINING.md)).
+- Tsuzuri is released under the MIT License. **By opening a PR you agree to provide your change under the MIT License.**
