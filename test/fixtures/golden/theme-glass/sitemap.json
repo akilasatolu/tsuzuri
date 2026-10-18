@@ -41,14 +41,6 @@
       "theme": null
     }
   ],
-  "pageRels": [
-    "README.md",
-    "docs/a.md",
-    "guide/README.md",
-    "ref/index.md",
-    "notes.de.md",
-    "docs/code.md"
-  ],
   "images": [
     "docs/img.png"
   ],

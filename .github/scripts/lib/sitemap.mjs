@@ -9,8 +9,7 @@
  *   - 新規フィールド `lang` / `siteName` / `siteOrigin` / `customDomain` /
  *     `theme` / `rejected` を追加する。
  *   - `pages` を `string[]` から `{ rel, title, description }[]` に変更する
- *     (破壊的変更)。旧 `pages` 相当の文字列配列は後方互換のため
- *     `pageRels` として併存させる。
+ *     (破壊的変更)。
  *
  * 引数 `opts.visitedMd` の形状についての前提:
  *   `Map<string, { content: string, meta?: { title?: string, description?: string } }>`
@@ -80,12 +79,9 @@ export function buildSitemap(opts) {
 
   const multiLang = Array.isArray(languages) && languages.length >= 2;
 
-  // 旧 `pages` 相当 (文字列配列)。後方互換のため `pageRels` として残す。
-  const pageRels = [...visitedMd.keys()];
-
-  // 新 `pages` (オブジェクト配列)。title は meta.title 優先、
+  // `pages` (オブジェクト配列)。集めた順。title は meta.title 優先、
   // 無ければ rel をフォールバックとして使う (h1抽出は呼び出し側の責務)。
-  const pages = pageRels.map((rel) => {
+  const pages = [...visitedMd.keys()].map((rel) => {
     const entry = visitedMd.get(rel) || {};
     const meta = entry.meta || {};
     return {
@@ -105,7 +101,6 @@ export function buildSitemap(opts) {
     styleFile,
     customStyleApplied: Boolean(customStyleApplied),
     pages,
-    pageRels,
     images: [...imageSet],
     files: fileSet ? [...fileSet] : [],
     hierarchy,

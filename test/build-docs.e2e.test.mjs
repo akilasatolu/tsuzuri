@@ -150,13 +150,13 @@ describe("build-docs.mjs :: main (E2E)", () => {
       // .nojekyll 存在
       assert.equal(readOut(dir, ".nojekyll"), "");
 
-      // sitemap.json: 後方互換フィールド(pageRels/images/hierarchy/missing/root/basePath)が
+      // sitemap.json: 後方互換フィールド(images/hierarchy/missing/root/basePath)と pages の rel が
       // 旧版の該当フィールドと同一内容であること。新規フィールド(pages/theme等)は
       // test/sitemap.test.mjs で確かめるため、本テストの対象外とする。
       const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
       assert.equal(sitemap.root, "README.md");
       assert.equal(sitemap.basePath, "");
-      assert.deepEqual(sitemap.pageRels.sort(), ["README.md", "docs/a.md"].sort());
+      assert.deepEqual(sitemap.pages.map((p) => p.rel).sort(), ["README.md", "docs/a.md"].sort());
       assert.deepEqual(sitemap.images, ["docs/img.png"]);
       assert.deepEqual(sitemap.missing, []);
       assert.equal(sitemap.customStyleApplied, false);
@@ -1062,7 +1062,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.match(readOut(dir, "docs", "a.html"), /<title>Title with bold and code<\/title>/);
       const indexHtml = readOut(dir, "index.html");
       assert.match(indexHtml, /href="https:\/\/example\.com\/\?a=1&amp;b=&quot;2&quot;"/);
-      assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).pageRels.sort(), ["README.md", "docs/a.md"]);
+      assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).pages.map((p) => p.rel).sort(), ["README.md", "docs/a.md"]);
       assert.equal(indexHtml.match(/href="\/README\.html"/g).length, 1, "ナビに起点ページが1回だけ");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -1096,7 +1096,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const result = runBuild(dir, { ROOT_MD: "docs/index.md", NAV_ENABLED: "true" });
       assert.equal(result.status, 0, result.stderr);
       assert.ok(!fs.existsSync(path.join(dir, "_site", "README.html")), "直下のREADME.mdは公開しない");
-      assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).pageRels.sort(), ["docs/a.md", "docs/index.md"]);
+      assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).pages.map((p) => p.rel).sort(), ["docs/a.md", "docs/index.md"]);
       assert.match(readOut(dir, "index.html"), /<a href="\/">top<\/a>/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });

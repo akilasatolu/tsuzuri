@@ -65,11 +65,12 @@ test("meta.themeがあればpages[].themeにそのまま反映される", () => 
   ]);
 });
 
-test("pageRelsが旧pages(文字列配列)と同一内容であること(後方互換)", () => {
+test("pagesのrelは集めた順(visitedMdの順)で、pageRelsというキーは無い", () => {
   const opts = baseOpts();
   const result = buildSitemap(opts);
-  assert.deepEqual(result.pageRels, ["README.md", "docs/setup.md"]);
-  assert.deepEqual(result.pageRels, [...opts.visitedMd.keys()]);
+  assert.deepEqual(result.pages.map((p) => p.rel), ["README.md", "docs/setup.md"]);
+  assert.deepEqual(result.pages.map((p) => p.rel), [...opts.visitedMd.keys()]);
+  assert.equal("pageRels" in result, false);
 });
 
 test("customDomain未設定時はnullに統一される(undefined渡し)", () => {
@@ -186,7 +187,7 @@ test("多言語: 2言語なら languages・pages[].lang・trees が入り、lang
     en: { rel: "README.en.md", children: [] },
   });
   // 既存のフィールドはそのまま
-  assert.deepEqual(result.pageRels, ["README.md", "README.en.md", "docs/a.md"]);
+  assert.deepEqual(result.pages.map((p) => p.rel), ["README.md", "README.en.md", "docs/a.md"]);
 });
 
 test("多言語: キーの並びが固定(JSON の文字列で比べられる)", () => {
