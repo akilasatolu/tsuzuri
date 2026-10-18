@@ -6,7 +6,7 @@ name: Sync docs branch
 #
 # docsへのpushには、書き込み権限付きのデプロイキー(Secret: DOCS_DEPLOY_KEY)を使う。
 # 既定の GITHUB_TOKEN でpushすると、そのpushでは docs-pages.yml が起動しないため。
-# デプロイキーの登録手順は README.md の「docsブランチへの自動反映」を参照。
+# デプロイキーの登録手順は MAINTAINING.md の「One-time repository setup」を参照。
 
 on:
   workflow_run:

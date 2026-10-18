@@ -1,7 +1,7 @@
 name: Release
 
 # vX.Y.Z のタグが push されたら、GitHub の Release を作成し、メジャーバージョンのタグ
-# (v1 など)をそのコミットに付け替える。手順は CONTRIBUTING.md の「リリース手順」を参照。
+# (v1 など)をそのコミットに付け替える。手順は MAINTAINING.md の「Releasing」(日本語は MAINTAINING.ja.md の「リリース」)を参照。
 #
 #   1. タグと package.json の version が一致し、タグのコミットが main に含まれることを確認
 #   2. CHANGELOG.md の該当する節から Release の本文を作り(scripts/release-notes.mjs)、Release を作成

@@ -16,7 +16,7 @@ import { ALLOWED_THEMES } from "../.github/scripts/lib/config.mjs";
  *   - 保存し直す: UPDATE_GOLDEN=1 node --test test/golden.test.mjs
  *       出力を「意図して」変えたとき(新しい機能・見た目の変更など)だけ行う。保存し直したら、
  *       git diff test/fixtures/golden/ で差分が意図した変更だけであることを確かめ、
- *       その差分をコードの変更と同じ PR に入れて、レビューでも確かめてもらう(CONTRIBUTING.md 参照)。
+ *       その差分をコードの変更と同じ PR に入れて、レビューでも確かめてもらう(CONTRIBUTING.md の「Golden tests」参照)。
  *       テストを通すためだけに保存し直さないこと(意図しない変化を見逃すことになる)。
  *
  * 補助の関数は、ほかのテストファイルと共有せずにこのファイルの中に持つ

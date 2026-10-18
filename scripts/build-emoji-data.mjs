@@ -3,7 +3,7 @@
 //   node scripts/build-emoji-data.mjs
 //
 // 表は配布対象(.github/scripts/)に入れてコミットしておき、gemoji 自体は利用者に配らない(開発用の依存のまま)。
-// gemoji を更新したら、このスクリプトを実行して、emoji-data.mjs の差分を同じPRに入れる(手順は README.md)。
+// gemoji を更新したら、このスクリプトを実行して、emoji-data.mjs の差分を同じPRに入れる(手順は MAINTAINING.md の「Updating dependencies」)。
 // 名前の順に並べて書き出すので、gemoji の中身が同じなら、何度作り直しても同じファイルになる。
 
 import fs from "node:fs";
