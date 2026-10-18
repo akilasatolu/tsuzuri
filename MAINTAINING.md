@@ -52,7 +52,7 @@ Without the key, `sync-docs.yml` fails at the `docs` checkout. CI on `main` and 
 - CI must pass (`.github/workflows/ci.yml`).
 - If the PR re-saved `test/fixtures/golden/`, read the diff and check that it contains only the intended change. A changed CSS file name (`tsuzuri-<hash>.css`) is expected whenever the CSS changes.
 - The PR agrees to the MIT License (see the template checklist).
-- `CHANGELOG.md` is **not** written in PRs. You write it at release time (see Releasing).
+- `CHANGELOG.md` is **not** written in PRs. You write it at release time, in English and Japanese (see Releasing).
 - Never enable auto-merge on Dependabot PRs (see below).
 
 ## Updating dependencies
@@ -98,7 +98,7 @@ Steps:
 
 1. Check that `npm test` and `npm run lint` pass on `main` and that CI is green.
 2. Run `node scripts/check-package.mjs`. It checks the packed package the way users get it; see the comment at the top of the script. This includes that `init --update` keeps the config file and the custom CSS (`.github/tsuzuri/styles/custom.css`).
-3. Write `CHANGELOG.md` before tagging. Under `[Unreleased]`, summarize the user-visible changes since the previous tag (the source is the merged PRs and `git log v<previous version>..main`, with the tag of the previous release in place of `v<previous version>`), using the categories described at the top of `CHANGELOG.md`. Rename the heading to `## [X.Y.Z] - YYYY-MM-DD` and add an empty `[Unreleased]` above it. `scripts/release-notes.mjs` fails if the `## [X.Y.Z]` section is missing or empty, and `release.yml` runs it after you push the tag.
+3. Write `CHANGELOG.md` before tagging. Under `[Unreleased]`, summarize the user-visible changes since the previous tag (the source is the merged PRs and `git log v<previous version>..main`, with the tag of the previous release in place of `v<previous version>`), using the categories described at the top of `CHANGELOG.md`. Rename the heading to `## [X.Y.Z] - YYYY-MM-DD` and add an empty `[Unreleased]` above it. In each release section, write the English block first, then the line `<!-- ja -->`, then the Japanese block with the Japanese category names (see the top of `CHANGELOG.md`). `scripts/release-notes.mjs` fails if the `## [X.Y.Z]` section is missing or empty, if the `<!-- ja -->` line is missing, or if either block is empty, and `release.yml` runs it after you push the tag.
 4. Set `version` to `X.Y.Z` in `package.json` and `package-lock.json` (the top-level `version` and `packages[""].version`; leave dependency versions alone).
 5. Commit, push to `main`, then tag and push the tag.
 
@@ -109,7 +109,7 @@ Steps:
 
 6. Pushing the tag starts `.github/workflows/release.yml`. Check the result in the Actions tab. It:
    - checks that the tag matches `version` in `package.json` and that the tagged commit is on `main`,
-   - creates the GitHub Release from the matching `CHANGELOG.md` section (`scripts/release-notes.mjs`),
+   - creates the GitHub Release from the matching `CHANGELOG.md` section (`scripts/release-notes.mjs`; the release notes have the English text first, then the Japanese),
    - moves the major tag (`vX`) to this commit.
 
    Your local `vX` tag stays old; run `git fetch --tags --force` if you need it.

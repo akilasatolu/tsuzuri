@@ -1,7 +1,7 @@
 # Tsuzuri への貢献ガイド
 [English](CONTRIBUTING.md) | 日本語
 
-Tsuzuri に興味を持っていただきありがとうございます。このガイドは、プルリクエスト(PR)を送るまでの手順をまとめています。リリースなどのメンテナーの作業は [MAINTAINING.ja.md](MAINTAINING.ja.md) にあります。[行動規範](CODE_OF_CONDUCT.md)(日本語のみ)も読んでください。
+Tsuzuri に興味を持っていただきありがとうございます。このガイドは、プルリクエスト(PR)を送るまでの手順をまとめています。リリースなどのメンテナーの作業は [MAINTAINING.ja.md](MAINTAINING.ja.md) にあります。[行動規範](CODE_OF_CONDUCT.ja.md)も読んでください。
 
 ## どのブランチに送るか
 

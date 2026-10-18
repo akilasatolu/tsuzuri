@@ -1,7 +1,7 @@
 # Contributing to Tsuzuri
 English | [日本語](CONTRIBUTING.ja.md)
 
-Thank you for your interest in Tsuzuri. This guide covers everything up to opening a pull request. Releases and other maintainer tasks are in [MAINTAINING.md](MAINTAINING.md). Please also read our [Code of Conduct](CODE_OF_CONDUCT.md) (Japanese only).
+Thank you for your interest in Tsuzuri. This guide covers everything up to opening a pull request. Releases and other maintainer tasks are in [MAINTAINING.md](MAINTAINING.md). Please also read our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Which branch?
 

@@ -11,6 +11,6 @@
 
 - 貢献したい方: [CONTRIBUTING.ja.md](CONTRIBUTING.ja.md)
 - メンテナー(リリース・`docs` ブランチ・依存パッケージ): [MAINTAINING.ja.md](MAINTAINING.ja.md)
-- 各バージョンの変更: [CHANGELOG.md](CHANGELOG.md)(日本語のみ)
-- 行動規範: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)(日本語のみ)
+- 各バージョンの変更: [CHANGELOG.md](CHANGELOG.md)(英語と日本語)
+- 行動規範: [CODE_OF_CONDUCT.ja.md](CODE_OF_CONDUCT.ja.md)
 - ライセンス: [MIT License](LICENSE)

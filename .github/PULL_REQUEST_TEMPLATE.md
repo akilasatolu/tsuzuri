@@ -20,5 +20,5 @@ Guide / ガイド:
 - [ ] (main) `npm test` passes / `npm test` が通る
 - [ ] (main) `npm run lint` passes / `npm run lint` が通る
 - [ ] If I re-saved the golden files, I explained why and what changed / ゴールデンを保存し直した場合は、理由と差分の内容を説明した
-- [ ] If I edited CONTRIBUTING, MAINTAINING or README, I updated both the English and Japanese files / CONTRIBUTING・MAINTAINING・README を直した場合は、英語版と日本語版の両方を直した
+- [ ] If I edited CONTRIBUTING, MAINTAINING, README or CODE_OF_CONDUCT, I updated both the English and Japanese files / CONTRIBUTING・MAINTAINING・README・CODE_OF_CONDUCT を直した場合は、英語版と日本語版の両方を直した
 - [ ] I agree to provide this change under the MIT License / この変更を MIT ライセンスで提供することに同意する

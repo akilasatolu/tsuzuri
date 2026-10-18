@@ -11,6 +11,6 @@ That site is built with Tsuzuri from the `docs` branch.
 
 - Want to contribute? [CONTRIBUTING.md](CONTRIBUTING.md)
 - Maintainers (releases, the `docs` branch, dependencies): [MAINTAINING.md](MAINTAINING.md)
-- Changes in each version: [CHANGELOG.md](CHANGELOG.md) (Japanese only)
-- Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) (Japanese only)
+- Changes in each version: [CHANGELOG.md](CHANGELOG.md) (English and Japanese)
+- Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - License: [MIT License](LICENSE)

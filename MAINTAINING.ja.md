@@ -52,7 +52,7 @@ push to main → CI passes → sync-docs.yml → push to docs → docs-pages.yml
 - CI(`.github/workflows/ci.yml`)が通っていること。
 - PR が `test/fixtures/golden/` を保存し直しているときは、差分を読み、意図した変更だけであることを確かめる。CSS が変わると CSS のファイル名(`tsuzuri-<ハッシュ>.css`)も変わるのは正常です。
 - PR が MIT ライセンスでの提供に同意していること(テンプレートのチェック項目)。
-- `CHANGELOG.md` は PR では書きません。リリースのときにメンテナーが書きます(「リリース」を参照)。
+- `CHANGELOG.md` は PR では書きません。リリースのときにメンテナーが、英語と日本語で書きます(「リリース」を参照)。
 - Dependabot の PR は、自動マージを有効にしないでください(下を参照)。
 
 ## 依存パッケージの更新
@@ -98,7 +98,7 @@ Dependabot が週 1 回、`package.json` の依存パッケージ、ワークフ
 
 1. `main` で `npm test` と `npm run lint` が通り、CI が成功していることを確認する。
 2. `node scripts/check-package.mjs` を実行する。利用者が受け取るのと同じ、パッケージにまとめた中身を確かめる(内容はスクリプトの先頭のコメントを参照)。`init --update` が設定ファイルと独自 CSS(`.github/tsuzuri/styles/custom.css`)を保持することも含まれる。
-3. タグを付ける前に `CHANGELOG.md` を書く。`[Unreleased]` に、前回のタグから今回までの利用者に見える変更をまとめる(材料は、マージした PR と `git log v<前回の版>..main`。`v<前回の版>` の部分は前回のリリースのタグにする)。カテゴリは `CHANGELOG.md` の冒頭の説明に従う。見出しを `## [X.Y.Z] - YYYY-MM-DD` に改め、その上に空の `[Unreleased]` を追加する。`scripts/release-notes.mjs` は `## [X.Y.Z]` の節が無い、または空のときにエラーで止まり、`release.yml` はタグの push のあとにこれを実行する。
+3. タグを付ける前に `CHANGELOG.md` を書く。`[Unreleased]` に、前回のタグから今回までの利用者に見える変更をまとめる(材料は、マージした PR と `git log v<前回の版>..main`。`v<前回の版>` の部分は前回のリリースのタグにする)。カテゴリは `CHANGELOG.md` の冒頭の説明に従う。見出しを `## [X.Y.Z] - YYYY-MM-DD` に改め、その上に空の `[Unreleased]` を追加する。各リリースの節には、英語のブロック、`<!-- ja -->` の行、日本語のカテゴリ名を使った日本語のブロックの順に書く(`CHANGELOG.md` の冒頭を参照)。`scripts/release-notes.mjs` は `## [X.Y.Z]` の節が無い、または空のとき、`<!-- ja -->` の行が無いとき、どちらかのブロックが空のときにエラーで止まり、`release.yml` はタグの push のあとにこれを実行する。
 4. `package.json` と `package-lock.json` の `version` を `X.Y.Z` にする(先頭の `version` と `packages[""].version`。依存パッケージの版は変えない)。
 5. コミットして `main` に push し、タグを付けて push する。
 
@@ -109,7 +109,7 @@ Dependabot が週 1 回、`package.json` の依存パッケージ、ワークフ
 
 6. タグの push で `.github/workflows/release.yml` が動く。Actions タブで結果を確認する。行うことは次のとおり。
    - タグと `package.json` の `version` が一致し、タグのコミットが `main` にあることの確認
-   - `CHANGELOG.md` の該当する節から GitHub の Release を作成(`scripts/release-notes.mjs`)
+   - `CHANGELOG.md` の該当する節から GitHub の Release を作成(`scripts/release-notes.mjs`。本文は英語、日本語の順)
    - メジャーバージョンのタグ(`vX`)をこのコミットに付け替え
 
    手元の `vX` タグは古いままです。必要なら `git fetch --tags --force` で取り込みます。
