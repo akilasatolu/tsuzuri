@@ -39,6 +39,14 @@ export function isExternal(link) {
   return false;
 }
 
+// 独自CSSのファイル名(設定 STYLE_FILE・frontmatter の styleFile・theme)として使える文字列か。
+// ファイル名だけを書く決まり: "/"・"\"・":"・制御文字を含まず、"." で始まらず(".." や隠しファイルを除く)、
+// ".css" で終わる(大文字・小文字は区別しない)。実際のファイルは .github/tsuzuri/styles/ の中から読む。
+const STYLE_FILE_NAME_RE = /^(?!\.)[^/\\:\p{Cc}]+\.css$/iu;
+export function isStyleFileName(name) {
+  return typeof name === "string" && STYLE_FILE_NAME_RE.test(name);
+}
+
 export function isMarkdownPath(p) {
   return /\.md$/i.test(p);
 }

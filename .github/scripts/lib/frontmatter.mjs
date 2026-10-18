@@ -10,15 +10,15 @@
  *   - サポートするキーは `title` / `description` / `ogImage` / `ogType` /
  *     `noindex` / `theme` / `styleFile` / `toc` / `nav` / `order` の10個。`noindex` のみ真偽値化し、それ以外は
  *     文字列として保持する(値全体を囲む引用符 "…" / '…' は外す)。
- *     `styleFile` はページ単位の独自CSS(STYLE_FILE の代わりに使うファイル)で、解釈は build-docs.mjs が行う。
+ *     `styleFile` はページ単位の独自CSS(STYLE_FILE の代わりに使う、.github/tsuzuri/styles/ の中のファイル名)で、解釈は build-docs.mjs が行う。
  *     `nav`(false でナビに載せない)・`order`(ナビの並び順)の解釈は site-tree.mjs が行う。
  *   - 上記10キー以外の未知のキーも文字列のまま `meta` に保持する
  *     (将来のフォーマット拡張に向けた寛容な扱い)。
  *
  * `theme`キーについて:
- *   ページ単位でテーマを上書きするためのキー。値の解釈(組み込みテーマ名か、
- *   独自CSSファイルパスか)は本モジュールの責務外で、呼び出し側
- *   (build-docs.mjs)が `config.mjs` の `ALLOWED_THEMES` と照合して判定する。
+ *   ページ単位でテーマを上書きするためのキー。値の解釈(".css" で終わる独自CSSの
+ *   ファイル名か、組み込みテーマ名か)は本モジュールの責務外で、呼び出し側
+ *   (build-docs.mjs)が判定する(組み込みテーマ名は `config.mjs` の `ALLOWED_THEMES`)。
  *   本モジュールは他の未知キーと同様、値を文字列としてそのまま `meta.theme`
  *   に保持するだけである。
  *   - frontmatterの開始(`---`)はあるが終端の`---`が見つからない場合は

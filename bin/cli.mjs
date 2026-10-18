@@ -270,8 +270,9 @@ OUT_DIR=_site
 # 見た目の比較: ${DOCS_URL}docs/gallery.html
 THEME=${theme}
 
-# 独自のCSSファイル。ファイルがあれば、テーマの後に読み込まれて最優先で反映されます(無ければ使いません)。
-STYLE_FILE=${VENDOR_DIR}/styles/custom.css
+# 独自のCSSのファイル名(${VENDOR_DIR}/styles/ の中のファイル。フォルダは書かず、ファイル名だけを書きます)。
+# ファイルがあれば、テーマの後に読み込まれて最優先で反映されます(無ければ使いません)。
+STYLE_FILE=custom.css
 
 # サイトの言語。カンマ区切りで、先頭が基本言語(起点の README の言語)です。例: ja / en / ja,en
 # 1つなら1言語のサイト(ページの言語 <html lang="..."> と画面の文言がその言語になります)。
@@ -1011,7 +1012,7 @@ export function buildCompletionMessage(answers = {}) {
     "実行時に外部リポジトリを参照することはありません。",
     "",
     `最新版に更新するときは npx github:${OSS_REPO}#${majorTagOf(readPackageVersion())} init --update を実行してください`,
-    "(設定ファイル・独自CSSはそのままに、ワークフローとスクリプトだけが更新されます)。",
+    "(設定ファイルと、既にある独自CSSはそのままに、ワークフローとスクリプトが更新されます。独自CSSが無ければ空のひな形が作られます)。",
   ].join("\n");
 }
 

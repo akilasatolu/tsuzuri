@@ -56,12 +56,12 @@ test("meta.titleが無い場合はrelをフォールバックとして使う", (
 test("meta.themeがあればpages[].themeにそのまま反映される", () => {
   const visitedMd = new Map([
     ["docs/special.md", { content: "本文", meta: { theme: "glass" } }],
-    ["docs/custom.md", { content: "本文", meta: { theme: "styles/custom.css" } }],
+    ["docs/custom.md", { content: "本文", meta: { theme: "custom.css" } }],
   ]);
   const result = buildSitemap(baseOpts({ visitedMd }));
   assert.deepEqual(result.pages, [
     { rel: "docs/special.md", title: "docs/special.md", description: null, theme: "glass" },
-    { rel: "docs/custom.md", title: "docs/custom.md", description: null, theme: "styles/custom.css" },
+    { rel: "docs/custom.md", title: "docs/custom.md", description: null, theme: "custom.css" },
   ]);
 });
 

@@ -20,6 +20,7 @@
 
 - 生成するワークフロー(`.github/workflows/docs-pages.yml`)の「Build」ステップで、設定ファイルの値を 1 つずつ書き写していた `env:` の列挙(20 項目)を整理し、`STYLE_DIR` だけにした。設定ファイルの値と `BASE_PATH`・`SITE_ORIGIN` は、前のステップが環境変数として渡すので、動作は変わらない。あわせて、ワークフローのコメント(ビルド用の依存の説明)を、依存の名前と版を書かない文面にした。`init --update` で反映される。設定ファイルを書き換える必要はない。
 - `init` が独自 CSS の空ひな形 `.github/tsuzuri/styles/custom.css` を必ず作るようにした(質問は無くなった)。既にあれば上書きしない(`--yes --force` でも)。`init --update` でも、無ければ作る。
+- `STYLE_FILE`・frontmatter の `styleFile`・`theme` の CSS を、ファイル名だけで書くように変えた。ファイルは `.github/tsuzuri/styles/` の中から読む(例: `STYLE_FILE=custom.css`、`styleFile: plain.css`、`theme: my-theme.css`)。ファイル名は `.css` で終わり、`/`・`\`・`:` を含まず、`.` で始まらないもの。`theme` は、`.css` で終われば CSS のファイル名、そうでなければ組み込みテーマ名として扱う。パスで書いた古い値は、警告を出して無視する(`STYLE_FILE` は独自 CSS を使わない。`styleFile` はサイト全体のものを、`theme` はサイト全体の `THEME` を使う)。`.github/docs-pages.config` の `STYLE_FILE` の値が古い書き方(`.github/tsuzuri/styles/custom.css`)の人は、`custom.css` に書き換える。`sitemap.json` の `styleFile` は、これまでどおりリポジトリの直下からのパスで出る(独自 CSS を使わないときは空)。
 
 ### Removed
 

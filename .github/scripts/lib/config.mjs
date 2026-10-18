@@ -7,11 +7,13 @@
  */
 
 import path from "node:path";
-import { normalizeBasePath } from "./path-utils.mjs";
+import { normalizeBasePath, isStyleFileName } from "./path-utils.mjs";
 
-// frontmatterの `theme` キー(ページ単位のテーマ上書き)からも参照するため export する。
-// この配列に含まれない値は「組み込みテーマ名ではなく、リポジトリルートからの
-// 相対パスで指定された独自CSSファイル」とみなされる(build-docs.mjs側の判定基準)。
+// 組み込みテーマ名の一覧。frontmatterの `theme` キー(ページ単位のテーマ上書き)が組み込みテーマ名か
+// を判定するため、build-docs.mjs からも参照するので export する。`.css` で終わる `theme` の値は
+// 独自CSSのファイル名(.github/tsuzuri/styles/ の中)として build-docs.mjs が別に扱う。
+// そのため、ここの名前は `.css` で終わってはいけない(test/config.test.mjs が確かめる)。
+// `.css` で終わらず、この配列にも無い値は、警告してサイト全体のTHEMEにフォールバックする。
 export const ALLOWED_THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties", "none"];
 const HOSTNAME_RE = /^[a-zA-Z0-9.-]+$/;
 // BCP 47 形式の言語タグ(例: "ja" / "en" / "en-US" / "zh-Hant-TW")の簡易チェック。
@@ -22,7 +24,7 @@ export const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @typedef {object} Config
  * @property {string} rootMd
  * @property {string} outDir
- * @property {string} styleFile
+ * @property {string} styleFile - 独自CSSのファイル名(.github/tsuzuri/styles/ の中。空なら独自CSSを使わない)
  * @property {string} basePath
  * @property {string} siteOrigin
  * @property {string[]} languages - サイトの言語(1つ以上。先頭が基本言語)
@@ -114,7 +116,7 @@ export function loadConfig(env = process.env) {
   const rootMd = normalizeRootMd(trimOr(env.ROOT_MD, "README.md"));
   const outDir = trimOr(env.OUT_DIR, "_site");
   // init が生成する設定ファイルと同じ既定値(組み込みテーマCSSと同じディレクトリの custom.css)
-  const styleFile = trimOr(env.STYLE_FILE, ".github/tsuzuri/styles/custom.css");
+  const styleFile = resolveStyleFile(env.STYLE_FILE);
   const siteOrigin = trimOr(env.SITE_ORIGIN, "");
   const faviconFile = trimOr(env.FAVICON_FILE, "");
   const ogDefaultImage = trimOr(env.OGP_DEFAULT_IMAGE, "");
@@ -185,6 +187,32 @@ export function loadConfig(env = process.env) {
 function normalizeRootMd(raw) {
   const normalized = path.posix.normalize(raw.replace(/\\/g, "/")).replace(/^(\.\/)+/, "").replace(/^\/+/, "");
   return normalized || "README.md";
+}
+
+/**
+ * 独自CSSのリポジトリの直下からのパス(.github/tsuzuri/styles/ の中のファイル)。
+ * 設定 STYLE_FILE・frontmatter の styleFile・theme には、ファイル名だけを書く。
+ * @param {string} name - isStyleFileName を満たすファイル名
+ * @returns {string}
+ */
+export function styleFilePath(name) {
+  return `${VENDOR_DIR}/styles/${name}`;
+}
+
+/**
+ * STYLE_FILE を読む。未設定・空は既定の custom.css。独自CSSのファイル名として使えない値
+ * (パス・.css で終わらない名前など)は、警告して "" にする(独自CSSを使わない)。
+ * @param {string|undefined} raw
+ * @returns {string}
+ */
+function resolveStyleFile(raw) {
+  const name = trimOr(raw, "custom.css");
+  if (isStyleFileName(name)) return name;
+  console.warn(
+    `[config] STYLE_FILE の値が不正です("${name}")。ファイル名だけ(例: custom.css)を書いてください` +
+      `(${VENDOR_DIR}/styles/ の中のファイルとして読みます)。独自CSSは使いません。`
+  );
+  return "";
 }
 
 // 値をtrimし、空ならデフォルト値を返す。未設定(undefined/null)も空扱い。

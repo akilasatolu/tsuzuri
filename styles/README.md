@@ -43,9 +43,12 @@
 
 ## 自分でスタイルをカスタマイズしたい場合
 
-`.github/docs-pages.config` の `STYLE_FILE` に独自の CSS ファイルを指定すると、
+`.github/tsuzuri/styles/` の中に独自の CSS ファイルを置き、`.github/docs-pages.config` の
+`STYLE_FILE` にそのファイル名だけ(例: `custom.css`。フォルダは書きません)を指定すると、
 選んだ THEME の後に読み込まれる第3層として追記されます(THEME の内容を
-上書きしたい場合はこちらを使います)。
+上書きしたい場合はこちらを使います)。`init` が空の `custom.css` を作るので、
+既定ではそのファイルに書きます。ページごとに変えるときは、frontmatter の `styleFile`
+(同じくファイル名だけ)や、独自のテーマとして使う `theme: my-theme.css` が使えます。
 
 各テーマファイルの `:root { --変数名: 値; }` の部分は CSS カスタムプロパティの
 定義です。独自の `STYLE_FILE` の中で同じ変数名を書き換えることで、配色だけを

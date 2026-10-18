@@ -53,11 +53,13 @@ import {
   withConfigFileDefaults,
   VENDOR_DIR,
   CONFIG_FILE_PATH,
+  styleFilePath,
 } from "./lib/config.mjs";
 import { crawlSite } from "./lib/crawler.mjs";
 import {
   isMarkdownPath,
   DIR_INDEX_NAMES,
+  isStyleFileName,
   toSiteAbsHref,
   resolveInsideRepo,
   resolveRepoRel,
@@ -226,21 +228,29 @@ async function main() {
   }
 
   // ---------- 3.5 ページ単位のテーマ上書き(frontmatter `theme`)解決 ----------
-  // frontmatterの `theme` キーは、次のいずれかとして解釈する:
-  //   - config.mjs の ALLOWED_THEMES に含まれる値 → 組み込みテーマ名として
-  //     ${config.styleDir}/${theme}.css を読み込む(サイト全体のTHEMEと同じ解決方法)。
-  //   - それ以外の値 → リポジトリルートからの相対パスとして扱い、
-  //     ユーザーが用意した独自CSSファイルをそのまま読み込む(パスを含めて指定する)。
-  // どちらも読み込みに失敗した場合(ファイル不在等)は console.warn した上で、
+  // frontmatterの `theme` キーは、値の終わりで見分ける:
+  //   - ".css" で終わる(大文字・小文字は区別しない) → 独自CSSのファイル名。ファイル名だけを書き、
+  //     ${VENDOR_DIR}/styles/ の中のファイルを読み込む(isStyleFileName を満たさない値は使わない)。
+  //   - それ以外 → 組み込みテーマ名(config.mjs の ALLOWED_THEMES)。${config.styleDir}/${theme}.css を
+  //     読み込む(サイト全体のTHEMEと同じ解決方法)。組み込みテーマ名の中に ".css" で終わるものは無い。
+  // どちらも使えない場合(不正な値・ファイル不在等)は console.warn した上で、
   // サイト全体のTHEME(themeCss)にフォールバックする(既存のfail-open方針を踏襲)。
   // 同じ指定が複数ページで使われるケースに備え、指定ごとに読み込み結果をキャッシュする。
-  const pageThemeCssCache = new Map(); // "builtin:material" | "path:styles/custom.css" -> css文字列
+  const pageThemeCssCache = new Map(); // "builtin:material" | "file:my-theme.css" -> css文字列
   function resolveThemeCssForPage(rel, rawThemeSpec) {
     if (typeof rawThemeSpec !== "string") return themeCss;
     const spec = rawThemeSpec.trim();
     if (!spec) return themeCss;
 
-    if (ALLOWED_THEMES.includes(spec)) {
+    if (!/\.css$/i.test(spec)) {
+      if (!ALLOWED_THEMES.includes(spec)) {
+        console.warn(
+          `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" は、組み込みテーマ名(${ALLOWED_THEMES.join(
+            "/"
+          )})でも、.css で終わるCSSのファイル名でもありません。サイト全体のTHEME("${config.theme}")にフォールバックします。`
+        );
+        return themeCss;
+      }
       if (spec === "none") return "";
       const cacheKey = `builtin:${spec}`;
       if (pageThemeCssCache.has(cacheKey)) return pageThemeCssCache.get(cacheKey);
@@ -256,23 +266,26 @@ async function main() {
       return css;
     }
 
-    // 組み込みテーマ名ではない → リポジトリルートからの相対パスで指定された
-    // ユーザー独自のスタイルファイルとして扱う。リポジトリ外(../ や絶対パス、
-    // リポジトリ外を指すシンボリックリンク)のファイルは読み込まない。
-    const cacheKey = `path:${spec}`;
+    // ".css" で終わる → ${VENDOR_DIR}/styles/ の中の独自CSSファイル。リポジトリ外を指す
+    // シンボリックリンクのファイルは読み込まない。
+    if (!isStyleFileName(spec)) {
+      console.warn(
+        `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" はCSSのファイル名として使えません(/・\\・: を含まず、. で始まらない、.css で終わるファイル名だけを書きます)。サイト全体のTHEME("${config.theme}")にフォールバックします。`
+      );
+      return themeCss;
+    }
+    const cacheKey = `file:${spec}`;
     if (pageThemeCssCache.has(cacheKey)) return pageThemeCssCache.get(cacheKey);
-    const abs = resolveInsideRepo(REPO_ROOT, spec);
+    const abs = resolveInsideRepo(REPO_ROOT, styleFilePath(spec));
     if (!abs) {
       console.warn(
         `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" はリポジトリの外を指しているため無視します。サイト全体のTHEME("${config.theme}")にフォールバックします。`
       );
       return themeCss;
     }
-    if (!fs.existsSync(abs)) {
+    if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
       console.warn(
-        `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" は組み込みテーマ名(${ALLOWED_THEMES.join(
-          "/"
-        )})に該当せず、リポジトリ内のファイルとしても見つかりません。サイト全体のTHEME("${config.theme}")にフォールバックします。`
+        `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" のファイル(${styleFilePath(spec)})が見つかりません。サイト全体のTHEME("${config.theme}")にフォールバックします。`
       );
       return themeCss;
     }
@@ -374,40 +387,50 @@ async function main() {
   }
 
   // ---------- 5. STYLE_FILE / FAVICON_FILE 読み込み(非致命的) ----------
+  // STYLE_FILE はファイル名だけ(config.mjs が検査済み。使えない値は "" になっている)。
+  // 実際のファイルは ${VENDOR_DIR}/styles/ の中。customStyleRel はそのリポジトリの直下からのパス(使わないときは "")
+  const customStyleRel = config.styleFile ? styleFilePath(config.styleFile) : "";
   let customCss = "";
-  if (config.styleFile) {
-    const styleAbs = resolveInsideRepo(REPO_ROOT, config.styleFile);
+  if (customStyleRel) {
+    const styleAbs = resolveInsideRepo(REPO_ROOT, customStyleRel);
     if (!styleAbs) {
       console.warn(`STYLE_FILE (${config.styleFile}) はリポジトリの外を指しているため無視します。`);
     } else if (fs.existsSync(styleAbs)) {
       customCss = fs.readFileSync(styleAbs, "utf-8");
-      console.log(`Custom style loaded: ${config.styleFile}`);
+      console.log(`Custom style loaded: ${customStyleRel}`);
     } else {
       // 独自CSSは任意なので、無くても警告にはしない
-      console.log(`Custom style file not used (${config.styleFile} does not exist).`);
+      console.log(`Custom style file not used (${customStyleRel} does not exist).`);
     }
   }
 
-  // ページ単位の独自CSS(frontmatter `styleFile`。リポジトリの直下からのパス)。指定したページでは、
-  // サイト全体の STYLE_FILE の代わりにこのファイルを3層目として使う(中身が空のファイルを指定すれば、
-  // そのページには独自CSSを当てない)。読めない場合は警告して、サイト全体の STYLE_FILE を使う。
+  // ページ単位の独自CSS(frontmatter `styleFile`。STYLE_FILE と同じく、${VENDOR_DIR}/styles/ の中のファイル名だけ)。
+  // 指定したページでは、サイト全体の STYLE_FILE の代わりにこのファイルを3層目として使う(中身が空のファイルを
+  // 指定すれば、そのページには独自CSSを当てない)。使えない値・読めない場合は警告して、サイト全体の STYLE_FILE を使う。
   const pageStyleCache = new Map(); // 指定 -> { css, rel } | null
   function resolveCustomStyleForPage(rel, rawSpec) {
-    if (typeof rawSpec !== "string" || !rawSpec.trim()) return { css: customCss, rel: config.styleFile };
+    if (typeof rawSpec !== "string" || !rawSpec.trim()) return { css: customCss, rel: customStyleRel };
     const spec = rawSpec.trim();
     if (!pageStyleCache.has(spec)) {
-      const abs = resolveInsideRepo(REPO_ROOT, spec);
       let loaded = null;
-      if (!abs) {
-        console.warn(`[build-docs] ${rel}: frontmatterの styleFile "${spec}" はリポジトリの外を指しているため無視します。`);
-      } else if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
-        console.warn(`[build-docs] ${rel}: frontmatterの styleFile "${spec}" が見つかりません。サイト全体の STYLE_FILE を使います。`);
+      if (!isStyleFileName(spec)) {
+        console.warn(
+          `[build-docs] ${rel}: frontmatterの styleFile "${spec}" はCSSのファイル名として使えません(/・\\・: を含まず、. で始まらない、.css で終わるファイル名だけを書きます)。サイト全体の STYLE_FILE を使います。`
+        );
       } else {
-        loaded = { css: fs.readFileSync(abs, "utf-8"), rel: spec };
+        const specRel = styleFilePath(spec);
+        const abs = resolveInsideRepo(REPO_ROOT, specRel);
+        if (!abs) {
+          console.warn(`[build-docs] ${rel}: frontmatterの styleFile "${spec}" はリポジトリの外を指しているため無視します。`);
+        } else if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
+          console.warn(`[build-docs] ${rel}: frontmatterの styleFile "${spec}" が見つかりません。サイト全体の STYLE_FILE を使います。`);
+        } else {
+          loaded = { css: fs.readFileSync(abs, "utf-8"), rel: specRel };
+        }
       }
       pageStyleCache.set(spec, loaded);
     }
-    return pageStyleCache.get(spec) ?? { css: customCss, rel: config.styleFile };
+    return pageStyleCache.get(spec) ?? { css: customCss, rel: customStyleRel };
   }
 
   // faviconも画像(imageSet)と同様に、リポジトリルートからの相対パス構造を
@@ -1352,7 +1375,7 @@ async function main() {
     const sitemap = buildSitemap({
       root: siteRootRel,
       basePath: config.basePath,
-      styleFile: config.styleFile,
+      styleFile: customStyleRel,
       customStyleApplied: Boolean(customCss),
       visitedMd,
       imageSet,

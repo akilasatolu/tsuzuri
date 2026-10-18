@@ -413,13 +413,14 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("frontmatterのtheme(独自CSSファイルへのパス)がページ単位で適用される", () => {
+  test("frontmatterのtheme(.css で終わる独自CSSのファイル名)がページ単位で適用される", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
+      fs.mkdirSync(path.join(dir, ".github", "tsuzuri", "styles"), { recursive: true });
       fs.writeFileSync(
-        path.join(dir, "my-custom-theme.css"),
+        path.join(dir, ".github", "tsuzuri", "styles", "my-custom-theme.css"),
         "/*CUSTOM_PATH_THEME_MARKER*/"
       );
       fs.writeFileSync(
@@ -443,7 +444,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(
         aStyle.includes("/*CUSTOM_PATH_THEME_MARKER*/"),
-        "リポジトリルートからの相対パスで指定した独自CSSがそのまま読み込まれる"
+        ".github/tsuzuri/styles/ の中の、ファイル名で指定した独自CSSが読み込まれる"
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -561,7 +562,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("frontmatterのthemeがリポジトリ外のファイルを指す場合は読み込まずフォールバックする", () => {
+  test("frontmatterのthemeに、フォルダを含む値・.css で終わらない組み込みでない値を書くと、読み込まずフォールバックする", () => {
     const parent = makeTmpDir();
     const dir = path.join(parent, "repo");
     try {
@@ -569,15 +570,46 @@ describe("build-docs.mjs :: main (E2E)", () => {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
       fs.writeFileSync(path.join(parent, "secret.css"), "/*SECRET_OUTSIDE_REPO*/");
-      fs.writeFileSync(
-        path.join(dir, "docs", "a.md"),
-        ["---", "theme: ../secret.css", "---", "# Page A"].join("\n")
-      );
+      fs.mkdirSync(path.join(dir, "sub"));
+      fs.writeFileSync(path.join(dir, "sub", "x.css"), "/*SUB_FOLDER_FILE*/");
+      for (const [value, warning] of [
+        ["../secret.css", /ファイル名として使えません/],
+        ["sub/x.css", /ファイル名として使えません/],
+        ["unknown-theme", /組み込みテーマ名.*でも、\.css で終わるCSSのファイル名でもありません/],
+      ]) {
+        fs.writeFileSync(path.join(dir, "docs", "a.md"), ["---", `theme: ${value}`, "---", "# Page A"].join("\n"));
+        const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stderr, warning, value);
+        const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
+        assert.ok(!aStyle.includes("SECRET_OUTSIDE_REPO") && !aStyle.includes("SUB_FOLDER_FILE"), value);
+        assert.ok(aStyle.includes("/*NINETIES_FIXTURE_MARKER*/"), `${value}: サイト全体のTHEMEにフォールバックする`);
+      }
+    } finally {
+      fs.rmSync(parent, { recursive: true, force: true });
+    }
+  });
 
+  test("リポジトリの外を指すシンボリックリンクの独自CSS(styleFile・theme)は読み込まない", (t) => {
+    const parent = makeTmpDir();
+    const dir = path.join(parent, "repo");
+    try {
+      fs.mkdirSync(dir);
+      copyBasicSite(dir);
+      copyFixtureStyleDir(dir);
+      fs.writeFileSync(path.join(parent, "secret.css"), "/*SECRET_OUTSIDE_REPO*/");
+      fs.mkdirSync(path.join(dir, ".github", "tsuzuri", "styles"), { recursive: true });
+      try {
+        fs.symlinkSync(path.join(parent, "secret.css"), path.join(dir, ".github", "tsuzuri", "styles", "link.css"));
+      } catch {
+        t.skip("シンボリックリンクを作れない環境");
+        return;
+      }
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), ["---", "theme: link.css", "styleFile: link.css", "---", "# Page A"].join("\n"));
       const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /リポジトリの外/);
-
+      assert.match(result.stderr, /theme "link\.css" はリポジトリの外を指している/);
+      assert.match(result.stderr, /styleFile "link\.css" はリポジトリの外を指している/);
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(!aStyle.includes("SECRET_OUTSIDE_REPO"));
       assert.ok(aStyle.includes("/*NINETIES_FIXTURE_MARKER*/"));
@@ -1464,8 +1496,10 @@ describe("build-docs.mjs :: main (E2E)", () => {
     try {
       copyBasicSite(dir);
       copyRealBaseAndThemeStyles(dir);
-      fs.writeFileSync(path.join(dir, "site.css"), "/* SITE CUSTOM */");
-      fs.writeFileSync(path.join(dir, "plain.css"), "");
+      const stylesDir = path.join(dir, ".github", "tsuzuri", "styles");
+      fs.mkdirSync(stylesDir, { recursive: true });
+      fs.writeFileSync(path.join(stylesDir, "site.css"), "/* SITE CUSTOM */");
+      fs.writeFileSync(path.join(stylesDir, "plain.css"), "");
       fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[A](docs/a.md) [B](docs/b.md)\n");
       fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\nstyleFile: plain.css\n---\n# A\n");
       fs.writeFileSync(path.join(dir, "docs", "b.md"), "---\nstyleFile: nope.css\n---\n# B\n");
@@ -1475,6 +1509,62 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.doesNotMatch(extractStyleBlock(readOut(dir, "docs", "a.html")), /SITE CUSTOM/, "空のファイルを指定したページには当てない");
       assert.match(extractStyleBlock(readOut(dir, "docs", "b.html")), /SITE CUSTOM/, "見つからなければサイト全体のもの");
       assert.match(result.stderr, /styleFile "nope\.css" が見つかりません/);
+      const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
+      assert.equal(sitemap.styleFile, ".github/tsuzuri/styles/site.css", "sitemap.json にはリポジトリの直下からのパスを出す");
+      assert.equal(sitemap.customStyleApplied, true);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("styleFile にフォルダを含む値・.css で終わらない値を書くと、警告してサイト全体の STYLE_FILE を使う", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      const stylesDir = path.join(dir, ".github", "tsuzuri", "styles");
+      fs.mkdirSync(stylesDir, { recursive: true });
+      fs.writeFileSync(path.join(stylesDir, "site.css"), "/* SITE CUSTOM */");
+      fs.writeFileSync(path.join(dir, "outside.css"), "/* OUTSIDE */");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[A](docs/a.md) [B](docs/b.md)\n");
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\nstyleFile: ../outside.css\n---\n# A\n");
+      fs.writeFileSync(path.join(dir, "docs", "b.md"), "---\nstyleFile: site.txt\n---\n# B\n");
+      const result = runBuild(dir, { STYLE_FILE: "site.css" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stderr, /styleFile "\.\.\/outside\.css" はCSSのファイル名として使えません/);
+      assert.match(result.stderr, /styleFile "site\.txt" はCSSのファイル名として使えません/);
+      for (const page of ["a", "b"]) {
+        const css = extractStyleBlock(readOut(dir, "docs", `${page}.html`));
+        assert.match(css, /SITE CUSTOM/);
+        assert.doesNotMatch(css, /OUTSIDE/);
+      }
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("STYLE_FILE にフォルダを含む値・.css で終わらない値を書くと、警告して独自CSSを使わない(sitemap.json の styleFile は空)", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndThemeStyles(dir);
+      const stylesDir = path.join(dir, ".github", "tsuzuri", "styles");
+      fs.mkdirSync(stylesDir, { recursive: true });
+      fs.writeFileSync(path.join(stylesDir, "custom.css"), "/* DEFAULT CUSTOM */");
+      for (const value of [".github/tsuzuri/styles/custom.css", "sub/x.css", "custom.txt"]) {
+        const result = runBuild(dir, { STYLE_FILE: value });
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stderr, /\[config\] STYLE_FILE の値が不正です/, value);
+        assert.doesNotMatch(extractStyleBlock(readOut(dir, "index.html")), /DEFAULT CUSTOM/, value);
+        const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
+        assert.equal(sitemap.styleFile, "", value);
+        assert.equal(sitemap.customStyleApplied, false, value);
+      }
+      // 未設定なら既定の custom.css を、.github/tsuzuri/styles/ の中から読む
+      const result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(extractStyleBlock(readOut(dir, "index.html")), /DEFAULT CUSTOM/);
+      assert.equal(JSON.parse(readOut(dir, "sitemap.json")).styleFile, ".github/tsuzuri/styles/custom.css");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

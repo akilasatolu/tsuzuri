@@ -370,7 +370,7 @@ test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=
   assert.ok(config.includes("ROOT_MD=README.md"));
   assert.ok(config.includes("THEME=material"));
   assert.ok(config.includes("OUT_DIR=_site"));
-  assert.ok(config.includes(`STYLE_FILE=${VENDOR_DIR}/styles/custom.css`));
+  assert.ok(config.includes("\nSTYLE_FILE=custom.css\n"));
 });
 
 test("buildDocsPagesConfig: THEME=ninetiesが反映される", () => {

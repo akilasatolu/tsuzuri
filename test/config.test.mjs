@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { loadConfig, CONFIG_FILE_KEYS, VENDOR_DIR, WORKFLOW_PATH, CONFIG_FILE_PATH, parseConfigText, withConfigFileDefaults, resolveLanguages, resolveOneLine } from "../.github/scripts/lib/config.mjs";
+import { loadConfig, ALLOWED_THEMES, styleFilePath, CONFIG_FILE_KEYS, VENDOR_DIR, WORKFLOW_PATH, CONFIG_FILE_PATH, parseConfigText, withConfigFileDefaults, resolveLanguages, resolveOneLine } from "../.github/scripts/lib/config.mjs";
 
 // console.warn を一時的に黙らせつつ呼び出し回数/内容を検査するヘルパー
 function withCapturedWarn(fn) {
@@ -19,7 +19,7 @@ test("全キー未設定+GITHUB_REPOSITORY未設定 → 全デフォルト値", 
   const config = loadConfig({});
   assert.equal(config.rootMd, "README.md");
   assert.equal(config.outDir, "_site");
-  assert.equal(config.styleFile, ".github/tsuzuri/styles/custom.css");
+  assert.equal(config.styleFile, "custom.css");
   assert.equal(config.basePath, "");
   assert.equal(config.siteOrigin, "");
   assert.deepEqual(config.languages, ["en"]);
@@ -170,7 +170,7 @@ test("回帰テスト: 旧4キーのみの設定オブジェクトで新規キ�
   const config = loadConfig({
     ROOT_MD: "README.md",
     OUT_DIR: "_site",
-    STYLE_FILE: ".github/docs-pages.style.css",
+    STYLE_FILE: "custom.css",
     BASE_PATH: "",
   });
   assert.deepEqual(config.languages, ["en"]);
@@ -435,4 +435,33 @@ test("利用者のリポジトリでの Tsuzuri のファイルの置き場所",
   assert.equal(VENDOR_DIR, ".github/tsuzuri");
   assert.equal(WORKFLOW_PATH, ".github/workflows/docs-pages.yml");
   assert.equal(CONFIG_FILE_PATH, ".github/docs-pages.config");
+});
+
+test("STYLE_FILE: ファイル名だけ。未設定・空は既定の custom.css、前後の空白は取る", () => {
+  withCapturedWarn((calls) => {
+    assert.equal(loadConfig({}).styleFile, "custom.css");
+    assert.equal(loadConfig({ STYLE_FILE: "" }).styleFile, "custom.css");
+    assert.equal(loadConfig({ STYLE_FILE: "  site.css " }).styleFile, "site.css");
+    assert.equal(loadConfig({ STYLE_FILE: "My Theme.CSS" }).styleFile, "My Theme.CSS");
+    assert.deepEqual(calls, []);
+  });
+});
+
+test("STYLE_FILE: フォルダを含む値・.css で終わらない値・. で始まる値は、警告して \"\"(独自CSSを使わない)にする", () => {
+  for (const value of [".github/tsuzuri/styles/custom.css", "sub/x.css", "../x.css", "a\\b.css", "C:x.css", "custom.txt", "custom", ".hidden.css", ".css"]) {
+    withCapturedWarn((calls) => {
+      assert.equal(loadConfig({ STYLE_FILE: value }).styleFile, "", value);
+      assert.equal(calls.length, 1, value);
+      assert.match(calls[0], /\[config\] STYLE_FILE の値が不正です/);
+      assert.match(calls[0], /ファイル名だけ/);
+    });
+  }
+});
+
+test("styleFilePath: .github/tsuzuri/styles/ の中のファイルとしてのリポジトリの直下からのパス", () => {
+  assert.equal(styleFilePath("custom.css"), ".github/tsuzuri/styles/custom.css");
+});
+
+test("ALLOWED_THEMES の組み込みテーマ名は、どれも .css で終わらない(frontmatter の theme で CSS のファイル名と見分けるため)", () => {
+  for (const theme of ALLOWED_THEMES) assert.doesNotMatch(theme, /\.css$/i, theme);
 });

@@ -5,6 +5,7 @@ import {
   normalizeBasePath,
   isExternal,
   isMarkdownPath,
+  isStyleFileName,
   isImagePath,
   mapSrcsetUrls,
   splitHref,
@@ -348,5 +349,20 @@ describe("mapSrcsetUrls", () => {
 
   test("空の値は何もしない", () => {
     assert.deepEqual(seen(""), { urls: [], out: "" });
+  });
+});
+
+describe("isStyleFileName", () => {
+  test("ファイル名だけで .css で終わるものは有効(大文字・小文字・空白・日本語も可)", () => {
+    for (const name of ["custom.css", "My.Theme.CSS", "日本語.css", "a b.css", "a-b_c.d.css", "x..css"]) {
+      assert.equal(isStyleFileName(name), true, name);
+    }
+  });
+
+  test("フォルダの区切り・..・. 始まり・: ・制御文字・.css で終わらないものは無効", () => {
+    for (const name of ["", "custom", "custom.txt", ".css", ".hidden.css", "..", "../a.css", "./a.css", "a/b.css", "/etc/x.css",
+      "a\\b.css", "C:a.css", "a\u0001.css", "a\n.css", "a.css ", undefined, null, 1]) {
+      assert.equal(isStyleFileName(name), false, JSON.stringify(name));
+    }
   });
 });
