@@ -16,13 +16,14 @@
 
 ## [Unreleased]
 
-### Removed
-
-- `sitemap.json` の `pageRels` を削除した。同じ内容が `pages[].rel` にある。`sitemap.json` はデバッグ用の出力で、`SITEMAP_JSON=true` のときだけ出る。
-
 ### Changed
 
 - 生成するワークフロー(`.github/workflows/docs-pages.yml`)の「Build」ステップで、設定ファイルの値を 1 つずつ書き写していた `env:` の列挙(20 項目)を整理し、`STYLE_DIR` だけにした。設定ファイルの値と `BASE_PATH`・`SITE_ORIGIN` は、前のステップが環境変数として渡すので、動作は変わらない。あわせて、ワークフローのコメント(ビルド用の依存の説明)を、依存の名前と版を書かない文面にした。`init --update` で反映される。設定ファイルを書き換える必要はない。
+
+### Removed
+
+- `sitemap.json` の `pageRels` を削除した。同じ内容が `pages[].rel` にある。`sitemap.json` はデバッグ用の出力で、`SITEMAP_JSON=true` のときだけ出る。
+- v1.7.0 より前に `init` したリポジトリで、`preview` がワークフローの `npm install` の行から依存を読む処理をやめた。`package-lock.json` が無いときは(依存が入っていても)、`init --update` を案内して終了する。
 
 ## [1.35.0] - 2026-10-11
 

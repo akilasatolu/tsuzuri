@@ -7,13 +7,13 @@ import {
   contentTypeOf,
   resolveServePath,
   createPreviewServer,
-  dependencySpecsFromWorkflow,
+  runPreview,
   vendoredVersionOf,
   shouldRebuildFor,
   RELOAD_EVENTS_PATH,
   browserCommand,
 } from "../bin/preview.mjs";
-import { buildDocsPagesYml, BUILD_DEPENDENCIES, readDependencyVersion, readPackageVersion } from "../bin/cli.mjs";
+import { buildDocsPagesYml, readPackageVersion } from "../bin/cli.mjs";
 
 function makeSite() {
   const dir = mkdtempSync(join(tmpdir(), "tsuzuri-preview-"));
@@ -69,14 +69,50 @@ test("createPreviewServer: ページを返し、無いURLは 404.html、末尾�
   }
 });
 
-test("生成ワークフローから、ビルド用の依存とコピー済みのバージョンを読める", () => {
+test("生成ワークフローから、コピー済みのバージョンを読める", () => {
   const yml = buildDocsPagesYml();
-  // v1.6.0 以前のワークフロー(npm install の行に版を並べていた)から読む
-  const specs = BUILD_DEPENDENCIES.map((name) => `${name}@${readDependencyVersion(name)}`);
-  const legacy = `        run: npm install --prefix .github/tsuzuri ${specs.join(" ")} --no-save --no-audit --no-fund --ignore-scripts\n`;
-  assert.deepEqual(dependencySpecsFromWorkflow(legacy), specs);
   assert.equal(vendoredVersionOf(yml), readPackageVersion());
-  assert.deepEqual(dependencySpecsFromWorkflow("no install"), []);
+  assert.equal(vendoredVersionOf("no version"), "");
+});
+
+// package-lock.json が無い(v1.7.0 より前に init した)リポジトリでは、依存が入っていてもビルドに進まず、
+// init --update を案内して止まる。サーバーも npm も起動しない経路なので、そのまま呼べる
+async function runPreviewWithoutLockfile({ withDependencies }) {
+  const dir = mkdtempSync(join(tmpdir(), "tsuzuri-preview-lock-"));
+  try {
+    mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
+    writeFileSync(join(dir, ".github/tsuzuri/build-docs.mjs"), "throw new Error('ビルドに進んではいけない');\n");
+    if (withDependencies) mkdirSync(join(dir, ".github/tsuzuri/node_modules/marked"), { recursive: true });
+    const warnings = [];
+    const logs = [];
+    const server = await runPreview({
+      cwd: dir,
+      port: 0,
+      version: "1.0.0",
+      watch: false,
+      log: (m) => logs.push(m),
+      warn: (m) => warnings.push(m),
+    });
+    return { server, warnings, logs };
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+test("runPreview: package-lock.json が無ければ、init --update を案内して止まる(依存が入っていない場合)", async () => {
+  const { server, warnings, logs } = await runPreviewWithoutLockfile({ withDependencies: false });
+  assert.equal(server, null);
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /package-lock\.json がありません/);
+  assert.match(warnings[0], /init --update/);
+  assert.deepEqual(logs, [], "依存のインストールには進まない");
+});
+
+test("runPreview: package-lock.json が無ければ、依存(node_modules/marked)が入っていても止まる", async () => {
+  const { server, warnings } = await runPreviewWithoutLockfile({ withDependencies: true });
+  assert.equal(server, null);
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /init --update/);
 });
 
 test("shouldRebuildFor: 出力先・.git・node_modules の変更ではビルドし直さない", () => {

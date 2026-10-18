@@ -151,7 +151,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.equal(readOut(dir, ".nojekyll"), "");
 
       // sitemap.json: 後方互換フィールド(images/hierarchy/missing/root/basePath)と pages の rel が
-      // 旧版の該当フィールドと同一内容であること。新規フィールド(pages/theme等)は
+      // 旧版の該当フィールドと同一内容であること。pages のほかの項目(title・theme 等)は
       // test/sitemap.test.mjs で確かめるため、本テストの対象外とする。
       const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
       assert.equal(sitemap.root, "README.md");

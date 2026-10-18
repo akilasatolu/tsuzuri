@@ -2,7 +2,8 @@
 // 利用者のリポジトリにコピー済みのビルドスクリプト(.github/tsuzuri/)で、公開時と同じ設定のサイトを
 // 手元にビルドし、簡易サーバーで表示する。
 //   1. ビルド用の依存が .github/tsuzuri/node_modules に無ければ、ワークフローと同じ方法でインストールする
-//      (.github/tsuzuri/package-lock.json があれば npm ci。無い古い版はワークフローに書かれた版を npm install)
+//      (.github/tsuzuri/package-lock.json のとおりに npm ci。package-lock.json が無い古い版は、
+//      依存が入っていても、init --update を案内して止まる)
 //   2. .github/tsuzuri/build-docs.mjs を実行する(設定ファイルの値が使われる。BASE_PATH は付けない)
 //   3. 出力先(OUT_DIR)を http://localhost:<port>/ で配信する
 //   4. リポジトリのファイルが変わったら自動でビルドし直し、開いているページを再読み込みさせる
@@ -157,17 +158,6 @@ export function shouldRebuildFor(relPath, outDirRel) {
   return !p.split("/").some((seg) => seg === ".git" || seg === "node_modules");
 }
 
-/**
- * v1.6.0 以前の生成済みワークフローの「Install build dependency」の行から、ビルド用の依存("marked@x.y.z ...")を読む。
- * コピー済みのビルドスクリプトと同じ版を入れるため、CLI 自身の版ではなくワークフローの記載を使う。
- * @param {string} workflowText
- * @returns {string[]}
- */
-export function dependencySpecsFromWorkflow(workflowText) {
-  const m = workflowText.match(/npm install --prefix \S+ ((?:[\w@./-]+@[\w.-]+ ?)+)/);
-  return m ? m[1].trim().split(/\s+/) : [];
-}
-
 /** 生成済みワークフローの先頭のコメントから、コピー済みの tsuzuri のバージョンを読む */
 export function vendoredVersionOf(workflowText) {
   return workflowText.match(/^# tsuzuri v(\d+\.\d+\.\d+) /m)?.[1] ?? "";
@@ -232,22 +222,20 @@ export async function runPreview({
     );
   }
 
-  // 1. ビルド用の依存(ワークフローと同じ方法で入れる)
+  // package-lock.json が無いのは、v1.7.0 より前に init した古いビルドスクリプト。
+  // 依存が入っていても、公開時と同じ依存かを確かめられないので、更新を案内して止める
+  if (!existsSync(join(cwd, VENDOR_DIR, "package-lock.json"))) {
+    warn(
+      `${VENDOR_DIR}/package-lock.json がありません。このリポジトリのビルドスクリプトは古い版です。` +
+        "init --update で更新してから、もう一度 preview を実行してください。"
+    );
+    return null;
+  }
+
+  // 1. ビルド用の依存(ワークフローと同じく、package-lock.json のとおりに入れる。中身のハッシュが違えば止まる)
   if (!existsSync(join(cwd, VENDOR_DIR, "node_modules", "marked"))) {
-    let npmArgs;
-    if (existsSync(join(cwd, VENDOR_DIR, "package-lock.json"))) {
-      // v1.7.0 以降: package-lock.json のとおりに入れる(中身のハッシュが違えば止まる)
-      npmArgs = ["ci", "--prefix", VENDOR_DIR, "--ignore-scripts", "--no-audit", "--no-fund"];
-      log(`ビルド用の依存をインストールします(${VENDOR_DIR}/package-lock.json のとおり)`);
-    } else {
-      const specs = dependencySpecsFromWorkflow(workflowText);
-      if (!specs.length) {
-        warn(`${WORKFLOW_PATH} からビルド用の依存を読み取れませんでした。init --update で作り直してください。`);
-        return null;
-      }
-      npmArgs = ["install", "--prefix", VENDOR_DIR, ...specs, "--no-save", "--no-audit", "--no-fund", "--ignore-scripts"];
-      log(`ビルド用の依存をインストールします(${VENDOR_DIR}/node_modules): ${specs.join(" ")}`);
-    }
+    const npmArgs = ["ci", "--prefix", VENDOR_DIR, "--ignore-scripts", "--no-audit", "--no-fund"];
+    log(`ビルド用の依存をインストールします(${VENDOR_DIR}/package-lock.json のとおり)`);
     const npm = spawnSync("npm", npmArgs, { cwd, stdio: "inherit", shell: process.platform === "win32" });
     if (npm.status !== 0) {
       warn("依存のインストールに失敗しました。");
