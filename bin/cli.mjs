@@ -857,67 +857,68 @@ export function guessDefaultBranch(
 }
 
 /**
- * CLI本体。サブコマンドは init(省略しても init 相当)と preview。
- *   --version / --help … 表示して終了
- *   --update           … 対話なしの更新モード(runUpdate)
- *   --yes 等           … 対話なしで生成(既存ファイルは --force が無ければスキップ)
- *   それ以外           … 対話形式で生成
- * どのモードでも最初に実行中の tsuzuri のバージョンを表示する
- * (npx のキャッシュで古い版が動いていないかを利用者が確認できるように)。
+ * 起点の Markdown がまだ無ければ、push する前に作るよう警告する(無いとビルドが失敗する)。
+ * @param {string} cwd
+ * @param {string} rootMd - 起点の Markdown の、cwd からの相対パス
  */
-export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) } = {}) {
-  const args = parseCliArgs(argv);
-  const version = readPackageVersion();
-
-  if (args.version) {
-    console.log(version);
-    return;
+function warnMissingRoot(cwd, rootMd) {
+  if (!existsSync(join(cwd, rootMd))) {
+    console.warn(`⚠ 起点の ${rootMd} がまだありません。push する前に作成してください(無いとビルドが失敗します)。`);
   }
-  if (args.help) {
-    console.log(`tsuzuri v${version}\n\n${HELP_TEXT}`);
-    return;
-  }
+}
 
-  console.log(`tsuzuri v${version}\n`);
+/** --version: バージョンだけを表示する(バージョン行や空行は付けない)。 */
+function runVersion({ version }) {
+  console.log(version);
+}
 
-  if (args.command === "preview") {
-    const server = await runPreview({ cwd, port: args.port, version, watch: !args["no-watch"], open: args.open });
-    if (!server) process.exitCode = 1;
-    return;
-  }
+/** --help: バージョン行と使い方を表示する。 */
+function runHelp({ version }) {
+  console.log(`tsuzuri v${version}\n\n${HELP_TEXT}`);
+}
 
-  if (args.update) {
-    console.log("最新版に更新します(設定ファイルは変更しません。独自CSSは、既にあれば変更しません)\n");
-    await runUpdate({ cwd, log: console.log });
-    console.log("\n更新が完了しました。変更内容は 'git diff' で確認できます。");
-    return;
-  }
+/**
+ * preview: 手元でサイトをビルドして配信する。配信を始められなかったときは終了コードを 1 にする。
+ * @param {{ cwd: string, args: ReturnType<typeof parseCliArgs>, version: string }} opts
+ */
+async function runPreviewMode({ cwd, args, version }) {
+  const server = await runPreview({ cwd, port: args.port, version, watch: !args["no-watch"], open: args.open });
+  if (!server) process.exitCode = 1;
+}
 
-  const locationWarnings = checkSetupLocation(cwd);
-  for (const warning of locationWarnings) console.warn(`⚠ ${warning}`);
-  const defaults = {
-    ...DEFAULT_ANSWERS,
-    triggerBranch: guessDefaultBranch(cwd, undefined, { useCurrentBranch: !args.nonInteractive }),
-  };
-  const warnMissingRoot = (rootMd) => {
-    if (!existsSync(join(cwd, rootMd))) {
-      console.warn(`⚠ 起点の ${rootMd} がまだありません。push する前に作成してください(無いとビルドが失敗します)。`);
-    }
-  };
+/**
+ * --update: 対話なしで、既存の利用者リポジトリの tsuzuri を最新化する(runUpdate)。
+ * @param {{ cwd: string }} opts
+ */
+async function runUpdateMode({ cwd }) {
+  console.log("最新版に更新します(設定ファイルは変更しません。独自CSSは、既にあれば変更しません)\n");
+  await runUpdate({ cwd, log: console.log });
+  console.log("\n更新が完了しました。変更内容は 'git diff' で確認できます。");
+}
 
-  if (args.nonInteractive) {
-    const answers = answersFromArgs(args, defaults);
-    warnMissingRoot(answers.rootMd);
-    const targets = buildTargets(answers);
-    await writeGeneratedFiles(targets, {
-      cwd,
-      confirmOverwrite: () => args.force,
-      log: console.log,
-    });
-    console.log(buildCompletionMessage(answers));
-    return;
-  }
+/**
+ * 対話なしの init(--yes など)。コマンドライン引数(指定が無ければ既定値)から回答を作って生成する。
+ * 既存ファイルは --force が無ければスキップする。
+ * @param {{ cwd: string, args: ReturnType<typeof parseCliArgs>, defaults: typeof DEFAULT_ANSWERS }} opts
+ */
+async function runInitNonInteractive({ cwd, args, defaults }) {
+  const answers = answersFromArgs(args, defaults);
+  warnMissingRoot(cwd, answers.rootMd);
+  const targets = buildTargets(answers);
+  await writeGeneratedFiles(targets, {
+    cwd,
+    confirmOverwrite: () => args.force,
+    log: console.log,
+  });
+  console.log(buildCompletionMessage(answers));
+}
 
+/**
+ * 対話形式の init。場所の警告があれば続行するかを尋ね、質問に答えてもらって生成する。
+ * 標準入力は、終わったら(中止も含めて)必ず閉じる。
+ * @param {{ cwd: string, defaults: typeof DEFAULT_ANSWERS, locationWarnings: string[] }} opts
+ */
+async function runInitInteractive({ cwd, defaults, locationWarnings }) {
   console.log("README → GitHub Pages 自動デプロイパッケージ セットアップ\n");
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -933,7 +934,7 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
       }
     }
     answers = await promptAnswers(asker, defaults);
-    warnMissingRoot(answers.rootMd);
+    warnMissingRoot(cwd, answers.rootMd);
     const targets = buildTargets(answers);
 
     console.log("\n--- 以下のファイルを生成します ---");
@@ -952,6 +953,39 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
   }
 
   console.log(buildCompletionMessage(answers));
+}
+
+/**
+ * CLI本体。サブコマンドは init(省略しても init 相当)と preview。
+ *   --version / --help … 表示して終了
+ *   --update           … 対話なしの更新モード(runUpdate)
+ *   --yes 等           … 対話なしで生成(既存ファイルは --force が無ければスキップ)
+ *   それ以外           … 対話形式で生成
+ * どのモードでも最初に実行中の tsuzuri のバージョンを表示する
+ * (npx のキャッシュで古い版が動いていないかを利用者が確認できるように)。
+ * ここでは引数とバージョンを読み、モードごとの関数に振り分けるだけにしている。
+ */
+export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) } = {}) {
+  const args = parseCliArgs(argv);
+  const version = readPackageVersion();
+
+  if (args.version) return runVersion({ version });
+  if (args.help) return runHelp({ version });
+
+  console.log(`tsuzuri v${version}\n`);
+
+  if (args.command === "preview") return runPreviewMode({ cwd, args, version });
+  if (args.update) return runUpdateMode({ cwd });
+
+  const locationWarnings = checkSetupLocation(cwd);
+  for (const warning of locationWarnings) console.warn(`⚠ ${warning}`);
+  const defaults = {
+    ...DEFAULT_ANSWERS,
+    triggerBranch: guessDefaultBranch(cwd, undefined, { useCurrentBranch: !args.nonInteractive }),
+  };
+
+  if (args.nonInteractive) return runInitNonInteractive({ cwd, args, defaults });
+  return runInitInteractive({ cwd, defaults, locationWarnings });
 }
 
 /**
