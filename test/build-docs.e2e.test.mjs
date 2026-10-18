@@ -1362,7 +1362,6 @@ describe("build-docs.mjs :: main (E2E)", () => {
       // 設定ファイルの LANGUAGES=ja が使われ、OS の LANG(言語タグでない値)は影響しない
       let result = runBuild(dir, { LANGUAGES: null, LANG: "ja_JP.UTF-8" });
       assert.equal(result.status, 0, result.stderr);
-      assert.doesNotMatch(result.stderr, /LANG は廃止しました/, "設定ファイルに LANG が無いので廃止の警告は出ない");
       let html = readOut(dir, "index.html");
       assert.match(html, /<html lang="ja">/);
       assert.match(html, /FromFile/);

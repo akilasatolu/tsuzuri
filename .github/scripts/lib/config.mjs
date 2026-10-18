@@ -73,26 +73,15 @@ export const CONFIG_FILE_KEYS = [
 
 // 設定ファイルの本文を { KEY: 値 } にする(ワークフローの Load config と同じ読み方)。
 //   - "#" で始まる行と空行は読み飛ばす。値の前後の空白は取り除く
-//   - 一覧にないキーは無視する
-//   - LANG は廃止したキー。書かれていたら1回だけ警告して無視する
+//   - 一覧にないキーは(警告なしで)無視する
 export function parseConfigText(text) {
   const values = {};
-  let warnedLang = false;
   for (const rawLine of text.replace(/^\uFEFF/, "").split(/\r?\n/)) {
     const line = rawLine.trim();
     if (!line || line.startsWith("#")) continue;
     const eq = line.indexOf("=");
     if (eq < 0) continue;
     const key = line.slice(0, eq).trim();
-    if (key === "LANG") {
-      if (!warnedLang) {
-        console.warn(
-          "[config] LANG は廃止しました。LANGUAGES に書いてください(例: LANGUAGES=ja。先頭が基本言語)。この行は無視します。"
-        );
-        warnedLang = true;
-      }
-      continue;
-    }
     if (CONFIG_FILE_KEYS.includes(key)) values[key] = line.slice(eq + 1).trim();
   }
   return values;
@@ -132,7 +121,7 @@ export function loadConfig(env = process.env) {
 
   const basePath = normalizeBasePath((env.BASE_PATH ?? "").trim());
 
-  // OS の環境変数 LANG("ja_JP.UTF-8" など)は読まない(設定キー LANG は廃止した)
+  // OS の環境変数 LANG("ja_JP.UTF-8" など)は読まない(言語は LANGUAGES だけで決まる)
   const languages = resolveLanguages(env.LANGUAGES);
 
   const navEnabled = parseBoolean("NAV_ENABLED", env.NAV_ENABLED);

@@ -373,18 +373,11 @@ test("parseConfigText: コメント・空行・未知のキーを読み飛ばし
   assert.deepEqual(values, { THEME: "nineties", SITE_NAME: "A=B", NAV_ENABLED: "true" });
 });
 
-test("parseConfigText: LANG の行は廃止の警告を1回だけ出して無視し、LANGUAGES は読む", () => {
+test("parseConfigText: LANG の行は(警告なしで)無視され、LANGUAGES は読む", () => {
   withCapturedWarn((calls) => {
     assert.deepEqual(parseConfigText("LANG=ja\n"), {});
-    assert.equal(calls.length, 1);
-    assert.equal(
-      calls[0],
-      "[config] LANG は廃止しました。LANGUAGES に書いてください(例: LANGUAGES=ja。先頭が基本言語)。この行は無視します。"
-    );
-  });
-  withCapturedWarn((calls) => {
     assert.deepEqual(parseConfigText("LANG=ja\nLANG=en\n"), {});
-    assert.equal(calls.length, 1, "LANG が2行あっても警告は1回");
+    assert.deepEqual(calls, [], "LANG の行だけでは警告しない(手元のビルドは未知のキーを黙って無視する)");
   });
   withCapturedWarn((calls) => {
     assert.deepEqual(parseConfigText("LANGUAGES=ja,en\n"), { LANGUAGES: "ja,en" });
@@ -394,7 +387,7 @@ test("parseConfigText: LANG の行は廃止の警告を1回だけ出して無視
     const values = parseConfigText("LANG=ja\nLANGUAGES=en\n");
     assert.deepEqual(values, { LANGUAGES: "en" }, "両方あれば LANGUAGES を使う");
     assert.deepEqual(loadConfig(values).languages, ["en"]);
-    assert.equal(calls.length, 1);
+    assert.deepEqual(calls, []);
   });
 });
 
@@ -427,15 +420,6 @@ test("ワークフローの Build の env: STYLE_DIR だけ(設定ファイル�
   assert.ok(yml.includes('echo "${key}=${value}" >> "$GITHUB_ENV"'));
   assert.ok(yml.includes('echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"'));
   assert.ok(yml.includes('echo "SITE_ORIGIN=$SITE_ORIGIN" >> "$GITHUB_ENV"'));
-});
-
-test("ワークフローの Load config: LANG の行には廃止の警告を出す(許可リストより前)", () => {
-  const yml = fs.readFileSync(new URL("../templates/.github/workflows/docs-pages.yml", import.meta.url), "utf-8");
-  const warnLine = yml.indexOf(
-    'LANG) echo "::warning::LANG は廃止しました。LANGUAGES に書いてください(例: LANGUAGES=ja。先頭が基本言語)。この行は無視します" ;;'
-  );
-  assert.ok(warnLine >= 0, "LANG) の廃止の警告の行");
-  assert.ok(warnLine < yml.indexOf("TRIGGER_BRANCH|ROOT_MD|"), "許可リストより前");
 });
 
 test('THEME="glass"(月) → 正常反映', () => {

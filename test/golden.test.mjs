@@ -229,15 +229,13 @@ describe("ゴールデン: 保存した出力と比べる", { skip: COMPARE_SKIP
   }
 });
 
-describe("ゴールデン: 廃止した LANG", { skip: COMPARE_SKIP }, () => {
-  // 意図した変更の確かめ: 設定ファイルに LANG=ja だけを書いても読まれず、既定(en)の出力になる
-  test("設定ファイルに LANG=ja だけを書くと default と同じ出力になり、廃止の警告が出る", () => {
+describe("ゴールデン: 設定キーではない LANG", { skip: COMPARE_SKIP }, () => {
+  // 設定ファイルに LANG=ja だけを書いても読まれず、既定(en)の出力になる
+  test("設定ファイルに LANG=ja だけを書くと default と同じ出力になる", () => {
     const dir = makeTmpDir();
     try {
-      const { outDir, result } = runGoldenBuild(dir, {}, "LANG=ja\n");
+      const { outDir } = runGoldenBuild(dir, {}, "LANG=ja\n");
       assertSameOutput(path.join(GOLDEN_DIR, "default"), outDir, "LANG=ja だけの設定ファイル");
-      const warnings = `${result.stdout}\n${result.stderr}`.match(/\[config\] LANG は廃止しました。/g) ?? [];
-      assert.equal(warnings.length, 1, `廃止の警告が1回出ること\n${result.stderr}`);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

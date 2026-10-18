@@ -497,12 +497,11 @@ describe("build-docs.mjs :: 多言語 C(異常系・言語の追加)", () => {
     });
   });
 
-  test("設定ファイルに LANG=ja と LANGUAGES=ja,en → 廃止の警告、結果は A と同じ", () => {
+  test("設定ファイルに LANG=ja と LANGUAGES=ja,en → LANG は読まれず、結果は A と同じ", () => {
     withSite(FIXTURE_A, { ".github/docs-pages.config": "LANG=ja\nLANGUAGES=ja,en\nNAV_ENABLED=true\n" }, (withFile) => {
       withSite(FIXTURE_A, {}, (plain) => {
         const result = runBuild(withFile, { LANGUAGES: null });
         assert.equal(result.status, 0, result.stderr);
-        assert.match(logOf(result), /\[config\] LANG は廃止しました。/);
         assert.equal(runBuild(plain, A_ENV).status, 0);
         const files = listFiles(path.join(plain, "_site"));
         assert.deepEqual(listFiles(path.join(withFile, "_site")), files);

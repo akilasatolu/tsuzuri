@@ -1066,7 +1066,7 @@ test("missingConfigKeys: 最新のひな形にあって設定ファイルに無�
   // LLMS_TXT は既定で有効のキー。古い設定ファイルには案内されるが、書かなくても有効で動く
   assert.ok(missing.includes("LLMS_TXT"));
   assert.deepEqual(missingConfigKeys(`${old}\nLLMS_TXT=false\n`).filter((k) => k === "LLMS_TXT"), []);
-  // 古い設定ファイル(廃止した LANG だけ)には、LANGUAGES が「設定ファイルに無い項目」として出る
+  // 古い設定ファイル(LANG だけで LANGUAGES が無いもの)には、LANGUAGES が「設定ファイルに無い項目」として出る
   const oldLang = missingConfigKeys("TRIGGER_BRANCH=main\nLANG=ja\nTHEME=material\n");
   assert.ok(oldLang.includes("LANGUAGES"));
   assert.ok(!oldLang.includes("LANG"));
@@ -1164,9 +1164,8 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     assert.match(env, /^OGP_DEFAULT_IMAGE=https:\/\/x\.example\/a\.png\?w=1&h=2$/m);
     assert.match(env, /^THEME=nineties {2}# 暗い配色$/m, "行の途中の#はコメントにならない(ドキュメントどおり)");
     assert.match(env, /^LANGUAGES=en$/m, "末尾に改行の無い最後の行も読む");
-    // LANG は廃止したキー: 案内の警告を出し、GITHUB_ENV には入れない(未知のキーの警告にはしない)
-    assert.match(result.stdout, /::warning::LANG は廃止しました。LANGUAGES に書いてください/);
-    assert.doesNotMatch(result.stdout, /未知の設定キー LANG /);
+    // LANG は設定キーではない(言語は LANGUAGES だけ): ほかの未知のキーと同じく警告して、GITHUB_ENV には入れない
+    assert.match(result.stdout, /::warning::未知の設定キー LANG を無視します/);
     assert.doesNotMatch(env, /^LANG=/m);
     assert.doesNotMatch(env, /NODE_OPTIONS|\r/);
   } finally {
