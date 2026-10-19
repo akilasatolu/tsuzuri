@@ -33,12 +33,15 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+## [1.36.0] - 2026-10-19
+
 ### Changed
 
 - In the "Build" step of the generated workflow (`.github/workflows/tsuzuri-pages.yml`), the `env:` list (20 items) that copied each value from the config file one by one has been reduced to just `STYLE_DIR`. The config file values, `BASE_PATH` and `SITE_ORIGIN` are passed as environment variables by an earlier step, so the behavior does not change. The comment in the workflow that explains the build dependencies was also reworded so that it no longer names the dependencies or their versions. This is applied by `init --update`. You do not need to edit your config file.
 - `init` now always creates `.github/tsuzuri/styles/custom.css`, an empty template for your own CSS (the question about it is gone). If the file already exists, it is not overwritten (even with `--yes --force`). `init --update` also creates it if it is missing.
 - `STYLE_FILE`, the frontmatter `styleFile`, and the CSS given in `theme` are now written as a file name only. The file is read from `.github/tsuzuri/styles/` (for example `STYLE_FILE=custom.css`, `styleFile: plain.css`, `theme: my-theme.css`). A file name must end with `.css`, must not contain `/`, `\` or `:`, and must not start with `.`. For `theme`, a value ending in `.css` is treated as a CSS file name, and any other value as a built-in theme name. An old value written as a path is ignored with a warning (`STYLE_FILE` then uses no custom CSS, `styleFile` uses the site-wide one, and `theme` uses the site-wide `THEME`). If the `STYLE_FILE` value in your `.github/tsuzuri/config` uses the old form (`.github/tsuzuri/styles/custom.css`), change it to `custom.css`. `styleFile` in `sitemap.json` is still output as a path from the repository root (empty when no custom CSS is used).
 - The files that `init` generates have new names. The workflow is now `.github/workflows/tsuzuri-pages.yml` (its displayed name is "Tsuzuri: Deploy to GitHub Pages") and the config file is now `.github/tsuzuri/config`. Of the files under `.github/tsuzuri/`, you edit only `config` and your own CSS files in `styles/` (`custom.css` by default), not the built-in theme CSS or the scripts; `init --update` never changes `config` or `custom.css`. Files that `init` generated under the old names are not migrated.
+- The text of a GitHub Release is now written in both English and Japanese. `scripts/release-notes.mjs` builds it from the `CHANGELOG.md` section for that version: the usage and update guide and the English block, then the same in Japanese. The Japanese block is the part after the `<!-- ja -->` line. Every section of `CHANGELOG.md` now has an English block, a `<!-- ja -->` line and a Japanese block, including the sections of past versions.
 
 ### Removed
 
@@ -55,6 +58,7 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - `init` が独自 CSS の空ひな形 `.github/tsuzuri/styles/custom.css` を必ず作るようにした(質問は無くなった)。既にあれば上書きしない(`--yes --force` でも)。`init --update` でも、無ければ作る。
 - `STYLE_FILE`・frontmatter の `styleFile`・`theme` の CSS を、ファイル名だけで書くように変えた。ファイルは `.github/tsuzuri/styles/` の中から読む(例: `STYLE_FILE=custom.css`、`styleFile: plain.css`、`theme: my-theme.css`)。ファイル名は `.css` で終わり、`/`・`\`・`:` を含まず、`.` で始まらないもの。`theme` は、`.css` で終われば CSS のファイル名、そうでなければ組み込みテーマ名として扱う。パスで書いた古い値は、警告を出して無視する(`STYLE_FILE` は独自 CSS を使わない。`styleFile` はサイト全体のものを、`theme` はサイト全体の `THEME` を使う)。`.github/tsuzuri/config` の `STYLE_FILE` の値が古い書き方(`.github/tsuzuri/styles/custom.css`)の人は、`custom.css` に書き換える。`sitemap.json` の `styleFile` は、これまでどおりリポジトリの直下からのパスで出る(独自 CSS を使わないときは空)。
 - `init` が生成するファイルの名前を変えた。ワークフローは `.github/workflows/tsuzuri-pages.yml`(画面に出る名前は "Tsuzuri: Deploy to GitHub Pages")、設定ファイルは `.github/tsuzuri/config` になった。`.github/tsuzuri/` の中で利用者が編集するのは、`config` と、`styles/` に置く独自 CSS(既定は `custom.css`)だけで、組み込みのテーマ CSS とスクリプトは編集しない。`init --update` は `config` と `custom.css` を変更しない。以前の名前で `init` が生成したファイルは、移行されない。
+- GitHub の Release の本文を、英語と日本語の両方で書くようにした。`scripts/release-notes.mjs` が、その版の `CHANGELOG.md` の節から、使い方・更新方法の案内と英語のブロック、続けて同じものを日本語で並べて作る。日本語のブロックは、`<!-- ja -->` の行より後ろの部分。`CHANGELOG.md` のすべての節が、英語のブロック、`<!-- ja -->` の行、日本語のブロックの順になった(過去の版の節も同じ)。
 
 ### 削除
 
