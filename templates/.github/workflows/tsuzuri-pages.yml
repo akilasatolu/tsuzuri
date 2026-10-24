@@ -2,8 +2,8 @@
 # bin/cli.mjs の buildDocsPagesYml() が読み込み、次のプレースホルダーを置き換えて出力する。
 #   __OSS_REPO__ / __VENDOR_DIR__ / __TSUZURI_VERSION__ / __MAJOR_TAG__
 # (この先頭のコメントブロックは出力に含まれない)
-# templates/ 配下に .github/workflows/ の形で置いているのは、Dependabot に
-# actions のバージョン更新の対象として認識させるため(ここでワークフローとして実行はされない)。
+# templates/ 配下に .github/workflows/ の形で置いているのは、本体のワークフローと同じ形で
+# actions のバージョンを管理するため(ここでワークフローとして実行はされない)。
 # --- template start ---
 name: "Tsuzuri: Deploy to GitHub Pages"
 

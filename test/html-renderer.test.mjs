@@ -591,17 +591,6 @@ describe("renderPager", () => {
   });
 });
 
-test("MERMAID_VERSION は deps/mermaid/package.json(Dependabot が更新する)のバージョンと同じ", async () => {
-  const { readFileSync } = await import("node:fs");
-  const { MERMAID_VERSION } = await import("../.github/scripts/lib/html-renderer.mjs");
-  const manifest = JSON.parse(readFileSync(new URL("../deps/mermaid/package.json", import.meta.url), "utf-8"));
-  assert.equal(
-    MERMAID_VERSION,
-    manifest.dependencies.mermaid,
-    "Dependabot が deps/mermaid/package.json を更新したら、html-renderer.mjs の MERMAID_VERSION も同じバージョンにしてください"
-  );
-});
-
 describe("renderAlert", () => {
   const note = "<p>[!NOTE]\n本文</p>\n";
   const expected = (type, title, body = "<p>本文</p>\n") =>

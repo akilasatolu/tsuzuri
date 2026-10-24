@@ -5,14 +5,9 @@ Thank you for your interest in Tsuzuri. This guide covers everything up to openi
 
 ## Which branch?
 
-| Branch | What it holds | Send PRs about |
-|---|---|---|
-| `main` (default) | Tsuzuri itself: CLI, build scripts, theme CSS, tests | the code |
-| `docs` | The user-facing site, built with Tsuzuri itself | the user documentation (`docs/`) |
+Send pull requests to `main`. It holds both the code (`bin/`, `.github/scripts/`, `styles/` and so on) and the user documentation (`docs/`).
 
-The two branches share no history. Do not merge one into the other.
-
-To get your own site listed on the examples page of the user site, open an issue with the URL of the site and the URL of its source. If it is accepted, a maintainer adds it to `docs/examples.md` and `docs/examples.ja.md` on the `docs` branch.
+To get your own site listed on the examples page of the user site, open an issue with the URL of the site and the URL of its source. If it is accepted, a maintainer adds it to `docs/examples.md` and `docs/examples.ja.md`.
 
 ## Setting up
 
@@ -28,7 +23,7 @@ Use `npm ci` rather than `npm install`: it installs exactly the versions recorde
 
 You do not need to push. Run your working tree directly. The examples assume you cloned this repository to `~/dev/tsuzuri` and ran `npm ci`.
 
-**Build a site.** In a directory that has Markdown files (the `docs` branch checked out with `git worktree add ../tsuzuri-docs docs` works well):
+**Build a site.** In a directory that has Markdown files (the root of this clone works well: it has `README.md` and `docs/`):
 
 ```sh
 STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
@@ -96,15 +91,15 @@ Edit these:
 - `.github/scripts/`: the build (`build-docs.mjs` and `lib/`).
 - `styles/`: the theme CSS.
 - `test/`: the tests, with fixtures in `test/fixtures/`.
-- `scripts/`, `deps/`: development and CI helpers, not shipped to users. Each script starts with a comment that explains it.
-- `.github/workflows/`, `.github/dependabot.yml`, `.github/PULL_REQUEST_TEMPLATE.md`, `.npmrc`: this repository's own CI, release, docs sync, dependency policy and PR template.
-- `README.md`, `CONTRIBUTING.md`, `MAINTAINING.md`, `CHANGELOG.md`: documentation for developers.
+- `scripts/`: development and CI helpers, not shipped to users. Each script starts with a comment that explains it.
+- `.github/workflows/`, `.github/PULL_REQUEST_TEMPLATE.md`, `.npmrc`: this repository's own CI, release, dependency policy and PR template.
+- `CONTRIBUTING.md`, `MAINTAINING.md`, `CHANGELOG.md`: documentation for developers.
 
-The user documentation (`docs/`) is on the `docs` branch.
+The user documentation is in `docs/` and `README.md` (the top page of the user site). Edit them on `main` like code; `.github/workflows/tsuzuri-pages.yml` publishes them.
 
 `init` copies `.github/scripts/` and `styles/` as they are into the user's repository, so anything you put there is shipped to users.
 
-`init` also generates `.github/workflows/tsuzuri-pages.yml` and `.github/tsuzuri/` (which includes the settings file `config`) in the **user's** repository. Do not commit these to `main`; `test/cli.test.mjs` tests the generation and `test/build-docs.e2e.test.mjs` tests the build.
+`init` also generates `.github/workflows/tsuzuri-pages.yml` and `.github/tsuzuri/` (which includes the settings file `config`) in the **user's** repository. This repository commits them too, because it publishes its own site that way. Do not edit the workflow and the build files by hand; they change only through `init --update` at release time (see [MAINTAINING.md](MAINTAINING.md)), except the SHA and version comment of an action, which are updated by hand in `tsuzuri-pages.yml` together with the other workflow files (see "Updating dependencies" in MAINTAINING.md). `test/cli.test.mjs` tests the generation and `test/build-docs.e2e.test.mjs` tests the build.
 
 Known limitations that users see (the frontmatter format, the mermaid CDN) are documented on the user site, not here: [Frontmatter limitations](https://akilasatolu.github.io/tsuzuri/docs/frontmatter.html#limitations), [Externally loaded files](https://akilasatolu.github.io/tsuzuri/docs/concepts.html#externally-loaded-files-and-dependency-safety).
 
@@ -116,8 +111,9 @@ Known limitations that users see (the frontmatter format, the mermaid CDN) are d
 - `actionlint`: static checks of the workflows, including the workflow `init` generates.
 - `verify-cdn`: checks the hash of the mermaid file that generated pages load.
 - `package-check`: runs `init`, install, build and `init --update` from the packed package (`scripts/check-package.mjs`).
+- `docs-build`: builds the user-facing site (`README.md` and `docs/`) the same way `tsuzuri-pages.yml` does, but does not deploy it. Broken links fail the job.
 
-Syncing the `docs` branch and releasing are done by maintainers; see [MAINTAINING.md](MAINTAINING.md).
+Releasing is done by maintainers; see [MAINTAINING.md](MAINTAINING.md).
 
 ## Opening a pull request
 
@@ -126,5 +122,5 @@ Syncing the `docs` branch and releasing are done by maintainers; see [MAINTAININ
 - Describe what you changed and why. If you change existing behavior, give the reason and what it affects.
 - If you saved `test/fixtures/golden/` again, say why and what changed in the diff (see [Golden tests](#golden-tests)).
 - You do not need to write `CHANGELOG.md`. The maintainers write it when they release.
-- Do not change dependency versions in a PR. Open an issue first if you think one needs updating; the maintainers and Dependabot update them (see [MAINTAINING.md](MAINTAINING.md)).
+- Do not change dependency versions in a PR. Open an issue first if you think one needs updating; the maintainers update them (see [MAINTAINING.md](MAINTAINING.md)).
 - Tsuzuri is released under the MIT License. **By opening a PR you agree to provide your change under the MIT License.**

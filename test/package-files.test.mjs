@@ -35,7 +35,7 @@ test("利用者に入る中身: 実行に要るファイルがあり、テスト
   ]) {
     assert.ok(files.includes(required), `${required} が入っていない`);
   }
-  for (const prefix of ["test/", "scripts/", "deps/", ".github/workflows/", "eslint.config.js"]) {
+  for (const prefix of ["test/", "scripts/", ".github/workflows/", "eslint.config.js"]) {
     assert.deepEqual(files.filter((f) => f.startsWith(prefix)), [], `${prefix} が入っている`);
   }
 });
