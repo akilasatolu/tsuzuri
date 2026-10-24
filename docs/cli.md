@@ -39,6 +39,7 @@ it's the version you intended (`npx` can run an old version from its cache).
 | `--languages <list>` | The site languages (`LANGUAGES`), comma-separated, with the base language first (e.g. `en`, `en,ja`). Default: `en` (v1.28.0 or later) |
 | `--site-name <name>` | The site name (`SITE_NAME`). Default: empty (the repository name is used at build time) |
 | `--no-nav` | Don't show the navigation, site search and table of contents (`NAV_ENABLED=false`). Default: shown |
+| `--lang <en\|ja>` | The language of the messages, and of the comments in the generated settings file and custom CSS template (v1.37.0 or later). Default: `en`. It does not skip the questions |
 | `--force` | Without questions, overwrite existing files too |
 | `--port <number>` | The port used by `preview`. Default: `4000` |
 | `--no-watch` | In `preview`, don't watch files for changes (don't rebuild automatically) |
@@ -56,6 +57,14 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --theme nineties --la
 
 An unknown option is an error, and nothing is generated. A value for `--languages` that isn't
 a valid language tag, such as `ja_JP`, is also an error, and nothing is generated.
+
+The messages of `init` and `preview` are in English (v1.37.0 or later; up to v1.36.0 they were in
+Japanese). Add `--lang ja` to the command to get Japanese messages, and Japanese comments in the
+settings file and the custom CSS template that `init` creates, like `npx github:akilasatolu/tsuzuri#v1 init --lang ja`.
+Only `en` and `ja` (in lowercase) are accepted. `--lang` applies only to the command it is given
+to, and it is not the language of the site (that is `LANGUAGES`; see the
+[configuration reference](./configuration.md#languages)). The workflow and the `.gitignore` that
+`init` generates are always in English.
 
 ## Previewing locally (`preview`)
 
@@ -156,11 +165,14 @@ In the generated settings file, the site language is written like this (when you
 `en`).
 
 ```
-# サイトの言語。カンマ区切りで、先頭が基本言語(起点の README の言語)です。例: ja / en / ja,en
-# 1つなら1言語のサイト(ページの言語 <html lang="..."> と画面の文言がその言語になります)。
-# 2つ以上なら多言語のサイトになります(ページの置き方: https://akilasatolu.github.io/tsuzuri/docs/i18n.html)。空なら en です。
+# Site languages, comma-separated; the first is the base language (the language of the starting README). Examples: ja / en / ja,en
+# With one language you get a single-language site (<html lang="..."> and the interface text use that language).
+# With two or more you get a multilingual site (how to place pages: https://akilasatolu.github.io/tsuzuri/docs/i18n.html). If empty, it is en.
 LANGUAGES=en
 ```
+
+(The comments in the generated settings file are in English. With `--lang ja` they are in Japanese. Up to
+v1.36.0 they were always in Japanese.)
 
 For the list and meaning of the generated keys, see the
 [configuration reference](./configuration.md).
@@ -175,20 +187,20 @@ overwrite any existing file it finds.
   so it asks once for all of them at the start.
 
   ```
-  ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N):
+  The workflow and the build scripts (under .github/tsuzuri/, except config and your own CSS) already exist. Overwrite them with the latest version? (y/N):
   ```
 
-  (The workflow and the build script (under `.github/tsuzuri/`, except `config` and your own
-  CSS) already exist. Overwrite them with the latest version?)
+  (Up to v1.36.0, and with `--lang ja`, the question is in Japanese:
+  `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N):`)
 
 - **The settings file** (`.github/tsuzuri/config`) is asked about separately. An existing
   custom CSS (`custom.css`) is kept without asking.
 
   ```
-  .github/tsuzuri/config は既に存在します。上書きしますか? (y/N):
+  .github/tsuzuri/config already exists. Overwrite it? (y/N):
   ```
 
-  (`.github/tsuzuri/config` already exists. Overwrite it?)
+  (Up to v1.36.0, and with `--lang ja`: `.github/tsuzuri/config は既に存在します。上書きしますか? (y/N):`)
 
 Files you answer "n" for (or leave empty) are skipped and keep their contents. To update only
 the workflow and the script to the latest version, use `--update` below, which does it without
@@ -212,9 +224,14 @@ It asks nothing and works as follows.
 | Custom CSS (`.github/tsuzuri/styles/custom.css`, and other CSS files you added to `styles/`) | If `custom.css` exists, **not changed**; if it doesn't, an empty template is created |
 
 If you run `--update` with a settings file created up to v1.27.0 (one with `LANG` but no
-`LANGUAGES`), it points out `LANGUAGES` as "a key missing from the settings file". Without a
+`LANGUAGES`), it points out `LANGUAGES` under "Keys missing from the settings file". Without a
 language the site becomes English, so for a Japanese site add `LANGUAGES=ja` and delete the
 `LANG` line (see the [configuration reference](./configuration.md#languages)).
+
+`--lang` does not change what `--update` writes, except for one case: with `init --update --lang ja`,
+the messages are in Japanese, and an empty `custom.css` template that is created because none
+existed has Japanese comments. The workflow, `.gitignore` and `package.json` it overwrites are the
+same with or without `--lang`.
 
 After it runs, check the changes with `git diff` before committing and pushing. Running it in a
 repository without `.github/tsuzuri/config` (where you haven't run `init` yet) writes

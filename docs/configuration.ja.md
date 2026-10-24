@@ -272,7 +272,7 @@ REPO_LICENSE=MIT
 自分で書いた`llms.txt`を置いたときは、それがそのままコピーされ、自動では作られません
 ([concepts.md](./concepts.ja.md)の「llms.txt」参照)。
 
-設定ファイルに`LLMS_TXT`が無いときは、`init --update`で「設定ファイルに無い項目」として案内されます。
+設定ファイルに`LLMS_TXT`が無いときは、`init --update`で「Keys missing from the settings file」(設定ファイルに無い項目。`--lang ja`なら「設定ファイルに無い項目があります」)として案内されます。
 追記しなくても有効で動きます(有効が既定です)。止めたいときだけ`LLMS_TXT=false`を追記してください。
 
 ```

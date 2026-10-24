@@ -118,7 +118,8 @@ To do the same thing by hand without `preview`, run the following steps in order
    > from the settings file as environment variables (for example
    > `STYLE_DIR=.github/tsuzuri/styles NAV_ENABLED=true node .github/tsuzuri/build-docs.mjs`).
    > You can see which version is copied into your repository in the comment at the top of
-   > `.github/workflows/tsuzuri-pages.yml` (`# tsuzuri v1.4.0 の …`). If it's old, update it with
+   > `.github/workflows/tsuzuri-pages.yml` (`# tsuzuri v1.37.0 generated this …`; up to v1.36.0,
+   > `# tsuzuri v1.4.0 の …`). If it's old, update it with
    > `init --update` (see the [CLI reference](cli.md)).
 
 3. Serve the resulting `_site/` with a simple server (opening the files directly breaks the

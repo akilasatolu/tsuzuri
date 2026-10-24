@@ -39,6 +39,7 @@ npx github:akilasatolu/tsuzuri#v1 init
 | `--languages <一覧>` | サイトの言語(`LANGUAGES`)。カンマ区切りで、先頭が基本言語(例: `ja`・`ja,en`)。既定: `en`(v1.28.0以降) |
 | `--site-name <名前>` | サイト名(`SITE_NAME`)。既定: 空(ビルド時にリポジトリ名になる) |
 | `--no-nav` | ナビ・サイト内検索・目次を表示しない(`NAV_ENABLED=false`)。既定: 表示する |
+| `--lang <en\|ja>` | 表示するメッセージと、生成する設定ファイル・独自CSSのひな形のコメントの言語(v1.37.0以降)。既定: `en`。質問は省略しない |
 | `--force` | 対話なしのとき、既存ファイルも上書きする |
 | `--port <番号>` | `preview`で使うポート番号。既定: `4000` |
 | `--no-watch` | `preview`で、ファイルの変更を見張らない(自動でビルドし直さない) |
@@ -53,6 +54,12 @@ npx github:akilasatolu/tsuzuri#v1 init
 ```
 npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --theme nineties --languages ja
 ```
+
+`init`と`preview`のメッセージは英語で表示されます(v1.37.0以降。v1.36.0までは日本語でした)。日本語で
+表示したいときは、`npx github:akilasatolu/tsuzuri#v1 init --lang ja`のように、コマンドに`--lang ja`を付けます。
+`init`が作る設定ファイルと独自CSSのひな形のコメントも日本語になります。値は`en`と`ja`(小文字)だけで、
+付けたコマンドのときだけ有効です。サイトの言語(`LANGUAGES`。[configuration.md](./configuration.ja.md#languages)参照)とは別のものです。
+`init`が生成するワークフローと`.gitignore`は、常に英語です。
 
 知らないオプションを指定した場合はエラーになり、何も生成しません。`--languages`に`ja_JP`のような
 言語タグとして正しくない値を指定した場合も、エラーになり何も生成しません。
@@ -141,12 +148,13 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 ビルドが失敗することがあります)。スクリプトを最新版に更新したい場合は、
 後述の「最新版に更新する(`--update`)」を参照してください。
 
-生成される設定ファイルでは、サイトの言語は次のように書かれます(質問に`ja`と答えた場合)。
+生成される設定ファイルでは、サイトの言語は次のように書かれます(質問に`ja`と答えた場合)。コメントは英語です
+(`--lang ja`を付けると日本語になります。v1.36.0までは常に日本語でした)。
 
 ```
-# サイトの言語。カンマ区切りで、先頭が基本言語(起点の README の言語)です。例: ja / en / ja,en
-# 1つなら1言語のサイト(ページの言語 <html lang="..."> と画面の文言がその言語になります)。
-# 2つ以上なら多言語のサイトになります(ページの置き方: https://akilasatolu.github.io/tsuzuri/docs/i18n.html)。空なら en です。
+# Site languages, comma-separated; the first is the base language (the language of the starting README). Examples: ja / en / ja,en
+# With one language you get a single-language site (<html lang="..."> and the interface text use that language).
+# With two or more you get a multilingual site (how to place pages: https://akilasatolu.github.io/tsuzuri/docs/i18n.html). If empty, it is en.
 LANGUAGES=ja
 ```
 
@@ -162,14 +170,19 @@ LANGUAGES=ja
   最初に1回だけまとめて確認します。
 
   ```
-  ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N):
+  The workflow and the build scripts (under .github/tsuzuri/, except config and your own CSS) already exist. Overwrite them with the latest version? (y/N):
   ```
+
+  (v1.36.0までと、`--lang ja`のときは、日本語で表示されます:
+  `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N):`)
 
 - **設定ファイル**(`.github/tsuzuri/config`)は、ファイルごとに確認します。独自CSS(`custom.css`)は、既にあれば確認せずに残します。
 
   ```
-  .github/tsuzuri/config は既に存在します。上書きしますか? (y/N):
+  .github/tsuzuri/config already exists. Overwrite it? (y/N):
   ```
+
+  (v1.36.0までと、`--lang ja`のときは、`.github/tsuzuri/config は既に存在します。上書きしますか? (y/N):`と表示されます)
 
 「n」(または未入力)を選んだファイルはスキップされ、既存の内容がそのまま保持されます。
 ワークフローとスクリプトだけを最新版にしたい場合は、次の`--update`を使うと確認なしで行えます。
@@ -192,9 +205,13 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 | 独自CSS(`.github/tsuzuri/styles/custom.css`と、`styles/`に足したほかのCSS) | `custom.css`が既にあれば**変更しない**。無ければ空のひな形を作る |
 
 v1.27.0までに作った設定ファイル(`LANG`だけで`LANGUAGES`が無いもの)で`--update`すると、
-「設定ファイルに無い項目があります」として`LANGUAGES`が案内されます。言語を書かないとサイトは英語になる
+「Keys missing from the settings file」(設定ファイルに無い項目。`--lang ja`なら「設定ファイルに無い項目があります」)として`LANGUAGES`が案内されます。言語を書かないとサイトは英語になる
 ので、日本語のサイトなら`LANGUAGES=ja`を書き足し、`LANG`の行は消してください
 ([configuration.md](./configuration.ja.md#languages)参照)。
+
+`--lang`は`--update`が書く内容を変えません。例外は1つで、`init --update --lang ja`のときは、メッセージが日本語になり、
+`custom.css`が無くて空のひな形を作る場合に限り、そのひな形のコメントが日本語になります。上書きされるワークフロー・
+`.gitignore`・`package.json`は、`--lang`の有無で変わりません。
 
 実行後、`git diff`で変更内容を確認してからコミット・pushしてください。
 `.github/tsuzuri/config`が無いリポジトリ(まだ`init`していない)で実行すると、

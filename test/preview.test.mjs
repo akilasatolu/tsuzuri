@@ -14,6 +14,7 @@ import {
   browserCommand,
 } from "../bin/preview.mjs";
 import { buildDocsPagesYml, readPackageVersion } from "../bin/cli.mjs";
+import { setCliLang } from "../bin/messages.mjs";
 
 function makeSite() {
   const dir = mkdtempSync(join(tmpdir(), "tsuzuri-preview-"));
@@ -103,9 +104,20 @@ test("runPreview: package-lock.json が無ければ、init --update を案内し
   const { server, warnings, logs } = await runPreviewWithoutLockfile({ withDependencies: false });
   assert.equal(server, null);
   assert.equal(warnings.length, 1);
-  assert.match(warnings[0], /package-lock\.json がありません/);
+  assert.match(warnings[0], /package-lock\.json not found/);
   assert.match(warnings[0], /init --update/);
   assert.deepEqual(logs, [], "依存のインストールには進まない");
+});
+
+test("runPreview: --lang ja のときは、案内も日本語になる", async () => {
+  setCliLang("ja");
+  try {
+    const { warnings } = await runPreviewWithoutLockfile({ withDependencies: false });
+    assert.match(warnings[0], /package-lock\.json がありません/);
+    assert.match(warnings[0], /init --update/);
+  } finally {
+    setCliLang("en");
+  }
 });
 
 test("runPreview: package-lock.json が無ければ、依存(node_modules/marked)が入っていても止まる", async () => {

@@ -32,7 +32,7 @@ import {
   answersFromArgs,
   readPackageVersion,
   readDependencyVersion,
-  HELP_TEXT,
+  buildHelpText,
   BUILD_DEPENDENCIES,
   buildBuildLockfiles,
   readBuildLockfiles,
@@ -46,11 +46,23 @@ import {
   guessDefaultBranch,
 } from "../bin/cli.mjs";
 import { parseConfigText, loadConfig, ALLOWED_THEMES, CONFIG_FILE_PATH } from "../.github/scripts/lib/config.mjs";
+import { setCliLang } from "../bin/messages.mjs";
+import { vendoredVersionOf } from "../bin/preview.mjs";
 import { createInterface } from "node:readline/promises";
 import { Readable } from "node:stream";
 
 function makeTmpDir() {
   return mkdtempSync(join(tmpdir(), "cli-test-"));
+}
+
+/** 表示の言語を一時的に lang にして fn を実行し、終わったら en に戻す(状態を他のテストに残さない) */
+function withLang(lang, fn) {
+  setCliLang(lang);
+  try {
+    return fn();
+  } finally {
+    setCliLang("en");
+  }
 }
 
 function fakeRl(answers) {
@@ -94,7 +106,7 @@ test("promptAnswers: 独自CSSのひな形は聞かない(6つの質問で終わ
   const rl = { question: async (prompt) => (asked.push(prompt), "") };
   const answers = await promptAnswers(rl);
   assert.equal(asked.length, 6);
-  assert.ok(!asked.some((q) => /独自CSS|custom\.css/.test(q)));
+  assert.ok(!asked.some((q) => /custom CSS|custom\.css/i.test(q)));
   assert.equal("createStyleFile" in answers, false);
 });
 
@@ -138,9 +150,9 @@ test("promptAnswers: サイトの言語(LANGUAGES)をサイト名の前に聞き
     assert.deepEqual(calls, [], input);
     assert.equal(
       prompts[4],
-      "? サイトの言語 (LANGUAGES。カンマ区切りで、先頭は README の言語。例: ja / en / ja,en) [en]: ",
+      "? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [en]: ",
     );
-    assert.match(prompts[5], /サイト名/);
+    assert.match(prompts[5], /Site name/);
     assert.ok(buildDocsPagesConfig(answers).includes(`\nLANGUAGES=${expected}\n`), input);
   }
 });
@@ -160,14 +172,18 @@ test("--languages で対話なしに指定できる。--yes だけなら en", ()
   assert.equal(answersFromArgs(args).languages, "ja,en");
   assert.equal(answersFromArgs(parseCliArgs(["--languages", " ja , en "])).languages, "ja,en");
   assert.equal(answersFromArgs(parseCliArgs(["--yes"])).languages, "en");
-  assert.throws(() => parseCliArgs(["--languages", " "]), /--languages に空の値/);
+  assert.throws(() => parseCliArgs(["--languages", " "]), /--languages cannot be empty/);
   // 明示した値の書き間違いは --theme と同じくエラーで止める(対話の答えは警告して en)
-  assert.throws(() => parseCliArgs(["--languages", "ja_JP"]), /^Error: --languages には言語タグをカンマ区切りで指定してください\(例: ja \/ en \/ ja,en\)\(指定: ja_JP\)$/);
-  assert.throws(() => parseCliArgs(["--languages", "ja,ja_JP"]), /--languages には/);
-  assert.throws(() => parseCliArgs(["--languages", ","]), /--languages には.*\(指定: ,\)$/);
+  assert.throws(() => parseCliArgs(["--languages", "ja_JP"]), /^Error: --languages needs language tags separated by commas \(e\.g\. ja \/ en \/ ja,en\) \(given: ja_JP\)$/);
+  assert.throws(() => parseCliArgs(["--languages", "ja,ja_JP"]), /--languages needs/);
+  assert.throws(() => parseCliArgs(["--languages", ","]), /--languages needs.*\(given: ,\)$/);
   assert.doesNotThrow(() => parseCliArgs(["--languages", "ja,en"]));
-  assert.match(HELP_TEXT, /--languages <一覧>\n\s+サイトの言語\(LANGUAGES。先頭が基本言語\)。既定: en\n/);
-  assert.match(HELP_TEXT, /--theme \/ --languages \/ --site-name .*のいずれかを指定した場合も、対話なしで実行します/);
+  assert.match(buildHelpText(), /--languages <list>\n\s+Site languages \(LANGUAGES; the first is the base language\)\. Default: en\n/);
+  assert.match(buildHelpText(), /Giving any of --branch \/ --root \/ --theme \/ --languages \/ --site-name .* also runs without questions/);
+  withLang("ja", () => {
+    assert.match(buildHelpText(), /--languages <一覧>\n\s+サイトの言語\(LANGUAGES。先頭が基本言語\)。既定: en\n/);
+    assert.match(buildHelpText(), /--theme \/ --languages \/ --site-name .*のいずれかを指定した場合も、対話なしで実行します/);
+  });
 });
 
 test("CLI: --languages の不正な値は --theme の不正な値と同じ終了コード・形のエラーで止まり、ファイルを作らない", () => {
@@ -179,11 +195,11 @@ test("CLI: --languages の不正な値は --theme の不正な値と同じ終了
       const result = spawnSync(process.execPath, [cli, "--languages", value], { cwd: dir, encoding: "utf8" });
       assert.notEqual(result.status, 0, value);
       assert.equal(result.status, theme.status, value);
-      assert.ok(result.stderr.includes(`--languages には言語タグをカンマ区切りで指定してください(例: ja / en / ja,en)(指定: ${value})`), result.stderr);
+      assert.ok(result.stderr.includes(`--languages needs language tags separated by commas (e.g. ja / en / ja,en) (given: ${value})`), result.stderr);
       // 前後の文言の形も --theme のエラーと同じ
       assert.equal(
-        result.stderr.replace(/--languages には.*?\(指定: [^)]*\)/, "X"),
-        theme.stderr.replace(/--theme には.*?\(指定: [^)]*\)/, "X"),
+        result.stderr.replace(/--languages needs.*?\(given: [^)]*\)/, "X"),
+        theme.stderr.replace(/--theme must be.*?\(given: [^)]*\)/, "X"),
         value,
       );
       assert.ok(!existsSync(join(dir, ".github")), value);
@@ -214,13 +230,25 @@ test("buildDocsPagesConfig: LANG の行は無く、LANGUAGES と説明があり�
   assert.ok(
     config.includes(
       [
-        "# サイトの言語。カンマ区切りで、先頭が基本言語(起点の README の言語)です。例: ja / en / ja,en",
-        '# 1つなら1言語のサイト(ページの言語 <html lang="..."> と画面の文言がその言語になります)。',
-        "# 2つ以上なら多言語のサイトになります(ページの置き方: https://akilasatolu.github.io/tsuzuri/docs/i18n.html)。空なら en です。",
+        "# Site languages, comma-separated; the first is the base language (the language of the starting README). Examples: ja / en / ja,en",
+        '# With one language you get a single-language site (<html lang="..."> and the interface text use that language).',
+        "# With two or more you get a multilingual site (how to place pages: https://akilasatolu.github.io/tsuzuri/docs/i18n.html). If empty, it is en.",
         "LANGUAGES=ja,en",
       ].join("\n"),
     ),
   );
+  withLang("ja", () => {
+    assert.ok(
+      buildDocsPagesConfig({ languages: "ja,en" }).includes(
+        [
+          "# サイトの言語。カンマ区切りで、先頭が基本言語(起点の README の言語)です。例: ja / en / ja,en",
+          '# 1つなら1言語のサイト(ページの言語 <html lang="..."> と画面の文言がその言語になります)。',
+          "# 2つ以上なら多言語のサイトになります(ページの置き方: https://akilasatolu.github.io/tsuzuri/docs/i18n.html)。空なら en です。",
+          "LANGUAGES=ja,en",
+        ].join("\n"),
+      ),
+    );
+  });
   const loaded = loadConfig(parseConfigText(config));
   assert.deepEqual(loaded.languages, ["ja", "en"]);
   assert.deepEqual(loadConfig(parseConfigText(buildDocsPagesConfig({}))).languages, ["en"], "既定は en");
@@ -306,7 +334,7 @@ test("readDependencyVersion: ^や~などの範囲指定は受け付けない", (
     const fsImpl = {
       readFileSync: () => JSON.stringify({ devDependencies: { marked: range } }),
     };
-    assert.throws(() => readDependencyVersion("marked", "/pkg", fsImpl), /完全一致/);
+    assert.throws(() => readDependencyVersion("marked", "/pkg", fsImpl), /exact version/);
   }
 });
 
@@ -317,8 +345,8 @@ test("package.jsonのmarkedとpackage-lock.jsonで実際に入る版が一致し
 
 test("buildDocsPagesYml: ワークフローのコメントは、ビルド用の依存の版が書いてある package.json を指す", () => {
   const yml = buildDocsPagesYml();
-  assert.ok(yml.includes(`ビルド用の依存は ${VENDOR_DIR}/node_modules に入れ、`));
-  assert.ok(yml.includes(`版は ${VENDOR_DIR}/package.json に書いてあり、`));
+  assert.ok(yml.includes(`The build dependencies go into ${VENDOR_DIR}/node_modules, `));
+  assert.ok(yml.includes(`Their versions are written in ${VENDOR_DIR}/package.json and `));
 });
 
 test("ビルド用の依存の package.json・package-lock.json を、本体の lockfile の版とハッシュで作る", () => {
@@ -357,7 +385,7 @@ test("コミットしてあるビルド用の lockfile の完成品が、本体�
 });
 
 test("ビルド用の lockfile の完成品が無い取得物では、init が中途半端に終わらないようエラーにする", () => {
-  assert.throws(() => readBuildLockfiles("/nonexistent", { existsSync: () => false, readFileSync }), /見つかりません/);
+  assert.throws(() => readBuildLockfiles("/nonexistent", { existsSync: () => false, readFileSync }), /were not found/);
 });
 
 test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=README.md/THEME=material", () => {
@@ -498,7 +526,7 @@ test("writeGeneratedFiles: 既存の custom.css は、確認もせず上書き�
     assert.equal(readFileSync(cssPath, "utf8"), "/* mine */");
     assert.deepEqual(asked, [], "確認しない");
     assert.equal(results[0].status, "skipped");
-    assert.ok(logs.some((m) => m.includes("保持しました")));
+    assert.ok(logs.some((m) => m.includes("kept")));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -646,7 +674,7 @@ test("reportFatalError: 分かりやすいエラーメッセージを出力し�
   const code = reportFatalError(new Error("EACCES: permission denied"), (msg) => logs.push(msg));
   assert.equal(code, 1);
   assert.equal(logs.length, 1);
-  assert.ok(logs[0].includes("エラー"));
+  assert.ok(logs[0].includes("Error: setup failed."));
   assert.ok(logs[0].includes("EACCES"));
 });
 
@@ -716,8 +744,11 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
 test("THEME_CHOICES: 組み込みテーマの一覧", () => {
   const keys = THEME_CHOICES.map((c) => c.key);
   assert.deepEqual(keys, ["material", "glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties", "none"]);
-  assert.ok(buildDocsPagesConfig({}).includes("nineties(90年代)"));
-  assert.ok(buildDocsPagesConfig({}).includes("kintsugi(金継ぎ)"));
+  assert.ok(buildDocsPagesConfig({}).includes("nineties / none (no decoration)"));
+  withLang("ja", () => {
+    assert.ok(buildDocsPagesConfig({}).includes("nineties(90年代)"));
+    assert.ok(buildDocsPagesConfig({}).includes("kintsugi(金継ぎ)"));
+  });
 });
 
 test("THEME_CHOICES: ALLOWED_THEMES と同じ順で、すべてに説明がある", () => {
@@ -727,9 +758,14 @@ test("THEME_CHOICES: ALLOWED_THEMES と同じ順で、すべてに説明があ�
 
 test("設定ファイルのひな形のテーマの一覧に、ALLOWED_THEMES のすべてのテーマが載っている", () => {
   const config = buildDocsPagesConfig({});
-  const line = config.split("\n").find((l) => l.startsWith("# テーマ:"));
+  const line = config.split("\n").find((l) => l.startsWith("# Theme:"));
   assert.ok(line, "テーマの一覧の行");
-  for (const theme of ALLOWED_THEMES) assert.ok(line.includes(`${theme}(`), `${theme} が載っていない`);
+  for (const theme of ALLOWED_THEMES) assert.ok(line.includes(theme), `${theme} が載っていない`);
+  withLang("ja", () => {
+    const jaLine = buildDocsPagesConfig({}).split("\n").find((l) => l.startsWith("# テーマ:"));
+    assert.ok(jaLine, "テーマの一覧の行(ja)");
+    for (const theme of ALLOWED_THEMES) assert.ok(jaLine.includes(`${theme}(`), `${theme} が載っていない(ja)`);
+  });
 });
 
 test("runUpdate: 独自CSS(custom.css)が無ければ、空のひな形を作る", async () => {
@@ -748,7 +784,7 @@ test("runUpdate: 独自CSS(custom.css)が無ければ、空のひな形を作る
 test("runUpdate: 設定ファイルが無い(未init)リポジトリではエラーにして何も書き込まない", async () => {
   const dir = makeTmpDir();
   try {
-    await assert.rejects(() => runUpdate({ cwd: dir }), /\.github\/tsuzuri\/config が見つかりません/);
+    await assert.rejects(() => runUpdate({ cwd: dir }), /\.github\/tsuzuri\/config not found/);
     assert.ok(!existsSync(join(dir, ".github")));
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -827,12 +863,21 @@ test("ワークフローのactionsはコミットSHAで固定され、本体のC
 
 test("buildCompletionMessage: 選んだトリガーブランチ・起点のMarkdownとGitHub側の設定手順を案内する", () => {
   const msg = buildCompletionMessage({ triggerBranch: "docs", rootMd: "index.md" });
-  assert.match(msg, /index\.md がリポジトリにあることを確認/);
-  assert.match(msg, /docs ブランチへ push/);
-  assert.match(msg, /github-pages の「Deployment branches and tags」に docs を追加/);
-  assert.match(msg, /Source を「GitHub Actions」/);
+  assert.match(msg, /Make sure index\.md is in the repository/);
+  assert.match(msg, /push to the docs branch/);
+  assert.match(msg, /add docs under Settings > Environments >\n\s+github-pages > "Deployment branches and tags"/);
+  assert.match(msg, /set Source to "GitHub Actions"/);
   assert.match(msg, /init --update/);
-  assert.doesNotMatch(msg, /mainブランチへpush/);
+  assert.doesNotMatch(msg, /push to the main branch/);
+  withLang("ja", () => {
+    const ja = buildCompletionMessage({ triggerBranch: "docs", rootMd: "index.md" });
+    assert.match(ja, /index\.md がリポジトリにあることを確認/);
+    assert.match(ja, /docs ブランチへ push/);
+    assert.match(ja, /github-pages の「Deployment branches and tags」に docs を追加/);
+    assert.match(ja, /Source を「GitHub Actions」/);
+    assert.match(ja, /init --update/);
+    assert.doesNotMatch(ja, /mainブランチへpush/);
+  });
 });
 
 test("runUpdate: 配布対象に無くなった lib/*.mjs は削除し、styles/ の独自CSSは残す", async () => {
@@ -887,7 +932,10 @@ test("runUpdate: 利用者が編集する config と styles/ の独自CSSは書�
 
 test("buildCompletionMessage: VENDOR_DIR の中で編集してよいのは config と styles/ の独自CSSだけ、と案内する", () => {
   const msg = buildCompletionMessage({});
-  assert.ok(msg.includes(`(${VENDOR_DIR}/ 配下で編集してよいのは、設定ファイル config と、styles/ に置く独自CSS(既定は custom.css)だけです。組み込みのテーマCSSとスクリプトは編集しないでください)`));
+  assert.ok(msg.includes(`(In ${VENDOR_DIR}/, you may edit only the settings file config and your own CSS in styles/ (custom.css by default). Do not edit the built-in theme CSS and the scripts.)`));
+  withLang("ja", () => {
+    assert.ok(buildCompletionMessage({}).includes(`(${VENDOR_DIR}/ 配下で編集してよいのは、設定ファイル config と、styles/ に置く独自CSS(既定は custom.css)だけです。組み込みのテーマCSSとスクリプトは編集しないでください)`));
+  });
 });
 
 test("init の生成物: VENDOR_DIR の外に作られるのはワークフローだけで、旧名のファイルは作らない", () => {
@@ -941,11 +989,17 @@ test("parseCliArgs: --yes や値の指定があれば対話なし。値は answe
 });
 
 test("parseCliArgs: 不明なオプション・サブコマンド、不正なテーマ、空の値はエラー", () => {
-  assert.throws(() => parseCliArgs(["--bogus"]), /引数が正しくありません/);
-  assert.throws(() => parseCliArgs(["--style"]), /引数が正しくありません/, "--style は削除した(独自CSSのひな形は常に作る)");
-  assert.throws(() => parseCliArgs(["deploy"]), /不明なサブコマンド/);
-  assert.throws(() => parseCliArgs(["--theme", "sepia"]), /--theme には/);
-  assert.throws(() => parseCliArgs(["--branch", " "]), /--branch に空の値/);
+  assert.throws(() => parseCliArgs(["--bogus"]), /Invalid arguments/);
+  assert.throws(() => parseCliArgs(["--style"]), /Invalid arguments/, "--style は削除した(独自CSSのひな形は常に作る)");
+  assert.throws(() => parseCliArgs(["deploy"]), /Unknown subcommand/);
+  assert.throws(() => parseCliArgs(["--theme", "sepia"]), /--theme must be/);
+  assert.throws(() => parseCliArgs(["--branch", " "]), /--branch cannot be empty/);
+  withLang("ja", () => {
+    assert.throws(() => parseCliArgs(["--bogus"]), /引数が正しくありません/);
+    assert.throws(() => parseCliArgs(["deploy"]), /不明なサブコマンド/);
+    assert.throws(() => parseCliArgs(["--theme", "sepia"]), /--theme には/);
+    assert.throws(() => parseCliArgs(["--branch", " "]), /--branch に空の値/);
+  });
 });
 
 test("parseCliArgs: preview サブコマンドと --port", () => {
@@ -958,9 +1012,9 @@ test("parseCliArgs: preview サブコマンドと --port", () => {
   assert.equal(parseCliArgs(["preview", "--no-watch"])["no-watch"], true);
   assert.equal(parseCliArgs(["preview", "--open"]).open, true);
   assert.equal(parseCliArgs(["preview"]).open, false);
-  assert.throws(() => parseCliArgs(["preview", "--port", "abc"]), /--port には/);
-  assert.throws(() => parseCliArgs(["preview", "--port", "70000"]), /--port には/);
-  assert.throws(() => parseCliArgs(["init", "preview"]), /不明なサブコマンド/);
+  assert.throws(() => parseCliArgs(["preview", "--port", "abc"]), /--port needs/);
+  assert.throws(() => parseCliArgs(["preview", "--port", "70000"]), /--port needs/);
+  assert.throws(() => parseCliArgs(["init", "preview"]), /Unknown subcommand/);
 });
 
 test("preview: init していないリポジトリではエラーにする", () => {
@@ -968,7 +1022,7 @@ test("preview: init していないリポジトリではエラーにする", () 
   try {
     const result = spawnSync(process.execPath, [join(PACKAGE_ROOT, "bin/cli.mjs"), "preview"], { cwd: dir, encoding: "utf8" });
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /先に init を実行してください/);
+    assert.match(result.stderr, /Run init first/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -981,22 +1035,27 @@ test("parseCliArgs: -v / -h / --update / --force", () => {
   assert.equal(parseCliArgs(["-y", "--force"]).force, true);
 });
 
-test("HELP_TEXT: 主なオプションとテーマ名を説明している", () => {
-  for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--force", "--version", "nineties"]) {
-    assert.ok(HELP_TEXT.includes(word), word);
+test("buildHelpText: 主なオプションとテーマ名を説明している(en・ja とも)", () => {
+  for (const lang of ["en", "ja"]) {
+    withLang(lang, () => {
+      const help = buildHelpText();
+      for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--force", "--version", "--lang", "nineties"]) {
+        assert.ok(help.includes(word), `${lang}: ${word}`);
+      }
+      assert.ok(!help.includes("--style"));
+    });
   }
-  assert.ok(!HELP_TEXT.includes("--style"));
 });
 
 test("readPackageVersion / readDependencyVersion: package.json の値を返す", () => {
   const pkg = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package.json"), "utf8"));
   assert.equal(readPackageVersion(), pkg.version);
   assert.equal(readDependencyVersion("marked"), pkg.devDependencies.marked);
-  assert.throws(() => readDependencyVersion("not-a-dependency"), /完全一致/);
+  assert.throws(() => readDependencyVersion("not-a-dependency"), /exact version/);
 });
 
 test("buildDocsPagesYml: 生成に使った tsuzuri のバージョンを先頭のコメントに入れる", () => {
-  assert.ok(buildDocsPagesYml().includes(`# tsuzuri v${readPackageVersion()} の npx github:`));
+  assert.ok(buildDocsPagesYml().includes(`# tsuzuri v${readPackageVersion()} generated this self-contained workflow with npx github:`));
 });
 
 test("CLIを実行すると最初にバージョンを表示し、--yes で対話なしに生成し、既存ファイルは --force が無ければスキップ", () => {
@@ -1022,7 +1081,7 @@ test("CLIを実行すると最初にバージョンを表示し、--yes で対�
 
     result = spawnSync(process.execPath, [cli, "--bogus"], { cwd: dir, encoding: "utf8" });
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /引数が正しくありません/);
+    assert.match(result.stderr, /Invalid arguments/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -1097,9 +1156,9 @@ test("createBundledConfirm: 一式は1回だけ聞いて同じ答えを使い、
   assert.equal(await confirm(`${VENDOR_DIR}/lib/config.mjs`), true);
   assert.equal(await confirm(".github/tsuzuri/config"), false);
   assert.equal(questions.length, 2);
-  assert.match(questions[0], /ワークフローとビルドスクリプト一式/);
-  assert.match(questions[0], /config と独自 CSS を除く/);
-  assert.match(questions[1], /\.github\/tsuzuri\/config は既に存在します/);
+  assert.match(questions[0], /The workflow and the build scripts/);
+  assert.match(questions[0], /except config and your own CSS/);
+  assert.match(questions[1], /\.github\/tsuzuri\/config already exists/);
 });
 
 test("buildDocsPagesConfig: LLMS_TXT=true をコメント付きで書く", () => {
@@ -1147,7 +1206,7 @@ test("runUpdate: 設定ファイルに無い新しい項目を案内する(設�
     writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=main\nTHEME=material\n");
     const logs = [];
     await runUpdate({ cwd: dir, log: (m) => logs.push(m) });
-    const notice = logs.find((m) => m.includes("設定ファイルに無い項目"));
+    const notice = logs.find((m) => m.includes("Keys missing from the settings file"));
     assert.ok(notice && notice.includes("LAST_UPDATED") && notice.includes("configuration.html"));
     assert.equal(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8"), "TRIGGER_BRANCH=main\nTHEME=material\n");
   } finally {
@@ -1161,8 +1220,12 @@ test("checkSetupLocation: リポジトリ直下なら注意なし、サブディ
   const exists = (p) => p === "/repo/.git";
   assert.equal(findRepoRoot("/repo/sub/dir", exists), "/repo");
   assert.deepEqual(checkSetupLocation("/repo", exists), []);
-  assert.match(checkSetupLocation("/repo/sub", exists)[0], /リポジトリの直下ではありません\(直下: \/repo\)/);
-  assert.match(checkSetupLocation("/elsewhere", exists)[0], /git リポジトリの中ではない/);
+  assert.match(checkSetupLocation("/repo/sub", exists)[0], /This is not the root of the repository \(root: \/repo\)/);
+  assert.match(checkSetupLocation("/elsewhere", exists)[0], /does not look like a git repository/);
+  withLang("ja", () => {
+    assert.match(checkSetupLocation("/repo/sub", exists)[0], /リポジトリの直下ではありません\(直下: \/repo\)/);
+    assert.match(checkSetupLocation("/elsewhere", exists)[0], /git リポジトリの中ではない/);
+  });
 });
 
 test("guessDefaultBranch: origin/HEAD → 今のブランチ → main の順に推測する", () => {
@@ -1194,13 +1257,13 @@ test("CLI: リポジトリ直下以外・ROOT_MDが無いときは警告し、--
     const cli = join(PACKAGE_ROOT, "bin/cli.mjs");
     let result = spawnSync(process.execPath, [cli, "-y", "--root", "nope.md"], { cwd: join(dir, "sub"), encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stderr, /リポジトリの直下ではありません/);
-    assert.match(result.stderr, /起点の nope\.md がまだありません/);
+    assert.match(result.stderr, /This is not the root of the repository/);
+    assert.match(result.stderr, /The root file nope\.md does not exist yet/);
 
     writeFileSync(join(dir, "README.md"), "# x\n");
     result = spawnSync(process.execPath, [cli, "-y"], { cwd: dir, encoding: "utf8" });
     assert.equal(result.status, 0, result.stderr);
-    assert.doesNotMatch(result.stderr, /直下ではありません|まだありません/);
+    assert.doesNotMatch(result.stderr, /not the root of the repository|does not exist yet/);
     // origin が無いので、作業中のブランチ(pages)ではなく main になる
     assert.match(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8"), /^TRIGGER_BRANCH=main$/m);
   } finally {
@@ -1226,14 +1289,14 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     const envFile = join(dir, "github.env");
     const result = spawnSync("bash", ["-e", "load.sh"], { cwd: dir, encoding: "utf8", env: { ...process.env, GITHUB_ENV: envFile } });
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /未知の設定キー NODE_OPTIONS を無視します/);
+    assert.match(result.stdout, /Ignoring unknown setting key NODE_OPTIONS/);
     const env = readFileSync(envFile, "utf8");
     assert.match(env, /^SITE_NAME=Bob's "docs"$/m);
     assert.match(env, /^OGP_DEFAULT_IMAGE=https:\/\/x\.example\/a\.png\?w=1&h=2$/m);
     assert.match(env, /^THEME=nineties {2}# 暗い配色$/m, "行の途中の#はコメントにならない(ドキュメントどおり)");
     assert.match(env, /^LANGUAGES=en$/m, "末尾に改行の無い最後の行も読む");
     // LANG は設定キーではない(言語は LANGUAGES だけ): ほかの未知のキーと同じく警告して、GITHUB_ENV には入れない
-    assert.match(result.stdout, /::warning::未知の設定キー LANG を無視します/);
+    assert.match(result.stdout, /::warning::Ignoring unknown setting key LANG/);
     assert.doesNotMatch(env, /^LANG=/m);
     assert.doesNotMatch(env, /NODE_OPTIONS|\r/);
   } finally {
@@ -1287,7 +1350,7 @@ function runCheckTriggerBranch({ triggerBranch, defaultBranch, currentBranch, ev
 }
 
 const DEFAULT_BRANCH_LOG = (branch) =>
-  `設定ファイルに TRIGGER_BRANCH が無い(または空の)ため、リポジトリの既定ブランチ ${branch} を使います`;
+  `The settings file has no TRIGGER_BRANCH (or it is empty), so the repository's default branch ${branch} is used`;
 
 test("生成ワークフローの Check trigger branch: リポジトリの既定ブランチを環境変数 DEFAULT_BRANCH で受け取る", () => {
   assert.ok(buildDocsPagesYml().includes("          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}\n"));
@@ -1314,37 +1377,37 @@ test("生成ワークフローの Check trigger branch: TRIGGER_BRANCH が無い
   assert.equal(r.status, 0, r.stderr);
   assert.equal(r.output, "should_deploy=false\n");
   assert.ok(r.stdout.includes(DEFAULT_BRANCH_LOG("master")), r.stdout);
-  assert.ok(r.stdout.includes("TRIGGER_BRANCH=master ではない push (main) のためスキップします"), r.stdout);
+  assert.ok(r.stdout.includes("Skipping because this push (main) is not to TRIGGER_BRANCH=master"), r.stdout);
 
   r = runCheckTriggerBranch({ defaultBranch: "main", currentBranch: "feature/foo" });
   assert.equal(r.status, 0, r.stderr);
   assert.equal(r.output, "should_deploy=false\n");
   assert.ok(r.stdout.includes(DEFAULT_BRANCH_LOG("main")), r.stdout);
-  assert.ok(r.stdout.includes("TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします"), r.stdout);
+  assert.ok(r.stdout.includes("Skipping because this push (feature/foo) is not to TRIGGER_BRANCH=main"), r.stdout);
 
   r = runCheckTriggerBranch({ defaultBranch: "main", currentBranch: "feature/foo", eventName: "workflow_dispatch" });
   assert.equal(r.status, 0, r.stderr);
   assert.equal(r.output, "should_deploy=true\n");
   assert.ok(r.stdout.includes(DEFAULT_BRANCH_LOG("main")), r.stdout);
-  assert.ok(r.stdout.includes("手動実行のためブランチ判定をスキップします"), r.stdout);
+  assert.ok(r.stdout.includes("Skipping the branch check because this is a manual run"), r.stdout);
 });
 
 test("生成ワークフローの Check trigger branch: TRIGGER_BRANCH に値があれば、その値で判定する(既定ブランチは使わない)", () => {
   let r = runCheckTriggerBranch({ triggerBranch: "docs", defaultBranch: "main", currentBranch: "docs" });
   assert.equal(r.status, 0, r.stderr);
   assert.equal(r.output, "should_deploy=true\n");
-  assert.doesNotMatch(r.stdout, /既定ブランチ/);
+  assert.doesNotMatch(r.stdout, /default branch/);
 
   r = runCheckTriggerBranch({ triggerBranch: "docs", defaultBranch: "main", currentBranch: "main" });
   assert.equal(r.status, 0, r.stderr);
   assert.equal(r.output, "should_deploy=false\n");
-  assert.ok(r.stdout.includes("TRIGGER_BRANCH=docs ではない push (main) のためスキップします"), r.stdout);
-  assert.doesNotMatch(r.stdout, /既定ブランチ/);
+  assert.ok(r.stdout.includes("Skipping because this push (main) is not to TRIGGER_BRANCH=docs"), r.stdout);
+  assert.doesNotMatch(r.stdout, /default branch/);
 
   r = runCheckTriggerBranch({ triggerBranch: "docs", defaultBranch: "main", currentBranch: "main", eventName: "workflow_dispatch" });
   assert.equal(r.status, 0, r.stderr);
   assert.equal(r.output, "should_deploy=true\n");
-  assert.doesNotMatch(r.stdout, /既定ブランチ/);
+  assert.doesNotMatch(r.stdout, /default branch/);
 
   // 値があれば、既定ブランチが取れなくても動く
   r = runCheckTriggerBranch({ triggerBranch: "docs", defaultBranch: "", currentBranch: "docs" });
@@ -1358,19 +1421,78 @@ test("生成ワークフローの Check trigger branch: TRIGGER_BRANCH が無い
     assert.equal(r.status, 1, r.stdout);
     assert.ok(
       r.stdout.includes(
-        "::error::設定ファイルに TRIGGER_BRANCH が無く(または空で)、リポジトリの既定ブランチも取得できませんでした。設定ファイルに TRIGGER_BRANCH=<公開するブランチ名> を書いてください。"
+        "::error::The settings file has no TRIGGER_BRANCH (or it is empty), and the repository's default branch could not be determined either. Write TRIGGER_BRANCH=<branch to deploy> in the settings file."
       ),
       r.stdout
     );
     assert.equal(r.output, "", "should_deploy を書き出さない");
-    assert.doesNotMatch(r.stdout, /を使います/);
+    assert.doesNotMatch(r.stdout, /is used/);
   }
 });
 
 test("buildDocsPagesConfig: TRIGGER_BRANCH のコメントに、省略・空のときの動きを書く", () => {
   assert.ok(
     buildDocsPagesConfig({}).includes(
-      "# 省略するか空にすると、リポジトリの既定ブランチになります。\n# リポジトリの既定ブランチ(通常は main)以外にする場合は、GitHub の\n"
+      "# If omitted or empty, the repository's default branch is used.\n# If it is not the default branch (usually main), add it in GitHub under\n"
     )
   );
+  withLang("ja", () => {
+    assert.ok(
+      buildDocsPagesConfig({}).includes(
+        "# 省略するか空にすると、リポジトリの既定ブランチになります。\n# リポジトリの既定ブランチ(通常は main)以外にする場合は、GitHub の\n"
+      )
+    );
+  });
+});
+
+// --- 表示の言語(--lang)・生成物の言語 ---
+
+test("buildDocsPagesConfig: en と ja で、設定ファイルのキーと値は同じ(違うのはコメントだけ)", () => {
+  const answers = { triggerBranch: "docs", rootMd: "index.md", theme: "nineties", navEnabled: false, languages: "ja,en", siteName: "Demo" };
+  const en = buildDocsPagesConfig(answers);
+  const ja = withLang("ja", () => buildDocsPagesConfig(answers));
+  assert.notEqual(en, ja);
+  assert.deepEqual(parseConfigText(en), parseConfigText(ja));
+  assert.deepEqual(missingConfigKeys(en), []);
+  assert.deepEqual(missingConfigKeys(ja), []);
+  // キーの行(コメントでない行)は言語によらず同一
+  const keyLines = (text) => text.split("\n").filter((l) => !l.startsWith("#") && l !== "");
+  assert.deepEqual(keyLines(en), keyLines(ja));
+});
+
+test("既定(en)の設定ファイル・CSSひな形・ワークフロー・.gitignore・package.json に日本語がない", () => {
+  const cjk = /[぀-ヿ一-鿿]/;
+  assert.doesNotMatch(buildDocsPagesConfig({}), cjk);
+  assert.doesNotMatch(buildStyleCssTemplate(), cjk);
+  assert.doesNotMatch(buildDocsPagesYml(), cjk);
+  const byPath = Object.fromEntries(buildVendorTargets().map((t) => [t.relPath, t.content]));
+  assert.doesNotMatch(byPath[`${VENDOR_DIR}/.gitignore`], cjk);
+  assert.doesNotMatch(byPath[`${VENDOR_DIR}/package.json`], cjk);
+  withLang("ja", () => {
+    assert.match(buildDocsPagesConfig({}), cjk);
+    assert.match(buildStyleCssTemplate(), cjk);
+  });
+});
+
+test("ワークフロー・.gitignore・package.json(init --update で上書きされるもの)は、--lang に依存しない", () => {
+  const snapshot = () => ({
+    workflow: buildDocsPagesYml(),
+    vendor: buildVendorTargets().map((t) => [t.relPath, t.content]),
+  });
+  const en = snapshot();
+  const ja = withLang("ja", snapshot);
+  assert.deepEqual(ja, en);
+});
+
+test("vendoredVersionOf: 日本語の旧ワークフローのコメントも、英語の新しいコメントも、先頭の版を読める", () => {
+  assert.equal(vendoredVersionOf("# tsuzuri v1.4.0 の npx github:akilasatolu/tsuzuri#v1 init によって生成された、自己完結型のワークフローです。\n"), "1.4.0");
+  assert.equal(vendoredVersionOf(buildDocsPagesYml(undefined, undefined, { tsuzuriVersion: "9.8.7" })), "9.8.7");
+  assert.equal(vendoredVersionOf("name: x\n"), "");
+});
+
+test("THEME_CHOICES の説明は、言語に従って読み出すたびに変わる", () => {
+  const en = THEME_CHOICES[0].label;
+  const ja = withLang("ja", () => THEME_CHOICES[0].label);
+  assert.match(en, /^Material/);
+  assert.match(ja, /^マテリアル/);
 });

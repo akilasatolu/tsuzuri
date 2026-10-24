@@ -48,6 +48,8 @@ mkdir /tmp/tsuzuri-init-test && cd /tmp/tsuzuri-init-test
 node ~/dev/tsuzuri/bin/cli.mjs
 ```
 
+The messages are in English. Add `--lang ja` to the command to try the Japanese ones.
+
 To build with the generated `.github/tsuzuri/`, first run the `npm install --prefix .github/tsuzuri ...` line from the generated workflow's "Install build dependency" step, then `node .github/tsuzuri/build-docs.mjs`.
 
 **Try it on GitHub.** Push your branch and run `init` from it in a separate test repository, then check that it publishes to GitHub Pages:
@@ -86,7 +88,7 @@ Never save it again just to make the test pass. That hides unintended changes.
 
 Edit these:
 
-- `bin/`: the setup CLI. `bin/cli.mjs` is the single source of what users receive (workflow, config file, vendored files); `bin/preview.mjs` is `preview`.
+- `bin/`: the setup CLI. `bin/cli.mjs` is the single source of what users receive (workflow, config file, vendored files); `bin/preview.mjs` is `preview`; `bin/messages.mjs` is the catalog of the CLI messages, in English and Japanese (add every new message to both; the workflow and `.github/tsuzuri/.gitignore` are always in English).
 - `templates/`: the workflow template (`.github/workflows/tsuzuri-pages.yml`) and the ready-made `package.json` and `package-lock.json` of the build dependencies given to users.
 - `.github/scripts/`: the build (`build-docs.mjs` and `lib/`).
 - `styles/`: the theme CSS.

@@ -76,8 +76,11 @@ npx github:akilasatolu/tsuzuri#v1 init
   that are not released yet.
 - The command prints the running version on its first line, in the form
   `tsuzuri v1.36.0`.
-- The screen output of `init` and `preview` is in Japanese. The comments in
-  the generated settings file and workflow are in Japanese too.
+- The screen output of `init` and `preview` is in English (v1.37.0 or later;
+  up to v1.36.0 it was in Japanese). With `--lang ja`, the screen output and
+  the comments in the generated settings file and in the empty custom CSS
+  template are in Japanese. The comments in the generated workflow and in
+  `.github/tsuzuri/.gitignore` are always in English.
 - `init` can be omitted. Without a subcommand, the command behaves as `init`.
 
 ### 3.2 Where the command runs
@@ -87,20 +90,24 @@ a repository. When `init` runs outside a git repository, or somewhere other
 than the root of the repository, `init` prints a warning. In interactive
 mode, it then shows the following question.
 
-`このまま続けますか? (y/N): ` (continue anyway?)
+`Continue anyway? (y/N): `
+
+(Up to v1.36.0, and with `--lang ja`, it is `このまま続けますか? (y/N): `.)
 
 With an empty answer or `n`, `init` exits without generating anything.
 
 ### 3.3 Interactive questions
 
 Without options, `init` shows the following six questions in order. An
-empty answer (Enter alone) results in the default in brackets.
+empty answer (Enter alone) results in the default in brackets. The questions
+are in English (v1.37.0 or later). Up to v1.36.0, and with `--lang ja`, they
+are in Japanese (for example `? トリガーブランチ (TRIGGER_BRANCH) [main]: `).
 
-1. `? トリガーブランチ (TRIGGER_BRANCH) [main]: ` (trigger branch)
+1. `? Trigger branch (TRIGGER_BRANCH) [main]: `
    The branch to deploy. The default is the default branch of `origin`, or
    the current branch when that is unknown, or `main` when that is unknown
    too.
-2. `? ルートとなるMarkdownファイル (ROOT_MD) [README.md]: ` (the root Markdown file)
+2. `? Root Markdown file (ROOT_MD) [README.md]: `
    The Markdown file that is the entry point of the site. The default is
    `README.md`.
 3. The third question shows the themes (`THEME`) as a list numbered 1 to 9
@@ -118,13 +125,13 @@ empty answer (Enter alone) results in the default in brackets.
 
    An empty answer, a number outside 1 to 9, or a non-numeric answer results
    in `material`.
-4. `? サイドバーのナビ・サイト内検索・ページ内の目次を表示しますか? (NAV_ENABLED) (Y/n): ` (show the sidebar navigation, the site search and the in-page table of contents?)
+4. `? Show the sidebar navigation, site search and in-page table of contents? (NAV_ENABLED) (Y/n): `
    The default is "show".
-5. `? サイトの言語 (LANGUAGES。カンマ区切りで、先頭は README の言語。例: ja / en / ja,en) [en]: ` (site languages, comma-separated, the README's language first)
+5. `? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [en]: `
    The default is `en`. A value that is not a valid language tag (for
    example `ja_JP`) is ignored with a warning. When no valid value is left,
    the result is `en`.
-6. `? サイト名 (SITE_NAME。空ならリポジトリ名) []: ` (site name; the repository name when empty)
+6. `? Site name (SITE_NAME; the repository name if empty) []: `
    The default is empty. When it is empty, the repository name becomes the
    site name in builds on GitHub Actions.
 
@@ -143,6 +150,12 @@ questions.
 - `--languages <list>`: the value of `LANGUAGES` (for example `ja`, `ja,en`).
 - `--site-name <name>`: the value of `SITE_NAME`.
 - `--no-nav`: results in `NAV_ENABLED=false`.
+
+`--lang <en|ja>` (v1.37.0 or later) does not turn on a non-interactive run.
+It is the language of the screen output and of the comments in the generated
+settings file and custom CSS template. The default is `en`, and only `en` and
+`ja` (in lowercase) are accepted. It applies only to the command it is given
+to.
 
 Example:
 
@@ -215,12 +228,16 @@ follows.
   files under `.github/tsuzuri/` other than `config` and the user's own CSS,
   it asks once for all of them.
 
-  `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N): ` (the workflow and the build script, except `config` and your own CSS, already exist; overwrite them with the latest version?)
+  `The workflow and the build scripts (under .github/tsuzuri/, except config and your own CSS) already exist. Overwrite them with the latest version? (y/N): `
+
+  (Up to v1.36.0, and with `--lang ja`: `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N): `.)
 
   For the settings file, it asks separately. An existing `custom.css` is
   kept without a question.
 
-  `.github/tsuzuri/config は既に存在します。上書きしますか? (y/N): ` (the file already exists; overwrite it?)
+  `.github/tsuzuri/config already exists. Overwrite it? (y/N): `
+
+  (Up to v1.36.0, and with `--lang ja`: `.github/tsuzuri/config は既に存在します。上書きしますか? (y/N): `.)
 
   With an empty answer or `n`, that file is left unchanged.
 
@@ -638,19 +655,25 @@ file and `.github/tsuzuri/` work from the state committed on that branch.
   performed. In this case the log of the Check trigger branch step shows the
   following line.
 
-  `TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします` (skipped because the push is not to the trigger branch)
+  `Skipping because this push (feature/foo) is not to TRIGGER_BRANCH=main`
+
+  (Up to v1.36.0: `TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします`.)
 
 - When the settings file has no `TRIGGER_BRANCH`, or its value is empty, the
   workflow uses the default branch of the repository. In this case the log
   of the same step shows the following line.
 
-  `設定ファイルに TRIGGER_BRANCH が無い(または空の)ため、リポジトリの既定ブランチ main を使います` (the default branch of the repository is used because the settings file has no trigger branch)
+  `The settings file has no TRIGGER_BRANCH (or it is empty), so the repository's default branch main is used`
+
+  (Up to v1.36.0: `設定ファイルに TRIGGER_BRANCH が無い(または空の)ため、リポジトリの既定ブランチ main を使います`.)
 
 - In a manual run, the branch check is not performed, and the content of the
   selected branch is deployed. In this case the log shows the following
   line.
 
-  `手動実行のためブランチ判定をスキップします` (the branch check is skipped because of the manual run)
+  `Skipping the branch check because this is a manual run`
+
+  (Up to v1.36.0: `手動実行のためブランチ判定をスキップします`.)
 
   The "Run workflow" button in the Actions tab is shown when the workflow
   file is on the default branch.
@@ -854,7 +877,8 @@ version inside the repository stays the same until an update.
   The symptom does not occur when: the command has `#v1` or a full version
   tag.
 - Symptom: `preview` ends with an error that contains the following text.
-  `ポート 4000 は使用中です。` (port 4000 is in use)
+  `Port 4000 is in use. Choose another number with --port (e.g. --port 4001)`
+  (Up to v1.36.0, and with `--lang ja`: `ポート 4000 は使用中です。--port で別の番号を指定してください(例: --port 4001)`.)
   Cause: another program is using the same port.
   The symptom does not occur when: a free port number is given with the
   `--port` option.

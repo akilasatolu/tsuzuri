@@ -7,7 +7,7 @@ import { join } from "node:path";
 import {
   PACKAGE_ROOT,
   DOCS_URL,
-  HELP_TEXT,
+  buildHelpText,
   readPackageVersion,
   buildTargets,
   buildWorkflowTarget,
@@ -20,6 +20,7 @@ import {
   missingConfigKeys,
 } from "../bin/cli.mjs";
 import { CONFIG_FILE_PATH } from "../.github/scripts/lib/config.mjs";
+import { t, setCliLang } from "../bin/messages.mjs";
 
 // main() の振る舞い(出力・終了コード・生成物)を、CLI を子プロセスで起動して固定するテスト。
 // main() を機能ごとの関数に分けても、利用者から見える動きが変わっていないことを確かめるためのもの。
@@ -28,13 +29,14 @@ import { CONFIG_FILE_PATH } from "../.github/scripts/lib/config.mjs";
 const CLI = join(PACKAGE_ROOT, "bin/cli.mjs");
 const VERSION = readPackageVersion();
 const BANNER = `tsuzuri v${VERSION}\n\n`;
-const HEADING = "README → GitHub Pages 自動デプロイパッケージ セットアップ\n\n";
-const UPDATE_INTRO = "最新版に更新します(設定ファイルは変更しません。独自CSSは、既にあれば変更しません)\n\n";
-const UPDATE_DONE = "\n更新が完了しました。変更内容は 'git diff' で確認できます。\n";
-const WARN_NO_GIT = "⚠ git リポジトリの中ではないようです。公開したいリポジトリの直下で実行してください。\n";
-const warnNoRoot = (rootMd) => `⚠ 起点の ${rootMd} がまだありません。push する前に作成してください(無いとビルドが失敗します)。\n`;
+// 既定(en)の文言。--lang ja の文言は、末尾の「--lang ja」のテストで確かめる
+const HEADING = "README → GitHub Pages auto-deploy setup\n\n";
+const UPDATE_INTRO = "Updating to the latest version (the settings file is not changed; an existing custom CSS is not changed either)\n\n";
+const UPDATE_DONE = "\nUpdate complete. You can review the changes with 'git diff'.\n";
+const WARN_NO_GIT = "⚠ This does not look like a git repository. Run this at the root of the repository you want to publish.\n";
+const warnNoRoot = (rootMd) => `⚠ The root file ${rootMd} does not exist yet. Create it before you push (the build fails without it).\n`;
 const BLANK_ANSWERS = "\n\n\n\n\n\n";
-const BUNDLE_QUESTION = "ワークフローとビルドスクリプト一式";
+const BUNDLE_QUESTION = "The workflow and the build scripts";
 
 function makeTmpDir() {
   return mkdtempSync(join(tmpdir(), "cli-main-test-"));
@@ -71,7 +73,7 @@ function setupRepo(dir) {
   writeFileSync(join(dir, "README.md"), "# x\n");
 }
 
-const created = (targets) => targets.map((t) => `✔ ${t.relPath} を作成しました\n`).join("");
+const created = (targets) => targets.map((t) => `✔ ${t.relPath} created\n`).join("");
 const read = (dir, relPath) => readFileSync(join(dir, relPath), "utf8");
 
 /** 既定の回答(-y のときと同じ)。DEFAULT_ANSWERS は export されていないので引数解釈から得る */
@@ -105,7 +107,7 @@ test("main: --help / -h は、バージョン行と使い方だけを標準出�
     withTmpDir((dir) => {
       const result = runCli([flag], { cwd: dir });
       assert.equal(result.status, 0, result.stderr);
-      assert.equal(result.stdout, `tsuzuri v${VERSION}\n\n${HELP_TEXT}\n`, flag);
+      assert.equal(result.stdout, `tsuzuri v${VERSION}\n\n${buildHelpText()}\n`, flag);
       assert.equal(result.stderr, "", flag);
       assert.deepEqual(readdirSync(dir), [], flag);
     });
@@ -148,12 +150,12 @@ test("main: --update(設定に足りない項目なし)は、案内・生成の�
     assert.equal(result.stderr, "");
     const lines = targets.map((t) =>
       t.relPath === customRel
-        ? `⏭ ${t.relPath} を保持しました(既にあるため上書きしません)\n`
-        : `✔ ${t.relPath} を上書きしました\n`,
+        ? `⏭ ${t.relPath} kept (it already exists, so it is not overwritten)\n`
+        : `✔ ${t.relPath} overwritten\n`,
     );
     assert.equal(
       result.stdout,
-      BANNER + UPDATE_INTRO + lines.join("") + `✖ ${staleRel} を削除しました(最新版では使われていないため)\n` + UPDATE_DONE,
+      BANNER + UPDATE_INTRO + lines.join("") + `✖ ${staleRel} deleted (no longer used by the latest version)\n` + UPDATE_DONE,
     );
     assert.equal(existsSync(join(dir, staleRel)), false);
     assert.equal(read(dir, CONFIG_FILE_PATH), config);
@@ -171,8 +173,8 @@ test("main: --update で設定ファイルに無い項目があると、生成�
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.stderr, "");
     const notice =
-      `ℹ 設定ファイルに無い項目があります(既定値で動きます): ${keys.join(", ")}\n` +
-      `  使う場合は ${CONFIG_FILE_PATH} に追記してください。説明: ${DOCS_URL}docs/configuration.html\n`;
+      `ℹ Keys missing from the settings file (defaults are used): ${keys.join(", ")}\n` +
+      `  Add them to ${CONFIG_FILE_PATH} if you want to use them. See: ${DOCS_URL}docs/configuration.html\n`;
     assert.equal(result.stdout, BANNER + UPDATE_INTRO + notice + created(updateTargets()) + UPDATE_DONE);
     assert.equal(read(dir, CONFIG_FILE_PATH), config);
   });
@@ -185,7 +187,7 @@ test("main: --update は、設定ファイルが無いと案内のあとにエ�
     assert.equal(result.stdout, BANNER + UPDATE_INTRO);
     assert.equal(
       result.stderr,
-      `エラー: セットアップに失敗しました。 (${CONFIG_FILE_PATH} が見つかりません。初回は --update を付けずに init を実行してください)\n`,
+      `Error: setup failed. (${CONFIG_FILE_PATH} not found. Run init without --update the first time)\n`,
     );
     assert.equal(existsSync(join(dir, ".github")), false);
   });
@@ -225,7 +227,7 @@ test("main: -y に付けたオプション(--branch など)が、生成物と完
     assert.equal(result.stderr, warnNoRoot("docs/index.md"));
     assert.equal(result.stdout, BANNER + created(buildTargets(answers)) + buildCompletionMessage(answers) + "\n");
     assert.equal(read(dir, ".github/tsuzuri/config"), buildDocsPagesConfig(answers));
-    assert.match(buildCompletionMessage(answers), /docs ブランチへ push/);
+    assert.match(buildCompletionMessage(answers), /push to the docs branch/);
   });
 });
 
@@ -242,8 +244,8 @@ test("main: -y で既存ファイルがあると、--force が無ければスキ
     assert.equal(result.stderr, "");
     const lines = targets.map((t) =>
       t.keepExisting
-        ? `⏭ ${t.relPath} を保持しました(既にあるため上書きしません)\n`
-        : `⏭ ${t.relPath} をスキップしました(既存ファイルを保持)\n`,
+        ? `⏭ ${t.relPath} kept (it already exists, so it is not overwritten)\n`
+        : `⏭ ${t.relPath} skipped (existing file kept)\n`,
     );
     assert.equal(result.stdout, BANNER + lines.join("") + buildCompletionMessage(answers) + "\n");
     assert.equal(read(dir, ".github/tsuzuri/config"), "KEEP\n");
@@ -262,16 +264,16 @@ test("main: 対話の init は、見出し・質問・生成の一覧・作成�
     assert.equal(result.stderr, "");
     assert.ok(result.stdout.startsWith(BANNER + HEADING), result.stdout);
     assertInOrder(result.stdout, [
-      "? トリガーブランチ (TRIGGER_BRANCH) [main]: ",
+      "? Trigger branch (TRIGGER_BRANCH) [main]: ",
       "(ROOT_MD)",
       "(THEME)",
       "(NAV_ENABLED)",
       "(LANGUAGES",
       "(SITE_NAME",
-      "\n--- 以下のファイルを生成します ---\n",
-      ...targets.map((t) => `  ${t.relPath}  (対象)\n`),
-      ...targets.map((t) => `✔ ${t.relPath} を作成しました\n`),
-      "セットアップが完了しました",
+      "\n--- The following files will be generated ---\n",
+      ...targets.map((t) => `  ${t.relPath}  (target)\n`),
+      ...targets.map((t) => `✔ ${t.relPath} created\n`),
+      "Setup complete.",
     ]);
     assert.ok(result.stdout.endsWith(buildCompletionMessage(answers) + "\n"));
     assert.equal(read(dir, ".github/tsuzuri/config"), buildDocsPagesConfig(answers));
@@ -304,7 +306,7 @@ test("main: 対話の init は、git の外だと場所の警告を出して続�
     const result = runCli([], { cwd: dir, input: `y\n${BLANK_ANSWERS}` });
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.stderr, WARN_NO_GIT + warnNoRoot("README.md"));
-    assert.ok(result.stdout.startsWith(BANNER + HEADING + "このまま続けますか? (y/N): ? トリガーブランチ"), result.stdout);
+    assert.ok(result.stdout.startsWith(BANNER + HEADING + "Continue anyway? (y/N): ? Trigger branch"), result.stdout);
     assert.ok(result.stdout.endsWith(buildCompletionMessage(answers) + "\n"));
     assert.equal(read(dir, ".github/tsuzuri/config"), buildDocsPagesConfig(answers));
   });
@@ -317,7 +319,7 @@ test("main: 対話の init は、続行の質問に n・空行・入力の終わ
       assert.equal(result.status, 0, JSON.stringify(input) + result.stderr);
       assert.equal(
         result.stdout,
-        BANNER + HEADING + "このまま続けますか? (y/N): " + "中止しました。リポジトリの直下で実行し直してください。\n",
+        BANNER + HEADING + "Continue anyway? (y/N): " + "Cancelled. Run it again at the root of the repository.\n",
         JSON.stringify(input),
       );
       assert.equal(result.stderr, WARN_NO_GIT, JSON.stringify(input));
@@ -342,9 +344,9 @@ test("main: 対話の init で既存ファイルがあると、一式は1回だ�
     assert.equal(result.stdout.split(BUNDLE_QUESTION).length - 1, 1, result.stdout);
     assertInOrder(result.stdout, [
       BUNDLE_QUESTION,
-      "⏭ .github/workflows/tsuzuri-pages.yml をスキップしました(既存ファイルを保持)",
-      ".github/tsuzuri/config は既に存在します。上書きしますか? (y/N): ",
-      "⏭ .github/tsuzuri/config をスキップしました(既存ファイルを保持)",
+      "⏭ .github/workflows/tsuzuri-pages.yml skipped (existing file kept)",
+      ".github/tsuzuri/config already exists. Overwrite it? (y/N): ",
+      "⏭ .github/tsuzuri/config skipped (existing file kept)",
     ]);
     assert.equal(read(dir, ".github/workflows/tsuzuri-pages.yml"), "KEEP-WORKFLOW\n");
     assert.equal(read(dir, ".github/tsuzuri/config"), "KEEP-CONFIG\n");
@@ -393,7 +395,7 @@ test("main: init していないリポジトリでの preview は、バージョ
     const result = runCli(["preview"], { cwd: dir });
     assert.equal(result.status, 1);
     assert.equal(result.stdout, BANNER);
-    assert.match(result.stderr, /先に init を実行してください/);
+    assert.match(result.stderr, /Run init first/);
   });
 });
 
@@ -402,7 +404,7 @@ test("main: preview --port の不正な値は、バージョン行を出す前�
     const result = runCli(["preview", "--port", "abc"], { cwd: dir });
     assert.equal(result.status, 1);
     assert.equal(result.stdout, "");
-    assert.equal(result.stderr, "エラー: セットアップに失敗しました。 (--port には 1〜65535 の番号を指定してください(指定: abc))\n");
+    assert.equal(result.stderr, "Error: setup failed. (--port needs a number from 1 to 65535 (given: abc))\n");
   });
 });
 
@@ -411,8 +413,192 @@ test("main: 未知のオプションは、引数のエラーとして終了コ�
     const result = runCli(["--bogus"], { cwd: dir });
     assert.equal(result.status, 1);
     assert.equal(result.stdout, "");
-    assert.ok(result.stderr.startsWith("エラー: セットアップに失敗しました。 (引数が正しくありません: "), result.stderr);
-    assert.ok(result.stderr.endsWith("(--help で使い方を表示します))\n"), result.stderr);
+    assert.ok(result.stderr.startsWith("Error: setup failed. (Invalid arguments: "), result.stderr);
+    assert.ok(result.stderr.endsWith("(use --help to see the usage))\n"), result.stderr);
     assert.deepEqual(readdirSync(dir), []);
   });
+});
+
+// --- 6. 表示の言語(--lang) ---
+
+const CJK = /[\u3040-\u30ff\u4e00-\u9fff]/;
+
+/** lang の表示で、関数 fn を実行する(終わったら en に戻す)。fn の中の buildXxx() の出力が lang になる */
+function inLang(lang, fn) {
+  setCliLang(lang);
+  try {
+    return fn();
+  } finally {
+    setCliLang("en");
+  }
+}
+
+/** ビルドスクリプト一式(日本語のコメントを含む)を除く、init が作るファイル */
+const NON_VENDORED_FILES = [
+  ".github/workflows/tsuzuri-pages.yml",
+  ".github/tsuzuri/config",
+  ".github/tsuzuri/styles/custom.css",
+  ".github/tsuzuri/.gitignore",
+  ".github/tsuzuri/package.json",
+];
+
+test("main: 既定(--lang なし)では、標準出力・標準エラー・生成物(スクリプト一式を除く)に日本語が出ない", () => {
+  // init -y(git あり・起点あり)
+  withTmpDir((dir) => {
+    setupRepo(dir);
+    const result = runCli(["-y"], { cwd: dir });
+    assert.equal(result.status, 0, result.stderr);
+    assert.doesNotMatch(result.stdout + result.stderr, CJK);
+    for (const rel of NON_VENDORED_FILES) assert.doesNotMatch(read(dir, rel), CJK, rel);
+  });
+  // init -y(git の外・起点なし): 警告も英語
+  withTmpDir((dir) => {
+    const result = runCli(["-y"], { cwd: dir });
+    assert.equal(result.status, 0, result.stderr);
+    assert.doesNotMatch(result.stdout + result.stderr, CJK);
+  });
+  // 対話の init、続けて --update
+  withTmpDir((dir) => {
+    setupRepo(dir);
+    let result = runCli([], { cwd: dir, input: BLANK_ANSWERS });
+    assert.equal(result.status, 0, result.stderr);
+    assert.doesNotMatch(result.stdout + result.stderr, CJK);
+    result = runCli(["--update"], { cwd: dir });
+    assert.equal(result.status, 0, result.stderr);
+    assert.doesNotMatch(result.stdout + result.stderr, CJK);
+    // 対話の init の既存ファイル確認
+    result = runCli([], { cwd: dir, input: `${BLANK_ANSWERS}n\nn\n` });
+    assert.equal(result.status, 0, result.stderr);
+    assert.doesNotMatch(result.stdout + result.stderr, CJK);
+  });
+  // --help、引数のエラー、init 前の preview
+  withTmpDir((dir) => {
+    for (const args of [["--help"], ["--bogus"], ["deploy"], ["--theme", "sepia"], ["preview", "--port", "abc"], ["preview"], ["--lang", "fr"]]) {
+      const result = runCli(args, { cwd: dir });
+      assert.doesNotMatch(result.stdout + result.stderr, CJK, args.join(" "));
+    }
+  });
+});
+
+test("main: --lang ja で、質問・生成の一覧・完了メッセージ・設定ファイルのコメントが日本語になる", () => {
+  withTmpDir((dir) => {
+    setupRepo(dir);
+    const answers = defaultAnswers();
+    const ja = inLang("ja", () => ({
+      targets: buildTargets(answers),
+      completion: buildCompletionMessage(answers),
+      config: buildDocsPagesConfig(answers),
+    }));
+    const result = runCli(["--lang", "ja"], { cwd: dir, input: BLANK_ANSWERS });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stderr, "");
+    assert.ok(result.stdout.startsWith(BANNER + "README → GitHub Pages 自動デプロイパッケージ セットアップ\n\n? トリガーブランチ"), result.stdout);
+    assertInOrder(result.stdout, [
+      "\n--- 以下のファイルを生成します ---\n",
+      ...ja.targets.map((target) => `  ${target.relPath}  (対象)\n`),
+      ...ja.targets.map((target) => `✔ ${target.relPath} を作成しました\n`),
+    ]);
+    assert.ok(result.stdout.endsWith(ja.completion + "\n"));
+    assert.equal(read(dir, ".github/tsuzuri/config"), ja.config);
+    assert.match(read(dir, ".github/tsuzuri/config"), CJK);
+    assert.match(read(dir, ".github/tsuzuri/styles/custom.css"), CJK);
+    // --lang ja だけでは質問を省略しない(質問に答えた)
+    assert.match(result.stdout, /\? サイト名 \(SITE_NAME/);
+  });
+});
+
+test("main: --lang ja -y の標準出力は、日本語の生成報告と完了メッセージになる。ワークフローなど英語固定のファイルは変わらない", () => {
+  withTmpDir((dir) => {
+    setupRepo(dir);
+    const answers = defaultAnswers();
+    const result = runCli(["-y", "--lang", "ja"], { cwd: dir });
+    assert.equal(result.status, 0, result.stderr);
+    const ja = inLang("ja", () => ({
+      targets: buildTargets(answers),
+      completion: buildCompletionMessage(answers),
+    }));
+    assert.equal(
+      result.stdout,
+      BANNER + ja.targets.map((target) => `✔ ${target.relPath} を作成しました\n`).join("") + ja.completion + "\n",
+    );
+    // 英語固定のファイルは、--lang なしで作ったものと同じ
+    const enWorkflow = buildWorkflowTarget().content;
+    assert.equal(read(dir, ".github/workflows/tsuzuri-pages.yml"), enWorkflow);
+    assert.doesNotMatch(read(dir, ".github/workflows/tsuzuri-pages.yml"), CJK);
+    assert.doesNotMatch(read(dir, ".github/tsuzuri/.gitignore"), CJK);
+    assert.doesNotMatch(read(dir, ".github/tsuzuri/package.json"), CJK);
+  });
+});
+
+test("main: --help --lang ja は日本語の使い方を出す。--lang の説明は en・ja どちらにもある", () => {
+  withTmpDir((dir) => {
+    const ja = runCli(["--help", "--lang", "ja"], { cwd: dir });
+    assert.equal(ja.status, 0, ja.stderr);
+    assert.equal(ja.stdout, `tsuzuri v${VERSION}\n\n${t("help.text", { repo: "akilasatolu/tsuzuri", themes: ["material", "glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties", "none"].join(" / ") }, "ja")}\n`);
+    assert.match(ja.stdout, /使い方: npx github:/);
+    assert.match(ja.stdout, /--lang <en\|ja> /);
+    const en = runCli(["--help"], { cwd: dir });
+    assert.match(en.stdout, /Usage: npx github:/);
+    assert.match(en.stdout, /--lang <en\|ja> /);
+  });
+});
+
+test("main: 引数のエラーも --lang の言語で出す。不正な --lang の値のエラーは英語", () => {
+  withTmpDir((dir) => {
+    let result = runCli(["--lang", "ja", "--bogus"], { cwd: dir });
+    assert.equal(result.status, 1);
+    assert.ok(result.stderr.startsWith("エラー: セットアップに失敗しました。 (引数が正しくありません: "), result.stderr);
+
+    result = runCli(["--lang=ja", "--theme", "sepia"], { cwd: dir });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /--theme には/);
+
+    result = runCli(["--lang", "fr"], { cwd: dir });
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, "");
+    assert.equal(result.stderr, "Error: setup failed. (--lang must be en or ja (given: fr))\n");
+
+    // 値が違う --lang が複数あるときは、parseArgs と同じく最後の値を見る
+    result = runCli(["--lang", "ja", "--lang", "fr"], { cwd: dir });
+    assert.equal(result.status, 1);
+    assert.equal(result.stderr, "Error: setup failed. (--lang must be en or ja (given: fr))\n");
+    result = runCli(["--lang", "fr", "--lang", "ja", "--bogus"], { cwd: dir });
+    assert.ok(result.stderr.startsWith("エラー: セットアップに失敗しました。 (引数が正しくありません: "), result.stderr);
+
+    // 大文字や地域付きは受け付けない
+    for (const value of ["JA", "ja-JP", "en-US"]) {
+      result = runCli(["--lang", value], { cwd: dir });
+      assert.equal(result.status, 1, value);
+      assert.equal(result.stderr, `Error: setup failed. (--lang must be en or ja (given: ${value}))\n`, value);
+    }
+    assert.deepEqual(readdirSync(dir), []);
+  });
+});
+
+test("main: --lang ja の preview(init 前)のエラーは日本語", () => {
+  withTmpDir((dir) => {
+    const result = runCli(["preview", "--lang", "ja"], { cwd: dir });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /先に init を実行してください/);
+  });
+});
+
+test("main: --update と --update --lang ja で、更新されるファイル(ワークフロー・.gitignore・package.json)は同じ。custom.css が無いときだけ --lang に従う", () => {
+  const files = [".github/workflows/tsuzuri-pages.yml", ".github/tsuzuri/.gitignore", ".github/tsuzuri/package.json"];
+  const run = (args) =>
+    withTmpDir((dir) => {
+      setupRepo(dir);
+      assert.equal(runCli(["-y"], { cwd: dir }).status, 0);
+      rmSync(join(dir, ".github/tsuzuri/styles/custom.css"));
+      const result = runCli(args, { cwd: dir });
+      assert.equal(result.status, 0, result.stderr);
+      return { files: files.map((rel) => read(dir, rel)), css: read(dir, ".github/tsuzuri/styles/custom.css"), stdout: result.stdout };
+    });
+  const en = run(["--update"]);
+  const ja = run(["--update", "--lang", "ja"]);
+  assert.deepEqual(ja.files, en.files);
+  assert.doesNotMatch(en.css, CJK);
+  assert.match(ja.css, CJK);
+  assert.doesNotMatch(en.stdout, CJK);
+  assert.match(ja.stdout, /最新版に更新します/);
 });

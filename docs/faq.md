@@ -15,10 +15,11 @@ the repository's Actions tab, and if the log of the "Check trigger branch" step 
 like
 
 ```
-TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします
+Skipping because this push (feature/foo) is not to TRIGGER_BRANCH=main
 ```
 
-(skipping because the push (feature/foo) isn't to TRIGGER_BRANCH=main), this is the cause. Merge
+(up to v1.36.0 the message is in Japanese: `TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします`),
+this is the cause. Merge
 or push to the target branch, or change the value of `TRIGGER_BRANCH` itself (for manual runs
 (`workflow_dispatch`) this check isn't done and it always deploys; see
 [Deployment](./deployment.md)).
@@ -106,8 +107,9 @@ it doesn't, check the following.
    usually fine, but if you wrote a full URL of the published site in Markdown, like
    `https://<owner>.github.io/<repo>/...`, it goes to the published site.
 
-## preview says "ポート 4000 は使用中です" (port 4000 is in use)
+## preview says "Port 4000 is in use"
 
+(Up to v1.36.0, and with `--lang ja`, the message is in Japanese: `ポート 4000 は使用中です`.)
 Another app (or another `preview`) is using the same port. Choose another number, like
 `--port 4001` (see the [CLI reference](cli.md#previewing-locally-preview)).
 
