@@ -48,6 +48,8 @@ mkdir /tmp/tsuzuri-init-test && cd /tmp/tsuzuri-init-test
 node ~/dev/tsuzuri/bin/cli.mjs
 ```
 
+メッセージは英語で表示されます。日本語のメッセージを試すときは、コマンドに `--lang ja` を付けます。
+
 生成された `.github/tsuzuri/` でビルドするときは、先に、生成されたワークフローの「Install build dependency」の `npm install --prefix .github/tsuzuri ...` の行を実行してから、`node .github/tsuzuri/build-docs.mjs` を実行します。
 
 **GitHub 上で試す。** ブランチを push し、別のテスト用リポジトリでそのブランチから `init` を実行して、GitHub Pages への公開まで確かめます。
@@ -86,7 +88,7 @@ npm run lint
 
 編集してよいものは次のとおりです。
 
-- `bin/`: セットアップ CLI。`bin/cli.mjs` は、利用者が受け取る内容(ワークフロー・設定ファイル・取り込む対象)の唯一の正で、`bin/preview.mjs` は `preview` の本体です。
+- `bin/`: セットアップ CLI。`bin/cli.mjs` は、利用者が受け取る内容(ワークフロー・設定ファイル・取り込む対象)の唯一の正で、`bin/preview.mjs` は `preview` の本体、`bin/messages.mjs` は CLI のメッセージの文言(英語と日本語)のカタログです(文言を足すときは両方に足します。ワークフローと `.github/tsuzuri/.gitignore` は常に英語です)。
 - `templates/`: ワークフローのひな形(`.github/workflows/tsuzuri-pages.yml`)と、利用者に配るビルド用の依存の `package.json`・`package-lock.json` の完成品。
 - `.github/scripts/`: ビルド本体(`build-docs.mjs` と `lib/`)。
 - `styles/`: テーマ CSS。

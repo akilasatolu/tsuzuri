@@ -297,7 +297,7 @@ Any value other than `true` and `false` (`off`, for example) is ignored with a w
 treated as `false`. If you put your own `llms.txt` right under the repository, it is copied as it
 is and no file is generated (see "llms.txt" in [Concepts](./concepts.md)).
 
-If your settings file doesn't have `LLMS_TXT`, `init --update` lists it under "keys missing from
+If your settings file doesn't have `LLMS_TXT`, `init --update` lists it under "Keys missing from
 the settings file". It works without adding anything (it is on); add `LLMS_TXT=false` only when
 you want to turn it off.
 

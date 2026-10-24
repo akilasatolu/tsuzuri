@@ -15,10 +15,10 @@ title: FAQ
 ステップのログに
 
 ```
-TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします
+Skipping because this push (feature/foo) is not to TRIGGER_BRANCH=main
 ```
 
-のようなメッセージが出ていれば、これが原因です。対象ブランチへマージ・pushするか、
+のようなメッセージ(v1.36.0までは日本語で、`TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします`)が出ていれば、これが原因です。対象ブランチへマージ・pushするか、
 `TRIGGER_BRANCH`の値自体を変更してください(手動実行(`workflow_dispatch`)の場合は
 この判定自体が行われず常にデプロイされます。詳細は[deployment.md](./deployment.ja.md))。
 
@@ -97,8 +97,9 @@ v1.32.0からは、[concepts.md](./concepts.ja.md)の「コピーされるファ
    `http://localhost:4000/`で開きます。リンクは自動で合わせるので通常は問題ありませんが、Markdownに
    `https://<owner>.github.io/<repo>/...`のような公開サイトの完全なURLを書いた場合は、公開サイトへ移動します。
 
-## previewで「ポート 4000 は使用中です」と出る
+## previewで「Port 4000 is in use」と出る
 
+(v1.36.0までと、`--lang ja`のときは日本語で、「ポート 4000 は使用中です」と出ます。)
 別のアプリ(または別の`preview`)が同じポートを使っています。`--port 4001`のように別の番号を
 指定してください([CLIリファレンス](cli.ja.md#手元で確認するpreview))。
 

@@ -72,8 +72,10 @@ npx github:akilasatolu/tsuzuri#v1 init
   リリース前の変更を含む `main` ブランチの内容が実行されます。
 - コマンドは、最初の行に `tsuzuri v1.36.0` の形で、動いているバージョンを
   表示します。
-- `init` と `preview` の画面の表示は日本語です。生成される設定ファイルと
-  ワークフローのコメントも日本語です。
+- `init` と `preview` の画面の表示は英語です(v1.37.0 以降。v1.36.0 までは
+  日本語でした)。`--lang ja` を付けると、画面の表示と、生成される設定ファイル・
+  空の独自 CSS のひな形のコメントが日本語になります。生成されるワークフローと
+  `.github/tsuzuri/.gitignore` のコメントは、常に英語です。
 - `init` は省略できます。サブコマンドが無い場合は `init` として動きます。
 
 ### 3.2 実行する場所
@@ -83,19 +85,23 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 `init` を実行すると、`init` は警告を表示します。対話形式では、続けて次の
 質問を表示します。
 
-`このまま続けますか? (y/N): `
+`Continue anyway? (y/N): `
+
+(v1.36.0 まで、および `--lang ja` のときは `このまま続けますか? (y/N): ` です。)
 
 何も入力しない場合と `n` の場合、`init` は何も生成せずに終了します。
 
 ### 3.3 対話形式の質問
 
 オプションを付けずに実行すると、`init` は次の 6 つの質問を順に表示します。
-何も入力せずに Enter を押すと、かっこ内の既定値になります。
+何も入力せずに Enter を押すと、かっこ内の既定値になります。質問は英語で
+表示されます(v1.37.0 以降)。v1.36.0 まで、および `--lang ja` のときは、
+日本語で表示されます(例: `? トリガーブランチ (TRIGGER_BRANCH) [main]: `)。
 
-1. `? トリガーブランチ (TRIGGER_BRANCH) [main]: `
+1. `? Trigger branch (TRIGGER_BRANCH) [main]: `
    デプロイするブランチです。既定値は、`origin` の既定ブランチ、それが
    分からなければ今のブランチ、それも分からなければ `main` です。
-2. `? ルートとなるMarkdownファイル (ROOT_MD) [README.md]: `
+2. `? Root Markdown file (ROOT_MD) [README.md]: `
    サイトの起点になる Markdown ファイルです。既定値は `README.md` です。
 3. 3 番目の質問は、テーマ(`THEME`)の一覧を 1 から 9 の番号付きで表示し、
    番号の入力を受け付けます。番号とテーマの対応は次のとおりです。
@@ -112,12 +118,12 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 
    何も入力しない場合、1 から 9 以外の番号を入力した場合、数字以外を
    入力した場合は、`material` になります。
-4. `? サイドバーのナビ・サイト内検索・ページ内の目次を表示しますか? (NAV_ENABLED) (Y/n): `
+4. `? Show the sidebar navigation, site search and in-page table of contents? (NAV_ENABLED) (Y/n): `
    既定値は「表示する」です。
-5. `? サイトの言語 (LANGUAGES。カンマ区切りで、先頭は README の言語。例: ja / en / ja,en) [en]: `
+5. `? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [en]: `
    既定値は `en` です。言語タグとして正しくない値(例: `ja_JP`)は、警告の
    うえで無視されます。正しい値が残らなければ `en` になります。
-6. `? サイト名 (SITE_NAME。空ならリポジトリ名) []: `
+6. `? Site name (SITE_NAME; the repository name if empty) []: `
    既定値は空です。空の場合、GitHub Actions でのビルドではリポジトリ名が
    サイト名になります。
 
@@ -135,6 +141,11 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 - `--languages <list>`: `LANGUAGES` の値です(例: `ja`、`ja,en`)。
 - `--site-name <name>`: `SITE_NAME` の値です。
 - `--no-nav`: `NAV_ENABLED=false` になります。
+
+`--lang <en|ja>`(v1.37.0 以降)を付けても、質問は省略されません。画面の
+表示と、生成される設定ファイル・独自 CSS のひな形のコメントの言語です。
+既定は `en` で、`en` と `ja`(小文字)だけを受け付けます。付けたコマンドの
+ときだけ有効です。
 
 例:
 
@@ -198,11 +209,15 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
   するかどうかを質問します。ワークフローと、`.github/tsuzuri/` のうち
   `config` と独自 CSS を除く一式については、まとめて 1 回だけ質問します。
 
-  `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N): `
+  `The workflow and the build scripts (under .github/tsuzuri/, except config and your own CSS) already exist. Overwrite them with the latest version? (y/N): `
+
+  (v1.36.0 まで、および `--lang ja` のときは `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N): ` です。)
 
   設定ファイルについては、別に質問します。すでにある `custom.css` は、質問なしでそのまま残ります。
 
-  `.github/tsuzuri/config は既に存在します。上書きしますか? (y/N): `
+  `.github/tsuzuri/config already exists. Overwrite it? (y/N): `
+
+  (v1.36.0 まで、および `--lang ja` のときは `.github/tsuzuri/config は既に存在します。上書きしますか? (y/N): ` です。)
 
   何も入力しない場合と `n` の場合、そのファイルは変更されません。
 
@@ -584,18 +599,24 @@ order: 1
   依存のインストール、ビルド、リンクの検査、デプロイは行われません。
   このとき、Check trigger branch のステップのログに次の表示が出ます。
 
-  `TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします`
+  `Skipping because this push (feature/foo) is not to TRIGGER_BRANCH=main`
+
+  (v1.36.0 までは日本語で、`TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします` でした。)
 
 - 設定ファイルに `TRIGGER_BRANCH` が無い場合と、値が空の場合、ワークフローは
   リポジトリの既定ブランチを使います。このとき、同じステップのログに次の
   表示が出ます。
 
-  `設定ファイルに TRIGGER_BRANCH が無い(または空の)ため、リポジトリの既定ブランチ main を使います`
+  `The settings file has no TRIGGER_BRANCH (or it is empty), so the repository's default branch main is used`
+
+  (v1.36.0 までは日本語で、`設定ファイルに TRIGGER_BRANCH が無い(または空の)ため、リポジトリの既定ブランチ main を使います` でした。)
 
 - 手動の実行では、ブランチの判定は行われず、選んだブランチの内容が
   デプロイされます。このとき、ログに次の表示が出ます。
 
-  `手動実行のためブランチ判定をスキップします`
+  `Skipping the branch check because this is a manual run`
+
+  (v1.36.0 までは日本語で、`手動実行のためブランチ判定をスキップします` でした。)
 
   Actions タブの「Run workflow」のボタンは、ワークフローのファイルが
   既定ブランチにある場合に表示されます。
@@ -773,7 +794,8 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   原因: コマンドに `#v1` が無く、`main` ブランチの内容が実行されています。
   症状が出ない条件: コマンドに `#v1` か、完全なバージョンのタグが付いています。
 - 症状: `preview` が次の表示を含むエラーで終了します。
-  `ポート 4000 は使用中です。`
+  `Port 4000 is in use. Choose another number with --port (e.g. --port 4001)`
+  (v1.36.0 まで、および `--lang ja` のときは日本語で、`ポート 4000 は使用中です。--port で別の番号を指定してください(例: --port 4001)` でした。)
   原因: ほかのプログラムが同じポートを使っています。
   症状が出ない条件: `--port` オプションで、空いているポート番号が
   指定されています。

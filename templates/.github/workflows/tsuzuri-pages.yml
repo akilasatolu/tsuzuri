@@ -7,23 +7,23 @@
 # --- template start ---
 name: "Tsuzuri: Deploy to GitHub Pages"
 
-# tsuzuri v__TSUZURI_VERSION__ の npx github:__OSS_REPO__#__MAJOR_TAG__ init によって生成された、自己完結型のワークフローです。
-# ビルドスクリプト本体(__VENDOR_DIR__/ 配下)もこのリポジトリにコピー済みのため、
-# 実行のたびにOSS本体リポジトリ(__OSS_REPO__)を参照することはありません。
-# スクリプトを最新版に更新したい場合は、npx github:__OSS_REPO__#__MAJOR_TAG__ init --update を実行してください。
+# tsuzuri v__TSUZURI_VERSION__ generated this self-contained workflow with npx github:__OSS_REPO__#__MAJOR_TAG__ init.
+# The build scripts (under __VENDOR_DIR__/) are also copied into this repository,
+# so each run does not fetch the Tsuzuri repository (__OSS_REPO__).
+# To update the scripts to the latest version, run npx github:__OSS_REPO__#__MAJOR_TAG__ init --update.
 
 on:
   push:
     branches: ["**"]
   workflow_dispatch:
 
-# 既定は読み取りのみ。Pagesへの公開に必要な権限は deploy ジョブにだけ付与する。
+# Read-only by default. The permissions needed to publish to Pages are given only to the deploy job.
 permissions:
   contents: read
 
-# 同じブランチの実行は push した順に1つずつ進める(後の push の内容が、先の push の内容で
-# 上書きされないように)。ブランチごとにグループを分けるので、TRIGGER_BRANCH 以外のブランチへの
-# push が、待機中の公開を押しのけて取り消すことはない。
+# Runs on the same branch go one at a time, in the order of the pushes (so the content of a later push is
+# not overwritten by the content of an earlier push). Groups are split per branch, so a push to a branch other than TRIGGER_BRANCH
+# never pushes out and cancels a waiting deployment.
 concurrency:
   group: tsuzuri-pages-${{ github.ref }}
   cancel-in-progress: false
@@ -40,27 +40,27 @@ jobs:
         run: |
           CONFIG_FILE="__VENDOR_DIR__/config"
           if [ ! -f "$CONFIG_FILE" ]; then
-            echo "::error::設定ファイル $CONFIG_FILE が見つかりません。パッケージ一式が正しく配置されているか確認してください。"
+            echo "::error::Settings file $CONFIG_FILE not found. Check that the package files are placed correctly."
             exit 1
           fi
 
-          # 前後の空白(CRLFのCRを含む)を除去する(xargsは値に ' や " が含まれると失敗するため使わない)
+          # Strip leading and trailing whitespace (including the CR of CRLF). xargs is not used because it fails when a value contains ' or "
           trim() { printf '%s' "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'; }
 
           while IFS='=' read -r key value || [ -n "$key" ]; do
             key="$(trim "$key")"
             value="$(trim "$value")"
-            # コメント行・空行をスキップ
+            # Skip comment lines and blank lines
             case "$key" in
               ''|'#'*) continue ;;
             esac
-            # 既知の設定キーだけを環境変数として取り込む。それ以外(NODE_OPTIONS等)を
-            # 設定ファイル経由で注入できないようにする。
+            # Import only known setting keys as environment variables, so that others (such as NODE_OPTIONS)
+            # cannot be injected through the settings file.
             case "$key" in
               TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANGUAGES|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS|SITEMAP_JSON|LAST_UPDATED|EDIT_LINK|REPO_LINK|REPO_VERSION|REPO_LICENSE|LLMS_TXT)
                 echo "${key}=${value}" >> "$GITHUB_ENV" ;;
               *)
-                echo "::warning::未知の設定キー ${key} を無視します" ;;
+                echo "::warning::Ignoring unknown setting key ${key}" ;;
             esac
           done < "$CONFIG_FILE"
 
@@ -71,30 +71,30 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          # TRIGGER_BRANCH と現在の ref を比較し、一致すれば should_deploy=true、
-          # 不一致なら should_deploy=false を必ず明示的に $GITHUB_OUTPUT に書き出す。
-          # 設定ファイルに TRIGGER_BRANCH が無い・空のときは、リポジトリの既定ブランチを使う。
+          # Compare TRIGGER_BRANCH with the current ref, and always write should_deploy=true on a match or
+          # should_deploy=false on a mismatch to $GITHUB_OUTPUT explicitly.
+          # If the settings file has no TRIGGER_BRANCH, or it is empty, the repository's default branch is used.
           if [ -z "$TRIGGER_BRANCH" ]; then
             if [ -z "$DEFAULT_BRANCH" ]; then
-              echo "::error::設定ファイルに TRIGGER_BRANCH が無く(または空で)、リポジトリの既定ブランチも取得できませんでした。設定ファイルに TRIGGER_BRANCH=<公開するブランチ名> を書いてください。"
+              echo "::error::The settings file has no TRIGGER_BRANCH (or it is empty), and the repository's default branch could not be determined either. Write TRIGGER_BRANCH=<branch to deploy> in the settings file."
               exit 1
             fi
             TRIGGER_BRANCH="$DEFAULT_BRANCH"
-            echo "設定ファイルに TRIGGER_BRANCH が無い(または空の)ため、リポジトリの既定ブランチ $TRIGGER_BRANCH を使います"
+            echo "The settings file has no TRIGGER_BRANCH (or it is empty), so the repository's default branch $TRIGGER_BRANCH is used"
           fi
 
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            echo "手動実行のためブランチ判定をスキップします"
+            echo "Skipping the branch check because this is a manual run"
             echo "should_deploy=true" >> "$GITHUB_OUTPUT"
           elif [ "$CURRENT_BRANCH" = "$TRIGGER_BRANCH" ]; then
             echo "should_deploy=true" >> "$GITHUB_OUTPUT"
           else
-            echo "TRIGGER_BRANCH=$TRIGGER_BRANCH ではない push ($CURRENT_BRANCH) のためスキップします"
+            echo "Skipping because this push ($CURRENT_BRANCH) is not to TRIGGER_BRANCH=$TRIGGER_BRANCH"
             echo "should_deploy=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # BASE_PATH: サイトがドメイン直下でない場合のパス(例: /repo)。
-      # SITE_ORIGIN: スキーム+ドメインのみ(パスは含めない。ページのURLは SITE_ORIGIN + BASE_PATH + パス)。
+      # BASE_PATH: the path when the site is not at the root of the domain (e.g. /repo).
+      # SITE_ORIGIN: scheme and domain only, without a path (the URL of a page is SITE_ORIGIN + BASE_PATH + path).
       - name: Determine base path / site origin
         if: steps.trigger.outputs.should_deploy != 'false'
         run: |
@@ -113,8 +113,8 @@ jobs:
           echo "BASE_PATH=$BASE_PATH" >> "$GITHUB_ENV"
           echo "SITE_ORIGIN=$SITE_ORIGIN" >> "$GITHUB_ENV"
 
-      # 最終更新日(LAST_UPDATED=true)を git の履歴から求めるため、そのときだけ全履歴を取得する
-      # (checkout は既定で直近の1コミットしか取得しないため、そのままでは日付が正しく求まらない)
+      # To get the last updated date (LAST_UPDATED=true) from the git history, fetch the full history only in that case
+      # (checkout fetches only the latest commit by default, so the dates would not be correct as is)
       - name: Fetch full history for last-updated dates
         if: steps.trigger.outputs.should_deploy != 'false' && env.LAST_UPDATED == 'true'
         run: git fetch --unshallow --quiet || true
@@ -124,10 +124,10 @@ jobs:
         with:
           node-version: 24
 
-      # ビルド用の依存は .github/tsuzuri/node_modules に入れ、利用者の package.json とは切り離す。
-      # 版は .github/tsuzuri/package.json に書いてあり、.github/tsuzuri/package-lock.json のとおりに npm ci で入れるので、
-      # ダウンロードした中身のハッシュが違えば止まる。インストールスクリプトは実行しない。
-      # 続けて、依存が npm の正規の署名付きで配布されたものかも確認する。
+      # The build dependencies go into .github/tsuzuri/node_modules, separate from the user's package.json.
+      # Their versions are written in .github/tsuzuri/package.json and installed exactly as listed in .github/tsuzuri/package-lock.json with npm ci,
+      # so installation stops if the hash of a downloaded package differs. Install scripts are not run.
+      # Then we also check that the dependencies were distributed with the official npm signatures.
       - name: Install build dependency
         if: steps.trigger.outputs.should_deploy != 'false'
         run: |
@@ -136,24 +136,24 @@ jobs:
 
       - name: Build
         if: steps.trigger.outputs.should_deploy != 'false'
-        # 設定ファイルの値(Load config の手順が $GITHUB_ENV に書いたもの)と BASE_PATH・SITE_ORIGIN
-        # (Determine base path / site origin の手順が書いたもの)は、そのまま環境変数として渡る。
+        # The values of the settings file (written to $GITHUB_ENV by the Load config step) and BASE_PATH / SITE_ORIGIN
+        # (written by the Determine base path / site origin step) are passed on as environment variables as they are.
         env:
-          # THEME解決の基準ディレクトリ。initでコピーしたベンダリング先を指す。
+          # The base directory for resolving THEME. Points to the vendored location copied by init.
           STYLE_DIR: __VENDOR_DIR__/styles
         run: node __VENDOR_DIR__/build-docs.mjs
 
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: steps.trigger.outputs.should_deploy != 'false'
         with:
-          # 設定ファイルで OUT_DIR を省略・空にした場合も、ビルドと同じ _site を上げる
+          # If OUT_DIR is omitted or empty in the settings file, upload the same _site as the build writes
           path: ${{ env.OUT_DIR || '_site' }}
 
   deploy:
     needs: build
     if: needs.build.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
-    # Pages への公開は、ブランチに関係なく同時に1つだけにする(実行中の公開は取り消さず、順番に行う)。
+    # Publishing to Pages is done one at a time regardless of the branch (a running deployment is not cancelled; they go in order).
     concurrency:
       group: pages
       cancel-in-progress: false

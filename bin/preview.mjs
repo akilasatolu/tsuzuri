@@ -15,6 +15,7 @@ import { existsSync, readFileSync, statSync, createReadStream, realpathSync, wat
 import { join, resolve, sep, extname, relative } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import { parseConfigText, VENDOR_DIR, WORKFLOW_PATH, CONFIG_FILE_PATH } from "../.github/scripts/lib/config.mjs";
+import { t } from "./messages.mjs";
 
 const CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -179,10 +180,10 @@ function openBrowser(url, warn) {
   const [cmd, args] = browserCommand(url);
   try {
     const child = spawn(cmd, args, { stdio: "ignore", detached: true });
-    child.on("error", () => warn(`ブラウザを開けませんでした。${url} を開いてください。`));
+    child.on("error", () => warn(t("preview.openFailed", { url })));
     child.unref();
   } catch {
-    warn(`ブラウザを開けませんでした。${url} を開いてください。`);
+    warn(t("preview.openFailed", { url }));
   }
 }
 
@@ -209,36 +210,30 @@ export async function runPreview({
 }) {
   const script = join(cwd, VENDOR_DIR, "build-docs.mjs");
   if (!existsSync(script)) {
-    warn(`${VENDOR_DIR}/build-docs.mjs がありません。先に init を実行してください(リポジトリの直下で実行します)。`);
+    warn(t("preview.noScript", { vendorDir: VENDOR_DIR }));
     return null;
   }
   const workflowAbs = join(cwd, WORKFLOW_PATH);
   const workflowText = existsSync(workflowAbs) ? readFileSync(workflowAbs, "utf-8") : "";
   const vendored = vendoredVersionOf(workflowText);
   if (vendored && vendored !== version) {
-    warn(
-      `⚠ このリポジトリのビルドスクリプトは v${vendored} です(このコマンドは v${version})。` +
-        `公開時と同じ v${vendored} でビルドします。最新にするには init --update を実行してください。`
-    );
+    warn(t("preview.versionMismatch", { vendored, version }));
   }
 
   // package-lock.json が無いのは、v1.7.0 より前に init した古いビルドスクリプト。
   // 依存が入っていても、公開時と同じ依存かを確かめられないので、更新を案内して止める
   if (!existsSync(join(cwd, VENDOR_DIR, "package-lock.json"))) {
-    warn(
-      `${VENDOR_DIR}/package-lock.json がありません。このリポジトリのビルドスクリプトは古い版です。` +
-        "init --update で更新してから、もう一度 preview を実行してください。"
-    );
+    warn(t("preview.noLock", { vendorDir: VENDOR_DIR }));
     return null;
   }
 
   // 1. ビルド用の依存(ワークフローと同じく、package-lock.json のとおりに入れる。中身のハッシュが違えば止まる)
   if (!existsSync(join(cwd, VENDOR_DIR, "node_modules", "marked"))) {
     const npmArgs = ["ci", "--prefix", VENDOR_DIR, "--ignore-scripts", "--no-audit", "--no-fund"];
-    log(`ビルド用の依存をインストールします(${VENDOR_DIR}/package-lock.json のとおり)`);
+    log(t("preview.installing", { vendorDir: VENDOR_DIR }));
     const npm = spawnSync("npm", npmArgs, { cwd, stdio: "inherit", shell: process.platform === "win32" });
     if (npm.status !== 0) {
-      warn("依存のインストールに失敗しました。");
+      warn(t("preview.installFailed"));
       return null;
     }
   }
@@ -246,7 +241,7 @@ export async function runPreview({
   // 2. ビルド
   const build = spawnSync(process.execPath, [script], { cwd, env: buildEnv(), stdio: "inherit" });
   if (build.status !== 0) {
-    warn("ビルドに失敗しました(上のメッセージを確認してください)。");
+    warn(t("preview.buildFailed"));
     return null;
   }
 
@@ -260,12 +255,12 @@ export async function runPreview({
     server.listen(port, "127.0.0.1", resolveListen);
   }).catch((err) => {
     if (err.code === "EADDRINUSE") {
-      throw new Error(`ポート ${port} は使用中です。--port で別の番号を指定してください(例: --port 4001)`, { cause: err });
+      throw new Error(t("preview.portInUse", { port }), { cause: err });
     }
     throw err;
   });
   const url = `http://localhost:${server.address().port}/`;
-  log(`\nプレビュー: ${url}`);
+  log(t("preview.url", { url }));
   if (open) openBrowser(url, warn);
 
   // 4. 変更を見張って、ビルドし直す(続けて変更されたときは、まとめて1回にする)
@@ -280,15 +275,15 @@ export async function runPreview({
         return;
       }
       building = true;
-      log("\n変更を検知したので、ビルドし直します…");
+      log(t("preview.changed"));
       const child = spawn(process.execPath, [script], { cwd, env: buildEnv(), stdio: "inherit" });
       child.on("close", (code) => {
         building = false;
         if (code === 0) {
           server.notifyReload();
-          log("ビルドし直しました(開いているページを再読み込みします)。");
+          log(t("preview.rebuilt"));
         } else {
-          warn("ビルドに失敗しました。直してから保存すると、もう一度ビルドします。");
+          warn(t("preview.rebuildFailed"));
         }
         if (pending) {
           pending = false;
@@ -303,12 +298,12 @@ export async function runPreview({
         timer = setTimeout(rebuild, 300);
       });
       server.on("close", () => watcher.close());
-      log("ファイルを保存すると、自動でビルドし直してページを再読み込みします。終了するには Ctrl+C を押します。");
+      log(t("preview.watching"));
     } catch (err) {
-      warn(`ファイルの変更を見張れませんでした(${err.message})。変更したら preview を実行し直してください。`);
+      warn(t("preview.watchFailed", { message: err.message }));
     }
   } else {
-    log("Markdown を変更したら、もう一度 preview を実行してください。終了するには Ctrl+C を押します。");
+    log(t("preview.noWatch"));
   }
   return server;
 }
