@@ -1,0 +1,10 @@
+{
+  "name": "tsuzuri-build",
+  "private": true,
+  "description": "Tsuzuri のビルド用の依存(init が生成します。編集しないでください)",
+  "dependencies": {
+    "marked": "18.0.14",
+    "highlight.js": "11.12.0",
+    "marked-footnote": "1.4.0"
+  }
+}

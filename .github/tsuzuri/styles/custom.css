@@ -1,0 +1,416 @@
+/*
+ * Tsuzuri サイト用の独自スタイル(STYLE_FILE)
+ *
+ * THEME=none(基礎CSSのみ)の上に、Tsuzuri(綴り)の名前とロゴをそのまま形にした「スレッド」の見た目を作る。
+ *   - 本文の左に、ページを綴じる1本の糸が通る。h1 はロゴの中心のような灯った点から始まり、h2 は糸の上の結び目
+ *   - 糸は読み進めるほど上から炎の色に染まり、結び目は読んだ章まで灯る(どこまで読んだかが分かる)
+ *   - ナビは、ページどうしが線でつながる木の形。今いるページの点だけが灯る
+ *   - ライト表示は生成りの紙と紺のインク、ダーク表示は夜の紺。動きに対応していないブラウザや、
+ *     動きを減らす設定の人には、糸と結び目は動かずにそのまま表示される
+ *
+ * テーマの見本ページ(docs/gallery/*.md)は、それぞれのテーマの見た目をそのまま見せるため、
+ * frontmatter の styleFile で中身が空の plain.css を指定して、このスタイルを当てないようにしている。
+ */
+:root {
+  color-scheme: light dark;
+  --fg: #1f2433;
+  --muted: #6b7186;
+  --bg: #f7f6f2;
+  --heading: #0f172a;
+  --accent: #1e3a6e;
+  --accent-2: #ea580c;
+  --border: #e3e1da;
+  --page-bg: radial-gradient(circle, rgba(15, 23, 42, 0.07) 1px, transparent 1.5px) 0 0 / 22px 22px, #f7f6f2;
+  --card-bg: #ffffff;
+  --card-border: 1px solid #e8e6df;
+  --card-filter: none;
+  --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 18px 50px rgba(15, 23, 42, 0.06);
+  --radius-lg: 18px;
+  --radius: 10px;
+  --pill: 999px;
+  --heading-weight: 750;
+  --el-bg: #faf9f6;
+  --el-shadow: none;
+  --inset-shadow: inset 0 0 0 1px #ebe9e2;
+  --hr: #e3e1da;
+  --code-bg: #f3f1ec;
+  --pre-bg: #0f172a;
+  --th-bg: #faf9f6;
+  --th-fg: #0f172a;
+  --hover-bg: #f3f1ec;
+  --current-bg: #fff4ec;
+  --current-fg: #9a3412;
+  --current-shadow: none;
+  --thread: #dcd9d0;
+  --flame: #f97316;
+  --flame-core: #fde68a;
+  --node-bg: #ffffff;
+  --pre-fg: #e2e8f0;
+  --hl-keyword: #ff8a65;
+  --hl-string: #a5d6ff;
+  --hl-number: #79c0ff;
+  --hl-title: #fdba74;
+  --hl-attr: #c4b5fd;
+  --hl-comment: #7d8aa5;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --heading-font: var(--font);
+  --content-width: 840px;
+}
+
+/* ダーク表示: OS がダークモードのとき(ライト表示に切り替えたときを除く)と、ダーク表示に切り替えたとき */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --fg: #d9deea;
+    --muted: #8a93ab;
+    --bg: #0b1120;
+    --heading: #f5f7fb;
+    --accent: #9db4e8;
+    --accent-2: #fb923c;
+    --border: #1f2a40;
+    --page-bg: radial-gradient(circle, rgba(203, 213, 225, 0.06) 1px, transparent 1.5px) 0 0 / 22px 22px, #0b1120;
+    --card-bg: #0f172a;
+    --card-border: 1px solid #1c2740;
+    --card-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+    --el-bg: #131c31;
+    --inset-shadow: inset 0 0 0 1px #1f2a40;
+    --hr: #1f2a40;
+    --code-bg: #1a2440;
+    --pre-bg: #070c18;
+    --th-bg: #131c31;
+    --th-fg: #f5f7fb;
+    --hover-bg: #162038;
+    --current-bg: rgba(249, 115, 22, 0.12);
+    --current-fg: #fdba74;
+    --thread: #25314b;
+    --node-bg: #0f172a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fg: #d9deea;
+  --muted: #8a93ab;
+  --bg: #0b1120;
+  --heading: #f5f7fb;
+  --accent: #9db4e8;
+  --accent-2: #fb923c;
+  --border: #1f2a40;
+  --page-bg: radial-gradient(circle, rgba(203, 213, 225, 0.06) 1px, transparent 1.5px) 0 0 / 22px 22px, #0b1120;
+  --card-bg: #0f172a;
+  --card-border: 1px solid #1c2740;
+  --card-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+  --el-bg: #131c31;
+  --inset-shadow: inset 0 0 0 1px #1f2a40;
+  --hr: #1f2a40;
+  --code-bg: #1a2440;
+  --pre-bg: #070c18;
+  --th-bg: #131c31;
+  --th-fg: #f5f7fb;
+  --hover-bg: #162038;
+  --current-bg: rgba(249, 115, 22, 0.12);
+  --current-fg: #fdba74;
+  --thread: #25314b;
+  --node-bg: #0f172a;
+}
+
+/* ページの地と、本文・ナビのカード */
+body { line-height: 1.75; background: var(--page-bg); background-attachment: fixed; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+main {
+  margin: 24px auto 48px;
+  padding: 40px 44px;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: var(--card-filter);
+  backdrop-filter: var(--card-filter);
+}
+body > nav {
+  margin: 16px 16px 0;
+  padding: 16px 20px;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: var(--card-filter);
+  backdrop-filter: var(--card-filter);
+}
+@media (max-width: 640px) {
+  main { margin: 12px; padding: 28px 20px; }
+}
+@media (min-width: 960px) {
+  body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }
+  body > nav { top: 16px; height: calc(100vh - 32px); margin: 16px 0 16px 16px; padding: 28px 20px; border: var(--card-border); }
+  body:has(> nav) > main { width: auto; margin: 16px 24px 48px; max-width: min(var(--content-width), 100% - 48px); justify-self: center; }
+}
+
+/* 見出し */
+main :is(h1, h2, h3, h4) { font-family: var(--heading-font); font-weight: var(--heading-weight); line-height: 1.35; letter-spacing: 0.01em; color: var(--heading); }
+main h1 { margin: 0 0 1em; font-size: 2.2em; }
+main h2 { margin: 2.2em 0 0.7em; font-size: 1.5em; }
+main h3 { margin: 1.8em 0 0.5em; font-size: 1.2em; color: var(--accent); }
+main h4 { margin: 1.5em 0 0.4em; font-size: 1em; color: var(--muted); }
+
+/* リンク */
+main a { color: var(--accent); font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.2em; text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+main a:hover { color: var(--accent-2); text-decoration-color: var(--accent-2); }
+
+/* 本文の部品(角を丸く、テーマの質感で) */
+main strong { color: var(--heading); }
+main blockquote { margin: 1.4em 0; padding: 0.8em 1.2em; color: var(--muted); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
+main hr { margin: 2.5em 0; height: 3px; border: 0; border-radius: 3px; background: var(--hr); }
+main kbd { padding: 0.15em 0.5em; font-size: 0.85em; background: var(--el-bg); border: 0; border-radius: 6px; box-shadow: var(--el-shadow); }
+main img { border-radius: var(--radius); }
+main code { padding: 2px 6px; background: var(--code-bg); border-radius: 6px; }
+main pre { padding: 16px 20px; background: var(--pre-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); line-height: 1.6; }
+main pre code { background: none; padding: 0; }
+main table { border-collapse: separate; border-spacing: 0; overflow: hidden; font-size: 0.95em; background: var(--el-bg); border-radius: var(--radius); box-shadow: var(--el-shadow); }
+main th, main td { border: 0; border-bottom: 1px solid var(--border); padding: 10px 14px; }
+main tr:last-child td { border-bottom: 0; }
+main th { text-align: left; color: var(--th-fg); background: var(--th-bg); }
+
+/* 注意書き・目次・前後のページ */
+.markdown-alert { border: 0; border-radius: var(--radius); background: color-mix(in srgb, var(--alert-color) 12%, var(--el-bg)); box-shadow: var(--el-shadow); }
+.tsuzuri-toc { background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
+.tsuzuri-toc > p { color: var(--accent); }
+.tsuzuri-pager { border-top: 0; }
+main .tsuzuri-pager a { color: var(--heading); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--el-shadow); transition: transform 0.15s; }
+main .tsuzuri-pager a:hover { transform: translateY(-2px); color: var(--accent); }
+.tsuzuri-pager span { color: var(--accent); opacity: 1; }
+.tsuzuri-updated { opacity: 1; color: var(--muted); }
+
+/* ナビ */
+.tsuzuri-nav-head > p { font-weight: 800; color: var(--heading); }
+body > nav a { margin: 2px 0; padding: 6px 12px; color: var(--fg); border-radius: var(--pill); }
+body > nav a:hover { color: var(--accent); background: var(--hover-bg); text-decoration: none; }
+body > nav a[aria-current="page"] { color: var(--current-fg); background: var(--current-bg); box-shadow: var(--current-shadow); font-weight: 700; }
+body > nav ul ul { border-left: 2px solid var(--border); }
+.tsuzuri-search input { padding: 9px 16px; background: var(--el-bg); border: 0; border-radius: var(--pill); box-shadow: var(--inset-shadow); }
+.tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
+
+/* ---- 本文の左を通る糸 ---- */
+main { position: relative; padding-left: 84px; }
+@media (max-width: 640px) { main { padding-left: 52px; } }
+main::before, main::after {
+  content: "";
+  position: absolute;
+  left: 40px;
+  top: 64px;
+  bottom: 48px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--thread);
+}
+@media (max-width: 640px) { main::before, main::after { left: 22px; } }
+main::after { background: linear-gradient(var(--flame-core), var(--flame) 30%, var(--accent-2)); transform: scaleY(0); transform-origin: 50% 0; opacity: 0; }
+/* 読み進めるほど、糸が上から炎の色に染まる(スクロールに連動) */
+@supports (animation-timeline: scroll()) {
+  main::after { opacity: 1; animation: tz-thread linear both; animation-timeline: scroll(root block); }
+}
+@keyframes tz-thread { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* ---- h1: ロゴの中心のような、灯った点から糸が始まる ---- */
+main h1 { position: relative; font-size: 2.4em; letter-spacing: -0.02em; line-height: 1.2; }
+main h1::before {
+  content: "";
+  position: absolute;
+  left: -54px;
+  top: 0.28em;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 55%, var(--flame-core) 0 32%, var(--flame) 36% 100%);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--flame) 22%, transparent), 0 0 24px color-mix(in srgb, var(--flame) 45%, transparent);
+}
+@media (max-width: 640px) { main h1::before { left: -39px; } }
+
+/* ---- h2: 糸の上の結び目。読んだところまで灯る ---- */
+main h2 { position: relative; margin-top: 2.6em; font-size: 1.5em; letter-spacing: -0.01em; }
+main h2::before {
+  content: "";
+  position: absolute;
+  left: -51px;
+  top: 0.38em;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--node-bg);
+  border: 2px solid var(--thread);
+  box-sizing: border-box;
+}
+@media (max-width: 640px) { main h2::before { left: -36px; } }
+@supports (animation-timeline: view()) {
+  main h2::before { animation: tz-knot linear both; animation-timeline: view(); animation-range: entry 100% cover 45%; }
+}
+@keyframes tz-knot {
+  from { background: var(--node-bg); border-color: var(--thread); box-shadow: none; }
+  to { background: var(--flame); border-color: var(--flame); box-shadow: 0 0 0 5px color-mix(in srgb, var(--flame) 20%, transparent), 0 0 16px color-mix(in srgb, var(--flame) 40%, transparent); }
+}
+main h3 { font-size: 1.12em; color: var(--accent); }
+
+/* ---- 本文 ---- */
+main a { color: var(--accent); font-weight: 600; text-decoration: none; background: linear-gradient(var(--accent-2), var(--accent-2)) 0 100% / 0 2px no-repeat, linear-gradient(color-mix(in srgb, var(--accent) 30%, transparent), color-mix(in srgb, var(--accent) 30%, transparent)) 0 100% / 100% 1px no-repeat; transition: background-size 0.25s, color 0.25s; }
+main a:hover { color: var(--accent-2); background-size: 100% 2px, 100% 1px; }
+main :is(h1, h2, h3, h4) a.tsuzuri-anchor { background: none; }
+main ul > li::marker { color: var(--accent-2); }
+main blockquote { background: none; box-shadow: none; border-left: 2px solid var(--accent-2); border-radius: 0; color: var(--muted); }
+main pre { color: var(--pre-fg); box-shadow: none; }
+main table { border: 1px solid var(--border); box-shadow: none; }
+main hr { height: 1px; }
+
+/* ---- ナビ: ページどうしが線でつながる木の形 ---- */
+body > nav ul ul { border-left: 0; margin-left: 10px; padding-left: 14px; position: relative; }
+body > nav ul ul > li { position: relative; }
+body > nav ul ul > li::before { content: ""; position: absolute; left: -14px; top: 0; bottom: 0; width: 1.5px; background: var(--thread); }
+body > nav ul ul > li:last-child::before { bottom: auto; height: 1.05em; }
+body > nav ul ul > li::after { content: ""; position: absolute; left: -14px; top: 1.05em; width: 10px; height: 1.5px; background: var(--thread); }
+body > nav a { border-radius: 8px; }
+body > nav a[aria-current="page"] { font-weight: 700; }
+body > nav a[aria-current="page"]::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--flame); box-shadow: 0 0 0 4px color-mix(in srgb, var(--flame) 22%, transparent); vertical-align: 0.05em; }
+.tsuzuri-nav-head > p { font-weight: 800; letter-spacing: -0.01em; }
+main .tsuzuri-pager a { border: 1px solid var(--border); box-shadow: none; }
+main .tsuzuri-pager a:hover { transform: translateY(-2px); border-color: var(--accent-2); }
+.tsuzuri-pager span { color: var(--accent-2); }
+
+/* ---------- トップページの部品で使う色(スレッドの配色から作る) ---------- */
+:root {
+  --surface: var(--card-bg);
+  --surface-2: var(--el-bg);
+  --tint: var(--el-bg);
+  --fg-soft: var(--muted);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.06);
+  --shadow-lg: var(--card-shadow);
+  --gradient: linear-gradient(135deg, #0f172a 0%, #1e3a6e 100%);
+  --gradient-flame: linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #dc2626 100%);
+}
+/* トップページの入口の見出しは中央寄せなので、糸の始まりの点は付けない */
+.tsuzuri-hero h1::before { content: none; }
+
+/* ---------- トップページの入口(README の <div class="tsuzuri-hero">) ---------- */
+.tsuzuri-hero {
+  margin: -8px -8px 40px;
+  padding: 40px 24px 32px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 22%, color-mix(in srgb, #f97316 16%, transparent) 0, transparent 38%),
+    radial-gradient(circle at 88% 88%, color-mix(in srgb, var(--accent) 10%, transparent) 0, transparent 45%),
+    var(--tint);
+  border-radius: 24px;
+}
+.tsuzuri-hero img[alt="Tsuzuri logo"] {
+  border-radius: 16px;
+  filter: drop-shadow(0 8px 20px color-mix(in srgb, #f97316 30%, transparent));
+}
+.tsuzuri-hero h1 {
+  margin: 8px auto 12px;
+  font-size: clamp(2.4rem, 7vw, 3.6rem);
+}
+.tsuzuri-hero h1::after { margin: 14px auto 0; }
+/* 入口では目次を出さない(ナビと「ドキュメント」の一覧で足りるため) */
+.tsuzuri-hero .tsuzuri-toc { display: none; }
+.tsuzuri-hero-lead {
+  margin: 0 0 8px;
+  font-size: clamp(1.2rem, 3.4vw, 1.6rem);
+  font-weight: 800;
+  color: var(--accent-2);
+}
+.tsuzuri-hero-sub { margin: 0 auto 24px; max-width: 34em; color: var(--fg-soft); }
+/* GitHub 上で読みやすくするための区切り(「・」「【】」)。サイトでは表示しない */
+.tsuzuri-sep { display: none; }
+.tsuzuri-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 0 0 20px; }
+main a.tsuzuri-button {
+  display: inline-block;
+  padding: 10px 24px;
+  color: var(--accent);
+  font-weight: 800;
+  text-decoration: none;
+  background: var(--surface);
+  border: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+main a.tsuzuri-button:hover {
+  color: var(--accent);
+  background: var(--surface);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+main a.tsuzuri-button-primary,
+main a.tsuzuri-button-primary:hover {
+  color: #fff;
+  background: var(--gradient-flame);
+  border-color: transparent;
+}
+.tsuzuri-hero p:has(> a > img) { margin: 0; }
+.tsuzuri-hero p:has(> a > img) a { background: none; }
+.tsuzuri-hero p:has(> a > img) img { border-radius: 4px; }
+
+/* ---------- 特徴のカード(README の <div class="tsuzuri-features">) ---------- */
+.tsuzuri-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 20px 0 8px;
+}
+.tsuzuri-feature {
+  padding: 20px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.tsuzuri-feature:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+/* 見出しの先頭の一文字(見出しの上に、ロゴの中心のような灯った丸として表示する) */
+.tsuzuri-feature-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 1.3rem;
+  line-height: 1;
+  font-weight: 800;
+  background: var(--gradient-flame);
+  border-radius: 50%;
+  box-shadow: 0 0 0 6px color-mix(in srgb, #f97316 18%, transparent);
+}
+.tsuzuri-feature:nth-child(even) .tsuzuri-feature-mark { background: var(--gradient); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 14%, transparent); }
+main .tsuzuri-feature h3 { margin: 0 0 6px; font-size: 1.05rem; }
+main .tsuzuri-feature h3::before { content: none; }
+.tsuzuri-feature p:last-child { margin: 0; color: var(--fg-soft); font-size: 0.93em; line-height: 1.7; }
+
+/* ---------- コードのコピーボタン ---------- */
+.tsuzuri-copy {
+  right: 12px;
+  padding: 3px 12px;
+  color: var(--pre-fg);
+  font-weight: 700;
+  background: color-mix(in srgb, var(--pre-fg) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pre-fg) 25%, transparent);
+  border-radius: 999px;
+}
+@media (hover: hover) { .tsuzuri-copy:hover { color: var(--pre-fg); background: color-mix(in srgb, var(--accent-2) 70%, transparent); border-color: transparent; } }
+
+/* ---------- 404 ページのボタン(トップページの入口と同じ見た目) ---------- */
+main > .tsuzuri-hero-actions { justify-content: flex-start; }
+
+/* ---------- ライト/ダークの切り替えボタン(ナビの見出しの横) ---------- */
+.tsuzuri-theme-toggle {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--accent);
+  background: var(--surface-2);
+  border: 0;
+  border-radius: 999px;
+  transition: background-color 0.15s, color 0.15s;
+}
+.tsuzuri-theme-toggle:hover { color: #fff; background: var(--gradient); }

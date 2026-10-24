@@ -1,7 +1,7 @@
 <!--
 Target branch / 宛先ブランチ:
-  main = Tsuzuri itself (CLI, build scripts, theme CSS) / 本体(CLI・ビルドスクリプト・テーマCSS)
-  docs = the user-facing docs site / 利用者向けドキュメント
+  main = Tsuzuri itself (CLI, build scripts, theme CSS) and the user-facing docs (docs/) / 本体(CLI・ビルドスクリプト・テーマCSS)と利用者向けドキュメント(docs/)
+  Send docs/ fixes to main too / docs/ の修正も main へ送る
 Guide / ガイド:
   https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.md
   https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.ja.md

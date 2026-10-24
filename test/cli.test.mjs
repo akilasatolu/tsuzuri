@@ -348,7 +348,7 @@ test("コミットしてあるビルド用の lockfile の完成品が、本体�
   const committed = readBuildLockfiles();
   const hint =
     `${BUILD_LOCKFILES_DIR}/ が古い。node scripts/build-lockfiles.mjs で作り直して同じPRにコミットする` +
-    "(Dependabot の更新PRの場合の手順は MAINTAINING.md の「Updating dependencies」)";
+    "(依存を手で更新するときの手順は MAINTAINING.md の「Updating dependencies」)";
   assert.equal(committed.packageJson, built.packageJson, hint);
   assert.equal(committed.packageLock, built.packageLock, hint);
   const vendor = Object.fromEntries(buildVendorTargets().map((t) => [t.relPath, t.content]));
@@ -811,11 +811,11 @@ test("ワークフローのactionsはコミットSHAで固定され、本体のC
     Object.fromEntries([...text.matchAll(/uses: (actions\/[\w-]+)@([0-9a-f]+) # (v[\d.]+)/g)].map((m) => [m[1], m[2]]));
   const template = readFileSync(join(PACKAGE_ROOT, WORKFLOW_TEMPLATE_PATH), "utf8");
   const ci = readFileSync(join(PACKAGE_ROOT, ".github/workflows/ci.yml"), "utf8");
-  const sync = readFileSync(join(PACKAGE_ROOT, ".github/workflows/sync-docs.yml"), "utf8");
   const release = readFileSync(join(PACKAGE_ROOT, ".github/workflows/release.yml"), "utf8");
+  const pages = readFileSync(join(PACKAGE_ROOT, ".github/workflows/tsuzuri-pages.yml"), "utf8");
   const tplUses = usesOf(template);
   for (const sha of Object.values(tplUses)) assert.match(sha, /^[0-9a-f]{40}$/);
-  for (const other of [usesOf(ci), usesOf(sync), usesOf(release)]) {
+  for (const other of [usesOf(ci), usesOf(release), usesOf(pages)]) {
     for (const [action, sha] of Object.entries(other)) {
       if (tplUses[action]) assert.equal(tplUses[action], sha, `${action} の版が本体のワークフローとひな形で異なる`);
     }

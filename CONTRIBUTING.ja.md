@@ -5,14 +5,9 @@ Tsuzuri に興味を持っていただきありがとうございます。この
 
 ## どのブランチに送るか
 
-| ブランチ | 中身 | PR を送る内容 |
-|---|---|---|
-| `main`(既定) | Tsuzuri 本体: CLI・ビルドスクリプト・テーマ CSS・テスト | コードの変更 |
-| `docs` | Tsuzuri 自身で作った利用者向けサイト | 利用者向けドキュメント(`docs/`)の修正 |
+PR は `main` に送ってください。`main` には、コード(`bin/`・`.github/scripts/`・`styles/` など)と、利用者向けドキュメント(`docs/`)の両方があります。
 
-2 つのブランチは履歴を共有しません。互いにマージしないでください。
-
-自分のサイトを利用者向けサイトの事例のページに載せてほしいときは、Issue を開き、サイトの URL とソースの URL を書いてください。採用されたら、メンテナーが `docs` ブランチの `docs/examples.md` と `docs/examples.ja.md` に追加します。
+自分のサイトを利用者向けサイトの事例のページに載せてほしいときは、Issue を開き、サイトの URL とソースの URL を書いてください。採用されたら、メンテナーが `docs/examples.md` と `docs/examples.ja.md` に追加します。
 
 ## 準備
 
@@ -28,7 +23,7 @@ npm ci
 
 push しなくても、作業ツリーをそのまま実行して試せます。以下の例は、このリポジトリを `~/dev/tsuzuri` に clone し、`npm ci` 済みとします。
 
-**サイトをビルドする。** Markdown のあるディレクトリで実行します(`git worktree add ../tsuzuri-docs docs` で `docs` ブランチを取り出すと試しやすいです)。
+**サイトをビルドする。** Markdown のあるディレクトリで実行します(この clone のルートは `README.md` と `docs/` があるので試しやすいです)。
 
 ```sh
 STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
@@ -96,15 +91,15 @@ npm run lint
 - `.github/scripts/`: ビルド本体(`build-docs.mjs` と `lib/`)。
 - `styles/`: テーマ CSS。
 - `test/`: テスト。フィクスチャは `test/fixtures/` にあります。
-- `scripts/`・`deps/`: 開発・CI 用の補助(利用者には配りません)。各スクリプトの先頭に説明のコメントがあります。
-- `.github/workflows/`・`.github/dependabot.yml`・`.github/PULL_REQUEST_TEMPLATE.md`・`.npmrc`: このリポジトリ自身の CI・リリース・docs の同期・依存パッケージの方針・PR テンプレート。
-- `README.md`・`CONTRIBUTING.md`・`MAINTAINING.md`・`CHANGELOG.md`: 開発者向けのドキュメント。
+- `scripts/`: 開発・CI 用の補助(利用者には配りません)。各スクリプトの先頭に説明のコメントがあります。
+- `.github/workflows/`・`.github/PULL_REQUEST_TEMPLATE.md`・`.npmrc`: このリポジトリ自身の CI・リリース・依存パッケージの方針・PR テンプレート。
+- `CONTRIBUTING.md`・`MAINTAINING.md`・`CHANGELOG.md`: 開発者向けのドキュメント。
 
-利用者向けドキュメント(`docs/`)は `docs` ブランチにあります。
+利用者向けドキュメントは `docs/` と `README.md`(利用者向けサイトのトップページ)にあります。コードと同じように `main` で編集します。公開は `.github/workflows/tsuzuri-pages.yml` が行います。
 
 `init` は `.github/scripts/` と `styles/` の中身をそのまま利用者のリポジトリへコピーするので、ここに置いたファイルは利用者に配られます。
 
-また、`init` は**利用者の**リポジトリに `.github/workflows/tsuzuri-pages.yml` と `.github/tsuzuri/`(設定ファイル `config` を含む)を生成します。これらを `main` にコミットしないでください。生成は `test/cli.test.mjs` が、ビルドは `test/build-docs.e2e.test.mjs` が検証します。
+また、`init` は**利用者の**リポジトリに `.github/workflows/tsuzuri-pages.yml` と `.github/tsuzuri/`(設定ファイル `config` を含む)を生成します。このリポジトリも、自分のサイトをその方法で公開するため、これらをコミットしています。ワークフローとビルド用のファイルは手で編集しないでください。変わるのは、リリース時の `init --update` だけです([MAINTAINING.ja.md](MAINTAINING.ja.md) を参照)。ただし、action の SHA とバージョンのコメントは、ほかのワークフローと同時に `tsuzuri-pages.yml` も手で直します(MAINTAINING.ja.md の「依存パッケージの更新」を参照)。生成は `test/cli.test.mjs` が、ビルドは `test/build-docs.e2e.test.mjs` が検証します。
 
 利用者に見える既知の限界(frontmatter の書式、mermaid の CDN 依存)は、ここではなく利用者向けサイトに書いてあります: [frontmatter の制限事項](https://akilasatolu.github.io/tsuzuri/ja/docs/frontmatter.html#制限事項)、[外部から読み込むファイル](https://akilasatolu.github.io/tsuzuri/ja/docs/concepts.html#外部から読み込むファイルと依存の安全性)。
 
@@ -116,8 +111,9 @@ npm run lint
 - `actionlint`: ワークフローの静的チェック。`init` が生成するワークフローも含む。
 - `verify-cdn`: 生成ページが読み込む mermaid のファイルのハッシュを確認する。
 - `package-check`: パッケージにまとめた中身から、`init`・インストール・ビルド・`init --update` を通す(`scripts/check-package.mjs`)。
+- `docs-build`: 利用者向けサイト(`README.md` と `docs/`)を `tsuzuri-pages.yml` と同じ方法でビルドする。公開はしない。リンク切れがあると失敗する。
 
-`docs` ブランチの同期とリリースはメンテナーが行います。[MAINTAINING.ja.md](MAINTAINING.ja.md) を見てください。
+リリースはメンテナーが行います。[MAINTAINING.ja.md](MAINTAINING.ja.md) を見てください。
 
 ## PR を送る
 
@@ -126,5 +122,5 @@ npm run lint
 - 「何を」「なぜ」変更したかを書いてください。既存の挙動を変えるときは、理由と影響範囲も書いてください。
 - `test/fixtures/golden/` を保存し直したときは、その理由と、差分で何が変わったかを書いてください([ゴールデンテスト](#ゴールデンテスト)を参照)。
 - `CHANGELOG.md` は書かなくてかまいません。リリースのときにメンテナーがまとめて書きます。
-- 依存パッケージの版は、PR で変えないでください。更新が必要だと思ったら、先に Issue で相談してください。メンテナーと Dependabot が更新します([MAINTAINING.ja.md](MAINTAINING.ja.md) を参照)。
+- 依存パッケージの版は、PR で変えないでください。更新が必要だと思ったら、先に Issue で相談してください。メンテナーが更新します([MAINTAINING.ja.md](MAINTAINING.ja.md) を参照)。
 - Tsuzuri は MIT ライセンスで公開されています。**PR を送ることで、その変更を MIT ライセンスの下で提供することに同意したものとみなします。**

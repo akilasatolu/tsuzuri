@@ -1,11 +1,11 @@
 name: CI
 
 # OSS本体自身の開発用CI(配布対象外)。
-# lint・test・ワークフローの静的チェック(actionlint)・mermaidのハッシュの確認(verify-cdn)・配布物の確認のみを行う。GitHub Pagesへのデプロイは一切行わないため、
+# lint・test・ワークフローの静的チェック(actionlint)・mermaidのハッシュの確認(verify-cdn)・配布物の確認・docsのビルド確認(docs-build)のみを行う。GitHub Pagesへのデプロイは一切行わないため、
 # pages/id-token権限は不要(contents: readのみで完結する)。
 # このワークフローはmainブランチ(tsuzuri本体の開発ブランチ)にのみ存在する。
-# このリポジトリ自身のPagesデプロイは、docsブランチ(tsuzuriで作ったユーザー向けサイト)
-# 側の tsuzuri-pages.yml が単独で担当しており、このワークフローとは競合しない。
+# このリポジトリ自身のPagesデプロイ(tsuzuriで作ったユーザー向けサイトの公開)は、
+# mainブランチの tsuzuri-pages.yml が単独で担当しており、このワークフローとは競合しない。
 #
 # 開発者が任意のブランチにpushしても、ここで実行されるのは上の確認だけであり、
 # GitHub Pagesや外部リポジトリに影響する処理は一切走らない。
@@ -22,7 +22,7 @@ jobs:
   lint-and-test:
     runs-on: ubuntu-latest
     # 利用者が手元で npx を実行する Node.js は様々なので、対応範囲(package.json の engines)を
-    # すべて試す。生成ワークフロー・sync-docs は Node.js 24 で動く。
+    # すべて試す。生成ワークフローは Node.js 24 で動く。
     strategy:
       fail-fast: false
       matrix:
@@ -85,3 +85,30 @@ jobs:
           node-version: 24
       - name: Check the packaged CLI
         run: node scripts/check-package.mjs
+
+  # 利用者向けサイト(README と docs/)のビルド確認。デプロイはしない(contents: read のまま)。
+  # 公開用の tsuzuri-pages.yml は、公開するブランチ以外の push ではビルドを飛ばすので、
+  # マージ前の確認はこのジョブで行う。公開時と同じ、コミット済みのビルドスクリプト(.github/tsuzuri/)を使う。
+  # Actions 上では GITHUB_ACTIONS=true でスクリプトが設定ファイルを読まないため、env -u で外して
+  # 設定ファイル(.github/tsuzuri/config)を読ませる。
+  docs-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # 最終更新日(LAST_UPDATED)に全履歴が要る
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - name: Install build dependency
+        run: |
+          npm ci --prefix .github/tsuzuri --ignore-scripts --no-audit --no-fund
+          npm audit signatures --prefix .github/tsuzuri
+      - name: Build the site (no deploy)
+        env:
+          BASE_PATH: /tsuzuri
+          SITE_ORIGIN: https://akilasatolu.github.io
+          STYLE_DIR: .github/tsuzuri/styles
+          STRICT_LINKS: "true"
+        run: env -u GITHUB_ACTIONS node .github/tsuzuri/build-docs.mjs

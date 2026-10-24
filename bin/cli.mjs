@@ -211,7 +211,7 @@ export function readPackageVersion(packageRoot = PACKAGE_ROOT, fsImpl = { readFi
  * プレースホルダー(__OSS_REPO__ / __VENDOR_DIR__ / __TSUZURI_VERSION__ / __MAJOR_TAG__)を
  * 置き換えるだけ。
  * ひな形を独立したYAMLファイルにしているのは、中で使う actions のバージョンを
- * Dependabot で自動更新できるようにするため。
+ * 本体のワークフローと同じ形で管理し、版がそろっているかをテストで確かめられるようにするため。
  *
  * @param {string} [packageRoot] - テスト時に差し替え可能にするため引数化している
  * @param {{readFileSync}} [fsImpl] - テスト用差し替え
@@ -590,7 +590,7 @@ export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
  *   (VENDOR_DIR/styles/ は利用者の独自CSSも置かれるため、削除の対象にしない)
  *
  * 設定ファイルが無い(=まだ init していない)リポジトリではエラーにする。
- * CI(mainブランチの更新をdocsブランチへ自動反映するワークフロー等)からも使う。
+ * リリース時に main で実行する init --update からも使う。
  *
  * @param {object} opts
  * @param {string} opts.cwd
