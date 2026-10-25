@@ -47,8 +47,8 @@ https://akilasatolu.github.io/tsuzuri/
 <p>Change the behavior by editing .github/tsuzuri/config. You never need to edit the workflow YAML.</p>
 </div>
 <div class="tsuzuri-feature">
-<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>Themes and custom CSS</h3>
-<p>Pick one of eight themes such as Material, Glass, Editorial and Minimal, then fine-tune it with your own CSS. This site is built with custom CSS too.</p>
+<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>Custom styles</h3>
+<p>Start with the default look, or download a custom style such as Glass, Editorial or Minimal from the gallery, then fine-tune it as your own. This site is built with a custom style of its own too.</p>
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">探</span><span class="tsuzuri-sep">】</span>Navigation, search and table of contents</h3>
@@ -89,7 +89,7 @@ Pages. The URL is shown under Settings → Pages. For each item in the settings 
 - [Concepts](docs/concepts.md)
 - [Configuration reference](docs/configuration.md)
 - [Theming](docs/theming.md)
-- [Theme gallery](docs/gallery.md)
+- [Style gallery](docs/gallery.md)
 - [Frontmatter reference](docs/frontmatter.md)
 - [Multilingual sites (i18n)](docs/i18n.md)
 - [CLI reference](docs/cli.md)
@@ -100,14 +100,16 @@ Pages. The URL is shown under Settings → Pages. For each item in the settings 
 
 ## Customizing the style
 
-You don't have to write CSS to change the look. Just set `THEME` in
-`.github/tsuzuri/config` to one of the themes, such as Material (`material`, the default),
-Glass (`glass`), 90s (`nineties`) or no decoration (`none`), and the colors, link underlines
-and the rest of the look switch together. See [Theming](docs/theming.md) for details.
+You don't have to write CSS to change the look. The look is the base CSS plus one custom style, a CSS
+file in `.github/tsuzuri/styles/`. `THEME=default.css` (included in the package) is the default.
+Download another custom style, such as Glass (`glass.css`), 90s (`nineties.css`) or no decoration
+(`none.css`), from the [gallery](docs/gallery.md), put it in `.github/tsuzuri/styles/`, and set
+`THEME=glass.css` in `.github/tsuzuri/config`; the colors, link underlines and the rest of the look
+switch together. See [Theming](docs/theming.md) for details.
 
-If you only want to fine-tune the colors, override the following CSS custom properties in
-the CSS file set in `STYLE_FILE` of `.github/tsuzuri/config` (it is loaded after the
-theme, as the third layer).
+If you only want to fine-tune the colors, copy `default.css` under another name, override the
+following CSS custom properties in it, and set that file name in `THEME` of
+`.github/tsuzuri/config`.
 
 | Variable | Meaning |
 |---|---|
@@ -120,23 +122,24 @@ theme, as the third layer).
 | `--content-width` | Maximum width of the content column (e.g. `860px`) |
 | `color-scheme` | `light` / `dark` / `light dark` (follows the OS setting) |
 
-With `THEME=none`, these variables are not defined anywhere, so the browser's default look
-(black text on a white background, and so on) is used as is.
+With a custom style that defines none of them (such as `none.css`, which contains only comments), these
+variables are not defined anywhere, so the browser's default look (black text on a white background, and
+so on) is used as is.
 
-## Theme preview
+## Style preview
 
-You can compare the built-in themes as real pages in the [theme gallery](docs/gallery.md).
+You can compare the custom styles as real pages in the [gallery](docs/gallery.md).
 
 To compare them on your own site, use the `theme` key in the frontmatter to give each page a
-different theme (it swaps the theme of a single page, separately from the site-wide `THEME`
+different custom style (it swaps the custom style of a single page, separately from the site-wide `THEME`
 setting; see the [frontmatter reference](docs/frontmatter.md#theme)). Give several Markdown
-files different `theme` values and build, and you can compare the looks with the regular
+files different `theme` values (file names in `.github/tsuzuri/styles/`) and build, and you can compare the looks with the regular
 `tsuzuri-pages.yml`.
 
 ## Contributing
 
 Contributions to both code and documentation are welcome. Tsuzuri itself (the CLI, the build
-script and the theme CSS) and this site (the user documentation, `docs/`) are developed in the
+script and the styles) and this site (the user documentation, `docs/`) are developed in the
 same repository, on the [`main` branch](https://github.com/akilasatolu/tsuzuri/tree/main). This
 site is published to GitHub Pages with Tsuzuri itself. For setting up a development environment
 and how to send a PR, see

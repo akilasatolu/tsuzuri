@@ -29,8 +29,8 @@ You do not need to push. Run your working tree directly. The examples assume you
 STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
 ```
 
-- `STYLE_DIR` makes the build use the theme CSS from your working tree.
-- Outside GitHub Actions, `.github/tsuzuri/config` is read if present, and environment variables win (for example `THEME=nineties`). The site language comes from `LANGUAGES`, not from the OS `LANG`.
+- `STYLE_DIR` makes the build use `base.css` from your working tree. It is only the location of the base CSS: custom styles (`THEME=name.css`, `theme: name.css`) are always read from the site's `.github/tsuzuri/styles/`. To try `default.css` from your working tree, copy it there with `node bin/cli.mjs init --update`.
+- Outside GitHub Actions, `.github/tsuzuri/config` is read if present, and environment variables win (for example `THEME=default.css`). The site language comes from `LANGUAGES`, not from the OS `LANG`.
 - The output goes to `_site/`. If it contains the `.tsuzuri-build` marker from a previous build, everything in it is deleted before the build; a directory without the marker is only overwritten.
 
 In a directory where `init` has already run, `node ~/dev/tsuzuri/bin/cli.mjs preview` builds, serves and rebuilds on changes.
@@ -91,7 +91,7 @@ Edit these:
 - `bin/`: the setup CLI. `bin/cli.mjs` is the single source of what users receive (workflow, config file, vendored files); `bin/preview.mjs` is `preview`; `bin/messages.mjs` is the catalog of the CLI messages, in English and Japanese (add every new message to both; the workflow and `.github/tsuzuri/.gitignore` are always in English).
 - `templates/`: the workflow template (`.github/workflows/tsuzuri-pages.yml`) and the ready-made `package.json` and `package-lock.json` of the build dependencies given to users.
 - `.github/scripts/`: the build (`build-docs.mjs` and `lib/`).
-- `styles/`: the theme CSS.
+- `styles/`: the base CSS and the default style (`base.css`, `default.css`).
 - `test/`: the tests, with fixtures in `test/fixtures/`.
 - `scripts/`: development and CI helpers, not shipped to users. Each script starts with a comment that explains it.
 - `.github/workflows/`, `.github/PULL_REQUEST_TEMPLATE.md`, `.npmrc`: this repository's own CI, release, dependency policy and PR template.

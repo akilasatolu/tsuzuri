@@ -22,11 +22,11 @@ Run the following command at the root of your repository.
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-It asks six questions: the trigger branch, the starting Markdown file, the theme, whether
+It asks five questions: the trigger branch, the starting Markdown file, whether
 to show the navigation, the site language, and the site name. You can accept every default just
-by pressing Enter (the repository's default branch, `README.md`, the Material theme,
-navigation shown, English (`en`), and the repository name). An empty custom CSS template
-is always created without a question. If your README is written in another language, answer the site
+by pressing Enter (the repository's default branch, `README.md`, navigation shown,
+English (`en`), and the repository name). The look is not asked about: the settings file starts
+with `THEME=default.css`, the default custom style included in the package. If your README is written in another language, answer the site
 language question with that language (for example `ja`). See the [CLI reference](./cli.md)
 for the full question flow.
 
@@ -34,13 +34,12 @@ Besides the workflow and the settings file, this command adds the whole build sc
 repository.
 
 - `.github/workflows/tsuzuri-pages.yml`
-- `.github/tsuzuri/` (the settings file `config`, which you edit, and the build script itself: `build-docs.mjs`, `lib/*.mjs`, `styles/*.css`,
+- `.github/tsuzuri/` (the settings file `config`, which you edit, and the build script itself: `build-docs.mjs`, `lib/*.mjs`, `styles/base.css` and `styles/default.css`,
   plus `package.json` and `package-lock.json`, which pin the build dependencies, and `.gitignore`)
-- `.github/tsuzuri/styles/custom.css` (an empty custom CSS template placed in the same
-  folder as the built-in theme CSS; an existing one is not overwritten)
 
-Under `.github/tsuzuri/`, you edit only the settings file `config` and your own CSS files in
-`styles/` (`custom.css` by default). Do not edit the built-in theme CSS or the scripts.
+Under `.github/tsuzuri/`, you edit only the settings file `config` and your own custom styles in
+`styles/`. Do not edit `base.css`, `default.css` or the scripts. To use another look, download a
+custom style from the [gallery](./gallery.md), put it in `styles/`, and set `THEME` (see [Theming](./theming.md)).
 
 Because the build script is copied into your repository too, the generated workflow builds
 and deploys entirely inside your repository, without fetching the Tsuzuri repository each
@@ -110,7 +109,7 @@ To do the same thing by hand without `preview`, run the following steps in order
    ```
 
    To try a different setting, pass it as an environment variable, like
-   `THEME=nineties node .github/tsuzuri/build-docs.mjs`. Only that key overrides the settings
+   `THEME=glass.css node .github/tsuzuri/build-docs.mjs`. Only that key overrides the settings
    file.
 
    > [!NOTE]

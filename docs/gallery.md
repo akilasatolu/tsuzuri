@@ -1,41 +1,172 @@
 ---
-title: Theme gallery
-description: A gallery to compare the look of Tsuzuri's built-in themes on real pages
+title: Gallery
+description: A gallery to compare the look of Tsuzuri's custom styles on real pages, and to download them
 ---
 
-# Theme gallery
+# Gallery
 
-See what Tsuzuri's built-in themes look like on actually generated pages. Each page has the same
-sample content (headings, paragraphs, links, lists, a table, code, a quote and an image), so you
-can compare them and choose a theme.
+See what Tsuzuri's custom styles look like on actually generated pages, and download the one you like.
+Each style has a sample page with the same content (headings, paragraphs, links, lists, a table, code,
+a quote and an image), so you can compare them. Scroll the screenshots sideways to see the light and
+dark looks.
 
-| Theme | Setting | Character |
-|---|---|---|
-| [Material (material)](gallery/material.md) | `THEME=material` | A standard style inspired by Material Design 3 (the default). Blue colors, rounded cards with shadows, and a tinted selection in the navigation. Switches between light and dark automatically. |
-| [Glass (glass)](gallery/glass.md) | `THEME=glass` | Glassmorphism. Thin, clear glass cards that let the colors show through, over a slowly swaying, flowing aurora. |
-| [Neumorphism (neumorphism)](gallery/neumorphism.md) | `THEME=neumorphism` | Neumorphism. Parts in the same color as the background, raised or pressed in with light and shadow. |
-| [Editorial (editorial)](gallery/editorial.md) | `THEME=editorial` | A style that relies on typography and white space, like a magazine or a polished document. Large serif headings with chapter numbers, and a vermilion accent. |
-| [Minimal (minimal)](gallery/minimal.md) | `THEME=minimal` | A calm look in only white, black and gray, like the Vercel or Linear docs. Only links are blue. |
-| [Kintsugi (kintsugi)](gallery/kintsugi.md) | `THEME=kintsugi` | A style after kintsugi, the craft of mending broken pottery with lacquer and gold. Gold seams run across porcelain-like cards, and code blocks are lacquer black. Porcelain in light mode, black lacquer in dark mode. |
-| [Blueprint (blueprint)](gallery/blueprint.md) | `THEME=blueprint` | Like a blueprint, with a white grid and fine lines on blue, and headings with dimension lines. Always looks the same. |
-| [90s (nineties)](gallery/nineties.md) | `THEME=nineties` | 90s nostalgia. A Windows 95-style teal desktop with gray windows and raised buttons. Light only. |
-| [No decoration (none)](gallery/none.md) | `THEME=none` | No theme layer; only the base CSS and the browser's default look. |
-| [Custom CSS example (this site)](gallery/custom.md) | `THEME=none` + `STYLE_FILE` | This site's own look, made only with custom CSS and no theme. |
+## How to use a custom style
 
-This whole site is built with `THEME=none` and custom CSS (`STYLE_FILE`). Each theme page sets its
-theme with `theme` in the frontmatter, and sets an empty CSS file (`plain.css`, in
-`.github/tsuzuri/styles/`) with `styleFile` so the site's custom CSS isn't applied (it shows only
-the built-in theme).
+A custom style is a CSS file in `.github/tsuzuri/styles/`. The look of a page is the base CSS
+(`base.css`) plus one custom style (see [Theming](theming.md)).
 
-```yaml
----
-theme: material
-styleFile: plain.css
----
-```
+1. Download the CSS file with the button under the style you like below.
+2. Put it in `.github/tsuzuri/styles/` in your repository.
+3. Change `THEME` in `.github/tsuzuri/config` to its file name, for example `THEME=glass.css`.
 
-For how to set it up, see [Theming](theming.md) and the
-[frontmatter reference](frontmatter.md#theme).
+To use a style for a single page only, write `theme: glass.css` in that page's frontmatter (see the
+[frontmatter reference](frontmatter.md#theme)). `default.css` is included in the package, so it needs no download:
+`init` puts it in `.github/tsuzuri/styles/`, and the settings file starts with `THEME=default.css`.
+Only `default.css` is overwritten by `init --update`; the styles you put there yourself are left as they are.
 
-To fine-tune the colors further, override CSS variables (`--fg`, `--bg`, `--accent` and so on) in
-the custom CSS set in `STYLE_FILE`.
+## Default (default)
+
+<div class="tsuzuri-carousel">
+<img src="../assets/gallery/default-light.png" alt="default (light)">
+<img src="../assets/gallery/default-dark.png" alt="default (dark)">
+</div>
+
+A standard style inspired by Material Design 3 (the default). Blue colors, rounded cards with shadows, and a tinted selection in the navigation. Switches between light and dark automatically.
+
+Included in the package, so no download is needed. Set `THEME=default.css` (the default).
+
+[Sample page](gallery/default.md)
+
+## Glass (glass)
+
+<div class="tsuzuri-carousel">
+<img src="../assets/gallery/glass-light.png" alt="glass (light)">
+<img src="../assets/gallery/glass-dark.png" alt="glass (dark)">
+</div>
+
+Glassmorphism. Thin, clear glass cards that let the colors show through, over a slowly swaying, flowing aurora.
+
+Use: put it in `.github/tsuzuri/styles/` and set `THEME=glass.css`.
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/glass.css" download>glass.css</a>
+
+[Sample page](gallery/glass.md)
+
+## Neumorphism (neumorphism)
+
+<div class="tsuzuri-carousel">
+<img src="../assets/gallery/neumorphism-light.png" alt="neumorphism (light)">
+<img src="../assets/gallery/neumorphism-dark.png" alt="neumorphism (dark)">
+</div>
+
+Neumorphism. Parts in the same color as the background, raised or pressed in with light and shadow.
+
+Use: put it in `.github/tsuzuri/styles/` and set `THEME=neumorphism.css`.
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/neumorphism.css" download>neumorphism.css</a>
+
+[Sample page](gallery/neumorphism.md)
+
+## Editorial (editorial)
+
+<div class="tsuzuri-carousel">
+<img src="../assets/gallery/editorial-light.png" alt="editorial (light)">
+<img src="../assets/gallery/editorial-dark.png" alt="editorial (dark)">
+</div>
+
+A style that relies on typography and white space, like a magazine or a polished document. Large serif headings with chapter numbers, and a vermilion accent.
+
+Use: put it in `.github/tsuzuri/styles/` and set `THEME=editorial.css`.
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/editorial.css" download>editorial.css</a>
+
+[Sample page](gallery/editorial.md)
+
+## Minimal (minimal)
+
+<div class="tsuzuri-carousel">
+<img src="../assets/gallery/minimal-light.png" alt="minimal (light)">
+<img src="../assets/gallery/minimal-dark.png" alt="minimal (dark)">
+</div>
+
+A calm look in only white, black and gray, like the Vercel or Linear docs. Only links are blue.
+
+Use: put it in `.github/tsuzuri/styles/` and set `THEME=minimal.css`.
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/minimal.css" download>minimal.css</a>
+
+[Sample page](gallery/minimal.md)
+
+## Kintsugi (kintsugi)
+
+<div class="tsuzuri-carousel">
+<img src="../assets/gallery/kintsugi-light.png" alt="kintsugi (light)">
+<img src="../assets/gallery/kintsugi-dark.png" alt="kintsugi (dark)">
+</div>
+
+A style after kintsugi, the craft of mending broken pottery with lacquer and gold. Gold seams run across porcelain-like cards, and code blocks are lacquer black. Porcelain in light mode, black lacquer in dark mode.
+
+Use: put it in `.github/tsuzuri/styles/` and set `THEME=kintsugi.css`.
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/kintsugi.css" download>kintsugi.css</a>
+
+[Sample page](gallery/kintsugi.md)
+
+## Blueprint (blueprint)
+
+<div class="tsuzuri-carousel">
+<img src="../assets/gallery/blueprint-light.png" alt="blueprint">
+</div>
+
+Like a blueprint, with a white grid and fine lines on blue, and headings with dimension lines. Always looks the same.
+
+Use: put it in `.github/tsuzuri/styles/` and set `THEME=blueprint.css`.
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/blueprint.css" download>blueprint.css</a>
+
+[Sample page](gallery/blueprint.md)
+
+## 90s (nineties)
+
+<div class="tsuzuri-carousel">
+<img src="../assets/gallery/nineties-light.png" alt="nineties">
+</div>
+
+90s nostalgia. A Windows 95-style teal desktop with gray windows and raised buttons. Light only.
+
+Use: put it in `.github/tsuzuri/styles/` and set `THEME=nineties.css`.
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/nineties.css" download>nineties.css</a>
+
+[Sample page](gallery/nineties.md)
+
+## No decoration (none)
+
+<div class="tsuzuri-carousel">
+<img src="../assets/gallery/none-light.png" alt="none">
+</div>
+
+Only the base CSS is applied, and the page is shown with the browser's default look. `none.css` is a CSS file that contains only comments.
+
+Use: put it in `.github/tsuzuri/styles/` and set `THEME=none.css`.
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/none.css" download>none.css</a>
+
+[Sample page](gallery/none.md)
+
+## Tsuzuri (this site)
+
+<div class="tsuzuri-carousel">
+<img src="../assets/gallery/tsuzuri-light.png" alt="tsuzuri (light)">
+<img src="../assets/gallery/tsuzuri-dark.png" alt="tsuzuri (dark)">
+</div>
+
+This site's own look, made with a custom style of its own.
+
+Use: put it in `.github/tsuzuri/styles/` and set `THEME=custom.css`.
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/custom.css" download>custom.css</a>
+
+[Sample page](gallery/custom.md)
+
+To fine-tune the colors further, copy `default.css` under another name, override CSS variables (`--fg`, `--bg`, `--accent` and so on) in it, and set it in `THEME` (see [Theming](theming.md#writing-your-own-custom-style)).

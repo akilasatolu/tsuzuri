@@ -349,24 +349,25 @@ describe("pageTemplate", () => {
 });
 
 describe("composeCss", () => {
-  test("3層カスケードの追記順序: base→theme→customの順で出現する", () => {
-    const css = composeCss({ baseCss: "/*base*/", themeCss: "/*theme*/", customCss: "/*custom*/" });
+  test("2層の追記順序: base→customの順で出現する", () => {
+    const css = composeCss({ baseCss: "/*base*/", customCss: "/*custom*/", styleFileRel: ".github/tsuzuri/styles/x.css" });
     const baseIdx = css.indexOf("/*base*/");
-    const themeIdx = css.indexOf("/*theme*/");
     const customIdx = css.indexOf("/*custom*/");
-    assert.ok(baseIdx >= 0 && themeIdx >= 0 && customIdx >= 0, "3つ全てが出現する");
-    assert.ok(baseIdx < themeIdx, "baseはthemeより前");
-    assert.ok(themeIdx < customIdx, "themeはcustomより前");
+    assert.ok(baseIdx >= 0 && customIdx >= 0, "2つとも出現する");
+    assert.ok(baseIdx < customIdx, "baseはcustomより前");
   });
 
-  test("themeCss=''(THEME=none相当)のとき/*theme*/相当の内容は一切出現しない", () => {
-    const css = composeCss({ baseCss: "/*base*/", themeCss: "", customCss: "/*custom*/" });
+  test("customCss が空(ベースだけ)のとき、base だけが出力される", () => {
+    const css = composeCss({ baseCss: "/*base*/", customCss: "" });
+    assert.equal(css, "/*base*/");
+  });
+
+  test("themeCss は受け取らない(3層目はなく、渡しても出力されない)", () => {
+    const css = composeCss({ baseCss: "/*base*/", themeCss: "/*theme*/", customCss: "/*custom*/" });
     assert.doesNotMatch(css, /\/\*theme\*\//);
-    assert.match(css, /\/\*base\*\//);
-    assert.match(css, /\/\*custom\*\//);
   });
 
-  test("customCssが非空ならstyleFileRelを使ったコメントがcustomCssの直前に挿入される", () => {
+  test("customCssが非空ならstyleFileRelを使ったコメントがcustomCssの直前に挿入される(カスタムスタイルのファイルのパス)", () => {
     const css = composeCss({ customCss: "/*custom*/", styleFileRel: "styles/my-style.css" });
     assert.match(css, /\/\* ---- Custom style: styles\/my-style\.css ---- \*\/\n\/\*custom\*\//);
   });

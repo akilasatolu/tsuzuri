@@ -85,16 +85,18 @@ search too.
 
 If the look isn't what you expect, check the following in order.
 
-1. A typo in `THEME`. A theme name that doesn't exist (e.g. `sepia`) falls back to `material`
-   automatically, with a warning (see the [configuration reference](./configuration.md)).
-2. Whether a file with the name set in `STYLE_FILE` actually exists in `.github/tsuzuri/styles/`.
-   If it doesn't, no warning is shown (the build log only says `Custom style file not used`),
-   and the custom CSS isn't applied. Also, write only a file name in `STYLE_FILE`: a path with
-   folders (such as `.github/tsuzuri/styles/custom.css`) or a name that doesn't end with `.css`
-   is ignored with a warning.
-3. The priority of the three-layer cascade (base CSS → THEME → STYLE_FILE). `STYLE_FILE` is the
-   top layer, loaded last, so check whether the CSS rules you wrote there override as expected,
-   including in terms of specificity (the strength of the selector). See
+1. A typo in `THEME`. A value that isn't the file name of a CSS file (`none`, an old theme name
+   such as `material`, a path with folders such as `.github/tsuzuri/styles/glass.css`, or a name
+   that doesn't end with `.css`) falls back to `default.css` automatically, with a warning (see the
+   [configuration reference](./configuration.md)).
+2. Whether a file with the name set in `THEME` actually exists in `.github/tsuzuri/styles/`.
+   If it doesn't, a warning is shown (`THEME ("…") was not found`), and the site is built with the base
+   CSS only. Custom styles other than `default.css` are not included in the package: download
+   them from the [gallery](./gallery.md).
+3. The priority of the two layers (base CSS → custom style). The custom style is loaded after the
+   base CSS, so check whether the CSS rules you wrote there override as expected,
+   including in terms of specificity (the strength of the selector). A `theme` in a page's
+   frontmatter replaces the site-wide custom style for that page. See
    [Theming](./theming.md) for details.
 
 ## The preview looks different from the published site

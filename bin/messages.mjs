@@ -17,7 +17,6 @@ export const DEFAULT_CLI_LANG = "en";
 export const MESSAGES = {
   en: {
     // --- writeGeneratedFiles のログ ---
-    "log.kept": "⏭ {path} kept (it already exists, so it is not overwritten)",
     "log.skipped": "⏭ {path} skipped (existing file kept)",
     "log.created": "✔ {path} created",
     "log.overwritten": "✔ {path} overwritten",
@@ -26,33 +25,13 @@ export const MESSAGES = {
     "prompt.continue": "Continue anyway? (y/N): ",
     "prompt.triggerBranch": "? Trigger branch (TRIGGER_BRANCH) [{default}]: ",
     "prompt.rootMd": "? Root Markdown file (ROOT_MD) [{default}]: ",
-    "prompt.theme": "? Choose a theme (THEME):\n{menu}\n  Enter a number [1]: ",
     "prompt.nav": "? Show the sidebar navigation, site search and in-page table of contents? (NAV_ENABLED) (Y/n): ",
     "prompt.languages":
       "? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [{default}]: ",
     "prompt.siteName": "? Site name (SITE_NAME; the repository name if empty) []: ",
     "prompt.overwriteBundle":
-      "The workflow and the build scripts (under {vendorDir}/, except config and your own CSS) already exist. Overwrite them with the latest version? (y/N): ",
+      "The workflow and the build scripts (under {vendorDir}/, except config) already exist. Overwrite them with the latest version? (y/N): ",
     "prompt.overwriteFile": "{path} already exists. Overwrite it? (y/N): ",
-
-    // --- テーマの説明(init の質問のメニュー) ---
-    "theme.material":
-      "Material (recommended. Material Design 3 style: blue palette, rounded cards with shadows, tonal navigation selection)",
-    "theme.glass":
-      "Glass (Glassmorphism. Thin translucent glass cards over a slowly drifting aurora background, with the colors showing through)",
-    "theme.neumorphism":
-      "Neumorphism (parts in the same color as the background that look raised or pressed in by light and shadow)",
-    "theme.editorial":
-      "Editorial (a magazine or fine-documentation look built on typography and white space: large serif headings, chapter numbers, a vermilion accent)",
-    "theme.minimal":
-      "Minimal (a calm look like the Vercel or Linear docs, using only white, black and gray; only links are blue)",
-    "theme.kintsugi":
-      "Kintsugi (the style of mending broken pottery with lacquer and gold: white porcelain cards with golden seams, code blocks in black lacquer; white porcelain in light mode, black lacquer in dark mode)",
-    "theme.blueprint":
-      "Blueprint (like a blueprint: a blue background with a white grid and fine lines, headings with dimension lines; always looks the same)",
-    "theme.nineties":
-      "90s (90s Nostalgia. A Windows 95 style teal desktop, gray windows and 3D buttons; light mode only)",
-    "theme.none": "No decoration",
 
     // --- init の流れ ---
     "init.heading": "README → GitHub Pages auto-deploy setup\n",
@@ -62,7 +41,7 @@ export const MESSAGES = {
 
     // --- init --update ---
     "update.intro":
-      "Updating to the latest version (the settings file is not changed; an existing custom CSS is not changed either)\n",
+      "Updating to the latest version (the settings file is not changed; the custom styles you put in styles/ are not changed either)\n",
     "update.done": "\nUpdate complete. You can review the changes with 'git diff'.",
     "update.missingKeys":
       "ℹ Keys missing from the settings file (defaults are used): {keys}\n  Add them to {config} if you want to use them. See: {docs}docs/configuration.html",
@@ -79,7 +58,6 @@ export const MESSAGES = {
     "error.args": "Invalid arguments: {message} (use --help to see the usage)",
     "error.subcommand": "Unknown subcommand: {name} (use --help to see the usage)",
     "error.port": "--port needs a number from 1 to 65535 (given: {value})",
-    "error.theme": "--theme must be one of {themes} (given: {value})",
     "error.emptyValue": "--{name} cannot be empty",
     "error.languages":
       "--languages needs language tags separated by commas (e.g. ja / en / ja,en) (given: {value})",
@@ -102,10 +80,10 @@ export const MESSAGES = {
       "After you push, the workflow runs in the Actions tab; when it finishes, the public URL is shown in Settings > Pages.",
       "The build scripts (under {vendorDir}/) are also copied into this repository,",
       "so nothing is fetched from an external repository at run time.",
-      "(In {vendorDir}/, you may edit only the settings file config and your own CSS in styles/ (custom.css by default). Do not edit the built-in theme CSS and the scripts.)",
+      "(In {vendorDir}/, you may edit only the settings file config and your own custom styles in styles/. Do not edit base.css, default.css and the scripts.)",
       "",
       "To update to the latest version, run npx github:{repo}#{tag} init --update",
-      "(the settings file and an existing custom CSS are kept, and the workflow and the scripts are updated. If there is no custom CSS, an empty template is created).",
+      "(the settings file and your own custom styles are kept, and the workflow, the scripts, base.css and default.css are updated).",
     ].join("\n"),
 
     // --- --help ---
@@ -119,13 +97,12 @@ export const MESSAGES = {
       "         It rebuilds automatically when you save a file.",
       "",
       "  --update           Update to the latest version without questions (overwrites the workflow and the build",
-      "                     scripts, and does not change the settings file. An existing custom CSS is not changed;",
-      "                     if there is none, an empty template is created)",
+      "                     scripts, base.css and default.css, and does not change the settings file or the custom",
+      "                     styles you put in styles/)",
       "  -y, --yes          Generate everything without questions, using the defaults (or the values given with the options below)",
       "      --branch <name> Trigger branch (TRIGGER_BRANCH). Default: the default branch of the repository",
       "                     (origin/HEAD; main if unknown)",
       "      --root <path>   Starting Markdown file (ROOT_MD). Default: README.md",
-      "      --theme <name>  Theme (THEME): {themes}. Default: material",
       "      --languages <list>",
       "                     Site languages (LANGUAGES; the first is the base language). Default: en",
       "      --site-name <name>",
@@ -139,7 +116,7 @@ export const MESSAGES = {
       "  -v, --version      Show the version",
       "  -h, --help         Show this help",
       "",
-      "Giving any of --branch / --root / --theme / --languages / --site-name / --no-nav also runs without questions.",
+      "Giving any of --branch / --root / --languages / --site-name / --no-nav also runs without questions.",
     ].join("\n"),
 
     // --- 設定ファイルのコメント(init が .github/tsuzuri/config に書く。各ブロックの先頭は "# ") ---
@@ -159,12 +136,9 @@ export const MESSAGES = {
     "config.rootMd": "# The Markdown file that is the entry point of the site (path from the repository root)",
     "config.outDir": "# Where the built site is written (a folder in the repository)",
     "config.theme": [
-      "# Theme: material / glass / neumorphism / editorial / minimal / kintsugi / blueprint / nineties / none (no decoration)",
-      "# Compare the looks: {docs}docs/gallery.html",
-    ].join("\n"),
-    "config.styleFile": [
-      "# File name of your own CSS (a file in {vendorDir}/styles/; write only the file name, not the folder).",
-      "# If the file exists, it is loaded after the theme and takes priority (it is not used if missing).",
+      "# The custom style of the whole site: the file name of a CSS file in {vendorDir}/styles/ (write only the file name, not the folder).",
+      "# The default, default.css, is included in the package. To use another one, download it from the gallery",
+      "# ({docs}docs/gallery.html), put it in {vendorDir}/styles/ and write its file name here.",
     ].join("\n"),
     "config.languages": [
       "# Site languages, comma-separated; the first is the base language (the language of the starting README). Examples: ja / en / ja,en",
@@ -202,12 +176,6 @@ export const MESSAGES = {
     "config.sitemapJson":
       "# Whether to output sitemap.json for troubleshooting (true/false). It is included in the public site, so keep it false normally.",
 
-    // --- 独自CSSのひな形 ---
-    "css.template": [
-      "/* Write your own CSS here. It is loaded after the theme and takes priority.",
-      "   List of CSS variables that change colors and widths (--fg / --bg / --accent, etc.): {docs}docs/theming.html */",
-    ].join("\n"),
-
     // --- preview ---
     "preview.noScript": "{vendorDir}/build-docs.mjs not found. Run init first (at the root of the repository).",
     "preview.versionMismatch":
@@ -229,7 +197,6 @@ export const MESSAGES = {
   },
 
   ja: {
-    "log.kept": "⏭ {path} を保持しました(既にあるため上書きしません)",
     "log.skipped": "⏭ {path} をスキップしました(既存ファイルを保持)",
     "log.created": "✔ {path} を作成しました",
     "log.overwritten": "✔ {path} を上書きしました",
@@ -237,33 +204,21 @@ export const MESSAGES = {
     "prompt.continue": "このまま続けますか? (y/N): ",
     "prompt.triggerBranch": "? トリガーブランチ (TRIGGER_BRANCH) [{default}]: ",
     "prompt.rootMd": "? ルートとなるMarkdownファイル (ROOT_MD) [{default}]: ",
-    "prompt.theme": "? テーマ (THEME) を選択してください:\n{menu}\n  番号を入力 [1]: ",
     "prompt.nav": "? サイドバーのナビ・サイト内検索・ページ内の目次を表示しますか? (NAV_ENABLED) (Y/n): ",
     "prompt.languages":
       "? サイトの言語 (LANGUAGES。カンマ区切りで、先頭は README の言語。例: ja / en / ja,en) [{default}]: ",
     "prompt.siteName": "? サイト名 (SITE_NAME。空ならリポジトリ名) []: ",
     "prompt.overwriteBundle":
-      "ワークフローとビルドスクリプト一式({vendorDir}/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N): ",
+      "ワークフローとビルドスクリプト一式({vendorDir}/ 配下。config を除く)は既に存在します。最新版で上書きしますか? (y/N): ",
     "prompt.overwriteFile": "{path} は既に存在します。上書きしますか? (y/N): ",
 
-    "theme.material": "マテリアル(推奨。Material Design 3 風。青系の配色、角丸のカードと影、トーンのついたナビの選択)",
-    "theme.glass": "グラス(Glassmorphism。ゆっくり揺れて流れるオーロラの地に、色がそのまま透ける薄い透明なガラスのカード)",
-    "theme.neumorphism": "ニューモーフィズム(Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする)",
-    "theme.editorial":
-      "エディトリアル(雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色)",
-    "theme.minimal": "ミニマル(Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青)",
-    "theme.kintsugi":
-      "金継ぎ(割れた器を漆と金で継ぐ「金継ぎ」のスタイル。白磁のようなカードに金の継ぎ目が走り、コードブロックは漆の黒。ライト表示は白磁、ダーク表示は黒漆)",
-    "theme.blueprint": "ブループリント(設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示)",
-    "theme.nineties": "90年代(90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ)",
-    "theme.none": "装飾なし",
 
     "init.heading": "README → GitHub Pages 自動デプロイパッケージ セットアップ\n",
     "init.cancelled": "中止しました。リポジトリの直下で実行し直してください。",
     "init.listHeader": "\n--- 以下のファイルを生成します ---",
     "init.listItem": "  {path}  (対象)",
 
-    "update.intro": "最新版に更新します(設定ファイルは変更しません。独自CSSは、既にあれば変更しません)\n",
+    "update.intro": "最新版に更新します(設定ファイルは変更しません。styles/ に置いたカスタムスタイルも変更しません)\n",
     "update.done": "\n更新が完了しました。変更内容は 'git diff' で確認できます。",
     "update.missingKeys":
       "ℹ 設定ファイルに無い項目があります(既定値で動きます): {keys}\n  使う場合は {config} に追記してください。説明: {docs}docs/configuration.html",
@@ -278,7 +233,6 @@ export const MESSAGES = {
     "error.args": "引数が正しくありません: {message}(--help で使い方を表示します)",
     "error.subcommand": "不明なサブコマンドです: {name}(--help で使い方を表示します)",
     "error.port": "--port には 1〜65535 の番号を指定してください(指定: {value})",
-    "error.theme": "--theme には {themes} のいずれかを指定してください(指定: {value})",
     "error.emptyValue": "--{name} に空の値は指定できません",
     "error.languages":
       "--languages には言語タグをカンマ区切りで指定してください(例: ja / en / ja,en)(指定: {value})",
@@ -300,10 +254,10 @@ export const MESSAGES = {
       "push すると Actions タブでワークフローが動き、完了すると Settings > Pages に公開URLが表示されます。",
       "ビルドスクリプト本体({vendorDir}/ 配下)もこのリポジトリにコピー済みのため、",
       "実行時に外部リポジトリを参照することはありません。",
-      "({vendorDir}/ 配下で編集してよいのは、設定ファイル config と、styles/ に置く独自CSS(既定は custom.css)だけです。組み込みのテーマCSSとスクリプトは編集しないでください)",
+      "({vendorDir}/ 配下で編集してよいのは、設定ファイル config と、styles/ に置く自分のカスタムスタイルだけです。base.css・default.css・スクリプトは編集しないでください)",
       "",
       "最新版に更新するときは npx github:{repo}#{tag} init --update を実行してください",
-      "(設定ファイルと、既にある独自CSSはそのままに、ワークフローとスクリプトが更新されます。独自CSSが無ければ空のひな形が作られます)。",
+      "(設定ファイルと、自分のカスタムスタイルはそのままに、ワークフロー・スクリプト・base.css・default.css が更新されます)。",
     ].join("\n"),
 
     "help.text": [
@@ -315,12 +269,11 @@ export const MESSAGES = {
       "         (init 済みのリポジトリの直下で実行します)。ファイルを保存すると自動でビルドし直します。",
       "",
       "  --update           対話なしで最新版に更新する(ワークフローとビルドスクリプトを上書きし、",
-      "                     設定ファイルは変更しない。独自CSSは既にあれば変更せず、無ければ空のひな形を作る)",
+      "                     設定ファイルと、styles/ に置いたカスタムスタイルは変更しない。base.css と default.css は上書きする)",
       "  -y, --yes          対話なしで、すべて既定値(または下のオプションで指定した値)で生成する",
       "      --branch <名前> トリガーブランチ(TRIGGER_BRANCH)。既定: リポジトリの既定ブランチ",
       "                     (origin/HEAD。分からなければ main)",
       "      --root <パス>   起点となるMarkdownファイル(ROOT_MD)。既定: README.md",
-      "      --theme <名前>  テーマ(THEME)。{themes}。既定: material",
       "      --languages <一覧>",
       "                     サイトの言語(LANGUAGES。先頭が基本言語)。既定: en",
       "      --site-name <名前>",
@@ -334,7 +287,7 @@ export const MESSAGES = {
       "  -v, --version      バージョンを表示する",
       "  -h, --help         この説明を表示する",
       "",
-      "--branch / --root / --theme / --languages / --site-name / --no-nav のいずれかを指定した場合も、対話なしで実行します。",
+      "--branch / --root / --languages / --site-name / --no-nav のいずれかを指定した場合も、対話なしで実行します。",
     ].join("\n"),
 
     "config.header": [
@@ -353,12 +306,9 @@ export const MESSAGES = {
     "config.rootMd": "# サイトの入り口になる Markdown ファイル(リポジトリの直下からのパス)",
     "config.outDir": "# ビルドしたサイトの出力先(リポジトリ内のフォルダ)",
     "config.theme": [
-      "# テーマ: material(マテリアル) / glass(グラス) / neumorphism(ニューモーフィズム) / editorial(エディトリアル) / minimal(ミニマル) / kintsugi(金継ぎ) / blueprint(ブループリント) / nineties(90年代) / none(装飾なし)",
-      "# 見た目の比較: {docs}docs/gallery.html",
-    ].join("\n"),
-    "config.styleFile": [
-      "# 独自のCSSのファイル名({vendorDir}/styles/ の中のファイル。フォルダは書かず、ファイル名だけを書きます)。",
-      "# ファイルがあれば、テーマの後に読み込まれて最優先で反映されます(無ければ使いません)。",
+      "# サイト全体のカスタムスタイル。{vendorDir}/styles/ の中のCSSファイルのファイル名(フォルダは書かず、ファイル名だけを書きます)。",
+      "# 既定の default.css はパッケージに入っています。ほかのものは、ギャラリー({docs}docs/gallery.html)で",
+      "# ダウンロードして {vendorDir}/styles/ に置き、ここにそのファイル名を書きます。",
     ].join("\n"),
     "config.languages": [
       "# サイトの言語。カンマ区切りで、先頭が基本言語(起点の README の言語)です。例: ja / en / ja,en",
@@ -392,10 +342,6 @@ export const MESSAGES = {
     "config.sitemapJson":
       "# 原因調査用の sitemap.json を出力するか(true/false)。公開サイトにも含まれるため、普段は false にしてください。",
 
-    "css.template": [
-      "/* 独自のCSSをここに書くと、テーマの後に読み込まれて最優先で反映されます。",
-      "   色や幅を変えるCSS変数(--fg / --bg / --accent など)の一覧: {docs}docs/theming.html */",
-    ].join("\n"),
 
     "preview.noScript": "{vendorDir}/build-docs.mjs がありません。先に init を実行してください(リポジトリの直下で実行します)。",
     "preview.versionMismatch":

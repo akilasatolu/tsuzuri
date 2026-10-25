@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { loadConfig, ALLOWED_THEMES, styleFilePath, CONFIG_FILE_KEYS, VENDOR_DIR, WORKFLOW_PATH, CONFIG_FILE_PATH, parseConfigText, withConfigFileDefaults, resolveLanguages, resolveOneLine } from "../.github/scripts/lib/config.mjs";
+import { loadConfig, DEFAULT_THEME, styleFilePath, CONFIG_FILE_KEYS, VENDOR_DIR, WORKFLOW_PATH, CONFIG_FILE_PATH, parseConfigText, withConfigFileDefaults, resolveLanguages, resolveOneLine } from "../.github/scripts/lib/config.mjs";
 
 // console.warn を一時的に黙らせつつ呼び出し回数/内容を検査するヘルパー
 function withCapturedWarn(fn) {
@@ -19,7 +19,7 @@ test("全キー未設定+GITHUB_REPOSITORY未設定 → 全デフォルト値", 
   const config = loadConfig({});
   assert.equal(config.rootMd, "README.md");
   assert.equal(config.outDir, "_site");
-  assert.equal(config.styleFile, "custom.css");
+  assert.equal("styleFile" in config, false);
   assert.equal(config.basePath, "");
   assert.equal(config.siteOrigin, "");
   assert.deepEqual(config.languages, ["en"]);
@@ -28,7 +28,7 @@ test("全キー未設定+GITHUB_REPOSITORY未設定 → 全デフォルト値", 
   assert.equal(config.siteName, "");
   assert.equal(config.customDomain, "");
   assert.equal(config.ogDefaultImage, "");
-  assert.equal(config.theme, "material");
+  assert.equal(config.theme, "default.css");
   assert.equal(config.styleDir, "styles");
 });
 
@@ -36,7 +36,6 @@ test("全キー設定済みで正しく反映される", () => {
   const config = loadConfig({
     ROOT_MD: "docs/index.md",
     OUT_DIR: "dist",
-    STYLE_FILE: "custom.css",
     BASE_PATH: "my-repo",
     SITE_ORIGIN: "https://example.com",
     LANGUAGES: "en",
@@ -45,12 +44,11 @@ test("全キー設定済みで正しく反映される", () => {
     SITE_NAME: "My Site",
     CUSTOM_DOMAIN: "docs.example.com",
     OGP_DEFAULT_IMAGE: "og.png",
-    THEME: "nineties",
+    THEME: "nineties.css",
     STYLE_DIR: "_pkg-src/styles",
   });
   assert.equal(config.rootMd, "docs/index.md");
   assert.equal(config.outDir, "dist");
-  assert.equal(config.styleFile, "custom.css");
   assert.equal(config.basePath, "/my-repo");
   assert.equal(config.siteOrigin, "https://example.com");
   assert.deepEqual(config.languages, ["en"]);
@@ -59,7 +57,7 @@ test("全キー設定済みで正しく反映される", () => {
   assert.equal(config.siteName, "My Site");
   assert.equal(config.customDomain, "docs.example.com");
   assert.equal(config.ogDefaultImage, "og.png");
-  assert.equal(config.theme, "nineties");
+  assert.equal(config.theme, "nineties.css");
   assert.equal(config.styleDir, "_pkg-src/styles");
 });
 
@@ -93,7 +91,7 @@ test('NAV_ENABLED="TRUE" (大文字) → true', () => {
 
 test('NAV_ENABLED="yes" → warnしてfalse', () => {
   withCapturedWarn((calls) => {
-    const config = loadConfig({ NAV_ENABLED: "yes", THEME: "material" });
+    const config = loadConfig({ NAV_ENABLED: "yes", THEME: "default.css" });
     assert.equal(config.navEnabled, false);
     assert.ok(calls.some((c) => c.includes("NAV_ENABLED")));
   });
@@ -104,7 +102,7 @@ test('CUSTOM_DOMAIN="https://example.com/path" → warnして空文字', () => {
     const config = loadConfig({
       CUSTOM_DOMAIN: "https://example.com/path",
       NAV_ENABLED: "false",
-      THEME: "material",
+      THEME: "default.css",
     });
     assert.equal(config.customDomain, "");
     assert.ok(calls.some((c) => c.includes("CUSTOM_DOMAIN")));
@@ -116,34 +114,39 @@ test('LANGUAGES="" → ["en"]', () => {
   assert.deepEqual(config.languages, ["en"]);
 });
 
-test('THEME="nineties" → 正常反映', () => {
-  const config = loadConfig({ THEME: "nineties" });
-  assert.equal(config.theme, "nineties");
-});
-
-test('THEME="Sumi" (大文字小文字違い) → warnして"material"', () => {
+test('THEME="nineties.css" → 正常反映(THEME起因のwarnなし)', () => {
   withCapturedWarn((calls) => {
-    const config = loadConfig({ THEME: "Sumi", NAV_ENABLED: "false" });
-    assert.equal(config.theme, "material");
-    assert.ok(calls.some((c) => c.includes("THEME")));
-  });
-});
-
-test('THEME="sepia" (許可リスト外) → warnして"material"', () => {
-  withCapturedWarn((calls) => {
-    const config = loadConfig({ THEME: "sepia", NAV_ENABLED: "false" });
-    assert.equal(config.theme, "material");
-    assert.ok(calls.some((c) => c.includes("THEME")));
-  });
-});
-
-test('THEME="none" → 正常反映(バリデーション通過、THEME起因のwarnなし)', () => {
-  withCapturedWarn((calls) => {
-    // NAV_ENABLEDは本テストの関心事ではないため明示的に有効値を渡し、
-    // THEME検証のみに着目してwarnが出ないことを確認する
-    const config = loadConfig({ THEME: "none", NAV_ENABLED: "false" });
-    assert.equal(config.theme, "none");
+    const config = loadConfig({ THEME: "nineties.css" });
+    assert.equal(config.theme, "nineties.css");
     assert.ok(!calls.some((c) => c.includes("THEME")));
+  });
+});
+
+test("THEME: 前後の空白は取る。大文字小文字は区別しない拡張子(.CSS)も使える", () => {
+  withCapturedWarn((calls) => {
+    assert.equal(loadConfig({ THEME: "  site.css " }).theme, "site.css");
+    assert.equal(loadConfig({ THEME: "My Style.CSS" }).theme, "My Style.CSS");
+    assert.deepEqual(calls, []);
+  });
+});
+
+test("THEME が .css のファイル名でない値(none・旧テーマ名・パス・.css で終わらない値)は、警告して default.css", () => {
+  for (const value of ["none", "material", "glass", "Sumi", "sepia", "sub/x.css", "../x.css", "a\\b.css", "C:x.css", ".github/tsuzuri/styles/default.css", "custom.txt", ".hidden.css", ".css"]) {
+    withCapturedWarn((calls) => {
+      const config = loadConfig({ THEME: value, NAV_ENABLED: "false" });
+      assert.equal(config.theme, "default.css", value);
+      assert.equal(calls.length, 1, value);
+      assert.match(calls[0], /\[config\] The value of THEME is invalid/, value);
+      assert.match(calls[0], /Falling back to "default\.css"/, value);
+    });
+  }
+});
+
+test("THEME 未設定・空・空白だけは、警告なしで default.css(DEFAULT_THEME)", () => {
+  withCapturedWarn((calls) => {
+    assert.equal(DEFAULT_THEME, "default.css");
+    for (const env of [{}, { THEME: "" }, { THEME: "   " }]) assert.equal(loadConfig(env).theme, "default.css");
+    assert.deepEqual(calls, []);
   });
 });
 
@@ -159,7 +162,7 @@ test("STYLE_DIR設定済み(_pkg-src/styles) → そのまま反映されパス�
     const config = loadConfig({
       STYLE_DIR: "../outside/styles",
       NAV_ENABLED: "false",
-      THEME: "material",
+      THEME: "default.css",
     });
     assert.equal(config.styleDir, "../outside/styles");
     assert.ok(!calls.some((c) => c.includes("STYLE_DIR")));
@@ -170,7 +173,6 @@ test("回帰テスト: 旧4キーのみの設定オブジェクトで新規キ�
   const config = loadConfig({
     ROOT_MD: "README.md",
     OUT_DIR: "_site",
-    STYLE_FILE: "custom.css",
     BASE_PATH: "",
   });
   assert.deepEqual(config.languages, ["en"]);
@@ -179,7 +181,7 @@ test("回帰テスト: 旧4キーのみの設定オブジェクトで新規キ�
   assert.equal(config.siteName, "");
   assert.equal(config.customDomain, "");
   assert.equal(config.ogDefaultImage, "");
-  assert.equal(config.theme, "material");
+  assert.equal(config.theme, "default.css");
   assert.equal(config.styleDir, "styles");
 });
 
@@ -203,7 +205,7 @@ test("NAV_ENABLED・THEME・LANGUAGESを省略(未設定・空文字)してもwa
     const blank = loadConfig({ LANGUAGES: " , ,," });
     for (const config of [unset, empty, blank]) {
       assert.equal(config.navEnabled, false);
-      assert.equal(config.theme, "material");
+      assert.equal(config.theme, "default.css");
       assert.deepEqual(config.languages, ["en"]);
     }
     assert.deepEqual(calls, []);
@@ -369,8 +371,8 @@ test("ROOT_MD: ./ や \\ を含む書き方も、リンクから解決したパ�
 });
 
 test("parseConfigText: コメント・空行・未知のキーを読み飛ばし、値の前後の空白を取る", () => {
-  const values = parseConfigText("\uFEFF# comment\r\nTHEME = nineties \r\n\nUNKNOWN=x\nSITE_NAME=A=B\nNAV_ENABLED=true");
-  assert.deepEqual(values, { THEME: "nineties", SITE_NAME: "A=B", NAV_ENABLED: "true" });
+  const values = parseConfigText("\uFEFF# comment\r\nTHEME = nineties.css \r\n\nUNKNOWN=x\nSITE_NAME=A=B\nNAV_ENABLED=true");
+  assert.deepEqual(values, { THEME: "nineties.css", SITE_NAME: "A=B", NAV_ENABLED: "true" });
 });
 
 test("parseConfigText: LANG の行は(警告なしで)無視され、LANGUAGES は読む", () => {
@@ -392,9 +394,9 @@ test("parseConfigText: LANG の行は(警告なしで)無視され、LANGUAGES �
 });
 
 test("withConfigFileDefaults: 環境変数を優先し、無いキーは設定ファイルの値にする", () => {
-  const file = { THEME: "nineties", LANGUAGES: "en", NAV_ENABLED: "true" };
-  const env = withConfigFileDefaults({ THEME: "glass", LANG: "ja_JP.UTF-8" }, file);
-  assert.equal(env.THEME, "glass");
+  const file = { THEME: "nineties.css", LANGUAGES: "en", NAV_ENABLED: "true" };
+  const env = withConfigFileDefaults({ THEME: "glass.css", LANG: "ja_JP.UTF-8" }, file);
+  assert.equal(env.THEME, "glass.css");
   assert.equal(env.LANGUAGES, "en");
   assert.equal(env.LANG, "ja_JP.UTF-8", "OS の LANG はそのまま(読まれない)");
   assert.equal(env.NAV_ENABLED, "true");
@@ -422,8 +424,8 @@ test("ワークフローの Build の env: STYLE_DIR だけ(設定ファイル�
   assert.ok(yml.includes('echo "SITE_ORIGIN=$SITE_ORIGIN" >> "$GITHUB_ENV"'));
 });
 
-test('THEME="glass"(月) → 正常反映', () => {
-  assert.equal(loadConfig({ THEME: "glass" }).theme, "glass");
+test('THEME="glass.css" → 正常反映', () => {
+  assert.equal(loadConfig({ THEME: "glass.css" }).theme, "glass.css");
 });
 
 test("CONFIG_FILE_KEYS: LANG は無く、LANGUAGES がある", () => {
@@ -437,31 +439,11 @@ test("利用者のリポジトリでの Tsuzuri のファイルの置き場所",
   assert.equal(CONFIG_FILE_PATH, ".github/tsuzuri/config");
 });
 
-test("STYLE_FILE: ファイル名だけ。未設定・空は既定の custom.css、前後の空白は取る", () => {
-  withCapturedWarn((calls) => {
-    assert.equal(loadConfig({}).styleFile, "custom.css");
-    assert.equal(loadConfig({ STYLE_FILE: "" }).styleFile, "custom.css");
-    assert.equal(loadConfig({ STYLE_FILE: "  site.css " }).styleFile, "site.css");
-    assert.equal(loadConfig({ STYLE_FILE: "My Theme.CSS" }).styleFile, "My Theme.CSS");
-    assert.deepEqual(calls, []);
-  });
-});
-
-test("STYLE_FILE: フォルダを含む値・.css で終わらない値・. で始まる値は、警告して \"\"(独自CSSを使わない)にする", () => {
-  for (const value of [".github/tsuzuri/styles/custom.css", "sub/x.css", "../x.css", "a\\b.css", "C:x.css", "custom.txt", "custom", ".hidden.css", ".css"]) {
-    withCapturedWarn((calls) => {
-      assert.equal(loadConfig({ STYLE_FILE: value }).styleFile, "", value);
-      assert.equal(calls.length, 1, value);
-      assert.match(calls[0], /\[config\] The value of STYLE_FILE is invalid/);
-      assert.match(calls[0], /Write only a file name/);
-    });
-  }
-});
-
 test("styleFilePath: .github/tsuzuri/styles/ の中のファイルとしてのリポジトリの直下からのパス", () => {
-  assert.equal(styleFilePath("custom.css"), ".github/tsuzuri/styles/custom.css");
+  assert.equal(styleFilePath("default.css"), ".github/tsuzuri/styles/default.css");
 });
 
-test("ALLOWED_THEMES の組み込みテーマ名は、どれも .css で終わらない(frontmatter の theme で CSS のファイル名と見分けるため)", () => {
-  for (const theme of ALLOWED_THEMES) assert.doesNotMatch(theme, /\.css$/i, theme);
+test("CONFIG_FILE_KEYS に STYLE_FILE は無く、THEME がある", () => {
+  assert.ok(!CONFIG_FILE_KEYS.includes("STYLE_FILE"));
+  assert.ok(CONFIG_FILE_KEYS.includes("THEME"));
 });

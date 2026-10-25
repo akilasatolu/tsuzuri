@@ -1,19 +1,20 @@
 ---
 title: 装飾なし(none)
-theme: none
+theme: none.css
 styleFile: plain.css
-description: Tsuzuriの組み込みテーマ「装飾なし(none)」の見本ページ
+description: カスタムスタイル「装飾なし(none)」の見本ページ
 ---
 
 # 装飾なし(none)
 
-テーマ層を適用せず、基礎CSSとブラウザ既定の見た目だけで表示。
+ベースだけを適用し、ブラウザ既定の見た目で表示します。`none.css`はコメントだけのCSSファイルです。
 
-このテーマをサイト全体で使うには、`.github/tsuzuri/config`で`THEME=none`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: none`と書きます
-([テーマ・スタイル](../theming.ja.md)参照)。
+使うには、[ギャラリー](../gallery.ja.md#装飾なしnone)で`none.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+`.github/tsuzuri/config`で`THEME=none.css`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: none.css`と書きます
+([スタイル(Theming)](../theming.ja.md)参照)。
 
-[← 90年代(nineties)](nineties.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [独自CSSの例 →](custom.ja.md)
+[← 90年代(nineties)](nineties.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [カスタムスタイルの例(このサイト) →](custom.ja.md)
 
 ## 見出しレベル2
 
@@ -36,7 +37,7 @@ description: Tsuzuriの組み込みテーマ「装飾なし(none)」の見本ペ
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `material` | 組み込みテーマ名 |
+| `THEME` | `default.css` | カスタムスタイルのファイル名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANGUAGES` | `en` | サイトの言語(`<html lang>`の値) |
 
@@ -50,4 +51,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 90年代(nineties)](nineties.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [独自CSSの例 →](custom.ja.md)
+[← 90年代(nineties)](nineties.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [カスタムスタイルの例(このサイト) →](custom.ja.md)

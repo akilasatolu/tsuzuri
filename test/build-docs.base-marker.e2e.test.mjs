@@ -55,7 +55,7 @@ function runBuild(cwd, overrides) {
   assert.ok(overrides && overrides.LANGUAGES, "このファイルのビルドは LANGUAGES をはっきり指定する");
   const env = { ...process.env };
   for (const key of CONFIG_ENV_KEYS) delete env[key];
-  env.THEME = "none";
+  env.THEME = "none.css"; // コメントだけのカスタムスタイル(makeSite/withSite が .github/tsuzuri/styles/ に置く)
   for (const [key, value] of Object.entries(overrides)) {
     if (value === null) delete env[key];
     else env[key] = value;
@@ -68,6 +68,8 @@ function makeSite(files) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "build-docs-base-marker-"));
   fs.mkdirSync(path.join(dir, "styles"), { recursive: true });
   fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(dir, "styles", "base.css"));
+  fs.mkdirSync(path.join(dir, ".github", "tsuzuri", "styles"), { recursive: true });
+  fs.writeFileSync(path.join(dir, ".github", "tsuzuri", "styles", "none.css"), "/* none */\n");
   for (const [rel, content] of Object.entries(files)) {
     const abs = path.join(dir, rel);
     fs.mkdirSync(path.dirname(abs), { recursive: true });

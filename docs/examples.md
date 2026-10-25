@@ -11,14 +11,14 @@ title: Examples
 The documentation site you're reading is built with Tsuzuri itself
 ([source](https://github.com/akilasatolu/tsuzuri/tree/main)). It combines the following features.
 
-- **A look made only with custom CSS**: it uses `THEME=none` and builds the colors, cards and
-  buttons with custom CSS in `STYLE_FILE` ([custom CSS example](gallery/custom.md)).
+- **A look made with a custom style of its own**: it builds the colors, cards and
+  buttons in its own custom style (`THEME`) ([custom style example](gallery/custom.md)).
 - **The top page entrance**: the beginning of `README.md` contains HTML with classes, such as
-  `<div class="tsuzuri-hero">`, styled with custom CSS. On GitHub the classes are dropped and it
+  `<div class="tsuzuri-hero">`, styled with the custom style. On GitHub the classes are dropped and it
   shows as ordinary text, so it still reads fine on GitHub.
-- **Theme gallery**: each theme sample page sets `theme` (the page's theme) and `styleFile` (an
-  empty CSS file) in the frontmatter, so it shows only the built-in theme
-  ([theme gallery](gallery.md)).
+- **Gallery**: each custom style's sample page sets `theme` (the page's custom style) in the
+  frontmatter, so it shows only that style, and the gallery offers each CSS file for download
+  ([gallery](gallery.md)).
 - **404 page**: made with `404.md` at the root of the repository.
 - **English and Japanese**: it's a [multilingual site](i18n.md) with `LANGUAGES=en,ja`. The
   English pages are the base, and each Japanese page sits next to it as `*.ja.md`.
@@ -69,8 +69,8 @@ For example, you could combine the following.
   without a `description` get one made from the first paragraph)
 - Set your brand's favicon with `FAVICON_FILE` and assign your own domain with `CUSTOM_DOMAIN`
   (see the [configuration reference](./configuration.md) and [Deployment](./deployment.md))
-- Change `THEME` to one close to your brand colors, such as `material` or `glass`. To go
-  further, build the look with `THEME=none` and custom CSS, like this site (see
+- Change `THEME` to a custom style close to your brand colors, such as `glass.css`, downloaded
+  from the [gallery](./gallery.md). To go further, write your own custom style, like this site (see
   [Theming](./theming.md))
 - Set `nav: false` on pages not worth listing in the navigation, such as past news posts
 

@@ -59,7 +59,7 @@ function runBuild(cwd, overrides) {
   assert.ok(overrides && "LANGUAGES" in overrides, "このファイルのビルドは LANGUAGES をはっきり指定する");
   const env = { ...process.env };
   for (const key of CONFIG_ENV_KEYS) delete env[key];
-  env.THEME = "none";
+  env.THEME = "none.css"; // コメントだけのカスタムスタイル(makeSite/withSite が .github/tsuzuri/styles/ に置く)
   for (const [key, value] of Object.entries(overrides)) {
     if (value === null) delete env[key];
     else env[key] = value;
@@ -73,6 +73,8 @@ function makeSite(fixture, extra = {}) {
   if (fixture) fs.cpSync(fixture, dir, { recursive: true });
   fs.mkdirSync(path.join(dir, "styles"), { recursive: true });
   fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(dir, "styles", "base.css"));
+  fs.mkdirSync(path.join(dir, ".github", "tsuzuri", "styles"), { recursive: true });
+  fs.writeFileSync(path.join(dir, ".github", "tsuzuri", "styles", "none.css"), "/* none */\n");
   for (const [rel, content] of Object.entries(extra)) {
     const abs = path.join(dir, rel);
     if (content === null) {

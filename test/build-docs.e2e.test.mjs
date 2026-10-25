@@ -64,23 +64,32 @@ function copyBasicSite(dir) {
   fs.cpSync(FIXTURE_SITE, dir, { recursive: true, filter: (src) => !src.includes("styles-fixture") });
 }
 
-// 実プロジェクトの styles/base.css・styles/material.css を
-// tmp dir 内の既定 STYLE_DIR ("styles") にコピーする(=既定THEME="material"での
-// 実運用と同じ構成を再現する)。
-function copyRealBaseAndThemeStyles(dir, themeFile = "material.css") {
+// 実プロジェクトの styles/base.css を tmp dir 内の既定 STYLE_DIR ("styles") に、styles/default.css を
+// .github/tsuzuri/styles/(カスタムスタイルの置き場所。STYLE_DIR には影響されない)にコピーする
+// (=既定の THEME=default.css での実運用と同じ構成を再現する)。
+function copyRealBaseAndDefaultStyle(dir, styleFile = "default.css") {
   const stylesDir = path.join(dir, "styles");
   fs.mkdirSync(stylesDir, { recursive: true });
   fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(stylesDir, "base.css"));
-  fs.copyFileSync(path.join(REAL_STYLES_DIR, themeFile), path.join(stylesDir, themeFile));
+  writeCustomStyle(dir, styleFile, fs.readFileSync(path.join(REAL_STYLES_DIR, styleFile), "utf-8"));
 }
 
-// フィクスチャ専用の STYLE_DIR ("styles-fixture") を tmp dir にコピーする。
-// マーカーコメントのみの base.css / nineties.css を持ち、実際のテーマCSSの中身に
-// 依存せずテーマカスケードの挙動を検証できる。
+// .github/tsuzuri/styles/ に、カスタムスタイル(THEME・frontmatter の theme で指定する ○○.css)を置く
+function writeCustomStyle(dir, name, css) {
+  const customDir = path.join(dir, ".github", "tsuzuri", "styles");
+  fs.mkdirSync(customDir, { recursive: true });
+  fs.writeFileSync(path.join(customDir, name), css);
+}
+
+// フィクスチャ専用のベース(STYLE_DIR="styles-fixture")と、カスタムスタイル(.github/tsuzuri/styles/nineties.css)を
+// tmp dir にコピーする。どちらもマーカーコメントだけで、実際のCSSの中身に依存せず
+// 「ベース → カスタムスタイル」の挙動を検証できる。
 function copyFixtureStyleDir(dir) {
   fs.cpSync(path.join(FIXTURE_SITE, "styles-fixture"), path.join(dir, "styles-fixture"), {
     recursive: true,
+    filter: (src) => path.basename(src) !== "nineties.css",
   });
+  writeCustomStyle(dir, "nineties.css", fs.readFileSync(path.join(FIXTURE_SITE, "styles-fixture", "nineties.css"), "utf-8"));
 }
 
 // sitemap.json(SITEMAP_JSON=true のときだけ出力)の内容を検証するテストが多いため、
@@ -119,7 +128,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir); // 既定 THEME=material 相当
+      copyRealBaseAndDefaultStyle(dir); // 既定 THEME=default.css 相当
 
       const result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
@@ -139,13 +148,13 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.doesNotMatch(indexHtml, /<link rel="canonical"/);
 
       // 【v3修正の緩和基準】バイト単位一致ではなく、旧pageTemplateが出力していた
-      // 個々のCSS宣言ブロック(=base.css/material.cssの内容そのもの)が、順序を問わず
+      // 個々のCSS宣言ブロック(=base.css/default.cssの内容そのもの)が、順序を問わず
       // 連結後の<style>文字列に一字一句そのまま含まれていること。
       const styleBlock = extractStyleBlock(indexHtml);
       const baseCssContent = fs.readFileSync(path.join(REAL_STYLES_DIR, "base.css"), "utf-8");
-      const waCssContent = fs.readFileSync(path.join(REAL_STYLES_DIR, "material.css"), "utf-8");
+      const waCssContent = fs.readFileSync(path.join(REAL_STYLES_DIR, "default.css"), "utf-8");
       assert.ok(styleBlock.includes(baseCssContent), "base.css相当のブロックが含まれること");
-      assert.ok(styleBlock.includes(waCssContent), ":root/@media(material.css相当)のブロックが含まれること");
+      assert.ok(styleBlock.includes(waCssContent), ":root/@media(default.css相当)のブロックが含まれること");
 
       // .nojekyll 存在
       assert.equal(readOut(dir, ".nojekyll"), "");
@@ -159,20 +168,21 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.deepEqual(sitemap.pages.map((p) => p.rel).sort(), ["README.md", "docs/a.md"].sort());
       assert.deepEqual(sitemap.images, ["docs/img.png"]);
       assert.deepEqual(sitemap.missing, []);
-      assert.equal(sitemap.customStyleApplied, false);
-      assert.equal(sitemap.theme, "material");
+      assert.equal("styleFile" in sitemap, false);
+      assert.equal("customStyleApplied" in sitemap, false);
+      assert.equal(sitemap.theme, "default.css");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  test("THEME=nineties実行時、base.css相当とnineties.css相当が正しい順序で<style>に含まれる", () => {
+  test("THEME=nineties.css 実行時、base.css相当とnineties.css相当が正しい順序で<style>に含まれる", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
 
-      const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "nineties.css", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
 
       const indexHtml = readOut(dir, "index.html");
@@ -181,21 +191,24 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.ok(styleBlock.includes("/*NINETIES_FIXTURE_MARKER*/"));
       assert.ok(
         styleBlock.indexOf("/*BASE_FIXTURE_MARKER*/") < styleBlock.indexOf("/*NINETIES_FIXTURE_MARKER*/"),
-        "baseCss -> themeCss の順で連結されること"
+        "ベース -> カスタムスタイル の順で連結されること"
       );
+      assert.ok(styleBlock.includes("/* ---- Custom style: .github/tsuzuri/styles/nineties.css ---- */"), "カスタムスタイルのファイルのパスをコメントで示す");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  test("THEME=none実行時はbase.css相当のみでtheme相当の目印文字列を含まない", () => {
+  test("THEME=none.css(コメントだけのカスタムスタイル)の実行時は、ベースだけの見た目で、ほかのカスタムスタイルの目印文字列を含まない", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
+      writeCustomStyle(dir, "none.css", "/* none: base only */\n");
 
-      const result = runBuild(dir, { THEME: "none", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "none.css", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
+      assert.equal(result.stderr, "", "警告は出ない");
 
       const indexHtml = readOut(dir, "index.html");
       const styleBlock = extractStyleBlock(indexHtml);
@@ -206,11 +219,11 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("許可リスト内だがCSSファイル本体が存在しないTHEME→warn+themeCss空でビルド成功", () => {
+  test("THEME のカスタムスタイルのファイルが存在しない→warnして、ベースだけでビルド成功", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      // styles-fixture には base.css のみコピーし、nineties.css を欠落させる
+      // styles-fixture には base.css のみコピーし、.github/tsuzuri/styles/nineties.css を置かない
       const stylesDir = path.join(dir, "styles-fixture");
       fs.mkdirSync(stylesDir, { recursive: true });
       fs.copyFileSync(
@@ -218,9 +231,9 @@ describe("build-docs.mjs :: main (E2E)", () => {
         path.join(stylesDir, "base.css")
       );
 
-      const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "nineties.css", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /nineties\.css.*was not found/);
+      assert.match(result.stderr, /THEME \("nineties\.css"\) was not found.*Continuing the build with base\.css only/);
 
       const indexHtml = readOut(dir, "index.html");
       const styleBlock = extractStyleBlock(indexHtml);
@@ -235,7 +248,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
 
       const result = runBuild(dir, { CUSTOM_DOMAIN: "docs.example.com" });
       assert.equal(result.status, 0, result.stderr);
@@ -250,7 +263,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
 
       const result = runBuild(dir, { FAVICON_FILE: "does-not-exist.ico" });
       assert.equal(result.status, 0, result.stderr);
@@ -268,7 +281,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dirFalse = makeTmpDir();
     try {
       copyBasicSite(dirTrue);
-      copyRealBaseAndThemeStyles(dirTrue);
+      copyRealBaseAndDefaultStyle(dirTrue);
       const resultTrue = runBuild(dirTrue, { NAV_ENABLED: "true" });
       assert.equal(resultTrue.status, 0, resultTrue.stderr);
       const indexTrue = readOut(dirTrue, "index.html");
@@ -277,7 +290,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.match(aTrue, /<nav/);
 
       copyBasicSite(dirFalse);
-      copyRealBaseAndThemeStyles(dirFalse);
+      copyRealBaseAndDefaultStyle(dirFalse);
       const resultFalse = runBuild(dirFalse); // NAV_ENABLED未設定=デフォルトfalse
       assert.equal(resultFalse.status, 0, resultFalse.stderr);
       const indexFalse = readOut(dirFalse, "index.html");
@@ -292,7 +305,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
 
       const result = runBuild(dir, { ROOT_MD: "NOPE.md" });
       assert.equal(result.status, 1);
@@ -306,7 +319,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
 
       // サブディレクトリ配下に favicon 本体を配置する
       fs.mkdirSync(path.join(dir, "assets"), { recursive: true });
@@ -340,7 +353,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
 
       fs.writeFileSync(
         path.join(dir, "README.md"),
@@ -380,119 +393,75 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("frontmatterのtheme(組み込みテーマ名)がページ単位で適用される", () => {
+  test("frontmatterの theme(○○.css のファイル名)がページ単位で適用され、サイト全体のカスタムスタイルを置き換える(混ざらない)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
-      // docs/a.md だけ frontmatter で theme: nineties を指定する。
+      writeCustomStyle(dir, "my-custom-theme.css", "/*CUSTOM_PATH_THEME_MARKER*/");
+      // docs/a.md だけ frontmatter で theme を指定する。
       fs.writeFileSync(
         path.join(dir, "docs", "a.md"),
-        ["---", "theme: nineties", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
+        ["---", "theme: my-custom-theme.css", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
       );
 
-      // サイト全体は THEME=none(=デフォルトではテーマ層を適用しない)。
-      const result = runBuild(dir, { THEME: "none", STYLE_DIR: "styles-fixture" });
+      // サイト全体は THEME=nineties.css
+      const result = runBuild(dir, { THEME: "nineties.css", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
+      assert.equal(result.stderr, "", "警告は出ない");
 
       const indexStyle = extractStyleBlock(readOut(dir, "index.html"));
-      assert.ok(indexStyle.includes("/*BASE_FIXTURE_MARKER*/"));
-      assert.ok(
-        !indexStyle.includes("/*NINETIES_FIXTURE_MARKER*/"),
-        "frontmatter未指定のページはサイト全体のTHEME(none)のまま"
-      );
-
-      const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
-      assert.ok(aStyle.includes("/*BASE_FIXTURE_MARKER*/"));
-      assert.ok(
-        aStyle.includes("/*NINETIES_FIXTURE_MARKER*/"),
-        "frontmatterでtheme: ninetiesを指定したページだけ上書きされる"
-      );
-    } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
-    }
-  });
-
-  test("frontmatterのtheme(.css で終わる独自CSSのファイル名)がページ単位で適用される", () => {
-    const dir = makeTmpDir();
-    try {
-      copyBasicSite(dir);
-      copyFixtureStyleDir(dir);
-      fs.mkdirSync(path.join(dir, ".github", "tsuzuri", "styles"), { recursive: true });
-      fs.writeFileSync(
-        path.join(dir, ".github", "tsuzuri", "styles", "my-custom-theme.css"),
-        "/*CUSTOM_PATH_THEME_MARKER*/"
-      );
-      fs.writeFileSync(
-        path.join(dir, "docs", "a.md"),
-        [
-          "---",
-          "theme: my-custom-theme.css",
-          "---",
-          "# Page A",
-          "",
-          "Back to [root](../README.md).",
-        ].join("\n")
-      );
-
-      const result = runBuild(dir, { THEME: "none", STYLE_DIR: "styles-fixture" });
-      assert.equal(result.status, 0, result.stderr);
-
-      const indexStyle = extractStyleBlock(readOut(dir, "index.html"));
+      assert.ok(indexStyle.includes("/*NINETIES_FIXTURE_MARKER*/"), "frontmatter未指定のページはサイト全体のTHEME(nineties.css)のまま");
       assert.ok(!indexStyle.includes("/*CUSTOM_PATH_THEME_MARKER*/"));
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
+      assert.ok(aStyle.includes("/*BASE_FIXTURE_MARKER*/"), "ベースは常に使う");
       assert.ok(
         aStyle.includes("/*CUSTOM_PATH_THEME_MARKER*/"),
-        ".github/tsuzuri/styles/ の中の、ファイル名で指定した独自CSSが読み込まれる"
+        ".github/tsuzuri/styles/ の中の、ファイル名で指定したカスタムスタイルが読み込まれる"
       );
+      assert.ok(!aStyle.includes("/*NINETIES_FIXTURE_MARKER*/"), "サイト全体のカスタムスタイルは混ざらない(置き換える)");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  test("frontmatterのthemeが組み込みテーマ名にもファイルにも該当しない場合、warnしつつサイト全体のTHEMEにフォールバックする", () => {
+  test("frontmatterの theme のファイルが無い場合、warnしつつサイト全体のカスタムスタイルに戻す", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
       fs.writeFileSync(
         path.join(dir, "docs", "a.md"),
-        [
-          "---",
-          "theme: no-such-file.css",
-          "---",
-          "# Page A",
-          "",
-          "Back to [root](../README.md).",
-        ].join("\n")
+        ["---", "theme: no-such-file.css", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
       );
 
-      const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "nineties.css", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /no-such-file\.css.*was not found/);
+      assert.match(result.stderr, /docs\/a\.md: the custom style \(\.github\/tsuzuri\/styles\/no-such-file\.css\) for the theme "no-such-file\.css" given in the frontmatter was not found\. Using the site-wide custom style \(THEME "nineties\.css"\) instead\./);
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(
         aStyle.includes("/*NINETIES_FIXTURE_MARKER*/"),
-        "解決できないthemeはサイト全体のTHEME(nineties)にフォールバックする"
+        "読めない theme はサイト全体のカスタムスタイル(nineties.css)に戻す"
       );
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  test("frontmatterでtheme: noneを指定するとそのページだけテーマ層を適用しない", () => {
+  test("frontmatterの theme: none.css(コメントだけのファイル)で、そのページだけスタイルなし(ベースだけ)になる", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
+      writeCustomStyle(dir, "none.css", "/* none */\n");
       fs.writeFileSync(
         path.join(dir, "docs", "a.md"),
-        ["---", "theme: none", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
+        ["---", "theme: none.css", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
       );
 
-      const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
+      const result = runBuild(dir, { THEME: "nineties.css", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
 
       const indexStyle = extractStyleBlock(readOut(dir, "index.html"));
@@ -500,8 +469,73 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(!aStyle.includes("/*NINETIES_FIXTURE_MARKER*/"));
+      assert.ok(aStyle.includes("/*BASE_FIXTURE_MARKER*/"));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("サイト全体の THEME が .css のファイル名でない値(none・旧テーマ名)のとき、警告して default.css を使う", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndDefaultStyle(dir);
+      for (const value of ["none", "material"]) {
+        const result = runBuild(dir, { THEME: value });
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stderr, new RegExp(`\\[config\\] The value of THEME is invalid \\("${value}"\\)`), value);
+        const style = extractStyleBlock(readOut(dir, "index.html"));
+        assert.ok(style.includes(fs.readFileSync(path.join(REAL_STYLES_DIR, "default.css"), "utf-8")), `${value}: default.css になる`);
+        assert.equal(JSON.parse(readOut(dir, "sitemap.json")).theme, "default.css", value);
+      }
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("THEME のファイルは .github/tsuzuri/styles/ から読む。STYLE_DIR が別のフォルダでも読める", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyFixtureStyleDir(dir);
+      // ベースだけがある STYLE_DIR(styles-fixture)の中には、カスタムスタイルを置いていない
+      assert.ok(!fs.existsSync(path.join(dir, "styles-fixture", "nineties.css")));
+      const result = runBuild(dir, { THEME: "nineties.css", STYLE_DIR: "styles-fixture" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.ok(extractStyleBlock(readOut(dir, "index.html")).includes("/*NINETIES_FIXTURE_MARKER*/"));
+      // STYLE_DIR の中にだけある同名のファイルは、読まない
+      fs.writeFileSync(path.join(dir, "styles-fixture", "other.css"), "/*ONLY_IN_STYLE_DIR*/");
+      const result2 = runBuild(dir, { THEME: "other.css", STYLE_DIR: "styles-fixture" });
+      assert.equal(result2.status, 0, result2.stderr);
+      assert.match(result2.stderr, /THEME \("other\.css"\) was not found/);
+      assert.ok(!extractStyleBlock(readOut(dir, "index.html")).includes("/*ONLY_IN_STYLE_DIR*/"));
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("サイト全体の THEME が、リポジトリの外を指すシンボリックリンクのときは読み込まない(警告してベースだけ)", (t) => {
+    const parent = makeTmpDir();
+    const dir = path.join(parent, "repo");
+    try {
+      fs.mkdirSync(dir);
+      copyBasicSite(dir);
+      copyFixtureStyleDir(dir);
+      fs.writeFileSync(path.join(parent, "secret.css"), "/*SECRET_OUTSIDE_REPO*/");
+      try {
+        fs.symlinkSync(path.join(parent, "secret.css"), path.join(dir, ".github", "tsuzuri", "styles", "link.css"));
+      } catch {
+        t.skip("シンボリックリンクを作れない環境");
+        return;
+      }
+      const result = runBuild(dir, { THEME: "link.css", STYLE_DIR: "styles-fixture" });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stderr, /THEME \("link\.css"\) points outside the repository, so it is ignored\. Continuing the build with base\.css only/);
+      const style = extractStyleBlock(readOut(dir, "index.html"));
+      assert.ok(!style.includes("SECRET_OUTSIDE_REPO"));
+      assert.ok(style.includes("/*BASE_FIXTURE_MARKER*/"));
+    } finally {
+      fs.rmSync(parent, { recursive: true, force: true });
     }
   });
 
@@ -523,7 +557,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
 
       const result = runBuild(dir, { SITE_NAME: "My Site", NAV_ENABLED: "true" });
       assert.equal(result.status, 0, result.stderr);
@@ -540,7 +574,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(
         path.join(dir, "docs", "a.md"),
         ["---", "title: ページA", "---", "# Page A", "", "Back to [root](../README.md)."].join("\n")
@@ -562,7 +596,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("frontmatterのthemeに、フォルダを含む値・.css で終わらない組み込みでない値を書くと、読み込まずフォールバックする", () => {
+  test("frontmatterのthemeに、フォルダを含む値・.css で終わらない値(none・旧テーマ名を含む)を書くと、読み込まずサイト全体のカスタムスタイルに戻す", () => {
     const parent = makeTmpDir();
     const dir = path.join(parent, "repo");
     try {
@@ -573,24 +607,27 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.mkdirSync(path.join(dir, "sub"));
       fs.writeFileSync(path.join(dir, "sub", "x.css"), "/*SUB_FOLDER_FILE*/");
       for (const [value, warning] of [
-        ["../secret.css", /cannot be used as a CSS file name/],
-        ["sub/x.css", /cannot be used as a CSS file name/],
-        ["unknown-theme", /neither a built-in theme name.*nor a CSS file name ending in \.css/],
+        ["../secret.css", /cannot be used as a custom style/],
+        ["sub/x.css", /cannot be used as a custom style/],
+        ["unknown-theme", /cannot be used as a custom style/],
+        ["none", /cannot be used as a custom style/],
+        ["glass", /cannot be used as a custom style/],
       ]) {
         fs.writeFileSync(path.join(dir, "docs", "a.md"), ["---", `theme: ${value}`, "---", "# Page A"].join("\n"));
-        const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
+        const result = runBuild(dir, { THEME: "nineties.css", STYLE_DIR: "styles-fixture" });
         assert.equal(result.status, 0, result.stderr);
         assert.match(result.stderr, warning, value);
+        assert.match(result.stderr, /Using the site-wide custom style \(THEME "nineties\.css"\) instead\./, value);
         const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
         assert.ok(!aStyle.includes("SECRET_OUTSIDE_REPO") && !aStyle.includes("SUB_FOLDER_FILE"), value);
-        assert.ok(aStyle.includes("/*NINETIES_FIXTURE_MARKER*/"), `${value}: サイト全体のTHEMEにフォールバックする`);
+        assert.ok(aStyle.includes("/*NINETIES_FIXTURE_MARKER*/"), `${value}: サイト全体のカスタムスタイルに戻す`);
       }
     } finally {
       fs.rmSync(parent, { recursive: true, force: true });
     }
   });
 
-  test("リポジトリの外を指すシンボリックリンクの独自CSS(styleFile・theme)は読み込まない", (t) => {
+  test("リポジトリの外を指すシンボリックリンクのカスタムスタイル(frontmatter の theme)は読み込まず、サイト全体のものに戻す", (t) => {
     const parent = makeTmpDir();
     const dir = path.join(parent, "repo");
     try {
@@ -598,18 +635,16 @@ describe("build-docs.mjs :: main (E2E)", () => {
       copyBasicSite(dir);
       copyFixtureStyleDir(dir);
       fs.writeFileSync(path.join(parent, "secret.css"), "/*SECRET_OUTSIDE_REPO*/");
-      fs.mkdirSync(path.join(dir, ".github", "tsuzuri", "styles"), { recursive: true });
       try {
         fs.symlinkSync(path.join(parent, "secret.css"), path.join(dir, ".github", "tsuzuri", "styles", "link.css"));
       } catch {
         t.skip("シンボリックリンクを作れない環境");
         return;
       }
-      fs.writeFileSync(path.join(dir, "docs", "a.md"), ["---", "theme: link.css", "styleFile: link.css", "---", "# Page A"].join("\n"));
-      const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), ["---", "theme: link.css", "---", "# Page A"].join("\n"));
+      const result = runBuild(dir, { THEME: "nineties.css", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /theme "link\.css" given in the frontmatter points outside the repository/);
-      assert.match(result.stderr, /styleFile "link\.css" in the frontmatter points outside the repository/);
+      assert.match(result.stderr, /theme "link\.css" given in the frontmatter points outside the repository, so it is ignored\. Using the site-wide custom style/);
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(!aStyle.includes("SECRET_OUTSIDE_REPO"));
       assert.ok(aStyle.includes("/*NINETIES_FIXTURE_MARKER*/"));
@@ -624,7 +659,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     try {
       fs.mkdirSync(dir);
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(parent, "icon.png"), "png");
 
       const result = runBuild(dir, { FAVICON_FILE: "../icon.png" });
@@ -641,7 +676,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
 
       for (const outDir of ["../out", ".", "/tmp"]) {
         const result = runBuild(dir, { OUT_DIR: outDir });
@@ -657,7 +692,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(
         path.join(dir, "README.md"),
         "# Root Page\n\n[テーマの説明へ](docs/a.md#テーマ設定) [A](docs/a.md)\n"
@@ -684,7 +719,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "docs", "manual.pdf"), "%PDF");
       fs.writeFileSync(path.join(dir, ".env"), "SECRET=1");
       fs.writeFileSync(
@@ -707,7 +742,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.mkdirSync(path.join(dir, "guide"));
       fs.writeFileSync(path.join(dir, "guide", "README.md"), "# Guide\n");
       fs.writeFileSync(path.join(dir, "README.md"), "# Root Page\n\n[guide](guide/) [guide readme](guide/README.md)\n");
@@ -727,7 +762,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
 
       let result = runBuild(dir, { NAV_ENABLED: "true", BASE_PATH: "/repo" });
       assert.equal(result.status, 0, result.stderr);
@@ -756,7 +791,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\nnoindex: true\n---\n# Page A\n");
 
       let result = runBuild(dir, { SITE_ORIGIN: "https://owner.github.io", BASE_PATH: "/repo" });
@@ -783,7 +818,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.mkdirSync(path.join(dir, "assets"));
       fs.writeFileSync(path.join(dir, "assets", "ogp.png"), "png");
       fs.writeFileSync(path.join(dir, "docs", "card.png"), "png");
@@ -812,7 +847,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
 
       let result = runBuild(dir, { STRICT_LINKS: "true" });
       assert.equal(result.status, 0, result.stderr);
@@ -835,7 +870,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\ntitle: ページA\n---\n# Page A\n");
 
       let result = runBuild(dir, { NAV_ENABLED: "true" });
@@ -857,7 +892,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       const result = runBuild(dir, { SITEMAP_JSON: "" });
       assert.equal(result.status, 0, result.stderr);
       assert.ok(fs.existsSync(path.join(dir, "_site", "index.html")));
@@ -871,7 +906,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(
         path.join(dir, "README.md"),
         [
@@ -907,7 +942,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\ntitle: ページA\n---\n# Page A\n\n検索できる本文です。\n");
 
       let result = runBuild(dir, { NAV_ENABLED: "true", BASE_PATH: "/repo" });
@@ -934,7 +969,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(
         path.join(dir, "README.md"),
         [
@@ -974,7 +1009,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       const body = ["# Page A", "", "![i](img.png)", "", "## One", "", "### One-1", "", "## Two", ""].join("\n");
       fs.writeFileSync(path.join(dir, "docs", "a.md"), body);
 
@@ -1005,7 +1040,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       let result = runBuild(dir, { LAST_UPDATED: "true" });
       assert.equal(result.status, 0, result.stderr);
       assert.doesNotMatch(readOut(dir, "index.html"), /class="tsuzuri-updated"/);
@@ -1036,7 +1071,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       for (const [rel, body] of [
         ["docs/ref.md", "# Ref\n"],
         ["docs/nested.md", "# Nested\n"],
@@ -1080,7 +1115,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(
         path.join(dir, "docs", "a.md"),
         ["```sh", "# install deps", "```", "", "# Title with **bold** and `code`", ""].join("\n")
@@ -1105,7 +1140,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "README.md"), "# Root Page\n\nx[^1] [A](docs/a.md)\n\n[^1]: note A\n");
       fs.writeFileSync(path.join(dir, "docs", "a.md"), "# Page A\n\ny[^1]\n\n[^1]: note B\n");
       const result = runBuild(dir);
@@ -1121,7 +1156,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "docs", "index.md"), "# Docs Top\n\n[top](/) [A](a.md)\n");
       // 既定のフィクスチャの a.md は ../README.md へリンクしているので、ここでは外す
       fs.writeFileSync(path.join(dir, "docs", "a.md"), "# Page A\n\n[up](../)\n");
@@ -1139,7 +1174,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(
         path.join(dir, "README.md"),
         [
@@ -1170,7 +1205,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.mkdirSync(path.join(dir, "guide"));
       fs.writeFileSync(path.join(dir, "guide", "README.md"), "# Guide\n");
       fs.mkdirSync(path.join(dir, "src"));
@@ -1222,7 +1257,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "docs", "with space.md"), "# スペース付き\n");
       fs.writeFileSync(path.join(dir, "README.md"), "# Root Page\n\n[A](docs/a.md) [S](<docs/with space.md>)\n");
       fs.mkdirSync(path.join(dir, "img"));
@@ -1256,7 +1291,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(
         path.join(dir, "README.md"),
         "# Root Page\n\n日本語の文を\n途中で改行します。\n続きの文です。\nThis is\nEnglish.\n\nサーバー\nを起動します。ユーザー・\nグループと**強調**\nです。\n\n```\nコード\n内の改行\n```\n"
@@ -1276,7 +1311,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       let result = runBuild(dir, { NAV_ENABLED: "true" });
       assert.equal(result.status, 0, result.stderr);
       let html = readOut(dir, "index.html");
@@ -1296,7 +1331,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(
         path.join(dir, "README.md"),
         '<h1 align="center">\n  <img src="docs/img.png" width="48"><br>\n  MyProj\n</h1>\n\n## Main\n\n[A](docs/a.md)\n'
@@ -1323,8 +1358,8 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
-      fs.mkdirSync(path.join(dir, ".github"));
+      copyRealBaseAndDefaultStyle(dir);
+      fs.mkdirSync(path.join(dir, ".github"), { recursive: true });
       fs.writeFileSync(path.join(dir, ".github", "CONTRIBUTING.md"), "# Contributing\n\n![logo](logo.png)\n");
       fs.copyFileSync(path.join(dir, "docs", "img.png"), path.join(dir, ".github", "logo.png"));
       fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[c](.github/CONTRIBUTING.md) ![l](.github/logo.png)\n");
@@ -1345,7 +1380,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "index.html"), "<p>hand-written</p>");
       fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[demo](index.html) [A](docs/a.md)\n");
       let result = runBuild(dir);
@@ -1364,7 +1399,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "docs", "c#.md"), "# CSharp\n");
       fs.writeFileSync(path.join(dir, "docs", "100%.md"), "# Percent\n");
       fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[c](docs/c%23.md) [p](docs/100%25.md)\n");
@@ -1379,17 +1414,17 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("手元のビルドでは .github/tsuzuri/config を読み、init でコピーしたテーマCSSを使う", () => {
+  test("手元のビルドでは .github/tsuzuri/config を読み、init でコピーしたベースと、THEME のカスタムスタイルを使う", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
       const vendored = path.join(dir, ".github", "tsuzuri", "styles");
       fs.mkdirSync(vendored, { recursive: true });
       fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(vendored, "base.css"));
-      fs.copyFileSync(path.join(REAL_STYLES_DIR, "nineties.css"), path.join(vendored, "nineties.css"));
+      fs.writeFileSync(path.join(vendored, "my.css"), "/* MY STYLE FROM THEME */\n");
       fs.writeFileSync(
         path.join(dir, ".github", "tsuzuri", "config"),
-        "# c\nTHEME=nineties\nSITE_NAME=FromFile\nLANGUAGES=ja\nNAV_ENABLED=true\n"
+        "# c\nTHEME=my.css\nSITE_NAME=FromFile\nLANGUAGES=ja\nNAV_ENABLED=true\n"
       );
       // 設定ファイルの LANGUAGES=ja が使われ、OS の LANG(言語タグでない値)は影響しない
       let result = runBuild(dir, { LANGUAGES: null, LANG: "ja_JP.UTF-8" });
@@ -1397,7 +1432,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       let html = readOut(dir, "index.html");
       assert.match(html, /<html lang="ja">/);
       assert.match(html, /FromFile/);
-      assert.ok(extractStyleBlock(html).includes(fs.readFileSync(path.join(REAL_STYLES_DIR, "nineties.css"), "utf-8").slice(0, 200)));
+      assert.ok(extractStyleBlock(html).includes("/* MY STYLE FROM THEME */"), "設定ファイルの THEME のカスタムスタイルを使う");
       result = runBuild(dir, { SITE_NAME: "FromEnv" });
       html = readOut(dir, "index.html");
       assert.match(html, /FromEnv/, "環境変数を優先する");
@@ -1412,7 +1447,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "demo.mp4"), "x");
       fs.writeFileSync(
         path.join(dir, "README.md"),
@@ -1427,16 +1462,16 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("手元のビルドでは、リポジトリ直下の styles/ より init でコピーしたテーマCSSを優先する", () => {
+  test("手元のビルドでは、リポジトリ直下の styles/ より init でコピーしたベースを優先する", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "styles", "base.css"), "/* MY APP BASE */");
       const vendored = path.join(dir, ".github", "tsuzuri", "styles");
       fs.mkdirSync(vendored, { recursive: true });
       fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(vendored, "base.css"));
-      fs.copyFileSync(path.join(REAL_STYLES_DIR, "material.css"), path.join(vendored, "material.css"));
+      fs.copyFileSync(path.join(REAL_STYLES_DIR, "default.css"), path.join(vendored, "default.css"));
       const result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
       assert.doesNotMatch(extractStyleBlock(readOut(dir, "index.html")), /MY APP BASE/);
@@ -1449,7 +1484,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "robots.txt"), "x");
       fs.writeFileSync(path.join(dir, "search-index.json"), "{}");
       fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[r](robots.txt) [s](search-index.json)\n");
@@ -1476,7 +1511,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(path.join(dir, "404.html"), "<p>hand-written</p>");
       fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[x](404.html)\n");
       let result = runBuild(dir);
@@ -1491,90 +1526,11 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test("frontmatter の styleFile で、そのページだけ独自CSSを差し替える(空のファイルなら当てない)", () => {
-    const dir = makeTmpDir();
-    try {
-      copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
-      const stylesDir = path.join(dir, ".github", "tsuzuri", "styles");
-      fs.mkdirSync(stylesDir, { recursive: true });
-      fs.writeFileSync(path.join(stylesDir, "site.css"), "/* SITE CUSTOM */");
-      fs.writeFileSync(path.join(stylesDir, "plain.css"), "");
-      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[A](docs/a.md) [B](docs/b.md)\n");
-      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\nstyleFile: plain.css\n---\n# A\n");
-      fs.writeFileSync(path.join(dir, "docs", "b.md"), "---\nstyleFile: nope.css\n---\n# B\n");
-      const result = runBuild(dir, { STYLE_FILE: "site.css" });
-      assert.equal(result.status, 0, result.stderr);
-      assert.match(extractStyleBlock(readOut(dir, "index.html")), /SITE CUSTOM/);
-      assert.doesNotMatch(extractStyleBlock(readOut(dir, "docs", "a.html")), /SITE CUSTOM/, "空のファイルを指定したページには当てない");
-      assert.match(extractStyleBlock(readOut(dir, "docs", "b.html")), /SITE CUSTOM/, "見つからなければサイト全体のもの");
-      assert.match(result.stderr, /styleFile "nope\.css" in the frontmatter was not found/);
-      const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
-      assert.equal(sitemap.styleFile, ".github/tsuzuri/styles/site.css", "sitemap.json にはリポジトリの直下からのパスを出す");
-      assert.equal(sitemap.customStyleApplied, true);
-    } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
-    }
-  });
-
-  test("styleFile にフォルダを含む値・.css で終わらない値を書くと、警告してサイト全体の STYLE_FILE を使う", () => {
-    const dir = makeTmpDir();
-    try {
-      copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
-      const stylesDir = path.join(dir, ".github", "tsuzuri", "styles");
-      fs.mkdirSync(stylesDir, { recursive: true });
-      fs.writeFileSync(path.join(stylesDir, "site.css"), "/* SITE CUSTOM */");
-      fs.writeFileSync(path.join(dir, "outside.css"), "/* OUTSIDE */");
-      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[A](docs/a.md) [B](docs/b.md)\n");
-      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\nstyleFile: ../outside.css\n---\n# A\n");
-      fs.writeFileSync(path.join(dir, "docs", "b.md"), "---\nstyleFile: site.txt\n---\n# B\n");
-      const result = runBuild(dir, { STYLE_FILE: "site.css" });
-      assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /styleFile "\.\.\/outside\.css" in the frontmatter cannot be used as a CSS file name/);
-      assert.match(result.stderr, /styleFile "site\.txt" in the frontmatter cannot be used as a CSS file name/);
-      for (const page of ["a", "b"]) {
-        const css = extractStyleBlock(readOut(dir, "docs", `${page}.html`));
-        assert.match(css, /SITE CUSTOM/);
-        assert.doesNotMatch(css, /OUTSIDE/);
-      }
-    } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
-    }
-  });
-
-  test("STYLE_FILE にフォルダを含む値・.css で終わらない値を書くと、警告して独自CSSを使わない(sitemap.json の styleFile は空)", () => {
-    const dir = makeTmpDir();
-    try {
-      copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
-      const stylesDir = path.join(dir, ".github", "tsuzuri", "styles");
-      fs.mkdirSync(stylesDir, { recursive: true });
-      fs.writeFileSync(path.join(stylesDir, "custom.css"), "/* DEFAULT CUSTOM */");
-      for (const value of [".github/tsuzuri/styles/custom.css", "sub/x.css", "custom.txt"]) {
-        const result = runBuild(dir, { STYLE_FILE: value });
-        assert.equal(result.status, 0, result.stderr);
-        assert.match(result.stderr, /\[config\] The value of STYLE_FILE is invalid/, value);
-        assert.doesNotMatch(extractStyleBlock(readOut(dir, "index.html")), /DEFAULT CUSTOM/, value);
-        const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
-        assert.equal(sitemap.styleFile, "", value);
-        assert.equal(sitemap.customStyleApplied, false, value);
-      }
-      // 未設定なら既定の custom.css を、.github/tsuzuri/styles/ の中から読む
-      const result = runBuild(dir);
-      assert.equal(result.status, 0, result.stderr);
-      assert.match(extractStyleBlock(readOut(dir, "index.html")), /DEFAULT CUSTOM/);
-      assert.equal(JSON.parse(readOut(dir, "sitemap.json")).styleFile, ".github/tsuzuri/styles/custom.css");
-    } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
-    }
-  });
-
   test("見出しが無いページ内リンクは警告し、STRICT_LINKS=true ならビルドを失敗させる", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(
         path.join(dir, "README.md"),
         "# Root\n\n## 使い方\n\n[ok](#使い方) [ok2](docs/a.md#page-a) [ok3](#%E4%BD%BF%E3%81%84%E6%96%B9) [fn](#top)\n\n[bad](docs/a.md#nope) [bad2](#missing)\n"
@@ -1596,7 +1552,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.mkdirSync(path.join(dir, "_site"));
       fs.writeFileSync(path.join(dir, "_site", "keep.txt"), "user file");
       let result = runBuild(dir);
@@ -1613,28 +1569,52 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
-  test(".で始まるディレクトリの PDF・動画はコピーし、設定ファイルはコピーしない。画像に width・height を付ける", () => {
+  test(".で始まるディレクトリの PDF・動画・CSS はコピーし、設定ファイルはコピーしない。画像に width・height を付ける", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
-      fs.mkdirSync(path.join(dir, ".github"));
+      copyRealBaseAndDefaultStyle(dir);
+      fs.mkdirSync(path.join(dir, ".github"), { recursive: true });
       fs.writeFileSync(path.join(dir, ".github", "manual.pdf"), "pdf");
       fs.writeFileSync(path.join(dir, ".github", "ci.yml"), "secret: x");
+      fs.writeFileSync(path.join(dir, ".github", "theme.css"), "/* css */");
       const pngBuf = Buffer.alloc(33);
       Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(pngBuf, 0);
       pngBuf.write("IHDR", 12, "ascii");
       pngBuf.writeUInt32BE(320, 16);
       pngBuf.writeUInt32BE(200, 20);
       fs.writeFileSync(path.join(dir, "shot.png"), pngBuf);
-      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[m](.github/manual.pdf) [c](.github/ci.yml) ![s](shot.png)\n");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[m](.github/manual.pdf) [c](.github/ci.yml) [t](.github/theme.css) ![s](shot.png)\n");
       const result = runBuild(dir, { STRICT_LINKS: "true" });
       assert.equal(result.status, 0, result.stderr);
       assert.ok(fs.existsSync(path.join(dir, "_site", "_.github", "manual.pdf")));
       assert.ok(!fs.existsSync(path.join(dir, "_site", "_.github", "ci.yml")));
+      assert.ok(fs.existsSync(path.join(dir, "_site", "_.github", "theme.css")), "CSS(カスタムスタイルのダウンロード用)はコピーする");
       const html = readOut(dir, "index.html");
       assert.match(html, /href="\/_\.github\/manual\.pdf"/);
+      assert.match(html, /href="\/_\.github\/theme\.css"/);
       assert.match(html, /<img src="\/shot\.png" alt="s" width="320" height="200" loading="lazy"/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("カスタムスタイル(.github/tsuzuri/styles/○○.css)へのダウンロードリンク(download 属性つきの生の HTML)は、CSS をコピーして書き換える", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndDefaultStyle(dir);
+      writeCustomStyle(dir, "glass.css", "/* GLASS */\n");
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        '# Root\n\n<div class="tsuzuri-carousel">\n<img src="docs/img.png" alt="a">\n</div>\n<a class="tsuzuri-button" href=".github/tsuzuri/styles/glass.css" download>glass.css</a>\n'
+      );
+      const result = runBuild(dir, { STRICT_LINKS: "true", BASE_PATH: "/repo" });
+      assert.equal(result.status, 0, result.stderr);
+      const html = readOut(dir, "index.html");
+      assert.match(html, /<a class="tsuzuri-button" href="\/repo\/_\.github\/tsuzuri\/styles\/glass\.css" download>glass\.css<\/a>/);
+      assert.match(html, /<div class="tsuzuri-carousel">/);
+      assert.equal(readOut(dir, "_.github", "tsuzuri", "styles", "glass.css"), "/* GLASS */\n");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1644,7 +1624,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(
         path.join(dir, "README.md"),
         "# Root\n\n![badge](docs/img.png)\n\n> [!NOTE]\n> 注意\n\nこれは**最初の**段落です。\n\n```sh\necho hi\n```\n\n```mermaid\ngraph TD\n```\n\n[A](docs/a.md)\n"
@@ -1673,8 +1653,9 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
-      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\ntheme: none\n---\n# A\n");
+      copyRealBaseAndDefaultStyle(dir);
+      writeCustomStyle(dir, "none.css", "/* none */\n");
+      fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\ntheme: none.css\n---\n# A\n");
       fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[A](docs/a.md) [B](docs/b.md)\n");
       fs.writeFileSync(path.join(dir, "docs", "b.md"), "# B\n");
       const result = runBuild(dir, { BASE_PATH: "/repo" });
@@ -1696,7 +1677,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       let result = runBuild(dir, { NAV_ENABLED: "true" });
       assert.equal(result.status, 0, result.stderr);
       let html = readOut(dir, "index.html");
@@ -1725,7 +1706,7 @@ describe("build-docs.mjs :: 編集リンク(EDIT_LINK)", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fn(dir);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -1793,7 +1774,7 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       fn(dir);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -1936,7 +1917,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
   test("見出しは絵文字で表示し、id は変換前の文字(demo-tada)から、<title> は変換後の文字になる", () => {
     const dir = makeTmpDir();
     try {
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       write(dir, "README.md", "# Demo :tada:\n\n## :rocket: Getting **started :+1:** & <b>x</b>\n\n`:tada:` と :tada:\n");
       const result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
@@ -1955,7 +1936,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
   test("絵文字と切れた見出しリンクのある見出しでも、警告と STRICT_LINKS の問題は1件ずつ", () => {
     const dir = makeTmpDir();
     try {
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       write(dir, "README.md", "# Home\n\n## :tada: see [x](a.md#nope)\n");
       write(dir, "a.md", "# A\n");
       let result = runBuild(dir);
@@ -1974,7 +1955,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
   test("<picture><source srcset> と <img srcset> の画像がコピーされ、srcset がサイト内のパスになる", () => {
     const dir = makeTmpDir();
     try {
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       write(
         dir,
         "README.md",
@@ -1997,7 +1978,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
   test("実在しない srcset の画像は警告になり、STRICT_LINKS=true では失敗する", () => {
     const dir = makeTmpDir();
     try {
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       write(dir, "README.md", '# Logo\n\n<img src="a.png" srcset="a.png 1x, nope@2x.png 2x">\n');
       write(dir, "a.png", "a");
       let result = runBuild(dir);
@@ -2013,7 +1994,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
   test('<source srcset="a.avif" type="image/avif"> の a.avif もコピーされ、srcset がサイト内のパスになる', () => {
     const dir = makeTmpDir();
     try {
-      copyRealBaseAndThemeStyles(dir);
+      copyRealBaseAndDefaultStyle(dir);
       write(dir, "README.md", '# Logo\n\n<picture><source srcset="a.avif" type="image/avif"><img src="a.png"></picture>\n');
       write(dir, "a.avif", "avif");
       write(dir, "a.png", "png");
@@ -2032,7 +2013,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
     test("src/foo.js はコピーせず、GitHub の blob の URL(#L10-L20 の断片つき)にする", () => {
       const dir = makeTmpDir();
       try {
-        copyRealBaseAndThemeStyles(dir);
+        copyRealBaseAndDefaultStyle(dir);
         write(dir, "README.md", "# Root\n\n[code](src/foo.js#L10-L20) [pkg](package.json)\n");
         write(dir, "src/foo.js", "x");
         write(dir, "package.json", "{}");
@@ -2052,7 +2033,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
     test("実在しない nope.js は missing になり、STRICT_LINKS=true で失敗する", () => {
       const dir = makeTmpDir();
       try {
-        copyRealBaseAndThemeStyles(dir);
+        copyRealBaseAndDefaultStyle(dir);
         write(dir, "README.md", "# Root\n\n[x](nope.js)\n");
         let result = runBuild(dir, gh);
         assert.equal(result.status, 0, result.stderr);
@@ -2069,7 +2050,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
     test("[demo](demo/index.html) はコピーされ、中身は変わらず、読み込む別ファイルは追わない", () => {
       const dir = makeTmpDir();
       try {
-        copyRealBaseAndThemeStyles(dir);
+        copyRealBaseAndDefaultStyle(dir);
         const demo = '<!doctype html><link rel="stylesheet" href="style.css"><a href="../README.md">r</a><img src="pic.png">\n';
         write(dir, "README.md", "# Root\n\n[demo](demo/index.html)\n");
         write(dir, "demo/index.html", demo);
@@ -2088,7 +2069,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
     test("![x](a.avif) と <video src=\"m.mkv\"> はコピーされ、警告は出ない", () => {
       const dir = makeTmpDir();
       try {
-        copyRealBaseAndThemeStyles(dir);
+        copyRealBaseAndDefaultStyle(dir);
         write(dir, "README.md", '# Root\n\n![x](a.avif)\n\n<video src="m.mkv"></video>\n');
         write(dir, "a.avif", "avif");
         write(dir, "m.mkv", "mkv");
@@ -2110,7 +2091,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
     test("コピーしない種類のファイルの埋め込み(![](pic.xyz)・<video src>・srcset)は警告になり、STRICT_LINKS=true で失敗する", () => {
       const dir = makeTmpDir();
       try {
-        copyRealBaseAndThemeStyles(dir);
+        copyRealBaseAndDefaultStyle(dir);
         write(dir, "README.md", '# Root\n\n![x](pic.xyz)\n\n<video src="clip.xyz"></video>\n\n<img srcset="s.xyz 1x">\n');
         for (const name of ["pic.xyz", "clip.xyz", "s.xyz"]) write(dir, name, name);
         let result = runBuild(dir, gh);
@@ -2132,7 +2113,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
     test("追加した画像の拡張子は、ドットで始まるフォルダの中・ドットで始まるファイル名でもコピーされる", () => {
       const dir = makeTmpDir();
       try {
-        copyRealBaseAndThemeStyles(dir);
+        copyRealBaseAndDefaultStyle(dir);
         write(dir, "README.md", "# Root\n\n![a](.github/a.avif) ![b](.a.avif) ![c](.github/c.png)\n");
         for (const rel of [".github/a.avif", ".a.avif", ".github/c.png"]) write(dir, rel, "img");
         const result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
@@ -2149,7 +2130,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
     test("README のないフォルダの埋め込み(![](src/))は、フォルダとして警告する", () => {
       const dir = makeTmpDir();
       try {
-        copyRealBaseAndThemeStyles(dir);
+        copyRealBaseAndDefaultStyle(dir);
         write(dir, "README.md", "# Root\n\n![x](src/)\n");
         write(dir, "src/a.js", "x");
         const result = runBuild(dir, gh);
@@ -2163,7 +2144,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
     test("リンク([x](clip.xyz)・<a href>)では警告を出さない", () => {
       const dir = makeTmpDir();
       try {
-        copyRealBaseAndThemeStyles(dir);
+        copyRealBaseAndDefaultStyle(dir);
         write(dir, "README.md", '# Root\n\n[x](clip.xyz) <a href="clip.xyz">y</a>\n');
         write(dir, "clip.xyz", "x");
         const result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
@@ -2177,7 +2158,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
     test("絵文字を含む見出しの中の埋め込みの警告は、二重に数えない", () => {
       const dir = makeTmpDir();
       try {
-        copyRealBaseAndThemeStyles(dir);
+        copyRealBaseAndDefaultStyle(dir);
         write(dir, "README.md", "# Home\n\n## :tada: ![x](pic.xyz)\n");
         write(dir, "pic.xyz", "x");
         const result = runBuild(dir, gh);
@@ -2192,7 +2173,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
     test("GitHub の URL が分からないとき(origin なし)は、これまでの警告を出してサイト内のパスのままにする", () => {
       const dir = makeTmpDir();
       try {
-        copyRealBaseAndThemeStyles(dir);
+        copyRealBaseAndDefaultStyle(dir);
         write(dir, "README.md", "# Root\n\n[code](src/foo.js)\n");
         write(dir, "src/foo.js", "x");
         const result = runBuild(dir);
@@ -2215,7 +2196,7 @@ describe("build-docs.mjs :: llms.txt", () => {
   const outPath = (dir, rel) => path.join(dir, "_site", rel);
   const siteWith = (files) => {
     const dir = makeTmpDir();
-    copyRealBaseAndThemeStyles(dir);
+    copyRealBaseAndDefaultStyle(dir);
     for (const [rel, content] of Object.entries(files)) write(dir, rel, content);
     return dir;
   };

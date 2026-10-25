@@ -73,8 +73,8 @@ npx github:akilasatolu/tsuzuri#v1 init
 - コマンドは、最初の行に `tsuzuri v1.36.0` の形で、動いているバージョンを
   表示します。
 - `init` と `preview` の画面の表示は英語です(v1.37.0 以降。v1.36.0 までは
-  日本語でした)。`--lang ja` を付けると、画面の表示と、生成される設定ファイル・
-  空の独自 CSS のひな形のコメントが日本語になります。生成されるワークフローと
+  日本語でした)。`--lang ja` を付けると、画面の表示と、生成される設定ファイルの
+  コメントが日本語になります。生成されるワークフローと
   `.github/tsuzuri/.gitignore` のコメントは、常に英語です。ビルドスクリプトの
   メッセージ(GitHub Actions でのビルドと、`preview` が実行するビルドのログ)も
   常に英語です(v1.37.0 以降)。`--lang` では変わりません。古いバージョンで
@@ -97,7 +97,7 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 
 ### 3.3 対話形式の質問
 
-オプションを付けずに実行すると、`init` は次の 6 つの質問を順に表示します。
+オプションを付けずに実行すると、`init` は次の 5 つの質問を順に表示します。
 何も入力せずに Enter を押すと、かっこ内の既定値になります。質問は英語で
 表示されます(v1.37.0 以降)。v1.36.0 まで、および `--lang ja` のときは、
 日本語で表示されます(例: `? トリガーブランチ (TRIGGER_BRANCH) [main]: `)。
@@ -107,32 +107,19 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
    分からなければ今のブランチ、それも分からなければ `main` です。
 2. `? Root Markdown file (ROOT_MD) [README.md]: `
    サイトの起点になる Markdown ファイルです。既定値は `README.md` です。
-3. 3 番目の質問は、テーマ(`THEME`)の一覧を 1 から 9 の番号付きで表示し、
-   番号の入力を受け付けます。番号とテーマの対応は次のとおりです。
-
-   - 1: `material`
-   - 2: `glass`
-   - 3: `neumorphism`
-   - 4: `editorial`
-   - 5: `minimal`
-   - 6: `kintsugi`
-   - 7: `blueprint`
-   - 8: `nineties`
-   - 9: `none`
-
-   何も入力しない場合、1 から 9 以外の番号を入力した場合、数字以外を
-   入力した場合は、`material` になります。
-4. `? Show the sidebar navigation, site search and in-page table of contents? (NAV_ENABLED) (Y/n): `
+3. `? Show the sidebar navigation, site search and in-page table of contents? (NAV_ENABLED) (Y/n): `
    既定値は「表示する」です。
-5. `? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [en]: `
+4. `? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [en]: `
    既定値は `en` です。言語タグとして正しくない値(例: `ja_JP`)は、警告の
    うえで無視されます。正しい値が残らなければ `en` になります。
-6. `? Site name (SITE_NAME; the repository name if empty) []: `
+5. `? Site name (SITE_NAME; the repository name if empty) []: `
    既定値は空です。空の場合、GitHub Actions でのビルドではリポジトリ名が
    サイト名になります。
 
-`init` は、独自 CSS については質問しません。空の
-`.github/tsuzuri/styles/custom.css` を必ず作ります(3.5 を参照)。
+`init` は、テーマやカスタムスタイルについては質問しません。設定ファイルは
+常に `THEME=default.css` で始まり、`init` が `.github/tsuzuri/styles/` に置くのは
+`base.css` と `default.css` だけです(3.5 を参照)。ほかのカスタムスタイルを使うには、
+利用者がギャラリーでダウンロードして、そのファイル名を `THEME` に書きます。
 
 ### 3.4 対話なしの実行
 
@@ -141,13 +128,12 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 - `-y`、`--yes`: `init` は、すべて既定値で生成します。
 - `--branch <name>`: `TRIGGER_BRANCH` の値です。
 - `--root <path>`: `ROOT_MD` の値です。
-- `--theme <name>`: `THEME` の値です。
 - `--languages <list>`: `LANGUAGES` の値です(例: `ja`、`ja,en`)。
 - `--site-name <name>`: `SITE_NAME` の値です。
 - `--no-nav`: `NAV_ENABLED=false` になります。
 
 `--lang <en|ja>`(v1.37.0 以降)を付けても、質問は省略されません。画面の
-表示と、生成される設定ファイル・独自 CSS のひな形のコメントの言語です。
+表示と、生成される設定ファイルのコメントの言語です。
 既定は `en` で、`en` と `ja`(小文字)だけを受け付けます。付けたコマンドの
 ときだけ有効です。
 
@@ -160,9 +146,10 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
 - 対話なしの場合、トリガーブランチの既定値は、`origin` の既定ブランチ、
   それが分からなければ `main` です。今のブランチは使われません。
 - 対話なしの場合、すでにあるファイルは上書きされずに残ります。`--force` を
-  付けると上書きされます(設定ファイル `.github/tsuzuri/config` も上書きされます。
-  ただし `.github/tsuzuri/styles/custom.css` は、`--force` でも上書きされません)。
-- 知らないオプション、9 つのテーマ名以外の `--theme`、言語タグとして正しくない
+  付けると上書きされます(設定ファイル `.github/tsuzuri/config` も上書きされます)。
+  利用者が `.github/tsuzuri/styles/` に置いたカスタムスタイルは、`init` が作る
+  ものではないので、上書きされません。
+- 知らないオプション(`--theme` はありません)、言語タグとして正しくない
   `--languages`、空の `--branch`・`--root`・`--languages` は、エラーになります。
   この場合、`init` は何も生成しません。
 
@@ -178,17 +165,18 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
 - `.github/tsuzuri/config`: 設定ファイル
 - `.github/tsuzuri/build-docs.mjs`: ビルドスクリプト
 - `.github/tsuzuri/lib/*.mjs`: ビルドスクリプトが使うモジュール(17 個)
-- `.github/tsuzuri/styles/*.css`: 基礎の CSS(`base.css`)と 8 つのテーマの CSS
+- `.github/tsuzuri/styles/base.css`、`.github/tsuzuri/styles/default.css`: 基礎の CSS と、
+  標準のカスタムスタイルです。置かれるのはこの 2 つだけです。ほかのカスタムスタイルは
+  パッケージには含めて配らず、ギャラリーに載せています。
 - `.github/tsuzuri/package.json`、`.github/tsuzuri/package-lock.json`:
   ビルドに使う依存(marked、highlight.js、marked-footnote)のバージョンと
   ハッシュ
 - `.github/tsuzuri/.gitignore`: `node_modules/` を git の対象から外す設定
-- `.github/tsuzuri/styles/custom.css`: 独自 CSS の空のひな形。無ければ必ず
-  作られます。すでにあるものは、質問なしで、`--force` を付けても、そのまま残ります。
 
 `.github/tsuzuri/` の中で、利用者が編集するのは、設定ファイル `config` と、
-`styles/` に置く利用者の CSS(既定は `custom.css`)だけです。ビルドスクリプトと
-組み込みのテーマの CSS は、利用者が編集するファイルではありません。編集や削除を
+`styles/` に置く利用者のカスタムスタイルだけです。ビルドスクリプト、`base.css`、
+`default.css` は、利用者が編集するファイルではありません(`default.css` を変えたい
+ときは、別の名前にコピーして `THEME` に指定します)。編集や削除を
 すると、ビルドが失敗することがあります。また、10 章の更新で上書きされます。
 
 ### 3.6 init が行わないこと
@@ -211,13 +199,13 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
   今のブランチ、対話なしでは `main` になります。
 - 生成先に同じ名前のファイルがすでにある場合、対話形式の `init` は上書き
   するかどうかを質問します。ワークフローと、`.github/tsuzuri/` のうち
-  `config` と独自 CSS を除く一式については、まとめて 1 回だけ質問します。
+  `config` を除く一式については、まとめて 1 回だけ質問します。
 
-  `The workflow and the build scripts (under .github/tsuzuri/, except config and your own CSS) already exist. Overwrite them with the latest version? (y/N): `
+  `The workflow and the build scripts (under .github/tsuzuri/, except config) already exist. Overwrite them with the latest version? (y/N): `
 
-  (v1.36.0 まで、および `--lang ja` のときは `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N): ` です。)
+  (v1.36.0 まで、および `--lang ja` のときは `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config を除く)は既に存在します。最新版で上書きしますか? (y/N): ` です。)
 
-  設定ファイルについては、別に質問します。すでにある `custom.css` は、質問なしでそのまま残ります。
+  設定ファイルについては、別に質問します。
 
   `.github/tsuzuri/config already exists. Overwrite it? (y/N): `
 
@@ -263,18 +251,17 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
   出力先の中身をすべて消します。このファイルはビルドが自動で置きます。
   省略時: `_site`
   init の値: `_site`
-- `STYLE_FILE`: 独自 CSS のファイル名です(ファイル名だけを `.css` で終わる形で
-  書き、フォルダは書きません)。ファイルは `.github/tsuzuri/styles/` の中から
-  読まれます。ファイルがあれば、テーマの後に読み込まれます。ファイルが無い場合は
-  使われません。ファイル名として使えない値(`/`・`\`・`:` を含む、`.` で始まる、
-  `.css` で終わらない)は、警告のうえで無視され、独自 CSS は使われません。
-  省略時: `custom.css`
-  init の値: `custom.css`
-- `THEME`: テーマです。値は `material`、`glass`、`neumorphism`、`editorial`、
-  `minimal`、`kintsugi`、`blueprint`、`nineties`、`none` の 9 つです。それ以外の値は、
-  警告のうえで `material` になります。
-  省略時: `material`
-  init の値: 質問 3 の答えです。
+- `THEME`: サイト全体のカスタムスタイルのファイル名です(ファイル名だけを
+  `.css` で終わる形で書き、フォルダは書きません)。ファイルは
+  `.github/tsuzuri/styles/` の中から読まれ、`STYLE_DIR` の影響は受けません。
+  ページの見た目は、基礎の CSS とこのカスタムスタイル 1 つで決まります。
+  CSS のファイル名でない値(`none`、`material` のような昔のテーマ名、フォルダを
+  含むパス、`.css` で終わらない名前)は、警告のうえで `default.css` になります。
+  ファイルが無い場合は、警告のうえで、基礎の CSS だけでビルドされます。
+  `THEME=none` というキーワードはありません(装飾なしにするには、ギャラリーの
+  `none.css` のような、コメントだけの CSS ファイルを使います)。
+  省略時: `default.css`
+  init の値: `default.css`
 - `LANGUAGES`: サイトの言語です。値は、`ja`、`en`、`pt-BR` のような言語タグの
   カンマ区切りです。先頭が基本言語で、起点の Markdown の言語に
   当たります。1 つなら 1 言語のサイト、2 つ以上なら多言語のサイトになります。
@@ -474,15 +461,13 @@ order: 1
 - `ogType`: `og:type` の値です。無い場合は `website` です。
 - `noindex`: `true` にすると、検索エンジン向けの `noindex` が出力され、
   `sitemap.xml` と `llms.txt` にも載りません。
-- `theme`: そのページだけのテーマです。`.css` で終わる値は、
-  `.github/tsuzuri/styles/` の中の独自 CSS のファイル名です(ファイル名だけで、
-  フォルダは書きません)。それ以外の値は、9 つのテーマ名のどれかにします。
-  使えない値(フォルダを含むファイル名、知らない名前、無いファイル)は警告が出て、
-  そのページはサイト全体の `THEME` になります。
-- `styleFile`: そのページだけ、`STYLE_FILE` の代わりに使われる独自 CSS のファイルです。
-  値は、`.github/tsuzuri/styles/` の中のファイル名です(ファイル名だけを `.css` で
-  終わる形で書き、フォルダは書きません)。使えない値や無いファイルは警告が出て、
-  そのページはサイト全体の `STYLE_FILE` になります。
+- `theme`: そのページだけのカスタムスタイルです。値は、
+  `.github/tsuzuri/styles/` の中のカスタムスタイルのファイル名です(ファイル名だけを
+  `.css` で終わる形で書き、フォルダは書きません)。サイト全体のカスタムスタイル
+  (`THEME`)を置き換えます(混ざりません)。使えない値(フォルダを含むファイル名、
+  `none` や昔のテーマ名を含む `.css` で終わらない名前、無いファイル、リポジトリの外を指す
+  シンボリックリンク)は警告が出て、そのページはサイト全体のカスタムスタイルになります。
+  装飾なしにするページは `theme: none.css`(コメントだけのファイル)にします。
 - `nav`: `false` にすると、そのページはナビと前後のページへのリンクに
   載りません。ページ自体は出力されます。`llms.txt` では、そのページは
   `## Optional` に載ります。
@@ -550,18 +535,23 @@ order: 1
 
 ## 7. 見た目(要点)
 
-- ページの CSS は、基礎の CSS、テーマ(`THEME`)、独自 CSS(`STYLE_FILE`)の
-  順に重なります。後のものが優先されます。
-- `THEME=none` の場合、テーマの層は使われません。
-- 独自 CSS では、`--fg`、`--bg`、`--border`、`--accent`、`--code-bg`、`--font`、
-  `--content-width` などの CSS 変数を上書きできます。
-- 見た目は、frontmatter の `theme` と `styleFile` で、ページごとに変わります。
-  `styleFile` と、`.css` で終わる `theme` は、`.github/tsuzuri/styles/` の中の
-  ファイル名です。
-- 独自 CSS は、`init` が空で作る `.github/tsuzuri/styles/custom.css` に書きます。
-- `nineties` はライト表示だけ、`blueprint` は常に同じ表示です。`material`、
-  `glass`、`neumorphism`、`editorial`、`minimal`、`kintsugi` の 6 つのテーマは、OS の設定に
-  合わせてライトとダークが切り替わります。
+- ページの CSS は、基礎の CSS(`base.css`)と、カスタムスタイル 1 つ
+  (`.github/tsuzuri/styles/` の中の CSS ファイル)です。カスタムスタイルは基礎の
+  CSS の後に読み込まれるので、優先されます。
+- サイト全体のカスタムスタイルは `THEME`(ファイル名。省略すると `default.css`)です。
+  `default.css` はパッケージに入っています。ほかのカスタムスタイル(`glass.css`、
+  `neumorphism.css`、`editorial.css`、`minimal.css`、`kintsugi.css`、`blueprint.css`、
+  `nineties.css`、`none.css`、このサイト自身の見た目)はパッケージには含めて配りません。
+  利用者がギャラリーでダウンロードして、`.github/tsuzuri/styles/` に置き、`THEME` に
+  指定します。
+- カスタムスタイルでは、`--fg`、`--bg`、`--border`、`--accent`、`--code-bg`、`--font`、
+  `--content-width` などの CSS 変数を定義・上書きできます。`default.css` を少し変えたいときは、
+  別の名前にコピーして変数を書き換え、`THEME` をその名前にします(`default.css` 自体は
+  `init --update` で上書きされます)。
+- frontmatter の `theme` で、そのページだけカスタムスタイルが置き換わります
+  (`.github/tsuzuri/styles/` の中のファイル名)。
+- `blueprint.css` はライトとダークで同じ表示、`nineties.css` はライト表示だけです。
+  ほかは OS の設定に合わせてライトとダークが切り替わります。
 
 ## 8. 公開
 
@@ -689,7 +679,7 @@ node .github/tsuzuri/build-docs.mjs
 - 1 行目は依存のインストール、2 行目はビルドです。
 - 手元のビルドは、`.github/tsuzuri/config` を自動で読みます。
 - 環境変数で渡したキーは、設定ファイルより優先されます
-  (例: `THEME=nineties node .github/tsuzuri/build-docs.mjs`)。
+  (例: `THEME=glass.css node .github/tsuzuri/build-docs.mjs`)。
 - 出力先のファイルは、ファイルとして直接開くとリンクが切れます。簡易サーバーで
   配信すると開けます(例: `npx serve _site`)。
 
@@ -720,14 +710,13 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 
 - 質問と上書きの確認はありません。
 - `.github/workflows/tsuzuri-pages.yml` と、`.github/tsuzuri/` の中の
-  ビルドスクリプト、テーマの CSS、`package.json`、`package-lock.json`、
+  ビルドスクリプト、`base.css`、`default.css`、`package.json`、`package-lock.json`、
   `.gitignore` が、実行したバージョンの内容で上書きされます。
 - `.github/tsuzuri/lib/` の中で、実行したバージョンに無い `.mjs` ファイルは
   削除されます。
-- `.github/tsuzuri/config` は変更されません。`.github/tsuzuri/styles/custom.css` は、
-  あれば変更されず、無ければ空のひな形が作られます。`styles/` に利用者が足した
-  ほかの CSS は削除されません。ただし、組み込みのテーマと同じ名前(`material.css`
-  など)のものは上書きされます。
+- `.github/tsuzuri/config` は変更されません。`styles/` に利用者が置いたカスタム
+  スタイルは、変更も削除もされません(昔の `material.css` などもそのまま残ります)。
+  `default.css` は上書きされます。
 - 設定ファイルに無いキーがある場合、`init` はそのキーの名前を表示します。
   `LLMS_TXT` が無い場合も表示され、`true` として動きます。
 - `.github/tsuzuri/config` が無いリポジトリでは、`init` は何も書き込まずに
@@ -788,14 +777,20 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   `STRICT_LINKS=true, so the build fails because of 3 link problem(s).`
   (v1.36.0 までは日本語で、`STRICT_LINKS=true のため、リンクの問題 3 件でビルドを失敗させます。` でした。)
 - 症状: `.github/tsuzuri/` の中のファイルへの変更が、更新のあとに消えます。
-  原因: `init --update` が、ビルドスクリプトとテーマの CSS を上書きします。
-  症状が出ない条件: 見た目の変更が、`STYLE_FILE` の独自 CSS に書かれています。
-- 症状: 独自 CSS が反映されず、ビルドのログに `STYLE_FILE` の値が不正という
-  警告が出ます。
-  原因: `STYLE_FILE` に、フォルダを含むパス(例: `.github/tsuzuri/styles/custom.css`)か、
-  `.css` で終わらない名前が書かれています。
+  原因: `init --update` が、ビルドスクリプト、`base.css`、`default.css` を上書きします。
+  症状が出ない条件: 見た目の変更が、別の名前のカスタムスタイル(`default.css` のコピーなど)に
+  書かれ、`THEME` で指定されています。
+- 症状: カスタムスタイルが反映されず、ビルドのログに `THEME` の値が不正という
+  警告が出ます(`default.css` が使われます)。
+  原因: `THEME` に、`none` や `material` のような昔のテーマ名、フォルダを含むパス
+  (例: `.github/tsuzuri/styles/glass.css`)、`.css` で終わらない名前が書かれています。
   症状が出ない条件: `.github/tsuzuri/styles/` の中のファイルのファイル名だけが
-  書かれています(例: `STYLE_FILE=custom.css`)。
+  書かれています(例: `THEME=glass.css`)。
+- 症状: ビルドのログに `THEME` のファイルが見つからないという警告が出て、ページに
+  装飾がありません。
+  原因: CSS ファイルが `.github/tsuzuri/styles/` にありません(ギャラリーからダウンロード
+  していない、または別のフォルダに置いている)。
+  症状が出ない条件: ファイルが `.github/tsuzuri/styles/` に置かれています。
 - 症状: リリースされていない動きをするバージョンが実行されます。
   原因: コマンドに `#v1` が無く、`main` ブランチの内容が実行されています。
   症状が出ない条件: コマンドに `#v1` か、完全なバージョンのタグが付いています。
@@ -813,8 +808,8 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 - 導入の手順: https://akilasatolu.github.io/tsuzuri/ja/docs/getting-started.html
 - 仕組み: https://akilasatolu.github.io/tsuzuri/ja/docs/concepts.html
 - 設定キー: https://akilasatolu.github.io/tsuzuri/ja/docs/configuration.html
-- テーマと独自 CSS: https://akilasatolu.github.io/tsuzuri/ja/docs/theming.html
-- テーマの見本: https://akilasatolu.github.io/tsuzuri/ja/docs/gallery.html
+- カスタムスタイル(スタイル): https://akilasatolu.github.io/tsuzuri/ja/docs/theming.html
+- スタイルのギャラリー(見本とダウンロード): https://akilasatolu.github.io/tsuzuri/ja/docs/gallery.html
 - frontmatter: https://akilasatolu.github.io/tsuzuri/ja/docs/frontmatter.html
 - 多言語のサイト: https://akilasatolu.github.io/tsuzuri/ja/docs/i18n.html
 - コマンド: https://akilasatolu.github.io/tsuzuri/ja/docs/cli.html

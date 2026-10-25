@@ -1,16 +1,17 @@
 ---
 title: Neumorphism (neumorphism)
-theme: neumorphism
+theme: neumorphism.css
 styleFile: plain.css
-description: A sample page of Tsuzuri's built-in theme "Neumorphism (neumorphism)"
+description: A sample page of the custom style "Neumorphism (neumorphism)"
 ---
 
 # Neumorphism (neumorphism)
 
 Neumorphism. Parts in the same color as the background, raised or pressed in with light and shadow.
 
-To use this theme for the whole site, set `THEME=neumorphism` in `.github/tsuzuri/config`.
-To use it for a single page, write `theme: neumorphism` in that page's frontmatter
+To use it, download `neumorphism.css` from the [gallery](../gallery.md#neumorphism-neumorphism), put it in `.github/tsuzuri/styles/`,
+and set `THEME=neumorphism.css` in `.github/tsuzuri/config`.
+To use it for a single page only, write `theme: neumorphism.css` in that page's frontmatter
 (see [Theming](../theming.md)).
 
 [← Glass (glass)](glass.md) · [Gallery](../gallery.md) · [Editorial (editorial) →](editorial.md)
@@ -36,7 +37,7 @@ This is also where you can check the line spacing and readability of longer pass
 
 | Setting | Default | Description |
 |---|---|---|
-| `THEME` | `material` | The built-in theme name |
+| `THEME` | `default.css` | The custom style file name |
 | `NAV_ENABLED` | `false` | Whether to show the navigation |
 | `LANGUAGES` | `en` | The site language (the value of `<html lang>`) |
 

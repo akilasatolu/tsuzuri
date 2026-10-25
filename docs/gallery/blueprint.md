@@ -1,16 +1,17 @@
 ---
 title: Blueprint (blueprint)
-theme: blueprint
+theme: blueprint.css
 styleFile: plain.css
-description: A sample page of Tsuzuri's built-in theme "Blueprint (blueprint)"
+description: A sample page of the custom style "Blueprint (blueprint)"
 ---
 
 # Blueprint (blueprint)
 
 Like a blueprint, with a white grid and fine lines on blue, and headings with dimension lines. Always looks the same.
 
-To use this theme for the whole site, set `THEME=blueprint` in `.github/tsuzuri/config`.
-To use it for a single page, write `theme: blueprint` in that page's frontmatter
+To use it, download `blueprint.css` from the [gallery](../gallery.md#blueprint-blueprint), put it in `.github/tsuzuri/styles/`,
+and set `THEME=blueprint.css` in `.github/tsuzuri/config`.
+To use it for a single page only, write `theme: blueprint.css` in that page's frontmatter
 (see [Theming](../theming.md)).
 
 [← Kintsugi (kintsugi)](kintsugi.md) · [Gallery](../gallery.md) · [90s (nineties) →](nineties.md)
@@ -36,7 +37,7 @@ This is also where you can check the line spacing and readability of longer pass
 
 | Setting | Default | Description |
 |---|---|---|
-| `THEME` | `material` | The built-in theme name |
+| `THEME` | `default.css` | The custom style file name |
 | `NAV_ENABLED` | `false` | Whether to show the navigation |
 | `LANGUAGES` | `en` | The site language (the value of `<html lang>`) |
 

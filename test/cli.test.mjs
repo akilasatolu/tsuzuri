@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync, chmodSync, symlinkSync, existsSync } from "node:fs";
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync, readFileSync, readdirSync, chmodSync, symlinkSync, existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { tmpdir } from "node:os";
@@ -10,16 +10,12 @@ import {
   OSS_REPO,
   VENDOR_DIR,
   PACKAGE_ROOT,
-  THEME_CHOICES,
   buildDocsPagesYml,
   buildDocsPagesConfig,
-  buildStyleCssTemplate,
   buildVendorTargets,
   buildTargets,
-  buildCustomCssTarget,
   buildWorkflowTarget,
   writeGeneratedFiles,
-  resolveThemeChoice,
   parseYesNo,
   promptAnswers,
   reportFatalError,
@@ -45,7 +41,7 @@ import {
   checkSetupLocation,
   guessDefaultBranch,
 } from "../bin/cli.mjs";
-import { parseConfigText, loadConfig, ALLOWED_THEMES, CONFIG_FILE_PATH } from "../.github/scripts/lib/config.mjs";
+import { parseConfigText, loadConfig, CONFIG_FILE_PATH } from "../.github/scripts/lib/config.mjs";
 import { setCliLang } from "../bin/messages.mjs";
 import { vendoredVersionOf } from "../bin/preview.mjs";
 import { createInterface } from "node:readline/promises";
@@ -79,39 +75,32 @@ function fakeRl(answers) {
 
 // --- 対話ロジック(promptAnswers)のテスト ---
 // 標準入力を直接モックする代わりに、question()を差し替えたrlオブジェクトを注入する。
-// 質問の順番: TRIGGER_BRANCH / ROOT_MD / THEME / NAV_ENABLED / LANGUAGES / SITE_NAME(独自CSSのひな形は聞かない。常に作る)
+// 質問の順番: TRIGGER_BRANCH / ROOT_MD / NAV_ENABLED / LANGUAGES / SITE_NAME(テーマ(THEME)は聞かない。設定ファイルは THEME=default.css で始まる)
 
 test("promptAnswers: 全てデフォルト値で応答すると既定値が返る", async () => {
-  const rl = fakeRl(["", "", "", "", "", ""]);
+  const rl = fakeRl(["", "", "", "", ""]);
   const answers = await promptAnswers(rl);
   assert.deepEqual(answers, {
     triggerBranch: "main",
     rootMd: "README.md",
-    theme: "material",
     navEnabled: true,
     languages: "en",
     siteName: "",
   });
 });
 
-test("promptAnswers: THEME番号入力(8)でninetiesが選ばれる", async () => {
-  const rl = fakeRl(["", "", "8", "", "", ""]);
-  const answers = await promptAnswers(rl);
-  assert.equal(answers.theme, "nineties");
-  assert.equal(THEME_CHOICES[7].key, "nineties");
-});
-
-test("promptAnswers: 独自CSSのひな形は聞かない(6つの質問で終わる。7つ目を聞くと答えが足りずに失敗する)", async () => {
+test("promptAnswers: テーマ(THEME)とカスタムスタイルは聞かない(5つの質問で終わる。6つ目を聞くと答えが足りずに失敗する)", async () => {
   const asked = [];
   const rl = { question: async (prompt) => (asked.push(prompt), "") };
   const answers = await promptAnswers(rl);
-  assert.equal(asked.length, 6);
-  assert.ok(!asked.some((q) => /custom CSS|custom\.css/i.test(q)));
+  assert.equal(asked.length, 5);
+  assert.ok(!asked.some((q) => /THEME|theme|custom style|custom CSS|custom\.css/i.test(q)));
+  assert.equal("theme" in answers, false);
   assert.equal("createStyleFile" in answers, false);
 });
 
 test("promptAnswers: ナビ(n で無効)とサイト名を聞き、設定ファイルに書く", async () => {
-  const answers = await promptAnswers(fakeRl(["", "", "", "n", "", "  My Docs  "]));
+  const answers = await promptAnswers(fakeRl(["", "", "n", "", "  My Docs  "]));
   assert.equal(answers.navEnabled, false);
   assert.equal(answers.siteName, "My Docs");
   const config = buildDocsPagesConfig(answers);
@@ -141,7 +130,7 @@ test("promptAnswers: サイトの言語(LANGUAGES)をサイト名の前に聞き
   ];
   for (const [input, expected] of cases) {
     const prompts = [];
-    const rl = fakeRl(["", "", "", "", input, "Site"]);
+    const rl = fakeRl(["", "", "", input, "Site"]);
     const { result: answers, calls } = await captureWarn(() =>
       promptAnswers({ question: (q) => (prompts.push(q), rl.question(q)) }),
     );
@@ -149,16 +138,16 @@ test("promptAnswers: サイトの言語(LANGUAGES)をサイト名の前に聞き
     assert.equal(answers.siteName, "Site", "次の質問はサイト名");
     assert.deepEqual(calls, [], input);
     assert.equal(
-      prompts[4],
+      prompts[3],
       "? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [en]: ",
     );
-    assert.match(prompts[5], /Site name/);
+    assert.match(prompts[4], /Site name/);
     assert.ok(buildDocsPagesConfig(answers).includes(`\nLANGUAGES=${expected}\n`), input);
   }
 });
 
 test("promptAnswers: 不正な言語タグ(ja_JP)は警告して en にする", async () => {
-  const { result: answers, calls } = await captureWarn(() => promptAnswers(fakeRl(["", "", "", "", "ja_JP", ""])));
+  const { result: answers, calls } = await captureWarn(() => promptAnswers(fakeRl(["", "", "", "ja_JP", ""])));
   assert.equal(answers.languages, "en");
   assert.deepEqual(calls, [
     '[config] "ja_JP" in LANGUAGES is ignored because it is not a valid language tag.',
@@ -173,33 +162,33 @@ test("--languages で対話なしに指定できる。--yes だけなら en", ()
   assert.equal(answersFromArgs(parseCliArgs(["--languages", " ja , en "])).languages, "ja,en");
   assert.equal(answersFromArgs(parseCliArgs(["--yes"])).languages, "en");
   assert.throws(() => parseCliArgs(["--languages", " "]), /--languages cannot be empty/);
-  // 明示した値の書き間違いは --theme と同じくエラーで止める(対話の答えは警告して en)
+  // 明示した値の書き間違いは --port と同じくエラーで止める(対話の答えは警告して en)
   assert.throws(() => parseCliArgs(["--languages", "ja_JP"]), /^Error: --languages needs language tags separated by commas \(e\.g\. ja \/ en \/ ja,en\) \(given: ja_JP\)$/);
   assert.throws(() => parseCliArgs(["--languages", "ja,ja_JP"]), /--languages needs/);
   assert.throws(() => parseCliArgs(["--languages", ","]), /--languages needs.*\(given: ,\)$/);
   assert.doesNotThrow(() => parseCliArgs(["--languages", "ja,en"]));
   assert.match(buildHelpText(), /--languages <list>\n\s+Site languages \(LANGUAGES; the first is the base language\)\. Default: en\n/);
-  assert.match(buildHelpText(), /Giving any of --branch \/ --root \/ --theme \/ --languages \/ --site-name .* also runs without questions/);
+  assert.match(buildHelpText(), /Giving any of --branch \/ --root \/ --languages \/ --site-name .* also runs without questions/);
   withLang("ja", () => {
     assert.match(buildHelpText(), /--languages <一覧>\n\s+サイトの言語\(LANGUAGES。先頭が基本言語\)。既定: en\n/);
-    assert.match(buildHelpText(), /--theme \/ --languages \/ --site-name .*のいずれかを指定した場合も、対話なしで実行します/);
+    assert.match(buildHelpText(), /--root \/ --languages \/ --site-name .*のいずれかを指定した場合も、対話なしで実行します/);
   });
 });
 
-test("CLI: --languages の不正な値は --theme の不正な値と同じ終了コード・形のエラーで止まり、ファイルを作らない", () => {
+test("CLI: --languages の不正な値は --port の不正な値と同じ終了コード・形のエラーで止まり、ファイルを作らない", () => {
   const dir = makeTmpDir();
   try {
     const cli = join(PACKAGE_ROOT, "bin/cli.mjs");
-    const theme = spawnSync(process.execPath, [cli, "--theme", "sepia"], { cwd: dir, encoding: "utf8" });
+    const port = spawnSync(process.execPath, [cli, "--port", "abc"], { cwd: dir, encoding: "utf8" });
     for (const value of ["ja_JP", ","]) {
       const result = spawnSync(process.execPath, [cli, "--languages", value], { cwd: dir, encoding: "utf8" });
       assert.notEqual(result.status, 0, value);
-      assert.equal(result.status, theme.status, value);
+      assert.equal(result.status, port.status, value);
       assert.ok(result.stderr.includes(`--languages needs language tags separated by commas (e.g. ja / en / ja,en) (given: ${value})`), result.stderr);
-      // 前後の文言の形も --theme のエラーと同じ
+      // 前後の文言の形も --port のエラーと同じ
       assert.equal(
         result.stderr.replace(/--languages needs.*?\(given: [^)]*\)/, "X"),
-        theme.stderr.replace(/--theme must be.*?\(given: [^)]*\)/, "X"),
+        port.stderr.replace(/--port needs.*?\(given: [^)]*\)/, "X"),
         value,
       );
       assert.ok(!existsSync(join(dir, ".github")), value);
@@ -263,13 +252,6 @@ test("--site-name / --no-nav で対話なしに指定できる", () => {
   assert.equal(answersFromArgs(parseCliArgs(["-y"])).navEnabled, true);
 });
 
-test("resolveThemeChoice: 不正値・範囲外は既定(material)にフォールバックする", () => {
-  assert.equal(resolveThemeChoice("0"), "material");
-  assert.equal(resolveThemeChoice("99"), "material");
-  assert.equal(resolveThemeChoice("abc"), "material");
-  assert.equal(resolveThemeChoice(""), "material");
-});
-
 test("parseYesNo: y/yes/大文字小文字を真、それ以外・空文字はデフォルト値", () => {
   assert.equal(parseYesNo("y", false), true);
   assert.equal(parseYesNo("Y", false), true);
@@ -318,7 +300,7 @@ test("buildDocsPagesYml: 設定ファイルは既知のキーだけを取り込�
   const yml = buildDocsPagesYml();
   assert.match(
     yml,
-    /TRIGGER_BRANCH\|ROOT_MD\|OUT_DIR\|STYLE_FILE\|LANGUAGES\|NAV_ENABLED\|FAVICON_FILE\|SITE_NAME\|CUSTOM_DOMAIN\|OGP_DEFAULT_IMAGE\|THEME\|STRICT_LINKS\|SITEMAP_JSON\|LAST_UPDATED\|EDIT_LINK\|REPO_LINK\|REPO_VERSION\|REPO_LICENSE\|LLMS_TXT\)/
+    /TRIGGER_BRANCH\|ROOT_MD\|OUT_DIR\|LANGUAGES\|NAV_ENABLED\|FAVICON_FILE\|SITE_NAME\|CUSTOM_DOMAIN\|OGP_DEFAULT_IMAGE\|THEME\|STRICT_LINKS\|SITEMAP_JSON\|LAST_UPDATED\|EDIT_LINK\|REPO_LINK\|REPO_VERSION\|REPO_LICENSE\|LLMS_TXT\)/
   );
   assert.ok(!yml.includes("| xargs"));
   assert.ok(yml.includes("--ignore-scripts"));
@@ -388,35 +370,33 @@ test("ビルド用の lockfile の完成品が無い取得物では、init が�
   assert.throws(() => readBuildLockfiles("/nonexistent", { existsSync: () => false, readFileSync }), /were not found/);
 });
 
-test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=README.md/THEME=material", () => {
+test("buildDocsPagesConfig: デフォルト応答でTRIGGER_BRANCH=main/ROOT_MD=README.md、THEME=default.css(STYLE_FILE は無い)", () => {
   const config = buildDocsPagesConfig({
     triggerBranch: "main",
     rootMd: "README.md",
-    theme: "material",
   });
   assert.ok(config.includes("TRIGGER_BRANCH=main"));
   assert.ok(config.includes("ROOT_MD=README.md"));
-  assert.ok(config.includes("THEME=material"));
+  assert.ok(config.includes("\nTHEME=default.css\n"));
   assert.ok(config.includes("OUT_DIR=_site"));
-  assert.ok(config.includes("\nSTYLE_FILE=custom.css\n"));
+  assert.ok(!config.includes("STYLE_FILE"));
 });
 
-test("buildDocsPagesConfig: THEME=ninetiesが反映される", () => {
-  const config = buildDocsPagesConfig({
-    triggerBranch: "main",
-    rootMd: "README.md",
-    theme: "nineties",
+test("buildDocsPagesConfig: THEME の値は、答えにかかわらず default.css(THEME の質問と --theme は無い)", () => {
+  const config = buildDocsPagesConfig({ triggerBranch: "main", rootMd: "README.md", theme: "nineties" });
+  assert.ok(config.includes("\nTHEME=default.css\n"));
+  assert.ok(!config.includes("nineties"));
+});
+
+test("buildDocsPagesConfig: THEME のコメントは、カスタムスタイルをギャラリーからダウンロードして置く手順を案内する", () => {
+  const config = buildDocsPagesConfig({});
+  assert.ok(config.includes("# The custom style of the whole site: the file name of a CSS file in .github/tsuzuri/styles/"));
+  assert.ok(config.includes("# (https://akilasatolu.github.io/tsuzuri/docs/gallery.html), put it in .github/tsuzuri/styles/ and write its file name here."));
+  withLang("ja", () => {
+    const ja = buildDocsPagesConfig({});
+    assert.ok(ja.includes("# サイト全体のカスタムスタイル。.github/tsuzuri/styles/ の中のCSSファイルのファイル名"));
+    assert.ok(ja.includes("ダウンロードして .github/tsuzuri/styles/ に置き、ここにそのファイル名を書きます。"));
   });
-  assert.ok(config.includes("THEME=nineties"));
-});
-
-test("buildStyleCssTemplate: コメントのみの空ひな形である", () => {
-  const css = buildStyleCssTemplate();
-  const nonEmptyLines = css.split("\n").map((l) => l.trim()).filter(Boolean);
-  for (const line of nonEmptyLines) {
-    assert.ok(line.startsWith("/*") || line.endsWith("*/") || line.includes("*/"));
-  }
-  assert.ok(css.includes("/*") && css.includes("*/"));
 });
 
 // --- ベンダリング(buildVendorTargets)のテスト ---
@@ -438,27 +418,26 @@ test("buildVendorTargets: build-docs.mjs・lib/*.mjs・styles/*.cssが実ファ�
     readFileSync(join(PACKAGE_ROOT, ".github/scripts/lib/config.mjs"), "utf8"),
   );
 
-  const waThemeTarget = targets.find((t) => t.relPath === `${VENDOR_DIR}/styles/material.css`);
-  assert.ok(waThemeTarget, "styles/material.cssが含まれること(選択したTHEME以外も含め全テーマをコピー)");
-  assert.equal(waThemeTarget.content, readFileSync(join(PACKAGE_ROOT, "styles/material.css"), "utf8"));
+  const defaultTarget = targets.find((t) => t.relPath === `${VENDOR_DIR}/styles/default.css`);
+  assert.ok(defaultTarget, "styles/default.cssが含まれること");
+  assert.equal(defaultTarget.content, readFileSync(join(PACKAGE_ROOT, "styles/default.css"), "utf8"));
+  const styleTargets = targets.filter((t) => t.relPath.startsWith(`${VENDOR_DIR}/styles/`)).map((t) => t.relPath).sort();
+  assert.deepEqual(styleTargets, [`${VENDOR_DIR}/styles/base.css`, `${VENDOR_DIR}/styles/default.css`], "置くのはベースと default だけ");
 
   // styles/README.md や styles/fixtures/ のような .css 以外・ディレクトリは対象外
   assert.ok(!targets.some((t) => t.relPath.includes("styles/README.md")));
   assert.ok(!targets.some((t) => t.relPath.includes("fixtures")));
 });
 
-test("buildTargets: 独自CSSのひな形(custom.css)は常に生成対象に含まれ、既にあれば保持する(VENDOR_DIR/styles/配下)", () => {
+test("buildTargets: ワークフロー・設定ファイル・ビルドスクリプト一式を含み、custom.css のひな形は含まない", () => {
   const targets = buildTargets({});
   const vendorCount = buildVendorTargets().length;
-  assert.equal(targets.length, 3 + vendorCount);
-  const styleTarget = targets.find((t) => t.relPath === `${VENDOR_DIR}/styles/custom.css`);
-  assert.ok(styleTarget, "組み込みテーマCSSと同じ.github/tsuzuri/styles/配下に生成されること");
-  assert.equal(styleTarget.content, buildStyleCssTemplate());
-  assert.equal(styleTarget.keepExisting, true);
-  assert.deepEqual(buildCustomCssTarget(), styleTarget);
+  assert.equal(targets.length, 2 + vendorCount);
+  assert.ok(!targets.some((t) => t.relPath.endsWith("custom.css")));
+  assert.ok(targets.some((t) => t.relPath === `${VENDOR_DIR}/styles/default.css`));
   assert.ok(targets.some((t) => t.relPath === `${VENDOR_DIR}/build-docs.mjs`));
-  // ほかの対象は、既にあれば確認する(keepExisting ではない)
-  assert.ok(targets.filter((t) => t !== styleTarget).every((t) => !t.keepExisting));
+  // どの対象も、既にあれば確認する(確認せずに保持する対象は無い)
+  assert.ok(targets.every((t) => !("keepExisting" in t)));
 });
 
 // --- ファイル書き出し(writeGeneratedFiles)のテスト ---
@@ -469,7 +448,6 @@ test("writeGeneratedFiles: 空ディレクトリに全てデフォルト値で�
     const targets = buildTargets({
       triggerBranch: "main",
       rootMd: "README.md",
-      theme: "material",
     });
     const confirmOverwrite = async () => {
       throw new Error("既存ファイルが無いので呼ばれないはず");
@@ -485,7 +463,7 @@ test("writeGeneratedFiles: 空ディレクトリに全てデフォルト値で�
     const config = readFileSync(join(dir, ".github/tsuzuri/config"), "utf8");
     assert.ok(config.includes("TRIGGER_BRANCH=main"));
     assert.ok(config.includes("ROOT_MD=README.md"));
-    assert.ok(config.includes("THEME=material"));
+    assert.ok(config.includes("THEME=default.css"));
 
     // ベンダリングされたファイルも実際に書き出されていること
     const vendoredBuildDocs = readFileSync(join(dir, VENDOR_DIR, "build-docs.mjs"), "utf8");
@@ -498,35 +476,12 @@ test("writeGeneratedFiles: 空ディレクトリに全てデフォルト値で�
   }
 });
 
-test("writeGeneratedFiles: コメントのみの空の custom.css が生成される", async () => {
+test("writeGeneratedFiles: styles/ に base.css と default.css だけが生成され、custom.css は作られない", async () => {
   const dir = makeTmpDir();
   try {
     const targets = buildTargets({});
     await writeGeneratedFiles(targets, { cwd: dir, confirmOverwrite: async () => true });
-    const css = readFileSync(join(dir, VENDOR_DIR, "styles/custom.css"), "utf8");
-    assert.equal(css, buildStyleCssTemplate());
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
-
-test("writeGeneratedFiles: 既存の custom.css は、確認もせず上書きもしない(confirmOverwrite が true でも)", async () => {
-  const dir = makeTmpDir();
-  try {
-    const cssPath = join(dir, VENDOR_DIR, "styles/custom.css");
-    mkdirSync(join(dir, VENDOR_DIR, "styles"), { recursive: true });
-    writeFileSync(cssPath, "/* mine */");
-    const asked = [];
-    const logs = [];
-    const results = await writeGeneratedFiles([buildCustomCssTarget()], {
-      cwd: dir,
-      confirmOverwrite: async (relPath) => (asked.push(relPath), true),
-      log: (m) => logs.push(m),
-    });
-    assert.equal(readFileSync(cssPath, "utf8"), "/* mine */");
-    assert.deepEqual(asked, [], "確認しない");
-    assert.equal(results[0].status, "skipped");
-    assert.ok(logs.some((m) => m.includes("kept")));
+    assert.deepEqual(readdirSync(join(dir, VENDOR_DIR, "styles")).sort(), ["base.css", "default.css"]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -560,7 +515,7 @@ test("writeGeneratedFiles: 既存ファイルはconfirmOverwriteがfalse(デフ�
       results.find((r) => r.relPath === ".github/tsuzuri/config").status,
       "created",
     );
-    assert.ok(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8").includes("THEME=material"));
+    assert.ok(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8").includes("THEME=default.css"));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -713,16 +668,18 @@ test("buildWorkflowTarget: init と init --update が使うワークフローの
   assert.deepEqual(buildTargets({}).find((t) => t.name === "tsuzuri-pages.yml"), target);
 });
 
-test("runUpdate: ワークフローとビルドスクリプトは上書き・追加し、設定ファイルと既存の独自CSSは変更しない", async () => {
+test("runUpdate: ワークフロー・ビルドスクリプト・default.css は上書き・追加し、設定ファイルと利用者のカスタムスタイルは変更しない", async () => {
   const dir = makeTmpDir();
   try {
     const configPath = join(dir, ".github/tsuzuri/config");
-    const customCssPath = join(dir, VENDOR_DIR, "styles/custom.css");
+    const customCssPath = join(dir, VENDOR_DIR, "styles/my.css");
+    const defaultCssPath = join(dir, VENDOR_DIR, "styles/default.css");
     const ymlPath = join(dir, ".github/workflows/tsuzuri-pages.yml");
     mkdirSync(join(dir, ".github/workflows"), { recursive: true });
     mkdirSync(join(dir, VENDOR_DIR, "styles"), { recursive: true });
     writeFileSync(configPath, "TRIGGER_BRANCH=docs\nFAVICON_FILE=assets/favicon.svg\n");
     writeFileSync(customCssPath, "/* my css */");
+    writeFileSync(defaultCssPath, "/* edited */");
     writeFileSync(ymlPath, "old workflow");
 
     const results = await runUpdate({ cwd: dir });
@@ -733,49 +690,25 @@ test("runUpdate: ワークフローとビルドスクリプトは上書き・追
     assert.ok(existsSync(join(dir, VENDOR_DIR, "build-docs.mjs")));
     assert.ok(existsSync(join(dir, VENDOR_DIR, "lib/site-tree.mjs")));
     assert.ok(!results.some((r) => r.relPath.endsWith("tsuzuri/config")));
-    assert.equal(results.find((r) => r.relPath.endsWith("custom.css")).status, "skipped", "既存の独自CSSは保持する");
+    assert.ok(!results.some((r) => r.relPath.endsWith("my.css")), "利用者のカスタムスタイルは結果に出ない(触らない)");
+    assert.equal(readFileSync(defaultCssPath, "utf8"), readFileSync(join(PACKAGE_ROOT, "styles/default.css"), "utf8"), "default.css は上書きされる");
+    assert.equal(results.find((r) => r.relPath === `${VENDOR_DIR}/styles/default.css`).status, "overwritten");
     assert.equal(results.find((r) => r.relPath === ".github/workflows/tsuzuri-pages.yml").status, "overwritten");
-    assert.deepEqual(results.filter((r) => r.status === "skipped").map((r) => r.relPath), [`${VENDOR_DIR}/styles/custom.css`]);
+    assert.deepEqual(results.filter((r) => r.status === "skipped"), []);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
 });
 
-test("THEME_CHOICES: 組み込みテーマの一覧", () => {
-  const keys = THEME_CHOICES.map((c) => c.key);
-  assert.deepEqual(keys, ["material", "glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties", "none"]);
-  assert.ok(buildDocsPagesConfig({}).includes("nineties / none (no decoration)"));
-  withLang("ja", () => {
-    assert.ok(buildDocsPagesConfig({}).includes("nineties(90年代)"));
-    assert.ok(buildDocsPagesConfig({}).includes("kintsugi(金継ぎ)"));
-  });
-});
-
-test("THEME_CHOICES: ALLOWED_THEMES と同じ順で、すべてに説明がある", () => {
-  assert.deepEqual(THEME_CHOICES.map((c) => c.key), ALLOWED_THEMES);
-  for (const choice of THEME_CHOICES) assert.ok(choice.label, `${choice.key} の説明`);
-});
-
-test("設定ファイルのひな形のテーマの一覧に、ALLOWED_THEMES のすべてのテーマが載っている", () => {
-  const config = buildDocsPagesConfig({});
-  const line = config.split("\n").find((l) => l.startsWith("# Theme:"));
-  assert.ok(line, "テーマの一覧の行");
-  for (const theme of ALLOWED_THEMES) assert.ok(line.includes(theme), `${theme} が載っていない`);
-  withLang("ja", () => {
-    const jaLine = buildDocsPagesConfig({}).split("\n").find((l) => l.startsWith("# テーマ:"));
-    assert.ok(jaLine, "テーマの一覧の行(ja)");
-    for (const theme of ALLOWED_THEMES) assert.ok(jaLine.includes(`${theme}(`), `${theme} が載っていない(ja)`);
-  });
-});
-
-test("runUpdate: 独自CSS(custom.css)が無ければ、空のひな形を作る", async () => {
+test("runUpdate: 設定ファイルだけのリポジトリでも default.css を作り、custom.css のひな形は作らない", async () => {
   const dir = makeTmpDir();
   try {
     mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
     writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=main\n");
     const results = await runUpdate({ cwd: dir });
-    assert.equal(readFileSync(join(dir, VENDOR_DIR, "styles/custom.css"), "utf8"), buildStyleCssTemplate());
-    assert.equal(results.find((r) => r.relPath === `${VENDOR_DIR}/styles/custom.css`).status, "created");
+    assert.equal(results.find((r) => r.relPath === `${VENDOR_DIR}/styles/default.css`).status, "created");
+    assert.ok(!existsSync(join(dir, VENDOR_DIR, "styles/custom.css")));
+    assert.deepEqual(readdirSync(join(dir, VENDOR_DIR, "styles")).sort(), ["base.css", "default.css"]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -880,7 +813,7 @@ test("buildCompletionMessage: 選んだトリガーブランチ・起点のMarkd
   });
 });
 
-test("runUpdate: 配布対象に無くなった lib/*.mjs は削除し、styles/ の独自CSSは残す", async () => {
+test("runUpdate: 配布対象に無くなった lib/*.mjs は削除し、styles/ の利用者のカスタムスタイルは残す", async () => {
   const dir = makeTmpDir();
   try {
     mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
@@ -889,16 +822,16 @@ test("runUpdate: 配布対象に無くなった lib/*.mjs は削除し、styles/
     mkdirSync(join(dir, VENDOR_DIR, "styles"), { recursive: true });
     writeFileSync(join(dir, VENDOR_DIR, "lib/removed-module.mjs"), "// old");
     writeFileSync(join(dir, VENDOR_DIR, "lib/notes.txt"), "keep");
-    writeFileSync(join(dir, VENDOR_DIR, "styles/custom.css"), "/* mine */");
-    writeFileSync(join(dir, VENDOR_DIR, "styles/old-theme.css"), "/* ? */");
+    writeFileSync(join(dir, VENDOR_DIR, "styles/my.css"), "/* mine */");
+    writeFileSync(join(dir, VENDOR_DIR, "styles/material.css"), "/* old built-in */");
 
     const results = await runUpdate({ cwd: dir });
 
     assert.ok(!existsSync(join(dir, VENDOR_DIR, "lib/removed-module.mjs")));
     assert.ok(existsSync(join(dir, VENDOR_DIR, "lib/notes.txt")), ".mjs 以外は削除しない");
     assert.ok(existsSync(join(dir, VENDOR_DIR, "lib/config.mjs")));
-    assert.ok(existsSync(join(dir, VENDOR_DIR, "styles/custom.css")));
-    assert.ok(existsSync(join(dir, VENDOR_DIR, "styles/old-theme.css")), "styles/ は削除の対象にしない");
+    assert.ok(existsSync(join(dir, VENDOR_DIR, "styles/my.css")));
+    assert.ok(existsSync(join(dir, VENDOR_DIR, "styles/material.css")), "styles/ は削除の対象にしない(古い material.css も消さない)");
     assert.deepEqual(
       results.filter((r) => r.status === "deleted").map((r) => r.relPath),
       [`${VENDOR_DIR}/lib/removed-module.mjs`]
@@ -908,20 +841,20 @@ test("runUpdate: 配布対象に無くなった lib/*.mjs は削除し、styles/
   }
 });
 
-test("runUpdate: 利用者が編集する config と styles/ の独自CSSは書き換えず、VENDOR_DIR 直下の未知のファイルも削除しない", async () => {
+test("runUpdate: 利用者が編集する config と styles/ のカスタムスタイルは書き換えず、VENDOR_DIR 直下の未知のファイルも削除しない", async () => {
   const dir = makeTmpDir();
   try {
     mkdirSync(join(dir, VENDOR_DIR, "styles"), { recursive: true });
-    writeFileSync(join(dir, CONFIG_FILE_PATH), "TRIGGER_BRANCH=keep\nTHEME=material\n");
-    writeFileSync(join(dir, VENDOR_DIR, "styles/custom.css"), "/* mine */");
+    writeFileSync(join(dir, CONFIG_FILE_PATH), "TRIGGER_BRANCH=keep\nTHEME=my.css\n");
+    writeFileSync(join(dir, VENDOR_DIR, "styles/my.css"), "/* mine */");
     writeFileSync(join(dir, VENDOR_DIR, "styles/plain.css"), "/* mine 2 */");
     writeFileSync(join(dir, VENDOR_DIR, "stray.txt"), "keep");
 
     const results = await runUpdate({ cwd: dir });
 
-    assert.equal(readFileSync(join(dir, CONFIG_FILE_PATH), "utf8"), "TRIGGER_BRANCH=keep\nTHEME=material\n");
-    assert.equal(readFileSync(join(dir, VENDOR_DIR, "styles/custom.css"), "utf8"), "/* mine */");
-    assert.equal(readFileSync(join(dir, VENDOR_DIR, "styles/plain.css"), "utf8"), "/* mine 2 */", "styles/ に足した独自CSSも残る");
+    assert.equal(readFileSync(join(dir, CONFIG_FILE_PATH), "utf8"), "TRIGGER_BRANCH=keep\nTHEME=my.css\n");
+    assert.equal(readFileSync(join(dir, VENDOR_DIR, "styles/my.css"), "utf8"), "/* mine */");
+    assert.equal(readFileSync(join(dir, VENDOR_DIR, "styles/plain.css"), "utf8"), "/* mine 2 */", "styles/ に足したカスタムスタイルも残る");
     assert.ok(existsSync(join(dir, VENDOR_DIR, "stray.txt")));
     assert.ok(!results.some((r) => r.relPath === CONFIG_FILE_PATH), "config は更新の結果に出ない");
     assert.ok(!results.some((r) => r.status === "deleted"));
@@ -930,11 +863,11 @@ test("runUpdate: 利用者が編集する config と styles/ の独自CSSは書�
   }
 });
 
-test("buildCompletionMessage: VENDOR_DIR の中で編集してよいのは config と styles/ の独自CSSだけ、と案内する", () => {
+test("buildCompletionMessage: VENDOR_DIR の中で編集してよいのは config と styles/ の自分のカスタムスタイルだけ、と案内する", () => {
   const msg = buildCompletionMessage({});
-  assert.ok(msg.includes(`(In ${VENDOR_DIR}/, you may edit only the settings file config and your own CSS in styles/ (custom.css by default). Do not edit the built-in theme CSS and the scripts.)`));
+  assert.ok(msg.includes(`(In ${VENDOR_DIR}/, you may edit only the settings file config and your own custom styles in styles/. Do not edit base.css, default.css and the scripts.)`));
   withLang("ja", () => {
-    assert.ok(buildCompletionMessage({}).includes(`(${VENDOR_DIR}/ 配下で編集してよいのは、設定ファイル config と、styles/ に置く独自CSS(既定は custom.css)だけです。組み込みのテーマCSSとスクリプトは編集しないでください)`));
+    assert.ok(buildCompletionMessage({}).includes(`(${VENDOR_DIR}/ 配下で編集してよいのは、設定ファイル config と、styles/ に置く自分のカスタムスタイルだけです。base.css・default.css・スクリプトは編集しないでください)`));
   });
 });
 
@@ -968,12 +901,11 @@ test("parseCliArgs: 引数なし・init だけなら対話モード", () => {
 
 test("parseCliArgs: --yes や値の指定があれば対話なし。値は answersFromArgs で回答になる", () => {
   assert.equal(parseCliArgs(["-y"]).nonInteractive, true);
-  const args = parseCliArgs(["init", "--branch", "docs", "--root", "index.md", "--theme", "nineties"]);
+  const args = parseCliArgs(["init", "--branch", "docs", "--root", "index.md"]);
   assert.equal(args.nonInteractive, true);
   assert.deepEqual(answersFromArgs(args), {
     triggerBranch: "docs",
     rootMd: "index.md",
-    theme: "nineties",
     navEnabled: true,
     languages: "en",
     siteName: "",
@@ -981,23 +913,22 @@ test("parseCliArgs: --yes や値の指定があれば対話なし。値は answe
   assert.deepEqual(answersFromArgs(parseCliArgs(["--yes"])), {
     triggerBranch: "main",
     rootMd: "README.md",
-    theme: "material",
     navEnabled: true,
     languages: "en",
     siteName: "",
   });
 });
 
-test("parseCliArgs: 不明なオプション・サブコマンド、不正なテーマ、空の値はエラー", () => {
+test("parseCliArgs: 不明なオプション・サブコマンド、空の値はエラー(--theme は削除した)", () => {
   assert.throws(() => parseCliArgs(["--bogus"]), /Invalid arguments/);
-  assert.throws(() => parseCliArgs(["--style"]), /Invalid arguments/, "--style は削除した(独自CSSのひな形は常に作る)");
+  assert.throws(() => parseCliArgs(["--style"]), /Invalid arguments/, "--style は削除した");
+  assert.throws(() => parseCliArgs(["--theme", "nineties"]), /Invalid arguments/, "--theme は削除した(THEME の質問もない)");
   assert.throws(() => parseCliArgs(["deploy"]), /Unknown subcommand/);
-  assert.throws(() => parseCliArgs(["--theme", "sepia"]), /--theme must be/);
   assert.throws(() => parseCliArgs(["--branch", " "]), /--branch cannot be empty/);
   withLang("ja", () => {
     assert.throws(() => parseCliArgs(["--bogus"]), /引数が正しくありません/);
     assert.throws(() => parseCliArgs(["deploy"]), /不明なサブコマンド/);
-    assert.throws(() => parseCliArgs(["--theme", "sepia"]), /--theme には/);
+    assert.throws(() => parseCliArgs(["--theme", "nineties"]), /引数が正しくありません/);
     assert.throws(() => parseCliArgs(["--branch", " "]), /--branch に空の値/);
   });
 });
@@ -1035,14 +966,16 @@ test("parseCliArgs: -v / -h / --update / --force", () => {
   assert.equal(parseCliArgs(["-y", "--force"]).force, true);
 });
 
-test("buildHelpText: 主なオプションとテーマ名を説明している(en・ja とも)", () => {
+test("buildHelpText: 主なオプションを説明している(en・ja とも。--theme は無い)", () => {
   for (const lang of ["en", "ja"]) {
     withLang(lang, () => {
       const help = buildHelpText();
-      for (const word of ["--update", "--yes", "--branch", "--root", "--theme", "--force", "--version", "--lang", "nineties"]) {
+      for (const word of ["--update", "--yes", "--branch", "--root", "--force", "--version", "--lang"]) {
         assert.ok(help.includes(word), `${lang}: ${word}`);
       }
       assert.ok(!help.includes("--style"));
+      assert.ok(!help.includes("--theme"));
+      assert.ok(!help.includes("nineties"));
     });
   }
 });
@@ -1135,13 +1068,13 @@ test("更新の案内はメジャーバージョンのタグ付き(未リリー�
   assert.doesNotMatch(buildDocsPagesYml(), /npx github:[^#\s]+ init/);
 });
 
-test("isBundledPath: ワークフローとビルドスクリプト一式だけが対象(設定ファイル・独自CSSは対象外)", () => {
+test("isBundledPath: ワークフローとビルドスクリプト一式(base.css・default.css を含む)が対象(設定ファイルは対象外)", () => {
   assert.equal(isBundledPath(".github/workflows/tsuzuri-pages.yml"), true);
   assert.equal(isBundledPath(`${VENDOR_DIR}/build-docs.mjs`), true);
-  assert.equal(isBundledPath(`${VENDOR_DIR}/styles/material.css`), true);
+  assert.equal(isBundledPath(`${VENDOR_DIR}/styles/base.css`), true);
+  assert.equal(isBundledPath(`${VENDOR_DIR}/styles/default.css`), true);
   assert.equal(isBundledPath(CONFIG_FILE_PATH), false);
   assert.equal(isBundledPath(".github/tsuzuri/config"), false);
-  assert.equal(isBundledPath(`${VENDOR_DIR}/styles/custom.css`), false);
 });
 
 test("createBundledConfirm: 一式は1回だけ聞いて同じ答えを使い、設定ファイルは個別に聞く", async () => {
@@ -1157,7 +1090,8 @@ test("createBundledConfirm: 一式は1回だけ聞いて同じ答えを使い、
   assert.equal(await confirm(".github/tsuzuri/config"), false);
   assert.equal(questions.length, 2);
   assert.match(questions[0], /The workflow and the build scripts/);
-  assert.match(questions[0], /except config and your own CSS/);
+  assert.match(questions[0], /except config\)/);
+  assert.equal(await confirm(`${VENDOR_DIR}/styles/default.css`), true, "default.css も一式の答えに従う");
   assert.match(questions[1], /\.github\/tsuzuri\/config already exists/);
 });
 
@@ -1173,15 +1107,14 @@ test("生成する設定ファイル・CSSひな形に、開発側の内部的�
   for (const word of ["★", "詳細設計", "後方互換", "現行", "build-docs.mjs", "ハードコード"]) {
     assert.ok(!config.includes(word), `設定ファイルに「${word}」が含まれる`);
   }
-  for (const key of ["TRIGGER_BRANCH", "ROOT_MD", "OUT_DIR", "THEME", "STYLE_FILE", "LANGUAGES", "NAV_ENABLED", "FAVICON_FILE", "SITE_NAME", "CUSTOM_DOMAIN", "OGP_DEFAULT_IMAGE", "STRICT_LINKS", "LAST_UPDATED", "EDIT_LINK", "REPO_LINK", "REPO_VERSION", "REPO_LICENSE", "SITEMAP_JSON", "LLMS_TXT"]) {
+  for (const key of ["TRIGGER_BRANCH", "ROOT_MD", "OUT_DIR", "THEME", "LANGUAGES", "NAV_ENABLED", "FAVICON_FILE", "SITE_NAME", "CUSTOM_DOMAIN", "OGP_DEFAULT_IMAGE", "STRICT_LINKS", "LAST_UPDATED", "EDIT_LINK", "REPO_LINK", "REPO_VERSION", "REPO_LICENSE", "SITEMAP_JSON", "LLMS_TXT"]) {
     assert.match(config, new RegExp(`^${key}=`, "m"), key);
   }
-  assert.ok(buildStyleCssTemplate().includes("https://akilasatolu.github.io/tsuzuri/docs/theming.html"));
-  assert.ok(!buildStyleCssTemplate().includes("README.md"));
+  assert.doesNotMatch(config, /^STYLE_FILE=/m);
 });
 
 test("missingConfigKeys: 最新のひな形にあって設定ファイルに無いキーを返す(コメント内のキーは数えない)", () => {
-  const old = ["TRIGGER_BRANCH=main", "# LAST_UPDATED=true", "THEME=material", "NAV_ENABLED=true"].join("\n");
+  const old = ["TRIGGER_BRANCH=main", "# LAST_UPDATED=true", "THEME=default.css", "NAV_ENABLED=true"].join("\n");
   const missing = missingConfigKeys(old);
   assert.ok(missing.includes("LAST_UPDATED"));
   assert.ok(missing.includes("STRICT_LINKS"));
@@ -1194,7 +1127,7 @@ test("missingConfigKeys: 最新のひな形にあって設定ファイルに無�
   assert.ok(missing.includes("LLMS_TXT"));
   assert.deepEqual(missingConfigKeys(`${old}\nLLMS_TXT=false\n`).filter((k) => k === "LLMS_TXT"), []);
   // 古い設定ファイル(LANG だけで LANGUAGES が無いもの)には、LANGUAGES が「設定ファイルに無い項目」として出る
-  const oldLang = missingConfigKeys("TRIGGER_BRANCH=main\nLANG=ja\nTHEME=material\n");
+  const oldLang = missingConfigKeys("TRIGGER_BRANCH=main\nLANG=ja\nTHEME=default.css\n");
   assert.ok(oldLang.includes("LANGUAGES"));
   assert.ok(!oldLang.includes("LANG"));
 });
@@ -1203,12 +1136,12 @@ test("runUpdate: 設定ファイルに無い新しい項目を案内する(設�
   const dir = makeTmpDir();
   try {
     mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
-    writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=main\nTHEME=material\n");
+    writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=main\nTHEME=default.css\n");
     const logs = [];
     await runUpdate({ cwd: dir, log: (m) => logs.push(m) });
     const notice = logs.find((m) => m.includes("Keys missing from the settings file"));
     assert.ok(notice && notice.includes("LAST_UPDATED") && notice.includes("configuration.html"));
-    assert.equal(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8"), "TRIGGER_BRANCH=main\nTHEME=material\n");
+    assert.equal(readFileSync(join(dir, ".github/tsuzuri/config"), "utf8"), "TRIGGER_BRANCH=main\nTHEME=default.css\n");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -1284,7 +1217,7 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
     writeFileSync(
       join(dir, ".github/tsuzuri/config"),
-      "# comment\r\nSITE_NAME = Bob's \"docs\"  \r\nOGP_DEFAULT_IMAGE=https://x.example/a.png?w=1&h=2\r\n\r\nNODE_OPTIONS=--require x\nTHEME=nineties  # 暗い配色\nLANG=en\nLANGUAGES=en"
+      "# comment\r\nSITE_NAME = Bob's \"docs\"  \r\nOGP_DEFAULT_IMAGE=https://x.example/a.png?w=1&h=2\r\n\r\nNODE_OPTIONS=--require x\nTHEME=nineties.css  # 暗い配色\nLANG=en\nLANGUAGES=en"
     );
     const envFile = join(dir, "github.env");
     const result = spawnSync("bash", ["-e", "load.sh"], { cwd: dir, encoding: "utf8", env: { ...process.env, GITHUB_ENV: envFile } });
@@ -1293,7 +1226,7 @@ test("生成ワークフローの Load config: CRLF・引用符・=を含む値�
     const env = readFileSync(envFile, "utf8");
     assert.match(env, /^SITE_NAME=Bob's "docs"$/m);
     assert.match(env, /^OGP_DEFAULT_IMAGE=https:\/\/x\.example\/a\.png\?w=1&h=2$/m);
-    assert.match(env, /^THEME=nineties {2}# 暗い配色$/m, "行の途中の#はコメントにならない(ドキュメントどおり)");
+    assert.match(env, /^THEME=nineties\.css {2}# 暗い配色$/m, "行の途中の#はコメントにならない(ドキュメントどおり)");
     assert.match(env, /^LANGUAGES=en$/m, "末尾に改行の無い最後の行も読む");
     // LANG は設定キーではない(言語は LANGUAGES だけ): ほかの未知のキーと同じく警告して、GITHUB_ENV には入れない
     assert.match(result.stdout, /::warning::Ignoring unknown setting key LANG/);
@@ -1311,7 +1244,7 @@ test("生成ワークフローの Load config: 値が空の TRIGGER_BRANCH= は�
     assert.ok(m, "Load config ステップを取り出せること");
     writeFileSync(join(dir, "load.sh"), m[1].split("\n").map((line) => line.slice(10)).join("\n"));
     mkdirSync(join(dir, ".github/tsuzuri"), { recursive: true });
-    writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=  \nTHEME=material\n");
+    writeFileSync(join(dir, ".github/tsuzuri/config"), "TRIGGER_BRANCH=  \nTHEME=default.css\n");
     const envFile = join(dir, "github.env");
     const result = spawnSync("bash", ["-e", "load.sh"], { cwd: dir, encoding: "utf8", env: { ...process.env, GITHUB_ENV: envFile } });
     assert.equal(result.status, 0, result.stderr);
@@ -1448,7 +1381,7 @@ test("buildDocsPagesConfig: TRIGGER_BRANCH のコメントに、省略・空の�
 // --- 表示の言語(--lang)・生成物の言語 ---
 
 test("buildDocsPagesConfig: en と ja で、設定ファイルのキーと値は同じ(違うのはコメントだけ)", () => {
-  const answers = { triggerBranch: "docs", rootMd: "index.md", theme: "nineties", navEnabled: false, languages: "ja,en", siteName: "Demo" };
+  const answers = { triggerBranch: "docs", rootMd: "index.md", navEnabled: false, languages: "ja,en", siteName: "Demo" };
   const en = buildDocsPagesConfig(answers);
   const ja = withLang("ja", () => buildDocsPagesConfig(answers));
   assert.notEqual(en, ja);
@@ -1460,17 +1393,15 @@ test("buildDocsPagesConfig: en と ja で、設定ファイルのキーと値は
   assert.deepEqual(keyLines(en), keyLines(ja));
 });
 
-test("既定(en)の設定ファイル・CSSひな形・ワークフロー・.gitignore・package.json に日本語がない", () => {
+test("既定(en)の設定ファイル・ワークフロー・.gitignore・package.json に日本語がない", () => {
   const cjk = /[぀-ヿ一-鿿]/;
   assert.doesNotMatch(buildDocsPagesConfig({}), cjk);
-  assert.doesNotMatch(buildStyleCssTemplate(), cjk);
   assert.doesNotMatch(buildDocsPagesYml(), cjk);
   const byPath = Object.fromEntries(buildVendorTargets().map((t) => [t.relPath, t.content]));
   assert.doesNotMatch(byPath[`${VENDOR_DIR}/.gitignore`], cjk);
   assert.doesNotMatch(byPath[`${VENDOR_DIR}/package.json`], cjk);
   withLang("ja", () => {
     assert.match(buildDocsPagesConfig({}), cjk);
-    assert.match(buildStyleCssTemplate(), cjk);
   });
 });
 
@@ -1488,11 +1419,4 @@ test("vendoredVersionOf: 日本語の旧ワークフローのコメントも、�
   assert.equal(vendoredVersionOf("# tsuzuri v1.4.0 の npx github:akilasatolu/tsuzuri#v1 init によって生成された、自己完結型のワークフローです。\n"), "1.4.0");
   assert.equal(vendoredVersionOf(buildDocsPagesYml(undefined, undefined, { tsuzuriVersion: "9.8.7" })), "9.8.7");
   assert.equal(vendoredVersionOf("name: x\n"), "");
-});
-
-test("THEME_CHOICES の説明は、言語に従って読み出すたびに変わる", () => {
-  const en = THEME_CHOICES[0].label;
-  const ja = withLang("ja", () => THEME_CHOICES[0].label);
-  assert.match(en, /^Material/);
-  assert.match(ja, /^マテリアル/);
 });

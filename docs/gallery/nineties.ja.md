@@ -1,17 +1,18 @@
 ---
 title: 90年代(nineties)
-theme: nineties
+theme: nineties.css
 styleFile: plain.css
-description: Tsuzuriの組み込みテーマ「90年代(nineties)」の見本ページ
+description: カスタムスタイル「90年代(nineties)」の見本ページ
 ---
 
 # 90年代(nineties)
 
 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。
 
-このテーマをサイト全体で使うには、`.github/tsuzuri/config`で`THEME=nineties`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: nineties`と書きます
-([テーマ・スタイル](../theming.ja.md)参照)。
+使うには、[ギャラリー](../gallery.ja.md#90年代nineties)で`nineties.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+`.github/tsuzuri/config`で`THEME=nineties.css`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: nineties.css`と書きます
+([スタイル(Theming)](../theming.ja.md)参照)。
 
 [← ブループリント(blueprint)](blueprint.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [装飾なし(none) →](none.ja.md)
 
@@ -36,7 +37,7 @@ description: Tsuzuriの組み込みテーマ「90年代(nineties)」の見本ペ
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `material` | 組み込みテーマ名 |
+| `THEME` | `default.css` | カスタムスタイルのファイル名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANGUAGES` | `en` | サイトの言語(`<html lang>`の値) |
 

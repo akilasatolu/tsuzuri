@@ -27,7 +27,7 @@ test("利用者に入る中身: 実行に要るファイルがあり、テスト
     ".github/scripts/lib/config.mjs",
     ".github/scripts/lib/i18n.mjs",
     "styles/base.css",
-    "styles/material.css",
+    "styles/default.css",
     "templates/.github/workflows/tsuzuri-pages.yml",
     // npm はルートの package-lock.json を必ず外すので、init が使う完成品はこちらで届ける
     "templates/tsuzuri/package.json",
@@ -38,4 +38,9 @@ test("利用者に入る中身: 実行に要るファイルがあり、テスト
   for (const prefix of ["test/", "scripts/", ".github/workflows/", "eslint.config.js"]) {
     assert.deepEqual(files.filter((f) => f.startsWith(prefix)), [], `${prefix} が入っている`);
   }
+  // ギャラリーで配るカスタムスタイルは、配布物に入れない(styles/ に入るのはベースと default だけ)
+  for (const name of ["glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties", "material", "custom"]) {
+    assert.ok(!files.includes(`styles/${name}.css`), `styles/${name}.css が入っている`);
+  }
+  assert.deepEqual(files.filter((f) => f.startsWith("styles/") && f.endsWith(".css")).sort(), ["styles/base.css", "styles/default.css"]);
 });

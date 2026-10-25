@@ -78,8 +78,7 @@ npx github:akilasatolu/tsuzuri#v1 init
   `tsuzuri v1.36.0`.
 - The screen output of `init` and `preview` is in English (v1.37.0 or later;
   up to v1.36.0 it was in Japanese). With `--lang ja`, the screen output and
-  the comments in the generated settings file and in the empty custom CSS
-  template are in Japanese. The comments in the generated workflow and in
+  the comments in the generated settings file are in Japanese. The comments in the generated workflow and in
   `.github/tsuzuri/.gitignore` are always in English. The messages of the
   build script (the log of the build on GitHub Actions, and of the build that
   `preview` runs) are always in English too (v1.37.0 or later); `--lang` does
@@ -102,7 +101,7 @@ With an empty answer or `n`, `init` exits without generating anything.
 
 ### 3.3 Interactive questions
 
-Without options, `init` shows the following six questions in order. An
+Without options, `init` shows the following five questions in order. An
 empty answer (Enter alone) results in the default in brackets. The questions
 are in English (v1.37.0 or later). Up to v1.36.0, and with `--lang ja`, they
 are in Japanese (for example `? トリガーブランチ (TRIGGER_BRANCH) [main]: `).
@@ -114,33 +113,21 @@ are in Japanese (for example `? トリガーブランチ (TRIGGER_BRANCH) [main]
 2. `? Root Markdown file (ROOT_MD) [README.md]: `
    The Markdown file that is the entry point of the site. The default is
    `README.md`.
-3. The third question shows the themes (`THEME`) as a list numbered 1 to 9
-   and accepts a number. The numbers map to themes as follows.
-
-   - 1: `material`
-   - 2: `glass`
-   - 3: `neumorphism`
-   - 4: `editorial`
-   - 5: `minimal`
-   - 6: `kintsugi`
-   - 7: `blueprint`
-   - 8: `nineties`
-   - 9: `none`
-
-   An empty answer, a number outside 1 to 9, or a non-numeric answer results
-   in `material`.
-4. `? Show the sidebar navigation, site search and in-page table of contents? (NAV_ENABLED) (Y/n): `
+3. `? Show the sidebar navigation, site search and in-page table of contents? (NAV_ENABLED) (Y/n): `
    The default is "show".
-5. `? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [en]: `
+4. `? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [en]: `
    The default is `en`. A value that is not a valid language tag (for
    example `ja_JP`) is ignored with a warning. When no valid value is left,
    the result is `en`.
-6. `? Site name (SITE_NAME; the repository name if empty) []: `
+5. `? Site name (SITE_NAME; the repository name if empty) []: `
    The default is empty. When it is empty, the repository name becomes the
    site name in builds on GitHub Actions.
 
-`init` does not ask about custom CSS. It always creates the empty
-`.github/tsuzuri/styles/custom.css` (see section 3.5).
+`init` does not ask about the theme or the custom style. The settings file
+always starts with `THEME=default.css`, and `init` places only `base.css` and
+`default.css` in `.github/tsuzuri/styles/` (see section 3.5). To use another
+custom style, the user downloads it from the gallery and writes its file name
+in `THEME`.
 
 ### 3.4 Non-interactive runs
 
@@ -150,14 +137,13 @@ questions.
 - `-y`, `--yes`: `init` generates everything with the defaults.
 - `--branch <name>`: the value of `TRIGGER_BRANCH`.
 - `--root <path>`: the value of `ROOT_MD`.
-- `--theme <name>`: the value of `THEME`.
 - `--languages <list>`: the value of `LANGUAGES` (for example `ja`, `ja,en`).
 - `--site-name <name>`: the value of `SITE_NAME`.
 - `--no-nav`: results in `NAV_ENABLED=false`.
 
 `--lang <en|ja>` (v1.37.0 or later) does not turn on a non-interactive run.
 It is the language of the screen output and of the comments in the generated
-settings file and custom CSS template. The default is `en`, and only `en` and
+settings file. The default is `en`, and only `en` and
 `ja` (in lowercase) are accepted. It applies only to the command it is given
 to.
 
@@ -172,9 +158,10 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
   used.
 - In a non-interactive run, files that already exist are left as they are.
   With `--force`, they are overwritten (this includes the settings file
-  `.github/tsuzuri/config`), except `.github/tsuzuri/styles/custom.css`,
-  which is never overwritten.
-- An unknown option, a `--theme` other than the nine theme names, a
+  `.github/tsuzuri/config`). The custom styles that the user put in
+  `.github/tsuzuri/styles/` are not created by `init`, so they are not
+  overwritten.
+- An unknown option (`--theme` no longer exists), a
   `--languages` that is not a valid language tag, and an empty `--branch`,
   `--root` or `--languages` each result in an error. In that case `init`
   generates nothing.
@@ -191,19 +178,18 @@ The other options are as follows.
 - `.github/tsuzuri/config`: the settings file
 - `.github/tsuzuri/build-docs.mjs`: the build script
 - `.github/tsuzuri/lib/*.mjs`: the modules the build script uses (17 files)
-- `.github/tsuzuri/styles/*.css`: the base CSS (`base.css`) and the CSS of
-  the 8 themes
+- `.github/tsuzuri/styles/base.css`, `.github/tsuzuri/styles/default.css`: the
+  base CSS and the default custom style. Only these two are placed. The other
+  custom styles are not distributed with the package; they are in the gallery.
 - `.github/tsuzuri/package.json`, `.github/tsuzuri/package-lock.json`:
   the versions and hashes of the build dependencies (marked, highlight.js,
   marked-footnote)
 - `.github/tsuzuri/.gitignore`: excludes `node_modules/` from git
-- `.github/tsuzuri/styles/custom.css`: the empty custom CSS template. It is
-  always created when it does not exist. An existing one is kept as it is,
-  without a question and even with `--force`.
 
 Under `.github/tsuzuri/`, the user edits only the settings file `config` and
-the user's own CSS files in `styles/` (`custom.css` by default). The build
-script and the built-in theme CSS are not files for the user to edit.
+the user's own custom styles in `styles/`. The build script, `base.css` and
+`default.css` are not files for the user to edit (to edit `default.css`, copy it
+under another name and set that name in `THEME`).
 Editing or deleting them can make the build fail. They are also overwritten
 by the update in chapter 10.
 
@@ -229,15 +215,14 @@ follows.
   current branch in interactive mode, and `main` in a non-interactive run.
 - When a file with the same name already exists at the destination,
   interactive `init` asks whether to overwrite it. For the workflow and the
-  files under `.github/tsuzuri/` other than `config` and the user's own CSS,
+  files under `.github/tsuzuri/` other than `config`,
   it asks once for all of them.
 
-  `The workflow and the build scripts (under .github/tsuzuri/, except config and your own CSS) already exist. Overwrite them with the latest version? (y/N): `
+  `The workflow and the build scripts (under .github/tsuzuri/, except config) already exist. Overwrite them with the latest version? (y/N): `
 
-  (Up to v1.36.0, and with `--lang ja`: `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N): `.)
+  (Up to v1.36.0, and with `--lang ja`: `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config を除く)は既に存在します。最新版で上書きしますか? (y/N): `.)
 
-  For the settings file, it asks separately. An existing `custom.css` is
-  kept without a question.
+  For the settings file, it asks separately.
 
   `.github/tsuzuri/config already exists. Overwrite it? (y/N): `
 
@@ -287,19 +272,17 @@ written in the settings file that `init` generates.
   directory before writing. The build places this file automatically.
   When omitted: `_site`
   Value from init: `_site`
-- `STYLE_FILE`: the file name of the custom CSS (only the file name, ending
-  with `.css`, no folders). The file is read from `.github/tsuzuri/styles/`.
-  When the file exists, it is loaded after the theme. When the file is
-  missing, it is not used. A value that cannot be used as a file name (it
-  contains `/`, `\` or `:`, starts with `.`, or does not end with `.css`)
-  is ignored with a warning, and no custom CSS is used.
-  When omitted: `custom.css`
-  Value from init: `custom.css`
-- `THEME`: the theme. The values are the nine names `material`, `glass`,
-  `neumorphism`, `editorial`, `minimal`, `kintsugi`, `blueprint`, `nineties`
-  and `none`. Any other value becomes `material` with a warning.
-  When omitted: `material`
-  Value from init: the answer to question 3.
+- `THEME`: the file name of the custom style of the whole site (only the file
+  name, ending with `.css`, no folders). The file is read from
+  `.github/tsuzuri/styles/`; `STYLE_DIR` does not affect it. The look of a page
+  is the base CSS plus this one custom style. A value that is not the file
+  name of a CSS file (`none`, an old theme name such as `material`, a path with
+  folders, a name that does not end with `.css`) becomes `default.css` with a
+  warning. When the file is missing, the build shows a warning and uses the
+  base CSS only. There is no `THEME=none` keyword (for no decoration, use a
+  CSS file that contains only comments, such as `none.css` from the gallery).
+  When omitted: `default.css`
+  Value from init: `default.css`
 - `LANGUAGES`: the site languages. The value is a comma-separated list of
   language tags such as `ja`, `en` and `pt-BR`. The first one is the base
   language, which is the language of the root Markdown file. One language
@@ -514,16 +497,14 @@ The keys are the following 10.
   `website`.
 - `noindex`: with `true`, the `noindex` tag for search engines is output,
   and the page is left out of `sitemap.xml` and `llms.txt`.
-- `theme`: the theme for that page alone. A value ending with `.css` is the
-  file name of a custom CSS file in `.github/tsuzuri/styles/` (only the file
-  name, no folders). Any other value must be one of the nine theme names.
-  A value that cannot be used (a file name with a folder, an unknown name,
-  a missing file) shows a warning, and the page uses the site-wide `THEME`.
-- `styleFile`: the custom CSS file used for that page alone in place of
-  `STYLE_FILE`. The value is a file name in `.github/tsuzuri/styles/` (only
-  the file name, ending with `.css`, no folders). A value that cannot be used
-  or a missing file shows a warning, and the page uses the site-wide
-  `STYLE_FILE`.
+- `theme`: the custom style for that page alone. The value is the file name
+  of a custom style in `.github/tsuzuri/styles/` (only the file name, ending
+  with `.css`, no folders). It replaces the site-wide custom style (`THEME`);
+  the two are not mixed. A value that cannot be used (a file name with a
+  folder, a name that does not end with `.css` including `none` and the old
+  theme names, a missing file, a symbolic link to outside the repository)
+  shows a warning, and the page uses the site-wide custom style. For a page
+  with no decoration, use `theme: none.css` (a file with only comments).
 - `nav`: with `false`, the page is left out of the navigation and of the
   links to the previous and next pages. The page itself is output. In
   `llms.txt`, the page is under `## Optional`.
@@ -600,20 +581,25 @@ generated.
 
 ## 7. Appearance (key points)
 
-- The CSS of a page is layered in this order: the base CSS, the theme
-  (`THEME`), the custom CSS (`STYLE_FILE`). Later layers take priority.
-- With `THEME=none`, the theme layer is not used.
-- The custom CSS can override CSS variables such as `--fg`, `--bg`,
-  `--border`, `--accent`, `--code-bg`, `--font` and `--content-width`.
-- `theme` and `styleFile` in the frontmatter change the appearance per page.
-  `styleFile` and a `theme` ending with `.css` are file names of files in
-  `.github/tsuzuri/styles/`.
-- The custom CSS is written in `.github/tsuzuri/styles/custom.css`, which
-  `init` creates empty.
-- `nineties` has a light display only, and `blueprint` has one display for
-  both. The six themes `material`, `glass`, `neumorphism`, `editorial`,
-  `minimal` and `kintsugi` switch between light and dark following the OS
-  setting.
+- The CSS of a page is the base CSS (`base.css`) plus one custom style (a CSS
+  file in `.github/tsuzuri/styles/`). The custom style is loaded after the base
+  CSS, so it takes priority.
+- The custom style of the whole site is `THEME` (a file name; `default.css`
+  when omitted). `default.css` is included in the package. The other custom
+  styles (`glass.css`, `neumorphism.css`, `editorial.css`, `minimal.css`,
+  `kintsugi.css`, `blueprint.css`, `nineties.css`, `none.css` and the look of
+  this site) are not distributed with the package. The user downloads one from
+  the gallery, puts it in `.github/tsuzuri/styles/`, and sets `THEME`.
+- A custom style can define and override CSS variables such as `--fg`, `--bg`,
+  `--border`, `--accent`, `--code-bg`, `--font` and `--content-width`. To make
+  a variation of `default.css`, copy it under another name, rewrite the
+  variables and set `THEME` to that name (`default.css` itself is overwritten
+  by `init --update`).
+- `theme` in the frontmatter replaces the custom style of that page alone (a
+  file name in `.github/tsuzuri/styles/`).
+- `blueprint.css` has one display for both light and dark, and `nineties.css`
+  has a light display only. The others switch between light and dark following
+  the OS setting.
 
 ## 8. Publishing
 
@@ -753,7 +739,7 @@ node .github/tsuzuri/build-docs.mjs
 - The first line installs the dependencies, and the second line builds.
 - A local build reads `.github/tsuzuri/config` automatically.
 - A key passed as an environment variable takes priority over the settings
-  file (for example `THEME=nineties node .github/tsuzuri/build-docs.mjs`).
+  file (for example `THEME=glass.css node .github/tsuzuri/build-docs.mjs`).
 - Opening the output files directly as files breaks the links. Serving them
   with a simple server makes them open correctly (for example
   `npx serve _site`).
@@ -787,17 +773,15 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 ```
 
 - There are no questions and no overwrite confirmations.
-- `.github/workflows/tsuzuri-pages.yml`, and the build script, the theme CSS,
+- `.github/workflows/tsuzuri-pages.yml`, and the build script, `base.css`, `default.css`,
   `package.json`, `package-lock.json` and `.gitignore` inside
   `.github/tsuzuri/`, are overwritten with the content of the version that
   ran.
 - Inside `.github/tsuzuri/lib/`, `.mjs` files that the version that ran does
   not have are deleted.
-- `.github/tsuzuri/config` is not changed. `.github/tsuzuri/styles/custom.css`
-  is not changed when it exists, and is created as an empty template when it
-  does not. Other CSS files that the user added to `styles/` are not deleted;
-  one with the same name as a built-in theme (such as `material.css`) is
-  overwritten.
+- `.github/tsuzuri/config` is not changed. The custom styles that the user put
+  in `styles/` are not changed or deleted (an old `material.css` and the like
+  stay as they are). `default.css` is overwritten.
 - When the settings file lacks some keys, `init` prints the names of those
   keys. A missing `LLMS_TXT` is printed as well, and works as `true`.
 - In a repository without `.github/tsuzuri/config`, `init` ends with an
@@ -867,16 +851,23 @@ version inside the repository stays the same until an update.
   (Up to v1.36.0: `STRICT_LINKS=true のため、リンクの問題 3 件でビルドを失敗させます。`)
 - Symptom: changes made to files inside `.github/tsuzuri/` disappear after
   an update.
-  Cause: `init --update` overwrites the build script and the theme CSS.
-  The symptom does not occur when: the appearance changes are written in the
-  custom CSS of `STYLE_FILE`.
-- Symptom: the custom CSS is not applied, and the build log shows a warning
-  that the value of `STYLE_FILE` is invalid.
-  Cause: `STYLE_FILE` holds a path with folders (for example
-  `.github/tsuzuri/styles/custom.css`) or a name that does not end with
-  `.css`.
+  Cause: `init --update` overwrites the build script, `base.css` and
+  `default.css`.
+  The symptom does not occur when: the appearance changes are written in a
+  custom style with another name (for example a copy of `default.css`) set in
+  `THEME`.
+- Symptom: the custom style is not applied, and the build log shows a warning
+  that the value of `THEME` is invalid (and `default.css` is used).
+  Cause: `THEME` holds `none`, an old theme name such as `material`, a path
+  with folders (for example `.github/tsuzuri/styles/glass.css`) or a name that
+  does not end with `.css`.
   The symptom does not occur when: only the file name of a file in
-  `.github/tsuzuri/styles/` is written (for example `STYLE_FILE=custom.css`).
+  `.github/tsuzuri/styles/` is written (for example `THEME=glass.css`).
+- Symptom: the build log shows a warning that the file of `THEME` was not
+  found, and the page has no decoration.
+  Cause: the CSS file is not in `.github/tsuzuri/styles/` (it was not
+  downloaded from the gallery, or it was put in another folder).
+  The symptom does not occur when: the file is in `.github/tsuzuri/styles/`.
 - Symptom: a version with unreleased behavior runs.
   Cause: the command has no `#v1`, and the content of the `main` branch
   runs.
@@ -896,8 +887,8 @@ The detailed description of each topic is at the following URLs.
 - Installation steps: https://akilasatolu.github.io/tsuzuri/docs/getting-started.html
 - Concepts: https://akilasatolu.github.io/tsuzuri/docs/concepts.html
 - Settings keys: https://akilasatolu.github.io/tsuzuri/docs/configuration.html
-- Themes and custom CSS: https://akilasatolu.github.io/tsuzuri/docs/theming.html
-- Theme samples: https://akilasatolu.github.io/tsuzuri/docs/gallery.html
+- Custom styles (theming): https://akilasatolu.github.io/tsuzuri/docs/theming.html
+- Style gallery (samples and downloads): https://akilasatolu.github.io/tsuzuri/docs/gallery.html
 - Frontmatter: https://akilasatolu.github.io/tsuzuri/docs/frontmatter.html
 - Multilingual sites: https://akilasatolu.github.io/tsuzuri/docs/i18n.html
 - Commands: https://akilasatolu.github.io/tsuzuri/docs/cli.html

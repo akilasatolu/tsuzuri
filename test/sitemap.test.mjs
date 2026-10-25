@@ -10,8 +10,6 @@ function baseOpts(overrides = {}) {
   return {
     root: "README.md",
     basePath: "",
-    styleFile: ".github/docs-pages.style.css",
-    customStyleApplied: false,
     visitedMd,
     imageSet: new Set(["images/logo.png"]),
     hierarchy: { "README.md": [] },
@@ -21,7 +19,7 @@ function baseOpts(overrides = {}) {
     siteName: "tsuzuri",
     siteOrigin: "https://example.com",
     customDomain: null,
-    theme: "material",
+    theme: "default.css",
     ...overrides,
   };
 }
@@ -34,7 +32,7 @@ test("新規フィールド(lang/siteName/siteOrigin/customDomain/theme)が正�
   assert.equal(result.siteName, "tsuzuri");
   assert.equal(result.siteOrigin, "https://example.com");
   assert.equal(result.customDomain, "docs.example.com");
-  assert.equal(result.theme, "material");
+  assert.equal(result.theme, "default.css");
 });
 
 test("pages[].title / pages[].description が正しく出力される (meta優先)", () => {
@@ -55,12 +53,12 @@ test("meta.titleが無い場合はrelをフォールバックとして使う", (
 
 test("meta.themeがあればpages[].themeにそのまま反映される", () => {
   const visitedMd = new Map([
-    ["docs/special.md", { content: "本文", meta: { theme: "glass" } }],
+    ["docs/special.md", { content: "本文", meta: { theme: "glass.css" } }],
     ["docs/custom.md", { content: "本文", meta: { theme: "custom.css" } }],
   ]);
   const result = buildSitemap(baseOpts({ visitedMd }));
   assert.deepEqual(result.pages, [
-    { rel: "docs/special.md", title: "docs/special.md", description: null, theme: "glass" },
+    { rel: "docs/special.md", title: "docs/special.md", description: null, theme: "glass.css" },
     { rel: "docs/custom.md", title: "docs/custom.md", description: null, theme: "custom.css" },
   ]);
 });
@@ -85,20 +83,20 @@ test("customDomain未設定時はnullに統一される(null明示渡し)", () =
   assert.equal(result.customDomain, null);
 });
 
-test("themeフィールドがconfig.loadConfig()で解決された最終テーマ名(noneを含む)と一致する", () => {
-  const resultWa = buildSitemap(baseOpts({ theme: "material" }));
-  assert.equal(resultWa.theme, "material");
+test("themeフィールドがconfig.loadConfig()で解決されたカスタムスタイルのファイル名と一致する", () => {
+  const resultDefault = buildSitemap(baseOpts({ theme: "default.css" }));
+  assert.equal(resultDefault.theme, "default.css");
 
-  const resultNone = buildSitemap(baseOpts({ theme: "none" }));
-  assert.equal(resultNone.theme, "none");
+  const resultNone = buildSitemap(baseOpts({ theme: "none.css" }));
+  assert.equal(resultNone.theme, "none.css");
 });
 
-test("既存フィールド(root/basePath/styleFile/customStyleApplied/images/hierarchy/missing)が維持される", () => {
-  const result = buildSitemap(baseOpts({ customStyleApplied: true }));
+test("既存フィールド(root/basePath/images/hierarchy/missing)が維持され、styleFile・customStyleApplied は出さない", () => {
+  const result = buildSitemap(baseOpts());
   assert.equal(result.root, "README.md");
   assert.equal(result.basePath, "");
-  assert.equal(result.styleFile, ".github/docs-pages.style.css");
-  assert.equal(result.customStyleApplied, true);
+  assert.equal("styleFile" in result, false);
+  assert.equal("customStyleApplied" in result, false);
   assert.deepEqual(result.images, ["images/logo.png"]);
   assert.deepEqual(result.hierarchy, { "README.md": [] });
   assert.deepEqual(result.missing, []);

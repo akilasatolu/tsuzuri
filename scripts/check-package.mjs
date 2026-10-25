@@ -8,7 +8,7 @@
 //   1. npm pack で配布物と同じファイル(tgz)を作る
 //   2. 空のリポジトリで、その tgz から init を実行する(npx と同じく npm exec で、インストールしてから起動する)
 //   3. 生成されたワークフローと同じ方法で依存を入れ(npm ci --ignore-scripts)、ビルドする
-//   4. 設定ファイルと独自CSSを書き換えてから init --update を実行し、どちらも保持されることを確かめる
+//   4. 設定ファイルを書き換え、利用者が置いたカスタムスタイルを足してから init --update を実行し、どちらも保持され、default.css は元に戻ることを確かめる
 // のどこかで失敗したら、終了コード 1 で止まる。npm の一時的なキャッシュは作業用の一時フォルダに置く。
 
 import { execFileSync } from "node:child_process";
@@ -66,10 +66,17 @@ try {
     ".github/tsuzuri/package.json",
     ".github/tsuzuri/package-lock.json",
     ".github/tsuzuri/.gitignore",
-    ".github/tsuzuri/styles/custom.css",
+    ".github/tsuzuri/styles/default.css",
   ]) {
     check(exists(rel), `init が ${rel} を作った`);
   }
+  // init が styles/ に置くのは base.css と default.css だけ(ほかのカスタムスタイルは配らない)
+  const stylesDir = path.join(site, ".github/tsuzuri/styles");
+  check(
+    JSON.stringify(fs.readdirSync(stylesDir).sort()) === JSON.stringify(["base.css", "default.css"]),
+    "init は styles/ に base.css と default.css だけを作る(custom.css などは作らない)"
+  );
+  check(/^THEME=default\.css$/m.test(read(".github/tsuzuri/config")), "設定ファイルは THEME=default.css で始まる");
   for (const rel of [".github/docs-pages.config", ".github/workflows/docs-pages.yml"]) {
     check(!exists(rel), `init は旧名の ${rel} を作らない`);
   }
@@ -85,16 +92,20 @@ try {
     check(exists(rel), `ビルドが ${rel} を書き出した`);
   }
 
-  // 4. init --update は設定ファイルと、既にある独自CSSを変えない
-  const customCssRel = ".github/tsuzuri/styles/custom.css";
-  fs.writeFileSync(path.join(site, customCssRel), "/* my custom css */\n");
+  // 4. init --update は設定ファイルと、利用者が置いたカスタムスタイルを変えず、default.css は上書きする
+  const customCssRel = ".github/tsuzuri/styles/my.css";
+  fs.writeFileSync(path.join(site, customCssRel), "/* my custom style */\n");
+  const defaultCssRel = ".github/tsuzuri/styles/default.css";
+  const originalDefaultCss = read(defaultCssRel);
+  fs.writeFileSync(path.join(site, defaultCssRel), "/* edited by mistake */\n");
   const configRel = ".github/tsuzuri/config";
-  const edited = read(configRel).replace(/^THEME=.*$/m, "THEME=nineties");
-  check(edited.includes("THEME=nineties"), "設定ファイルを書き換えた(THEME=nineties)");
+  const edited = read(configRel).replace(/^THEME=.*$/m, "THEME=my.css");
+  check(edited.includes("THEME=my.css"), "設定ファイルを書き換えた(THEME=my.css)");
   fs.writeFileSync(path.join(site, configRel), edited);
   run("npm", ["exec", "--yes", `--package=${tgz}`, "--", "tsuzuri", "init", "--update"], site);
   check(read(configRel) === edited, "init --update の後も設定ファイルはそのまま");
-  check(read(customCssRel) === "/* my custom css */\n", "init --update の後も独自CSS(custom.css)はそのまま");
+  check(read(customCssRel) === "/* my custom style */\n", "init --update の後も利用者が置いたカスタムスタイル(my.css)はそのまま");
+  check(read(defaultCssRel) === originalDefaultCss, "init --update で default.css は元の内容に上書きされる");
   check(exists(".github/tsuzuri/package-lock.json"), "init --update の後も package-lock.json がある");
 
   console.log("\n配布物の確認はすべて通りました。");

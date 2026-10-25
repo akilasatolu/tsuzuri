@@ -217,7 +217,7 @@ describe("resolveInsideRepo", () => {
 });
 
 describe("isLinkedFilePath", () => {
-  test("コピーする拡張子の一覧(文書・圧縮・動画・音声)にあるファイルは対象", () => {
+  test("コピーする拡張子の一覧(文書・圧縮・動画・音声・CSS)にあるファイルは対象", () => {
     assert.equal(isLinkedFilePath("docs/manual.pdf"), true);
     assert.equal(isLinkedFilePath("downloads/sample.zip"), true);
     const exts = [
@@ -225,6 +225,7 @@ describe("isLinkedFilePath", () => {
       ...["zip", "tar", "gz", "tgz", "bz2", "xz", "7z"],
       ...["mp4", "webm", "mov", "m4v", "ogv", "avi", "mkv"],
       ...["mp3", "m4a", "wav", "ogg", "oga", "flac", "aac", "opus", "weba"],
+      ...["css"],
     ];
     for (const ext of exts) assert.equal(isLinkedFilePath(`files/a.${ext}`), true, `.${ext}`);
   });
@@ -238,10 +239,12 @@ describe("isLinkedFilePath", () => {
     assert.equal(isLinkedFilePath("dist/app.tar.gz"), true);
     assert.equal(isLinkedFilePath("dist/app.tar.zst"), false);
   });
-  test("\".\" で始まるフォルダの中は、動画・音声・PDF だけ対象(追加した動画・音声を含む)", () => {
-    for (const ext of ["pdf", "mp4", "ogv", "avi", "mkv", "mp3", "flac", "aac", "opus", "weba"]) {
+  test("\".\" で始まるフォルダの中は、動画・音声・PDF・CSS だけ対象(追加した動画・音声を含む)", () => {
+    for (const ext of ["pdf", "mp4", "ogv", "avi", "mkv", "mp3", "flac", "aac", "opus", "weba", "css"]) {
       assert.equal(isLinkedFilePath(`.github/media/a.${ext}`), true, `.${ext}`);
     }
+    assert.equal(isLinkedFilePath(".github/tsuzuri/styles/glass.css"), true, "カスタムスタイルのダウンロード用");
+    assert.equal(isLinkedFilePath("docs/.hidden.css"), false, ".で始まるファイルは対象外");
     for (const ext of ["zip", "docx", "html", "json"]) {
       assert.equal(isLinkedFilePath(`.github/media/a.${ext}`), false, `.${ext}`);
     }

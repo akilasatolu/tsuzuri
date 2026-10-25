@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // npx github:akilasatolu/tsuzuri [init] のエントリーポイント。
 // 利用者リポジトリに配布用ファイル(tsuzuri-pages.yml / .github/tsuzuri/config /
-// 独自CSSの空ひな形 custom.css)に加えて、ビルドスクリプト本体
+// ベースCSSと default.css)に加えて、ビルドスクリプト本体
 // (build-docs.mjs / lib/*.mjs / styles/*.css)一式を `.github/tsuzuri/` 配下に
 // コピー(ベンダリング)する。これにより、生成後のワークフローは実行のたびに
 // OSS本体リポジトリ(tsuzuri)を参照する必要がなくなり、利用者リポジトリの中だけで
@@ -20,7 +20,6 @@ import { t, setCliLang, detectLangFromArgv, isCliLang } from "./messages.mjs";
 import {
   LANG_TAG_RE,
   resolveLanguages,
-  ALLOWED_THEMES,
   VENDOR_DIR,
   WORKFLOW_PATH,
   CONFIG_FILE_PATH,
@@ -49,20 +48,9 @@ export const DOCS_URL = "https://akilasatolu.github.io/tsuzuri/";
 // init が生成するワークフローのひな形(PACKAGE_ROOT からの相対パス)。
 export const WORKFLOW_TEMPLATE_PATH = "templates/.github/workflows/tsuzuri-pages.yml";
 
-// THEME選択肢(番号選択、1始まり。順番は ALLOWED_THEMES の順)。
-// 説明(label)は bin/messages.mjs の "theme.<key>"。言語は実行時に決まるので、読み出すたびに引く。
-// テーマを足すときは、lib/config.mjs の ALLOWED_THEMES と messages.mjs の両方(en・ja)に足す。
-export const THEME_CHOICES = ALLOWED_THEMES.map((key) => ({
-  key,
-  get label() {
-    return t(`theme.${key}`);
-  },
-}));
-
 const DEFAULT_ANSWERS = {
   triggerBranch: "main",
   rootMd: "README.md",
-  theme: "material",
   // ナビ(サイドバー・検索・目次・前後のページ)は、新しく作るときは表示する
   navEnabled: true,
   // サイトの言語(LANGUAGES)。カンマ区切りで、先頭が基本言語
@@ -236,11 +224,11 @@ export function buildWorkflowTarget() {
 
 /**
  * .github/tsuzuri/config の内容を組み立てる。
- * 対話結果(TRIGGER_BRANCH/ROOT_MD/THEME など)を埋め込み、
+ * 対話結果(TRIGGER_BRANCH/ROOT_MD など)を埋め込み、
  * それ以外のキーはデフォルト値のまま出力する。
  */
 export function buildDocsPagesConfig(answers) {
-  const { triggerBranch, rootMd, theme, navEnabled, languages, siteName } = { ...DEFAULT_ANSWERS, ...answers };
+  const { triggerBranch, rootMd, navEnabled, languages, siteName } = { ...DEFAULT_ANSWERS, ...answers };
   // コメントは bin/messages.mjs の "config.<名前>"(--lang に従う)。KEY=値 の行はここに1つだけ持つ
   const vars = { docs: DOCS_URL, vendorDir: VENDOR_DIR };
   const item = (name, line) => `${t(`config.${name}`, vars)}\n${line}`;
@@ -249,8 +237,7 @@ export function buildDocsPagesConfig(answers) {
     item("triggerBranch", `TRIGGER_BRANCH=${triggerBranch}`),
     item("rootMd", `ROOT_MD=${rootMd}`),
     item("outDir", "OUT_DIR=_site"),
-    item("theme", `THEME=${theme}`),
-    item("styleFile", "STYLE_FILE=custom.css"),
+    item("theme", "THEME=default.css"),
     item("languages", `LANGUAGES=${languages}`),
     item("navEnabled", `NAV_ENABLED=${navEnabled ? "true" : "false"}`),
     item("favicon", "FAVICON_FILE="),
@@ -267,28 +254,6 @@ export function buildDocsPagesConfig(answers) {
     item("sitemapJson", "SITEMAP_JSON=false"),
   ];
   return `${blocks.join("\n\n")}\n`;
-}
-
-/**
- * 独自CSS(custom.css)の空ひな形(コメントのみ)を組み立てる。コメントは --lang に従う。
- */
-export function buildStyleCssTemplate() {
-  return `${t("css.template", { docs: DOCS_URL })}\n`;
-}
-
-/**
- * 独自CSS(custom.css)の空ひな形の生成対象({name, relPath, content, keepExisting})。
- * 組み込みテーマCSS一式(${VENDOR_DIR}/styles/)と同じディレクトリに置く。
- * テーマCSSを参考にしながら独自CSSを書けるよう、あえて同じ場所にまとめている。
- * keepExisting: 既にあれば上書きしない(確認もしない。--force でも、init --update でも)。
- */
-export function buildCustomCssTarget() {
-  return {
-    name: "custom.css",
-    relPath: `${VENDOR_DIR}/styles/custom.css`,
-    content: buildStyleCssTemplate(),
-    keepExisting: true,
-  };
 }
 
 /**
@@ -330,9 +295,8 @@ export function buildVendorTargets(packageRoot = PACKAGE_ROOT, fsImpl = { exists
     }
   }
 
-  // 組み込みテーマ全て(base.css含む)をコピーする。frontmatterの`theme`キーで
-  // サイト全体のTHEMEとは違う組み込みテーマをページ単位で指定できるため、
-  // 選択されたTHEME以外のCSSも含めて一式コピーしておく必要がある。
+  // ベース(base.css)と default.css をコピーする(styles/ に置いてあるCSSがこの2つだけ)。
+  // ほかのカスタムスタイルは配らない(ギャラリーからダウンロードして styles/ に置く)。
   const stylesDir = join(packageRoot, "styles");
   if (fsImpl.existsSync(stylesDir)) {
     for (const entry of fsImpl.readdirSync(stylesDir, { withFileTypes: true })) {
@@ -373,7 +337,7 @@ export function buildVendorTargets(packageRoot = PACKAGE_ROOT, fsImpl = { exists
  */
 export function buildTargets(answers) {
   const merged = { ...DEFAULT_ANSWERS, ...answers };
-  const targets = [
+  return [
     buildWorkflowTarget(),
     {
       name: "config",
@@ -382,17 +346,14 @@ export function buildTargets(answers) {
     },
     ...buildVendorTargets(),
   ];
-  targets.push(buildCustomCssTarget());
-  return targets;
 }
 
 /**
  * ファイル単位で既存ファイルを検出しつつ書き出す。
  * ファイル単位で個別にexistsSyncをチェックし、既存ファイルは上書き確認を行う。
  * 1ファイルのスキップ(N回答)が他ファイルの処理を止めないようにする。
- * keepExisting が真の対象(独自CSSのひな形)は、既にあれば確認せずに保持する。
  *
- * @param {Array<{name:string, relPath:string, content:string, keepExisting?:boolean}>} targets
+ * @param {Array<{name:string, relPath:string, content:string}>} targets
  * @param {object} opts
  * @param {string} opts.cwd - 書き出し先のルートディレクトリ
  * @param {(relPath: string) => Promise<boolean>|boolean} opts.confirmOverwrite -
@@ -414,12 +375,6 @@ export async function writeGeneratedFiles(targets, opts) {
     const fullPath = join(cwd, target.relPath);
     const alreadyExists = fsImpl.existsSync(fullPath);
 
-    if (alreadyExists && target.keepExisting) {
-      log(t("log.kept", { path: target.relPath }));
-      results.push({ ...target, status: "skipped" });
-      continue;
-    }
-
     if (alreadyExists) {
       const overwrite = await confirmOverwrite(target.relPath);
       if (!overwrite) {
@@ -436,20 +391,6 @@ export async function writeGeneratedFiles(targets, opts) {
   }
 
   return results;
-}
-
-/**
- * THEME番号選択肢の入力文字列を key に変換する。
- * 不正値・空文字はデフォルト("1" = material)扱いにする。
- */
-export function resolveThemeChoice(input) {
-  const trimmed = (input ?? "").trim();
-  if (trimmed === "") return THEME_CHOICES[0].key;
-  const index = Number.parseInt(trimmed, 10) - 1;
-  if (Number.isNaN(index) || index < 0 || index >= THEME_CHOICES.length) {
-    return THEME_CHOICES[0].key;
-  }
-  return THEME_CHOICES[index].key;
 }
 
 /**
@@ -484,7 +425,7 @@ export function createAsker(rl) {
 }
 
 /**
- * 対話プロンプトで6項目(TRIGGER_BRANCH/ROOT_MD/THEME/NAV_ENABLED/LANGUAGES/SITE_NAME)を収集する。
+ * 対話プロンプトで5項目(TRIGGER_BRANCH/ROOT_MD/NAV_ENABLED/LANGUAGES/SITE_NAME)を収集する。
  * readlineインターフェースは呼び出し側から注入する(テスト時は標準入力をモックしたものを渡す)。
  */
 export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
@@ -493,12 +434,6 @@ export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
 
   const rootMdInput = await rl.question(t("prompt.rootMd", { default: DEFAULT_ANSWERS.rootMd }));
   const rootMd = rootMdInput.trim() || DEFAULT_ANSWERS.rootMd;
-
-  const themeMenu = THEME_CHOICES.map(
-    (choice, i) => `    ${i + 1}) ${choice.key} - ${choice.label}`,
-  ).join("\n");
-  const themeInput = await rl.question(t("prompt.theme", { menu: themeMenu }));
-  const theme = resolveThemeChoice(themeInput);
 
   const navInput = await rl.question(t("prompt.nav"));
   const navEnabled = parseYesNo(navInput, DEFAULT_ANSWERS.navEnabled);
@@ -510,7 +445,7 @@ export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
   const siteNameInput = await rl.question(t("prompt.siteName"));
   const siteName = siteNameInput.trim();
 
-  return { triggerBranch, rootMd, theme, navEnabled, languages, siteName };
+  return { triggerBranch, rootMd, navEnabled, languages, siteName };
 }
 
 /**
@@ -518,10 +453,10 @@ export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
  *
  * - ワークフロー(tsuzuri-pages.yml)とビルドスクリプト一式(VENDOR_DIR 配下)は上書きする
  * - 設定ファイル(.github/tsuzuri/config)は一切触らない
- * - 独自CSS(custom.css)は、既にあれば触らない。無ければ空のひな形を作る
  * - 新しく増えたビルドスクリプトは追加される
  * - 本体側で削除されたビルドスクリプト(VENDOR_DIR/lib/*.mjs のうち配布対象に無いもの)は削除する
- *   (VENDOR_DIR/styles/ は利用者の独自CSSも置かれるため、削除の対象にしない)
+ *   (VENDOR_DIR/styles/ は利用者のカスタムスタイルも置かれるため、削除の対象にしない。
+ *   styles/ の base.css と default.css は上書きし、利用者が置いたカスタムスタイルは変更しない)
  *
  * 設定ファイルが無い(=まだ init していない)リポジトリではエラーにする。
  * リリース時に main で実行する init --update からも使う。
@@ -543,11 +478,7 @@ export async function runUpdate({
   if (!fsImpl.existsSync(join(cwd, configRel))) {
     throw new Error(t("update.noConfig", { config: configRel }));
   }
-  const updateTargets = targets ?? [
-    buildWorkflowTarget(),
-    ...buildVendorTargets(),
-    buildCustomCssTarget(),
-  ];
+  const updateTargets = targets ?? [buildWorkflowTarget(), ...buildVendorTargets()];
   // 新しいバージョンで増えた設定項目のうち、利用者の設定ファイルに無いものを案内する
   // (設定ファイルは書き換えないので、無い項目は既定値で動く)
   if (fsImpl.readFileSync) {
@@ -582,15 +513,15 @@ export async function runUpdate({
 }
 
 export function buildHelpText() {
-  return t("help.text", { repo: OSS_REPO, themes: THEME_CHOICES.map((c) => c.key).join(" / ") });
+  return t("help.text", { repo: OSS_REPO });
 }
 
 /**
- * コマンドライン引数を解析する。不明なオプション・サブコマンドや不正なテーマ名はエラーにする。
+ * コマンドライン引数を解析する。不明なオプション・サブコマンドはエラーにする。
  *
  * @param {string[]} argv - process.argv.slice(2) 相当
  * @returns {{ update: boolean, yes: boolean, force: boolean, version: boolean,
- *   help: boolean, branch?: string, root?: string, theme?: string, languages?: string, port: number, command: "init" | "preview",
+ *   help: boolean, branch?: string, root?: string, languages?: string, port: number, command: "init" | "preview",
  *   nonInteractive: boolean }}
  */
 export function parseCliArgs(argv = []) {
@@ -619,7 +550,6 @@ function parseCliArgsRaw(argv) {
       force: { type: "boolean", default: false },
       branch: { type: "string" },
       root: { type: "string" },
-      theme: { type: "string" },
       languages: { type: "string" },
       lang: { type: "string" },
       "site-name": { type: "string" },
@@ -643,11 +573,6 @@ function parseCliArgsRaw(argv) {
       throw new Error(t("error.port", { value: values.port }));
     }
   }
-  if (values.theme !== undefined && !THEME_CHOICES.some((c) => c.key === values.theme)) {
-    throw new Error(
-      t("error.theme", { themes: THEME_CHOICES.map((c) => c.key).join(" / "), value: values.theme }),
-    );
-  }
   for (const key of ["branch", "root", "languages"]) {
     if (values[key] !== undefined && !values[key].trim()) {
       throw new Error(t("error.emptyValue", { name: key }));
@@ -662,7 +587,7 @@ function parseCliArgsRaw(argv) {
   const nonInteractive =
     values.yes ||
     values["no-nav"] ||
-    ["branch", "root", "theme", "languages", "site-name"].some((k) => values[k] !== undefined);
+    ["branch", "root", "languages", "site-name"].some((k) => values[k] !== undefined);
   return { ...values, command, port, nonInteractive };
 }
 
@@ -681,7 +606,6 @@ export function answersFromArgs(args, defaults = DEFAULT_ANSWERS) {
   return {
     triggerBranch: args.branch?.trim() ?? defaults.triggerBranch,
     rootMd: args.root?.trim() ?? DEFAULT_ANSWERS.rootMd,
-    theme: args.theme ?? DEFAULT_ANSWERS.theme,
     navEnabled: !args["no-nav"],
     languages: args.languages !== undefined ? resolveLanguages(args.languages).join(",") : DEFAULT_ANSWERS.languages,
     siteName: args["site-name"]?.trim() ?? DEFAULT_ANSWERS.siteName,
@@ -896,23 +820,22 @@ export async function main({ cwd = process.cwd(), argv = process.argv.slice(2) }
 }
 
 /**
- * ワークフロー(tsuzuri-pages.yml)とビルドスクリプト一式(VENDOR_DIR 配下。設定ファイルと独自CSSを除く)の組か。
+ * ワークフロー(tsuzuri-pages.yml)とビルドスクリプト一式(VENDOR_DIR 配下。設定ファイルを除く。base.css と default.css を含む)の組か。
  * これらは同じバージョンでそろっていないと動かないため、上書きするかどうかをまとめて決める。
- * 設定ファイル(VENDOR_DIR/config)と独自CSS(VENDOR_DIR/styles/custom.css。styles/ に利用者が足した CSS も同様)は、利用者が編集するので対象外。
+ * 設定ファイル(VENDOR_DIR/config)は、利用者が編集するので対象外。
+ * (利用者が styles/ に置いたカスタムスタイルは、init が作る対象に無いので、ここでは扱わない。)
  * @param {string} relPath
  */
 export function isBundledPath(relPath) {
   return relPath === WORKFLOW_PATH ||
-    (relPath.startsWith(`${VENDOR_DIR}/`) &&
-      relPath !== CONFIG_FILE_PATH &&
-      relPath !== `${VENDOR_DIR}/styles/custom.css`);
+    (relPath.startsWith(`${VENDOR_DIR}/`) && relPath !== CONFIG_FILE_PATH);
 }
 
 /**
  * 対話形式の init で使う上書き確認を作る。
  *   - ワークフローとビルドスクリプト一式は、最初に既存ファイルが見つかったときに1回だけ聞き、
  *     その答えを一式すべてに適用する(一部だけ上書きしてバージョンがずれるのを防ぐ)
- *   - 設定ファイルは、ファイルごとに聞く(独自CSSは、既にあれば聞かずに保持する)
+ *   - 設定ファイルは、ファイルごとに聞く
  *
  * @param {(question: string) => Promise<boolean>} ask
  * @returns {(relPath: string) => Promise<boolean>}

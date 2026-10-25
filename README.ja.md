@@ -48,8 +48,8 @@ https://akilasatolu.github.io/tsuzuri/
 <p>.github/tsuzuri/config を書き換えるだけで動作を変えられます。ワークフローのYAMLを編集する必要はありません。</p>
 </div>
 <div class="tsuzuri-feature">
-<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>テーマと独自CSS</h3>
-<p>マテリアル・グラス・エディトリアル・ミニマルなど8つのテーマに、独自CSSを重ねて自由に調整できます。このサイトも独自CSSで作っています。</p>
+<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>カスタムスタイル</h3>
+<p>標準の見た目から始めても、グラス・エディトリアル・ミニマルなどのカスタムスタイルをギャラリーからダウンロードして、自由に調整してもかまいません。このサイトも自分用のカスタムスタイルで作っています。</p>
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">探</span><span class="tsuzuri-sep">】</span>ナビ・検索・目次</h3>
@@ -86,8 +86,8 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 - [AIエージェント向けの参考情報](docs/ai-reference.ja.md)
 - [仕組み(Concepts)](docs/concepts.ja.md)
 - [設定リファレンス(Configuration)](docs/configuration.ja.md)
-- [テーマ・スタイル(Theming)](docs/theming.ja.md)
-- [テーマギャラリー(Gallery)](docs/gallery.ja.md)
+- [スタイル(Theming)](docs/theming.ja.md)
+- [ギャラリー(Gallery)](docs/gallery.ja.md)
 - [Frontmatterリファレンス](docs/frontmatter.ja.md)
 - [多言語サイト(i18n)](docs/i18n.ja.md)
 - [CLIリファレンス](docs/cli.ja.md)
@@ -99,14 +99,15 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 ## スタイルのカスタマイズ
 
 見た目を変えたい場合、CSSを自分で書く必要は必ずしもありません。
-`.github/tsuzuri/config`の`THEME`に、マテリアル(`material`・既定)/グラス(`glass`)/
-90年代(`nineties`)/装飾なし(`none`)などのテーマのいずれかを指定するだけで、配色や
+見た目は、ベースCSSと、`.github/tsuzuri/styles/`の中のCSSファイル1つ(カスタムスタイル)で決まります。
+パッケージに入っている`THEME=default.css`が既定です。[ギャラリー](docs/gallery.ja.md)で、グラス(`glass.css`)/
+90年代(`nineties.css`)/装飾なし(`none.css`)などのカスタムスタイルをダウンロードして
+`.github/tsuzuri/styles/`に置き、`.github/tsuzuri/config`の`THEME=glass.css`のように指定するだけで、配色や
 リンクの下線の有無などの見た目がまとめて切り替わります。詳しくは
-[テーマ・スタイル(Theming)](docs/theming.ja.md)を参照してください。
+[スタイル(Theming)](docs/theming.ja.md)を参照してください。
 
-さらに細かく配色だけを調整したい場合は、`.github/tsuzuri/config`の
-`STYLE_FILE`に指定したCSSファイルの中で、以下のCSSカスタムプロパティを
-上書きしてください(THEMEの後に読み込まれる第3層として反映されます)。
+さらに細かく配色だけを調整したい場合は、`default.css`を別の名前にコピーして、その中で、以下のCSSカスタムプロパティを
+上書きし、`.github/tsuzuri/config`の`THEME`にそのファイル名を指定してください。
 
 | 変数 | 意味 |
 |---|---|
@@ -119,24 +120,24 @@ Settings → Pagesに表示されます。設定ファイルの各項目の詳�
 | `--content-width` | 本文カラムの最大幅(例: `860px`) |
 | `color-scheme` | `light` / `dark` / `light dark`(OS設定に追従) |
 
-`THEME=none`を指定した場合はこれらの変数がどこにも定義されないため、
+変数を何も定義しないカスタムスタイル(コメントだけの`none.css`など)の場合は、これらの変数がどこにも定義されないため、
 ブラウザの既定の見た目(黒文字・白背景など)がそのまま使われます。
 
-## テーマプレビュー
+## スタイルのプレビュー
 
-組み込みテーマの見た目は、[テーマギャラリー](docs/gallery.ja.md)で実際のページとして
+カスタムスタイルの見た目は、[ギャラリー](docs/gallery.ja.md)で実際のページとして
 見比べられます。
 
 自分のサイトで見比べたい場合は、frontmatterの`theme`キーで
-ページごとに異なるテーマを指定できます(サイト全体の`THEME`設定とは別に、
-1ページだけテーマを差し替える機能。詳しくは[Frontmatterリファレンス](docs/frontmatter.ja.md#theme)を参照)。
+ページごとに異なるカスタムスタイルを指定できます(サイト全体の`THEME`設定とは別に、
+1ページだけカスタムスタイルを置き換える機能。詳しくは[Frontmatterリファレンス](docs/frontmatter.ja.md#theme)を参照)。
 複数のMarkdownファイルにそれぞれ違う`theme`を指定してビルドすれば、
 通常の`tsuzuri-pages.yml`だけで見た目を比較できます。
 
 ## コントリビュート
 
 コード・ドキュメントいずれの貢献も歓迎します。Tsuzuri本体(CLI・ビルドスクリプト・
-テーマCSS)も、このサイト(利用者向けドキュメント、`docs/`)も、同じリポジトリの
+スタイル)も、このサイト(利用者向けドキュメント、`docs/`)も、同じリポジトリの
 [`main`ブランチ](https://github.com/akilasatolu/tsuzuri/tree/main)で開発しています。
 このサイトは、Tsuzuri自身を使ってGitHub Pagesに公開しています。開発環境のセットアップ方法や
 PRの作法は

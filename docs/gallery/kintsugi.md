@@ -1,16 +1,17 @@
 ---
 title: Kintsugi (kintsugi)
-theme: kintsugi
+theme: kintsugi.css
 styleFile: plain.css
-description: A sample page of Tsuzuri's built-in theme "Kintsugi (kintsugi)"
+description: A sample page of the custom style "Kintsugi (kintsugi)"
 ---
 
 # Kintsugi (kintsugi)
 
 A style after kintsugi, the craft of mending broken pottery with lacquer and gold. Gold seams run across porcelain-like cards, and code blocks are lacquer black. Porcelain in light mode, black lacquer in dark mode.
 
-To use this theme for the whole site, set `THEME=kintsugi` in `.github/tsuzuri/config`.
-To use it for a single page, write `theme: kintsugi` in that page's frontmatter
+To use it, download `kintsugi.css` from the [gallery](../gallery.md#kintsugi-kintsugi), put it in `.github/tsuzuri/styles/`,
+and set `THEME=kintsugi.css` in `.github/tsuzuri/config`.
+To use it for a single page only, write `theme: kintsugi.css` in that page's frontmatter
 (see [Theming](../theming.md)).
 
 [← Minimal (minimal)](minimal.md) · [Gallery](../gallery.md) · [Blueprint (blueprint) →](blueprint.md)
@@ -36,7 +37,7 @@ This is also where you can check the line spacing and readability of longer pass
 
 | Setting | Default | Description |
 |---|---|---|
-| `THEME` | `material` | The built-in theme name |
+| `THEME` | `default.css` | The custom style file name |
 | `NAV_ENABLED` | `false` | Whether to show the navigation |
 | `LANGUAGES` | `en` | The site language (the value of `<html lang>`) |
 
