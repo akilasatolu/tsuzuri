@@ -156,7 +156,7 @@ describe("build-docs.mjs :: 基本言語の印付きの優先(1言語)", () => {
     withSite({ ...SITE_D, "docs/b.md": "# B\n\n[p](a.md#only-plain)\n" }, (dir) => {
       const result = runBuild(dir, { LANGUAGES: "en" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /リンク先のページに見出しが見つからないリンク: 1 件/);
+      assert.match(result.stderr, /Links whose target page has no such heading: 1/);
       assert.match(result.stderr, /docs\/a\.en\.md#only-plain \(referenced from docs\/b\.md\)/);
       const strict = runBuild(dir, { LANGUAGES: "en", STRICT_LINKS: "true" });
       assert.equal(strict.status, 1);
@@ -260,14 +260,14 @@ describe("build-docs.mjs :: 基本言語の印付きの優先(1言語)", () => {
     withSite({ "other.md": "# Other\n" }, (dir) => {
       const result = runBuild(dir, { LANGUAGES: "en" });
       assert.equal(result.status, 1);
-      assert.match(result.stderr, /起点となる README\.md\(または README\.en\.md\)が見つかりません。処理を中止します。/);
+      assert.match(result.stderr, /The root file README\.md \(or README\.en\.md\) was not found\. Aborting\./);
       assert.equal(existsOut(dir, "index.html"), false);
     });
     // 基本言語と ROOT_MD に合わせて文言を作る
     withSite({ "docs/README.en.md": "# x\n" }, (dir) => {
       const result = runBuild(dir, { LANGUAGES: "ja", ROOT_MD: "docs/README.md" });
       assert.equal(result.status, 1);
-      assert.match(result.stderr, /起点となる docs\/README\.md\(または docs\/README\.ja\.md\)が見つかりません。/);
+      assert.match(result.stderr, /The root file docs\/README\.md \(or docs\/README\.ja\.md\) was not found\./);
     });
   });
 

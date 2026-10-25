@@ -75,7 +75,11 @@ npx github:akilasatolu/tsuzuri#v1 init
 - `init` と `preview` の画面の表示は英語です(v1.37.0 以降。v1.36.0 までは
   日本語でした)。`--lang ja` を付けると、画面の表示と、生成される設定ファイル・
   空の独自 CSS のひな形のコメントが日本語になります。生成されるワークフローと
-  `.github/tsuzuri/.gitignore` のコメントは、常に英語です。
+  `.github/tsuzuri/.gitignore` のコメントは、常に英語です。ビルドスクリプトの
+  メッセージ(GitHub Actions でのビルドと、`preview` が実行するビルドのログ)も
+  常に英語です(v1.37.0 以降)。`--lang` では変わりません。古いバージョンで
+  コピーされたビルドスクリプトは、`init --update` で更新するまで日本語で
+  表示します。
 - `init` は省略できます。サブコマンドが無い場合は `init` として動きます。
 
 ### 3.2 実行する場所
@@ -751,7 +755,8 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   ビルドもデプロイも行われません(8.3)。
   症状が出ない条件: push されたブランチが `TRIGGER_BRANCH` と同じです。
 - 症状: ビルドが次のエラーで終了します。
-  `起点となる README.md(または README.en.md)が見つかりません。処理を中止します。`
+  `The root file README.md (or README.en.md) was not found. Aborting.`
+  (v1.36.0 までは日本語で、`起点となる README.md(または README.en.md)が見つかりません。処理を中止します。` でした。)
   原因: `ROOT_MD` のファイルがリポジトリにありません。
   症状が出ない条件: `ROOT_MD` のファイルが、そのブランチにコミットされています。
 - 症状: README が日本語なのに、「Menu」などの画面の文言が英語になります。
@@ -780,7 +785,8 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   原因: `STRICT_LINKS` が `false` です。この場合、リンク切れは警告だけです。
   症状が出ない条件: `STRICT_LINKS=true` です。この場合、ビルドは次の表示を
   出して失敗し、サイトは前回の内容のままになります。
-  `STRICT_LINKS=true のため、リンクの問題 3 件でビルドを失敗させます。`
+  `STRICT_LINKS=true, so the build fails because of 3 link problem(s).`
+  (v1.36.0 までは日本語で、`STRICT_LINKS=true のため、リンクの問題 3 件でビルドを失敗させます。` でした。)
 - 症状: `.github/tsuzuri/` の中のファイルへの変更が、更新のあとに消えます。
   原因: `init --update` が、ビルドスクリプトとテーマの CSS を上書きします。
   症状が出ない条件: 見た目の変更が、`STYLE_FILE` の独自 CSS に書かれています。

@@ -220,7 +220,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /nineties\.css.*見つかりません/);
+      assert.match(result.stderr, /nineties\.css.*was not found/);
 
       const indexHtml = readOut(dir, "index.html");
       const styleBlock = extractStyleBlock(indexHtml);
@@ -296,7 +296,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       const result = runBuild(dir, { ROOT_MD: "NOPE.md" });
       assert.equal(result.status, 1);
-      assert.match(result.stderr, /NOPE\.md.*見つかりません/);
+      assert.match(result.stderr, /NOPE\.md.*was not found/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -470,7 +470,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /no-such-file\.css.*見つかりません/);
+      assert.match(result.stderr, /no-such-file\.css.*was not found/);
 
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(
@@ -513,7 +513,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       const result = runBuild(dir);
       assert.equal(result.status, 1);
-      assert.match(result.stderr, /base\.css.*見つかりません/);
+      assert.match(result.stderr, /base\.css.*was not found/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -573,9 +573,9 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.mkdirSync(path.join(dir, "sub"));
       fs.writeFileSync(path.join(dir, "sub", "x.css"), "/*SUB_FOLDER_FILE*/");
       for (const [value, warning] of [
-        ["../secret.css", /ファイル名として使えません/],
-        ["sub/x.css", /ファイル名として使えません/],
-        ["unknown-theme", /組み込みテーマ名.*でも、\.css で終わるCSSのファイル名でもありません/],
+        ["../secret.css", /cannot be used as a CSS file name/],
+        ["sub/x.css", /cannot be used as a CSS file name/],
+        ["unknown-theme", /neither a built-in theme name.*nor a CSS file name ending in \.css/],
       ]) {
         fs.writeFileSync(path.join(dir, "docs", "a.md"), ["---", `theme: ${value}`, "---", "# Page A"].join("\n"));
         const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
@@ -608,8 +608,8 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.writeFileSync(path.join(dir, "docs", "a.md"), ["---", "theme: link.css", "styleFile: link.css", "---", "# Page A"].join("\n"));
       const result = runBuild(dir, { THEME: "nineties", STYLE_DIR: "styles-fixture" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /theme "link\.css" はリポジトリの外を指している/);
-      assert.match(result.stderr, /styleFile "link\.css" はリポジトリの外を指している/);
+      assert.match(result.stderr, /theme "link\.css" given in the frontmatter points outside the repository/);
+      assert.match(result.stderr, /styleFile "link\.css" in the frontmatter points outside the repository/);
       const aStyle = extractStyleBlock(readOut(dir, "docs", "a.html"));
       assert.ok(!aStyle.includes("SECRET_OUTSIDE_REPO"));
       assert.ok(aStyle.includes("/*NINETIES_FIXTURE_MARKER*/"));
@@ -629,7 +629,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       const result = runBuild(dir, { FAVICON_FILE: "../icon.png" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /FAVICON_FILE.*リポジトリの外/);
+      assert.match(result.stderr, /FAVICON_FILE.*points outside the repository/);
       assert.doesNotMatch(readOut(dir, "index.html"), /<link rel="icon"/);
       assert.deepEqual(fs.readdirSync(parent).sort(), ["icon.png", "repo"]);
     } finally {
@@ -696,7 +696,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.equal(result.status, 0, result.stderr);
       assert.equal(readOut(dir, "docs", "manual.pdf"), "%PDF");
       assert.ok(!fs.existsSync(path.join(dir, "_site", ".env")));
-      assert.match(result.stderr, /リンク先のファイルが見つかりません: nope\.zip/);
+      assert.match(result.stderr, /The linked file was not found: nope\.zip/);
       assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).files.sort(), ["docs/manual.pdf", "nope.zip"]);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -823,7 +823,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       result = runBuild(dir, { STRICT_LINKS: "true" });
       assert.equal(result.status, 1);
-      assert.match(result.stderr, /STRICT_LINKS=true のため、リンクの問題 2 件/);
+      assert.match(result.stderr, /STRICT_LINKS=true, so the build fails because of 2 link problem\(s\)/);
       assert.match(result.stderr, /docs\/nope\.md/);
       assert.match(result.stderr, /nope\.png/);
     } finally {
@@ -1009,7 +1009,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       let result = runBuild(dir, { LAST_UPDATED: "true" });
       assert.equal(result.status, 0, result.stderr);
       assert.doesNotMatch(readOut(dir, "index.html"), /class="tsuzuri-updated"/);
-      assert.match(result.stderr, /最終更新日を表示しません/);
+      assert.match(result.stderr, /the last updated dates are not shown/);
 
       const git = (...args) =>
         spawnSync("git", args, {
@@ -1200,7 +1200,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.writeFileSync(path.join(dir, "README.md"), "# Root Page\n\n[MIT](LICENSE)\n");
       result = runBuild(dir, { STRICT_LINKS: "true" });
       assert.equal(result.status, 0, "GitHub上のURLが分からなくても、実在するファイルなのでリンク切れにはしない");
-      assert.match(result.stderr, /README\.md から LICENSE へのリンク/, "警告に参照元のページを出す");
+      assert.match(result.stderr, /The link from README\.md to LICENSE/, "警告に参照元のページを出す");
       const git = (...args) => spawnSync("git", args, { cwd: dir, encoding: "utf-8" });
       git("init", "-q");
       git("remote", "add", "origin", "git@github.com:owner/repo.git");
@@ -1350,11 +1350,11 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[demo](index.html) [A](docs/a.md)\n");
       let result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /出力先が README\.md と重なるためコピーしません/);
+      assert.match(result.stderr, /its output path collides with README\.md/);
       assert.match(readOut(dir, "index.html"), /<h1 id="root">Root<\/h1>/, "生成したページのまま");
       result = runBuild(dir, { STRICT_LINKS: "true" });
       assert.equal(result.status, 1);
-      assert.match(result.stderr, /出力先の重複: index\.html/);
+      assert.match(result.stderr, /Output path collision: index\.html/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1481,11 +1481,11 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[x](404.html)\n");
       let result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /出力先が 404\.md と重なるためコピーしません/);
+      assert.match(result.stderr, /its output path collides with 404\.md/);
       assert.doesNotMatch(readOut(dir, "404.html"), /hand-written/, "生成した 404 ページのまま");
       result = runBuild(dir, { STRICT_LINKS: "true" });
       assert.equal(result.status, 1);
-      assert.match(result.stderr, /出力先の重複: 404\.html/);
+      assert.match(result.stderr, /Output path collision: 404\.html/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1508,7 +1508,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.match(extractStyleBlock(readOut(dir, "index.html")), /SITE CUSTOM/);
       assert.doesNotMatch(extractStyleBlock(readOut(dir, "docs", "a.html")), /SITE CUSTOM/, "空のファイルを指定したページには当てない");
       assert.match(extractStyleBlock(readOut(dir, "docs", "b.html")), /SITE CUSTOM/, "見つからなければサイト全体のもの");
-      assert.match(result.stderr, /styleFile "nope\.css" が見つかりません/);
+      assert.match(result.stderr, /styleFile "nope\.css" in the frontmatter was not found/);
       const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
       assert.equal(sitemap.styleFile, ".github/tsuzuri/styles/site.css", "sitemap.json にはリポジトリの直下からのパスを出す");
       assert.equal(sitemap.customStyleApplied, true);
@@ -1531,8 +1531,8 @@ describe("build-docs.mjs :: main (E2E)", () => {
       fs.writeFileSync(path.join(dir, "docs", "b.md"), "---\nstyleFile: site.txt\n---\n# B\n");
       const result = runBuild(dir, { STYLE_FILE: "site.css" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /styleFile "\.\.\/outside\.css" はCSSのファイル名として使えません/);
-      assert.match(result.stderr, /styleFile "site\.txt" はCSSのファイル名として使えません/);
+      assert.match(result.stderr, /styleFile "\.\.\/outside\.css" in the frontmatter cannot be used as a CSS file name/);
+      assert.match(result.stderr, /styleFile "site\.txt" in the frontmatter cannot be used as a CSS file name/);
       for (const page of ["a", "b"]) {
         const css = extractStyleBlock(readOut(dir, "docs", `${page}.html`));
         assert.match(css, /SITE CUSTOM/);
@@ -1554,7 +1554,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       for (const value of [".github/tsuzuri/styles/custom.css", "sub/x.css", "custom.txt"]) {
         const result = runBuild(dir, { STYLE_FILE: value });
         assert.equal(result.status, 0, result.stderr);
-        assert.match(result.stderr, /\[config\] STYLE_FILE の値が不正です/, value);
+        assert.match(result.stderr, /\[config\] The value of STYLE_FILE is invalid/, value);
         assert.doesNotMatch(extractStyleBlock(readOut(dir, "index.html")), /DEFAULT CUSTOM/, value);
         const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
         assert.equal(sitemap.styleFile, "", value);
@@ -1581,12 +1581,12 @@ describe("build-docs.mjs :: main (E2E)", () => {
       );
       let result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /見出しが見つからないリンク: 2 件/);
+      assert.match(result.stderr, /Links whose target page has no such heading: 2/);
       assert.match(result.stderr, /docs\/a\.md#nope \(referenced from README\.md\)/);
       assert.match(result.stderr, /README\.md#missing/);
       result = runBuild(dir, { STRICT_LINKS: "true" });
       assert.equal(result.status, 1);
-      assert.match(result.stderr, /見出しが見つかりません: docs\/a\.md#nope/);
+      assert.match(result.stderr, /Heading not found: docs\/a\.md#nope/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1760,7 +1760,7 @@ describe("build-docs.mjs :: 編集リンク(EDIT_LINK)", () => {
     withBasic((dir) => {
       const result = runBuild(dir, { ...gh, GITHUB_REF: "refs/tags/v1", GITHUB_REF_NAME: "v1", EDIT_LINK: "true" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /EDIT_LINK=true ですが/);
+      assert.match(result.stderr, /EDIT_LINK=true, but/);
       assert.doesNotMatch(readOut(dir, "index.html"), /tsuzuri-edit-link/);
     });
   });
@@ -1876,11 +1876,11 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
     withBasic((dir) => {
       const result = runBuild(dir, { ...gh, REPO_VERSION: "v1\nv2", REPO_LICENSE: "a".repeat(65) });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /REPO_VERSION の値に/);
-      assert.match(result.stderr, /REPO_LICENSE の値が長すぎます/);
+      assert.match(result.stderr, /The value of REPO_VERSION contains/);
+      assert.match(result.stderr, /The value of REPO_LICENSE is too long/);
       assert.doesNotMatch(readOut(dir, "index.html"), /tsuzuri-repo-info/);
       const tab = runBuild(dir, { ...gh, REPO_VERSION: "v1\tv2", REPO_LICENSE: "a".repeat(64) });
-      assert.match(tab.stderr, /REPO_VERSION の値に/);
+      assert.match(tab.stderr, /The value of REPO_VERSION contains/);
       assert.doesNotMatch(readOut(dir, "index.html"), /repo-version/);
       assert.match(readOut(dir, "index.html"), /repo-license/);
     });
@@ -1892,7 +1892,7 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
       git("init", "-q", "-b", "work");
       const result = runBuild(dir, { ...ALL });
       assert.equal(result.status, 0, result.stderr);
-      assert.equal(result.stderr.match(/REPO_LINK=true ですが/g).length, 1);
+      assert.equal(result.stderr.match(/REPO_LINK=true, but/g).length, 1);
       const html = readOut(dir, "docs", "a.html");
       assert.doesNotMatch(html, /tsuzuri-repo-link/);
       assert.match(html, /tsuzuri-repo-version/);
@@ -1960,12 +1960,12 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
       write(dir, "a.md", "# A\n");
       let result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /見出しが見つからないリンク: 1 件/);
+      assert.match(result.stderr, /Links whose target page has no such heading: 1/);
       assert.equal(result.stderr.split("a.md#nope").length - 1, 1);
       assert.match(readOut(dir, "index.html"), /<h2 id="tada-see-x">/);
       result = runBuild(dir, { STRICT_LINKS: "true" });
       assert.equal(result.status, 1);
-      assert.match(result.stderr, /リンクの問題 1 件/);
+      assert.match(result.stderr, /because of 1 link problem\(s\)/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -2056,11 +2056,11 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
         write(dir, "README.md", "# Root\n\n[x](nope.js)\n");
         let result = runBuild(dir, gh);
         assert.equal(result.status, 0, result.stderr);
-        assert.match(result.stderr, /リンク先が見つからなかったファイル: 1 件\n\s+- nope\.js \(referenced from README\.md\)/);
+        assert.match(result.stderr, /Files that links point to were not found: 1\n\s+- nope\.js \(referenced from README\.md\)/);
         assert.deepEqual(JSON.parse(readOut(dir, "sitemap.json")).missing, [{ rel: "nope.js", referencedFrom: "README.md" }]);
         result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
         assert.equal(result.status, 1);
-        assert.match(result.stderr, /リンク先が見つかりません: nope\.js/);
+        assert.match(result.stderr, /Link target not found: nope\.js/);
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
       }
@@ -2098,7 +2098,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
         assert.equal(readOut(dir, "m.mkv"), "mkv");
         assert.match(readOut(dir, "index.html"), /<img src="\/a\.avif"/);
         assert.match(readOut(dir, "index.html"), /<video src="\/m\.mkv">/);
-        assert.doesNotMatch(result.stderr, /表示・再生できません/);
+        assert.doesNotMatch(result.stderr, /cannot be displayed or played/);
         const sitemap = JSON.parse(readOut(dir, "sitemap.json"));
         assert.deepEqual(sitemap.images, ["a.avif"]);
         assert.deepEqual(sitemap.files, ["m.mkv"]);
@@ -2115,15 +2115,15 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
         for (const name of ["pic.xyz", "clip.xyz", "s.xyz"]) write(dir, name, name);
         let result = runBuild(dir, gh);
         assert.equal(result.status, 0, result.stderr);
-        assert.match(result.stderr, /表示・再生できません: 3 件/);
-        assert.match(result.stderr, /埋め込みの先 pic\.xyz はコピーしない種類のファイルのため、表示・再生できません \(referenced from README\.md\)/);
-        assert.match(result.stderr, /埋め込みの先 clip\.xyz /);
-        assert.match(result.stderr, /埋め込みの先 s\.xyz /);
+        assert.match(result.stderr, /cannot be displayed or played: 3/);
+        assert.match(result.stderr, /The embedded target pic\.xyz is a file of a type that is not copied, so it cannot be displayed or played \(referenced from README\.md\)/);
+        assert.match(result.stderr, /The embedded target clip\.xyz /);
+        assert.match(result.stderr, /The embedded target s\.xyz /);
         assert.match(readOut(dir, "index.html"), /<img src="https:\/\/github\.com\/o\/r\/blob\/abc123\/pic\.xyz"/);
         result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
         assert.equal(result.status, 1);
-        assert.match(result.stderr, /リンクの問題 3 件/);
-        assert.match(result.stderr, /コピーしない種類のファイルの埋め込み: clip\.xyz/);
+        assert.match(result.stderr, /because of 3 link problem\(s\)/);
+        assert.match(result.stderr, /Embedded file of a type that is not copied: clip\.xyz/);
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
       }
@@ -2140,7 +2140,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
         assert.equal(readOut(dir, "_.github", "a.avif"), "img");
         assert.equal(readOut(dir, "_.a.avif"), "img");
         assert.equal(readOut(dir, "_.github", "c.png"), "img");
-        assert.doesNotMatch(result.stderr, /表示・再生できません/);
+        assert.doesNotMatch(result.stderr, /cannot be displayed or played/);
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
       }
@@ -2154,7 +2154,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
         write(dir, "src/a.js", "x");
         const result = runBuild(dir, gh);
         assert.equal(result.status, 0, result.stderr);
-        assert.match(result.stderr, /埋め込みの先 src はフォルダのため、表示・再生できません/);
+        assert.match(result.stderr, /The embedded target src is a folder, so it cannot be displayed or played/);
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
       }
@@ -2168,7 +2168,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
         write(dir, "clip.xyz", "x");
         const result = runBuild(dir, { ...gh, STRICT_LINKS: "true" });
         assert.equal(result.status, 0, result.stderr);
-        assert.doesNotMatch(result.stderr, /表示・再生できません/);
+        assert.doesNotMatch(result.stderr, /cannot be displayed or played/);
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
       }
@@ -2182,8 +2182,8 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
         write(dir, "pic.xyz", "x");
         const result = runBuild(dir, gh);
         assert.equal(result.status, 0, result.stderr);
-        assert.match(result.stderr, /表示・再生できません: 1 件/);
-        assert.equal(result.stderr.split("埋め込みの先 pic.xyz").length - 1, 1);
+        assert.match(result.stderr, /cannot be displayed or played: 1/);
+        assert.equal(result.stderr.split("The embedded target pic.xyz").length - 1, 1);
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
       }
@@ -2197,7 +2197,7 @@ describe("build-docs.mjs :: 絵文字のショートコードと srcset", () => 
         write(dir, "src/foo.js", "x");
         const result = runBuild(dir);
         assert.equal(result.status, 0, result.stderr);
-        assert.match(result.stderr, /README\.md から src\/foo\.js へのリンク/);
+        assert.match(result.stderr, /The link from README\.md to src\/foo\.js/);
         assert.match(readOut(dir, "index.html"), /<a href="\/src\/foo\.js">code<\/a>/);
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
@@ -2326,7 +2326,7 @@ describe("build-docs.mjs :: llms.txt", () => {
       assert.ok(!fs.existsSync(outPath(dir, "llms.txt")));
       const bad = runBuild(dir, { ...env, LLMS_TXT: "off" });
       assert.equal(bad.status, 0);
-      assert.match(bad.stderr, /\[config\] LLMS_TXT の値が不正です\("off"\)。false にフォールバックします。/);
+      assert.match(bad.stderr, /\[config\] The value of LLMS_TXT is invalid \("off"\)\. Falling back to false\./);
       assert.ok(!fs.existsSync(outPath(dir, "llms.txt")));
       for (const value of ["true", "TRUE", ""]) {
         assert.equal(runBuild(dir, { ...env, LLMS_TXT: value }).status, 0);
@@ -2343,7 +2343,7 @@ describe("build-docs.mjs :: llms.txt", () => {
       for (const origin of ["owner.github.io", "https://a b.example", "https://a.example/(x)", "https://" + "a".repeat(201)]) {
         const result = runBuild(dir, { SITE_ORIGIN: origin });
         assert.equal(result.status, 0, result.stderr);
-        assert.match(result.stderr, /SITE_ORIGIN の形が正しくないため、llms\.txt を作りません/, origin);
+        assert.match(result.stderr, /SITE_ORIGIN is not in a valid form, so llms\.txt is not generated/, origin);
         assert.ok(!fs.existsSync(outPath(dir, "llms.txt")), origin);
         assert.ok(fs.existsSync(outPath(dir, "sitemap.xml")), origin);
       }
@@ -2424,7 +2424,7 @@ describe("build-docs.mjs :: llms.txt", () => {
         for (const env of [{}, { SITE_ORIGIN: ORIGIN }]) {
           const result = runBuild(dir, { ...env, STRICT_LINKS: "true" });
           assert.equal(result.status, 0, result.stderr);
-          assert.match(result.stderr, /llms\.txt がシンボリックリンク\(または通常のファイル以外\)のため、コピーも自動生成もしません/);
+          assert.match(result.stderr, /llms\.txt is a symbolic link \(or not a regular file\), so it is neither copied nor generated/);
           assert.ok(!fs.existsSync(outPath(dir, "llms.txt")));
           const files = fs.readdirSync(path.join(dir, "_site"), { recursive: true });
           assert.ok(!files.some((n) => fs.statSync(outPath(dir, n)).isFile() && fs.readFileSync(outPath(dir, n)).includes("dummy-value")));
@@ -2443,7 +2443,7 @@ describe("build-docs.mjs :: llms.txt", () => {
         for (const dir of [broken, folder]) {
           const result = runBuild(dir, { SITE_ORIGIN: ORIGIN, STRICT_LINKS: "true" });
           assert.equal(result.status, 0, result.stderr);
-          assert.match(result.stderr, /llms\.txt がシンボリックリンク/);
+          assert.match(result.stderr, /llms\.txt is a symbolic link/);
           assert.ok(!fs.existsSync(outPath(dir, "llms.txt")));
         }
       } finally {

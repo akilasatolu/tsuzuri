@@ -161,8 +161,8 @@ test("promptAnswers: 不正な言語タグ(ja_JP)は警告して en にする", 
   const { result: answers, calls } = await captureWarn(() => promptAnswers(fakeRl(["", "", "", "", "ja_JP", ""])));
   assert.equal(answers.languages, "en");
   assert.deepEqual(calls, [
-    '[config] LANGUAGES の "ja_JP" は言語タグとして不正なため無視します。',
-    '[config] LANGUAGES に正しい言語タグがありません。"en" にします。',
+    '[config] "ja_JP" in LANGUAGES is ignored because it is not a valid language tag.',
+    '[config] LANGUAGES has no valid language tag. Using "en".',
   ]);
 });
 

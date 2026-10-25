@@ -80,7 +80,11 @@ npx github:akilasatolu/tsuzuri#v1 init
   up to v1.36.0 it was in Japanese). With `--lang ja`, the screen output and
   the comments in the generated settings file and in the empty custom CSS
   template are in Japanese. The comments in the generated workflow and in
-  `.github/tsuzuri/.gitignore` are always in English.
+  `.github/tsuzuri/.gitignore` are always in English. The messages of the
+  build script (the log of the build on GitHub Actions, and of the build that
+  `preview` runs) are always in English too (v1.37.0 or later); `--lang` does
+  not change them. A build script copied by an older version prints them in
+  Japanese until `init --update` updates it.
 - `init` can be omitted. Without a subcommand, the command behaves as `init`.
 
 ### 3.2 Where the command runs
@@ -822,7 +826,8 @@ version inside the repository stays the same until an update.
   The symptom does not occur when: the pushed branch is the same as
   `TRIGGER_BRANCH`.
 - Symptom: the build ends with the following error.
-  `起点となる README.md(または README.en.md)が見つかりません。処理を中止します。` (the root file is not found; the build stops)
+  `The root file README.md (or README.en.md) was not found. Aborting.`
+  (Up to v1.36.0: `起点となる README.md(または README.en.md)が見つかりません。処理を中止します。`)
   Cause: the file named by `ROOT_MD` is not in the repository.
   The symptom does not occur when: the file named by `ROOT_MD` is committed
   on that branch.
@@ -858,7 +863,8 @@ version inside the repository stays the same until an update.
   The symptom does not occur when: the setting is `STRICT_LINKS=true`. In
   this case the build fails with the following line, and the site keeps its
   previous content.
-  `STRICT_LINKS=true のため、リンクの問題 3 件でビルドを失敗させます。` (the build fails because of 3 link problems)
+  `STRICT_LINKS=true, so the build fails because of 3 link problem(s).`
+  (Up to v1.36.0: `STRICT_LINKS=true のため、リンクの問題 3 件でビルドを失敗させます。`)
 - Symptom: changes made to files inside `.github/tsuzuri/` disappear after
   an update.
   Cause: `init --update` overwrites the build script and the theme CSS.

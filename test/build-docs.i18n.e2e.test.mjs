@@ -426,7 +426,7 @@ describe("build-docs.mjs :: 多言語 C(異常系・言語の追加)", () => {
       assert.equal(result.status, 0, result.stderr);
       assert.match(
         result.stderr,
-        /\[build-docs\] English\(en\)のトップページ\(README\.en\.md\)が見つかりません。翻訳の無いページの言語切り替えボタンには English を出しません。/
+        /\[build-docs\] The top page \(README\.en\.md\) of English \(en\) was not found\. English is not shown on the language switch button of pages without a translation\./
       );
       assert.equal(existsOut(dir, "en/index.html"), false);
       assert.ok(existsOut(dir, "en/docs/a.html"));
@@ -443,11 +443,11 @@ describe("build-docs.mjs :: 多言語 C(異常系・言語の追加)", () => {
     withSite(FIXTURE_A, extra, (dir) => {
       const result = runBuild(dir, A_ENV);
       assert.equal(result.status, 0, result.stderr);
-      assert.match(result.stderr, /多言語のURL\(\/en\/\)と同じ名前のフォルダ en のページがあります。出力先が重なるおそれがあります。/);
-      assert.match(result.stderr, /出力先 en\/docs\/a\.html が重複しています/);
+      assert.match(result.stderr, /There are pages in the folder en, which has the same name as the multilingual URL \(\/en\/\)\. The output paths may collide\./);
+      assert.match(result.stderr, /The output path en\/docs\/a\.html is duplicated/);
       const strict = runBuild(dir, { ...A_ENV, STRICT_LINKS: "true" });
       assert.equal(strict.status, 1);
-      assert.match(strict.stderr, /出力先の重複: en\/docs\/a\.html/);
+      assert.match(strict.stderr, /Output path collision: en\/docs\/a\.html/);
     });
   });
 
@@ -464,7 +464,7 @@ describe("build-docs.mjs :: 多言語 C(異常系・言語の追加)", () => {
       }
       const result = runBuild(dir, A_ENV);
       assert.equal(result.status, 0, result.stderr);
-      const m = result.stderr.match(/\[build-docs\] (docs\/a\.(?:en|EN)\.md) は (docs\/a\.(?:en|EN)\.md) と同じページの同じ言語版のため使いません。/);
+      const m = result.stderr.match(/\[build-docs\] (docs\/a\.(?:en|EN)\.md) is not used because it is the same language version of the same page as (docs\/a\.(?:en|EN)\.md)\./);
       assert.ok(m, result.stderr);
       const kept = m[2];
       const html = readOut(dir, "en/docs/a.html");
@@ -476,7 +476,7 @@ describe("build-docs.mjs :: 多言語 C(異常系・言語の追加)", () => {
       assert.equal(urls.filter((u) => u === "/en/docs/a.html").length, 1);
       const strict = runBuild(dir, { ...A_ENV, STRICT_LINKS: "true" });
       assert.equal(strict.status, 1);
-      assert.match(strict.stderr, /翻訳の重複: docs\/a\.(?:en|EN)\.md/);
+      assert.match(strict.stderr, /Duplicate translation: docs\/a\.(?:en|EN)\.md/);
     });
   });
 
@@ -491,7 +491,7 @@ describe("build-docs.mjs :: 多言語 C(異常系・言語の追加)", () => {
       const html = readOut(dir, "pt-br/index.html");
       assert.match(html, /marker-pt/);
       assert.equal(htmlLang(html), "pt-BR");
-      assert.doesNotMatch(logOf(result), /同じページの同じ言語版/);
+      assert.doesNotMatch(logOf(result), /same language version of the same page/);
       const nav = hrefsOf(navOf(stripLangParts(html)));
       assert.deepEqual(nav, ["/pt-br/README.html"]);
     });
@@ -531,7 +531,7 @@ describe("build-docs.mjs :: 404 とフォルダへのリンクの見出し(1言�
       const result = runBuild(dir, { LANGUAGES: "en", STRICT_LINKS: "true" });
       assert.equal(result.status, 0, result.stderr);
       assert.match(readOut(dir, "404.html"), /marker-404-linked/);
-      assert.doesNotMatch(logOf(result), /重複/);
+      assert.doesNotMatch(logOf(result), /duplicated|collision|collides/);
     });
   });
 
@@ -546,7 +546,7 @@ describe("build-docs.mjs :: 404 とフォルダへのリンクの見出し(1言�
       (dir) => {
         const result = runBuild(dir, { LANGUAGES: "ja" });
         assert.equal(result.status, 0, result.stderr);
-        assert.match(result.stderr, /リンク先のページに見出しが見つからないリンク: 1 件/);
+        assert.match(result.stderr, /Links whose target page has no such heading: 1/);
         assert.match(result.stderr, /d\/index\.md#readme-only/);
         assert.doesNotMatch(result.stderr, /#idx-only/);
         assert.match(readOut(dir, "d/index.html"), /Idx only/);
@@ -846,7 +846,7 @@ describe("build-docs.mjs :: llms.txt(多言語)", () => {
       assert.ok(!existsOut(dir, "llms.txt"));
       const bad = runBuild(dir, { ...ENV, LLMS_TXT: "ture" });
       assert.equal(bad.status, 0);
-      assert.match(bad.stderr, /LLMS_TXT の値が不正です\("ture"\)/);
+      assert.match(bad.stderr, /The value of LLMS_TXT is invalid \("ture"\)/);
       assert.ok(!existsOut(dir, "llms.txt"));
     });
   });

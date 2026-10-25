@@ -209,8 +209,8 @@ function resolveStyleFile(raw) {
   const name = trimOr(raw, "custom.css");
   if (isStyleFileName(name)) return name;
   console.warn(
-    `[config] STYLE_FILE の値が不正です("${name}")。ファイル名だけ(例: custom.css)を書いてください` +
-      `(${VENDOR_DIR}/styles/ の中のファイルとして読みます)。独自CSSは使いません。`
+    `[config] The value of STYLE_FILE is invalid ("${name}"). Write only a file name (e.g. custom.css)` +
+      ` (it is read as a file in ${VENDOR_DIR}/styles/). The custom CSS is not used.`
   );
   return "";
 }
@@ -230,7 +230,7 @@ function parseBoolean(name, raw, emptyValue = false) {
   if (trimmed === "false") return false;
   if (trimmed === "") return emptyValue;
   console.warn(
-    `[config] ${name} の値が不正です("${raw ?? ""}")。false にフォールバックします。`
+    `[config] The value of ${name} is invalid ("${raw ?? ""}"). Falling back to false.`
   );
   return false;
 }
@@ -264,19 +264,19 @@ export function resolveLanguages(raw) {
   const seen = new Set();
   for (const item of items) {
     if (!LANG_TAG_RE.test(item)) {
-      console.warn(`[config] LANGUAGES の "${item}" は言語タグとして不正なため無視します。`);
+      console.warn(`[config] "${item}" in LANGUAGES is ignored because it is not a valid language tag.`);
       continue;
     }
     const lower = item.toLowerCase();
     if (seen.has(lower)) {
-      console.warn(`[config] LANGUAGES の "${item}" が重複しているため無視します。`);
+      console.warn(`[config] "${item}" in LANGUAGES is ignored because it is a duplicate.`);
       continue;
     }
     seen.add(lower);
     languages.push(item);
   }
   if (languages.length === 0) {
-    console.warn('[config] LANGUAGES に正しい言語タグがありません。"en" にします。');
+    console.warn('[config] LANGUAGES has no valid language tag. Using "en".');
     return ["en"];
   }
   return languages;
@@ -295,11 +295,11 @@ export function resolveOneLine(name, raw, max = 64) {
   const trimmed = (raw ?? "").trim();
   if (!trimmed) return "";
   if (/\p{Cc}/u.test(trimmed)) {
-    console.warn(`[config] ${name} の値に改行・タブなどの制御文字が含まれています。空文字にフォールバックします。`);
+    console.warn(`[config] The value of ${name} contains control characters such as line breaks or tabs. Falling back to an empty string.`);
     return "";
   }
   if (trimmed.length > max) {
-    console.warn(`[config] ${name} の値が長すぎます(${max}文字まで)。空文字にフォールバックします。`);
+    console.warn(`[config] The value of ${name} is too long (at most ${max} characters). Falling back to an empty string.`);
     return "";
   }
   return trimmed;
@@ -310,7 +310,7 @@ function resolveCustomDomain(raw) {
   if (!trimmed) return "";
   if (HOSTNAME_RE.test(trimmed)) return trimmed;
   console.warn(
-    `[config] CUSTOM_DOMAIN の値が不正です("${trimmed}")。空文字にフォールバックします。`
+    `[config] The value of CUSTOM_DOMAIN is invalid ("${trimmed}"). Falling back to an empty string.`
   );
   return "";
 }
@@ -321,7 +321,7 @@ function resolveTheme(raw) {
   if (trimmed === "") return "material";
   if (ALLOWED_THEMES.includes(trimmed)) return trimmed;
   console.warn(
-    `[config] THEME の値が不正です("${trimmed}")。"material" にフォールバックします。`
+    `[config] The value of THEME is invalid ("${trimmed}"). Falling back to "material".`
   );
   return "material";
 }
