@@ -133,13 +133,14 @@ test("detectLangFromArgv: 最後に現れた --lang の値を見る。en か ja 
 test("bin/cli.mjs と bin/preview.mjs の t(\"…\") のキーは、すべてカタログにあり、カタログのキーはどこかで使われている", () => {
   const sources = ["cli.mjs", "preview.mjs"].map((f) => readFileSync(join(BIN_DIR, f), "utf8")).join("\n");
   const used = new Set([...sources.matchAll(/\bt\(\s*["']([\w.]+)["']/g)].map((m) => m[1]));
-  // 動的に引くキー: THEME_CHOICES の theme.<key>、設定ファイルのコメント config.<name>(buildDocsPagesConfig の item)
+  // 動的に引くキー: 設定ファイルのコメント config.<name>(buildDocsPagesConfig の item)
   for (const m of sources.matchAll(/item\(\s*"(\w+)"/g)) used.add(`config.${m[1]}`);
-  for (const key of Object.keys(MESSAGES.en)) {
-    if (key.startsWith("theme.")) used.add(key);
-  }
   assert.deepEqual([...used].filter((k) => !(k in MESSAGES.en)), [], "カタログに無いキーを使っている");
   assert.deepEqual(Object.keys(MESSAGES.en).filter((k) => !used.has(k)), [], "どこでも使われていないキー");
-  // テーマの説明は、ALLOWED_THEMES の数だけある
-  assert.equal(Object.keys(MESSAGES.en).filter((k) => k.startsWith("theme.")).length, 9);
+  // テーマの質問・説明・--theme のエラー、保持のログ(log.kept)は無い
+  for (const key of ["prompt.theme", "error.theme", "log.kept", "css.template", "config.styleFile"]) {
+    assert.equal(key in MESSAGES.en, false, key);
+    assert.equal(key in MESSAGES.ja, false, key);
+  }
+  assert.equal(Object.keys(MESSAGES.en).filter((k) => k.startsWith("theme.")).length, 0);
 });

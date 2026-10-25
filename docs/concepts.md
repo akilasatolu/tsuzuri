@@ -32,7 +32,7 @@ and PDFs (settings files, for example), are never copied, so they aren't publish
 
 Among the linked files, the ones with the following extensions are copied (the extension is
 compared ignoring case, so `A.PDF` is copied too, and `app.tar.gz` is matched by `gz`; v1.32.0
-or later. Before that, every file with an extension was copied).
+or later. Before that, every file with an extension was copied; `css` is copied from v1.38.0 or later).
 
 | Kind | Extensions |
 |---|---|
@@ -41,12 +41,15 @@ or later. Before that, every file with an extension was copied).
 | Archives | `zip` `tar` `gz` `tgz` `bz2` `xz` `7z` |
 | Video | `mp4` `webm` `mov` `m4v` `ogv` `avi` `mkv` |
 | Audio | `mp3` `m4a` `wav` `ogg` `oga` `flac` `aac` `opus` `weba` |
+| Stylesheets | `css` |
 
 The idea is that files you open with an app or a browser are copied, while files whose contents
 you read as text (source code, settings files, `.txt`, `.csv` and so on) and files with any
-other extension become links to the file on GitHub. This keeps a kind of file Tsuzuri doesn't
-know from being published unintentionally. Inside folders starting with `.`, only the PDF, video
-and audio entries above (and images) are copied.
+other extension become links to the file on GitHub. The exception is `css`: a CSS file is copied
+so that it can be downloaded (this is how the [gallery](./gallery.md) offers custom styles). This keeps a kind of file Tsuzuri doesn't
+know from being published unintentionally. Inside folders starting with `.`, only the PDF, video,
+audio and stylesheet (`css`) entries above (and images) are copied. So a CSS file in `.github/` (for
+example `.github/tsuzuri/styles/glass.css`) is copied too, and appears in the site under `_.github/`.
 
 A linked `.html` or `.htm` file is copied as it is, without changing its contents. A page that
 is complete in a single file (styles and scripts written inside it) is shown as it is. The other
@@ -195,7 +198,7 @@ too; this site's 404 page is also made with `404.md`). Otherwise the default con
 ("Page not found" and a link to the top page, in Japanese if the page language is Japanese and
 in English otherwise; on a [multilingual site](./i18n.md), a notice for each language that has
 a top page, with links to each top page, where only the notice in the URL's language is shown;
-see [Multilingual sites](./i18n.md#the-404-page)). It's shown with the same navigation and theme as the
+see [Multilingual sites](./i18n.md#the-404-page)). It's shown with the same navigation and custom style as the
 other pages, and isn't indexed by search engines (`noindex`).
 
 ## sitemap.xml and robots.txt (for search engines)
@@ -395,8 +398,8 @@ extra space at the top.
 Code blocks with a language name, like ```` ```js ````, are highlighted at build time (using
 [highlight.js](https://highlightjs.org/); no JavaScript runs in the browser). Code blocks
 without a language name, or with an unsupported one, are shown as they are without
-highlighting (the language is never guessed). The colors follow the theme and can be changed
-with custom CSS (see [Theming](./theming.md)).
+highlighting (the language is never guessed). The colors follow the custom style and can be changed
+in your own custom style (see [Theming](./theming.md)).
 
 ## Site search
 
@@ -421,17 +424,17 @@ the navigation header (v1.7.0 or later). Your choice is saved in the browser, so
 the same the next time you open it. If you haven't chosen, it follows the OS setting (dark mode
 or not), as before.
 
-If the theme has no light/dark difference (90s (`nineties`), which is light only, `none` and so
-on), the button isn't shown. To write dark colors in your custom CSS, see
+If the custom style has no light/dark difference (90s (`nineties.css`), which is light only, `none.css` and so
+on), the button isn't shown. To write dark colors in your custom style, see
 [Theming](./theming.md#supporting-light-and-dark).
 
 ## How the CSS is loaded
 
-The page CSS (base CSS, theme and custom CSS) is combined into one file
+The page CSS (the base CSS and the custom style) is combined into one file
 (`tsuzuri-<string made from its contents>.css`) that every page loads (v1.7.0 or later; before
 that it was embedded in each page). Since all pages use the same file, the browser cache makes
 the second and later pages show up faster. When the CSS changes, the file name changes too, so
-an old CSS never sticks around. Pages that change `theme` or `styleFile` load a file for that
+an old CSS never sticks around. Pages that change `theme` load a file for that
 combination.
 
 Readers who chose "reduce motion" in their OS don't get animations such as cards lifting on
@@ -447,7 +450,7 @@ output to check "which files were actually collected and which links were exclud
 includes the list of collected pages (with titles and descriptions), the list of images, the
 page hierarchy (`hierarchy`, the parent-child relationships from following links, and `tree`,
 following the folder structure), the lists of `missing` (broken links) and `rejected` (refused
-links) described above, and settings such as the current `THEME` and the site name. When the
+links) described above, and settings such as the current `THEME` (the custom style file name) and the site name. When the
 site isn't generated as you expect, set `SITEMAP_JSON=true` temporarily and check this file to
 find the cause more easily (we recommend setting it back to `false` when you're done).
 

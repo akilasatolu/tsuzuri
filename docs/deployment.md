@@ -13,10 +13,10 @@ repository.
 Your repository
 .github/workflows/tsuzuri-pages.yml  … all the build and deploy steps (self-contained)
 .github/tsuzuri/config               … the settings file that customizes the behavior (you edit it)
-.github/tsuzuri/styles/custom.css    … an empty template for your own CSS (you edit it)
 .github/tsuzuri/build-docs.mjs       … the build script itself (copied)
 .github/tsuzuri/lib/*.mjs            … the modules the build script depends on (copied)
-.github/tsuzuri/styles/*.css         … the CSS of the built-in themes (copied)
+.github/tsuzuri/styles/base.css      … the base CSS (copied)
+.github/tsuzuri/styles/default.css   … the default custom style (copied; custom styles you add yourself go next to it)
 .github/tsuzuri/package.json         … the versions of the build dependencies (marked and others)
 .github/tsuzuri/package-lock.json    … the same (with the hashes used to verify the downloaded contents)
 .github/tsuzuri/.gitignore           … keeps locally installed dependencies (node_modules/) out of commits
@@ -35,8 +35,8 @@ Tsuzuri repository over the network (no second `checkout` or the like).
   this file directly; you customize the behavior by changing values in
   `.github/tsuzuri/config`.
 - **Under `.github/tsuzuri/`**: the build script itself, and the files you edit. You edit only
-  the settings file `config` and your own CSS files in `styles/` (`custom.css` by default). Do
-  not edit the built-in theme CSS or the scripts; deleting or changing them can make the build
+  the settings file `config` and your own custom styles in `styles/`. Do
+  not edit `base.css`, `default.css` or the scripts; deleting or changing them can make the build
   fail.
 
 ## Changing the trigger branch
@@ -121,8 +121,8 @@ the version never changes automatically unless you do something** (unlike the ol
 `uses: ...@v1`, it's no longer updated to the latest on every workflow run).
 
 To update to the latest Tsuzuri, run the setup command with `--update`. Only the workflow and
-the build script (including the built-in theme CSS) are overwritten with the latest version;
-`.github/tsuzuri/config` and your custom CSS (`STYLE_FILE`) are left as they are (see "Updating to the latest version
+the build script (including `base.css` and `default.css`) are overwritten with the latest version;
+`.github/tsuzuri/config` and the custom styles you put in `styles/` are left as they are (see "Updating to the latest version
 (`--update`)" in the [CLI reference](./cli.md)).
 
 ```sh

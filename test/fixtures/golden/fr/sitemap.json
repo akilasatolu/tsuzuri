@@ -1,8 +1,6 @@
 {
   "root": "README.md",
   "basePath": "",
-  "styleFile": ".github/tsuzuri/styles/custom.css",
-  "customStyleApplied": false,
   "pages": [
     {
       "rel": "README.md",
@@ -141,5 +139,5 @@
   "siteName": "",
   "siteOrigin": "",
   "customDomain": "",
-  "theme": "material"
+  "theme": "default.css"
 }

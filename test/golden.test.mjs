@@ -5,7 +5,6 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
-import { ALLOWED_THEMES } from "../.github/scripts/lib/config.mjs";
 
 /**
  * ゴールデンテスト: いくつかの設定で作ったサイトの出力をまるごと保存しておき(test/fixtures/golden/)、
@@ -30,8 +29,6 @@ const REAL_STYLES_DIR = path.join(PROJECT_ROOT, "styles");
 const FIXTURE_SITE = path.join(TEST_DIR, "fixtures", "site-golden");
 const GOLDEN_DIR = path.join(TEST_DIR, "fixtures", "golden");
 
-const THEMES = ALLOWED_THEMES.filter((t) => t !== "none"); // 組み込みテーマ(CSSがあるもの)
-
 // 設定の表(name: 保存先のフォルダ名、env: ビルドするときの環境変数)。保存と比較が同じ表を使う。
 const ORIGIN_ENV = { SITE_ORIGIN: "https://example.github.io", BASE_PATH: "/repo" };
 const GOLDEN_CONFIGS = [
@@ -41,7 +38,8 @@ const GOLDEN_CONFIGS = [
   { name: "default", env: {} },
   { name: "origin", env: { LANGUAGES: "ja", ...ORIGIN_ENV } },
   { name: "fr", env: { LANGUAGES: "fr" } },
-  ...THEMES.map((theme) => ({ name: `theme-${theme}`, env: { LANGUAGES: "ja", THEME: theme } })),
+  // THEME を明示した場合(パッケージに入っているカスタムスタイルは default.css だけ)
+  { name: "theme-default", env: { LANGUAGES: "ja", THEME: "default.css" } },
 ];
 
 // 設定に関わる環境変数。子プロセスを起動する前にすべて消してから、指定した値だけを入れる。
@@ -160,7 +158,7 @@ function makeTmpDir(prefix = "golden-") {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
 }
 
-// fixture と本物の styles/(base.css と全テーマ)を一時フォルダに写してビルドし、出力先を返す
+// fixture と本物の styles/(base.css)・カスタムスタイル(default.css)を一時フォルダに写してビルドし、出力先を返す
 function buildSite(dir, overrides) {
   return runGoldenBuild(dir, overrides).outDir;
 }
@@ -173,7 +171,11 @@ function runGoldenBuild(dir, overrides, configText) {
     fs.mkdirSync(path.join(dir, ".github", "tsuzuri"), { recursive: true });
     fs.writeFileSync(path.join(dir, ".github", "tsuzuri", "config"), configText);
   }
-  fs.cpSync(REAL_STYLES_DIR, path.join(dir, "styles"), { recursive: true });
+  // ベース(base.css)は styles/ に、カスタムスタイル(default.css)は .github/tsuzuri/styles/ に置く(THEME はそこから読む)
+  fs.mkdirSync(path.join(dir, "styles"), { recursive: true });
+  fs.copyFileSync(path.join(REAL_STYLES_DIR, "base.css"), path.join(dir, "styles", "base.css"));
+  fs.mkdirSync(path.join(dir, ".github", "tsuzuri", "styles"), { recursive: true });
+  fs.copyFileSync(path.join(REAL_STYLES_DIR, "default.css"), path.join(dir, ".github", "tsuzuri", "styles", "default.css"));
   const env = { ...process.env };
   for (const key of Object.keys(env)) {
     if (CONFIG_ENV_KEYS.includes(key) || key.startsWith("GITHUB_") || key.startsWith("GIT_")) delete env[key];

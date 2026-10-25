@@ -11,14 +11,14 @@ title: 使用例(Examples)
 いま見ているこのドキュメントサイトも、Tsuzuri自身で作っています
 ([ソース](https://github.com/akilasatolu/tsuzuri/tree/main))。次の機能を組み合わせています。
 
-- **独自CSSだけで作った見た目**: `THEME=none`にして、`STYLE_FILE`の独自CSSで配色・カード・ボタンを
-  作っています([独自CSSの例](gallery/custom.ja.md))。
+- **自分用のカスタムスタイルで作った見た目**: 配色・カード・ボタンを、自分用のカスタムスタイル
+  (`THEME`)で作っています([カスタムスタイルの例](gallery/custom.ja.md))。
 - **トップページの入口**: `README.md`の冒頭に、`<div class="tsuzuri-hero">`のようにclass付きのHTMLを書き、
-  独自CSSで見た目を付けています。GitHub上ではclassが消えて普通の文章として表示されるので、
+  カスタムスタイルで見た目を付けています。GitHub上ではclassが消えて普通の文章として表示されるので、
   GitHubで読んでも崩れません。
-- **テーマギャラリー**: 各テーマの見本ページは、frontmatterで`theme`(そのページのテーマ)と
-  `styleFile`(中身が空のCSS)を指定して、組み込みテーマだけの見た目にしています
-  ([テーマギャラリー](gallery.ja.md))。
+- **ギャラリー**: 各カスタムスタイルの見本ページは、frontmatterで`theme`(そのページのカスタムスタイル)を
+  指定して、そのスタイルだけの見た目にしています。ギャラリーでは、各CSSファイルをダウンロードできます
+  ([ギャラリー](gallery.ja.md))。
 - **404ページ**: リポジトリ直下の`404.md`で作っています。
 - **英語と日本語**: `LANGUAGES=en,ja`の[多言語サイト](i18n.ja.md)です。英語のページを基本にして、
   日本語のページを`*.ja.md`として横に置いています。
@@ -66,8 +66,8 @@ Tsuzuriは元々「READMEをそのままGitHub Pagesにする」ことを目的�
   本文の最初の段落から自動で作られます)
 - `FAVICON_FILE`でブランドのfaviconを設定し、`CUSTOM_DOMAIN`で独自ドメインを割り当てる
   (詳細は[configuration.md](./configuration.ja.md)、[deployment.md](./deployment.ja.md))
-- `THEME`を`material`(マテリアル)や`glass`(グラス)のようなブランドカラーに近いテーマに変更する。さらに作り込みたい
-  場合は、このサイトのように`THEME=none`と独自CSSで見た目を作る(詳細は[theming.md](./theming.ja.md))
+- `THEME`を、[ギャラリー](./gallery.ja.md)でダウンロードした`glass.css`のような、ブランドカラーに近いカスタムスタイルに変更する。
+  さらに作り込みたい場合は、このサイトのように自分用のカスタムスタイルを作る(詳細は[theming.md](./theming.ja.md))
 - 「お知らせ」の過去記事のように、ナビに並べるほどではないページは`nav: false`にする
 
 このように、追加のビルドツールやCMSを用意しなくても、Markdownファイルと設定ファイルの

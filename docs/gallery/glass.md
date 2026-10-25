@@ -1,19 +1,20 @@
 ---
 title: Glass (glass)
-theme: glass
+theme: glass.css
 styleFile: plain.css
-description: A sample page of Tsuzuri's built-in theme "Glass (glass)"
+description: A sample page of the custom style "Glass (glass)"
 ---
 
 # Glass (glass)
 
 Glassmorphism. Thin, clear glass cards that let the colors show through, over a slowly swaying, flowing aurora.
 
-To use this theme for the whole site, set `THEME=glass` in `.github/tsuzuri/config`.
-To use it for a single page, write `theme: glass` in that page's frontmatter
+To use it, download `glass.css` from the [gallery](../gallery.md#glass-glass), put it in `.github/tsuzuri/styles/`,
+and set `THEME=glass.css` in `.github/tsuzuri/config`.
+To use it for a single page only, write `theme: glass.css` in that page's frontmatter
 (see [Theming](../theming.md)).
 
-[← Material (material)](material.md) · [Gallery](../gallery.md) · [Neumorphism (neumorphism) →](neumorphism.md)
+[← Default (default)](default.md) · [Gallery](../gallery.md) · [Neumorphism (neumorphism) →](neumorphism.md)
 
 ## Heading level 2
 
@@ -36,7 +37,7 @@ This is also where you can check the line spacing and readability of longer pass
 
 | Setting | Default | Description |
 |---|---|---|
-| `THEME` | `material` | The built-in theme name |
+| `THEME` | `default.css` | The custom style file name |
 | `NAV_ENABLED` | `false` | Whether to show the navigation |
 | `LANGUAGES` | `en` | The site language (the value of `<html lang>`) |
 
@@ -50,4 +51,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../../assets/favicon.svg)
 
-[← Material (material)](material.md) · [Gallery](../gallery.md) · [Neumorphism (neumorphism) →](neumorphism.md)
+[← Default (default)](default.md) · [Gallery](../gallery.md) · [Neumorphism (neumorphism) →](neumorphism.md)

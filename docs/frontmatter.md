@@ -75,65 +75,28 @@ true).
 A page with `noindex: true` isn't listed in `llms.txt` either (v1.34.0 or later).
 
 ### theme
-Set this when you want this page alone to use a theme different from `THEME` (the site-wide
-theme) in `.github/tsuzuri/config`. Two kinds of values are accepted, told apart by whether
-the value ends with `.css`.
+Replaces the custom style of this page alone. The site-wide custom style is `THEME` in
+`.github/tsuzuri/config`; this key gives a different one just for this page.
 
-- **A built-in theme name**: `material` / `glass` / `neumorphism` / `editorial` / `minimal` /
-  `kintsugi` / `blueprint` / `nineties` / `none` (see [Theming](theming.md) for what they mean;
-  with `none`, the theme layer isn't applied to this page)
-- **The file name of a custom CSS file**: a value that ends with `.css` is treated as the name of
-  a custom CSS file. Prepare the file yourself and put it in `.github/tsuzuri/styles/`. Write
-  **only the file name** (no folders). A value containing `/`, `\` or `:`, or starting with `.`,
-  can't be used (such as `../x.css` or `assets/x.css`). If such a value, or a symbolic link
-  pointing outside the repository, is given, a warning is shown and the site-wide `THEME` is
-  used instead.
-
-A value that doesn't end with `.css` and doesn't match one of the nine built-in theme names above
-(such as a typo like `materail`) also shows a warning and falls back to the site-wide `THEME`.
+Write the **file name of a custom style**: a `.css` file in `.github/tsuzuri/styles/`, such as
+`glass.css` (see [Theming](theming.md) for what custom styles are, and the [gallery](gallery.md) for
+the ones you can download). Write **only the file name** (no folders). A value containing `/`, `\` or
+`:`, or starting with `.`, or not ending with `.css`, can't be used (such as `../x.css`, `assets/x.css`,
+or the old theme names such as `material`). `none` can't be used either; to show the page with no
+decoration, use `none.css` (a file that contains only comments, which you put in `.github/tsuzuri/styles/`).
 
 ```markdown
 ---
-theme: nineties
+theme: glass.css
 ---
 ```
 
-```markdown
----
-theme: my-original-theme.css
----
-```
+The page is shown with the base CSS plus this custom style. The site-wide custom style (`THEME`) is
+**replaced**, not mixed in.
 
-Either way, `STYLE_FILE` in `.github/tsuzuri/config` (the site-wide custom CSS, the third
-layer) is still applied regardless of this key. So the layers stack as "base CSS → (this
-page's) theme → STYLE_FILE". If you don't want `STYLE_FILE` applied to this page, use
-[`styleFile`](#stylefile) below.
-
-If no CSS file is found for the given theme name or file name (a built-in theme's CSS is missing, a
-custom CSS file doesn't exist, and so on), a warning is shown and that page falls back to the
-site-wide `THEME` (the build itself doesn't stop; a "fail-open" behavior).
-
-### styleFile
-Sets the custom CSS file used for this page instead of `STYLE_FILE` in
-`.github/tsuzuri/config` (the site-wide custom CSS, the third layer) (v1.5.0 or later). As
-with `STYLE_FILE`, write **only the file name** of a file in `.github/tsuzuri/styles/`, ending
-with `.css` (no folders).
-
-Give it an empty CSS file (only comments) and that page won't get the site-wide custom CSS, so
-it shows only the `theme`. For example, use it when the whole site is built with custom CSS but
-you want theme sample pages to look like the built-in theme (this site's
-[theme gallery](gallery.md) does exactly that).
-
-```markdown
----
-theme: material
-styleFile: plain.css
----
-```
-
-If the file isn't found, the value can't be used as a file name (it contains a folder, doesn't
-end with `.css`, and so on), or it is a symbolic link pointing outside the repository, a warning
-is shown and the site-wide `STYLE_FILE` is used.
+If the value can't be used as a file name, the file doesn't exist, or it is a symbolic link pointing
+outside the repository, a warning is shown and that page uses the site-wide custom style (the build
+itself doesn't stop; a "fail-open" behavior).
 
 ### nav
 With `false`, the page isn't listed in the navigation (sidebar) or in the "previous page / next

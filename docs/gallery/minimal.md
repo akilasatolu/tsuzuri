@@ -1,16 +1,17 @@
 ---
 title: Minimal (minimal)
-theme: minimal
+theme: minimal.css
 styleFile: plain.css
-description: A sample page of Tsuzuri's built-in theme "Minimal (minimal)"
+description: A sample page of the custom style "Minimal (minimal)"
 ---
 
 # Minimal (minimal)
 
 A calm look in only white, black and gray, like the Vercel or Linear docs. Only links are blue.
 
-To use this theme for the whole site, set `THEME=minimal` in `.github/tsuzuri/config`.
-To use it for a single page, write `theme: minimal` in that page's frontmatter
+To use it, download `minimal.css` from the [gallery](../gallery.md#minimal-minimal), put it in `.github/tsuzuri/styles/`,
+and set `THEME=minimal.css` in `.github/tsuzuri/config`.
+To use it for a single page only, write `theme: minimal.css` in that page's frontmatter
 (see [Theming](../theming.md)).
 
 [← Editorial (editorial)](editorial.md) · [Gallery](../gallery.md) · [Kintsugi (kintsugi) →](kintsugi.md)
@@ -36,7 +37,7 @@ This is also where you can check the line spacing and readability of longer pass
 
 | Setting | Default | Description |
 |---|---|---|
-| `THEME` | `material` | The built-in theme name |
+| `THEME` | `default.css` | The custom style file name |
 | `NAV_ENABLED` | `false` | Whether to show the navigation |
 | `LANGUAGES` | `en` | The site language (the value of `<html lang>`) |
 

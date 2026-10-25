@@ -1,11 +1,11 @@
 ---
-title: Custom CSS example (this site)
-description: A sample page of this site's own look, made only with THEME=none and custom CSS (STYLE_FILE)
+title: Custom style example (this site)
+description: A sample page of this site's own look, made with a custom style of its own
 ---
 
-# Custom CSS example (this site)
+# Custom style example (this site)
 
-This look is made without a built-in theme (`THEME=none`), using only custom CSS in `STYLE_FILE`.
+This look is a custom style of its own (`custom.css`), made without relying on any other style.
 The whole site looks like this. It's the "thread" design, which gives shape to the name and logo of
 Tsuzuri (綴り, "binding"): a single thread that binds the pages runs to the left of the content,
 the h1 starts from a lit dot like the center of the logo, and each h2 is a knot on the thread.
@@ -14,7 +14,9 @@ chapters you've read, so you can tell how far you've got. The navigation is a tr
 are connected by lines.
 
 The CSS is [custom.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/custom.css).
-See [Theming](../theming.md#customizing-with-your-own-css) for how to write it.
+See [Theming](../theming.md#writing-your-own-custom-style) for how to write one. To use it on your own
+site, download `custom.css` from the [gallery](../gallery.md#tsuzuri-this-site), put it in `.github/tsuzuri/styles/`,
+and set `THEME=custom.css`.
 
 [← No decoration (none)](none.md) · [Gallery](../gallery.md)
 
@@ -39,7 +41,7 @@ This is also where you can check the line spacing and readability of longer pass
 
 | Setting | Default | Description |
 |---|---|---|
-| `THEME` | `material` | The built-in theme name |
+| `THEME` | `default.css` | The custom style file name |
 | `NAV_ENABLED` | `false` | Whether to show the navigation |
 | `LANGUAGES` | `en` | The site language (the value of `<html lang>`) |
 

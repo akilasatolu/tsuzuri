@@ -35,11 +35,10 @@ it's the version you intended (`npx` can run an old version from its cache).
 | `-y`, `--yes` | Generate the files with all defaults, without questions |
 | `--branch <name>` | The trigger branch (`TRIGGER_BRANCH`). Default: the repository's default branch (the default branch of `origin`, or `main` if unknown; up to v1.3.0 it could be the current branch) |
 | `--root <path>` | The starting Markdown file (`ROOT_MD`). Default: `README.md` |
-| `--theme <name>` | The theme (`THEME`). `material` / `glass` / `neumorphism` / `editorial` / `minimal` / `kintsugi` / `blueprint` / `nineties` / `none`. Default: `material` |
 | `--languages <list>` | The site languages (`LANGUAGES`), comma-separated, with the base language first (e.g. `en`, `en,ja`). Default: `en` (v1.28.0 or later) |
 | `--site-name <name>` | The site name (`SITE_NAME`). Default: empty (the repository name is used at build time) |
 | `--no-nav` | Don't show the navigation, site search and table of contents (`NAV_ENABLED=false`). Default: shown |
-| `--lang <en\|ja>` | The language of the messages, and of the comments in the generated settings file and custom CSS template (v1.37.0 or later). Default: `en`. It does not skip the questions |
+| `--lang <en\|ja>` | The language of the messages, and of the comments in the generated settings file (v1.37.0 or later). Default: `en`. It does not skip the questions |
 | `--force` | Without questions, overwrite existing files too |
 | `--port <number>` | The port used by `preview`. Default: `4000` |
 | `--no-watch` | In `preview`, don't watch files for changes (don't rebuild automatically) |
@@ -47,20 +46,20 @@ it's the version you intended (`npx` can run an old version from its cache).
 | `-v`, `--version` | Show the version |
 | `-h`, `--help` | Show the usage |
 
-With any of `--yes`, `--branch`, `--root`, `--theme`, `--languages`, `--site-name`, or
+With any of `--yes`, `--branch`, `--root`, `--languages`, `--site-name`, or
 `--no-nav`, the files are generated without questions (useful from scripts or CI). In that
-case, existing files are skipped rather than overwritten. Add `--force` to overwrite them. This includes the settings file `.github/tsuzuri/config` (your settings are replaced by the generated ones); only an existing `custom.css` is never overwritten.
+case, existing files are skipped rather than overwritten. Add `--force` to overwrite them. This includes the settings file `.github/tsuzuri/config` (your settings are replaced by the generated ones). The custom styles you put in `.github/tsuzuri/styles/` yourself are never overwritten, since `init` doesn't create them.
 
 ```
-npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --theme nineties --languages ja
+npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --languages ja
 ```
 
-An unknown option is an error, and nothing is generated. A value for `--languages` that isn't
+An unknown option (including `--theme`, which was removed together with the theme question) is an error, and nothing is generated. A value for `--languages` that isn't
 a valid language tag, such as `ja_JP`, is also an error, and nothing is generated.
 
 The messages of `init` and `preview` are in English (v1.37.0 or later; up to v1.36.0 they were in
 Japanese). Add `--lang ja` to the command to get Japanese messages, and Japanese comments in the
-settings file and the custom CSS template that `init` creates, like `npx github:akilasatolu/tsuzuri#v1 init --lang ja`.
+settings file that `init` creates, like `npx github:akilasatolu/tsuzuri#v1 init --lang ja`.
 Only `en` and `ja` (in lowercase) are accepted. `--lang` applies only to the command it is given
 to, and it is not the language of the site (that is `LANGUAGES`; see the
 [configuration reference](./configuration.md#languages)). The workflow and the `.gitignore` that
@@ -116,15 +115,10 @@ pressing Enter).
 2. **Starting Markdown file (`ROOT_MD`)** `[README.md]`
    - The path of the Markdown file that is the entrance to the site. If left empty, it's
      `README.md`.
-3. **Theme (`THEME`)**
-   - The nine choices `material` (recommended) / `glass` / `neumorphism` / `editorial` /
-     `minimal` / `kintsugi` / `blueprint` / `nineties` / `none` (no decoration) are shown with
-     numbers (1–9); type a number. If left empty, it's `1` (`material`).
-   - See [Theming](./theming.md) for what each theme looks like.
-4. **Show the navigation? (`NAV_ENABLED`) (Y/n)** (v1.7.0 or later)
+3. **Show the navigation? (`NAV_ENABLED`) (Y/n)** (v1.7.0 or later)
    - Whether to show the sidebar, site search, the in-page table of contents and the links to
      the previous and next pages. If left empty (or `y`), they're shown.
-5. **Site languages (`LANGUAGES`)** `[en]` (v1.28.0 or later)
+4. **Site languages (`LANGUAGES`)** `[en]` (v1.28.0 or later)
    - Enter the site languages, comma-separated. Put the language of your README (the base
      language) first. If your README is in Japanese, enter `ja`; for an English and Japanese
      site with an English README, enter `en,ja`. The value is written to the settings file in
@@ -132,13 +126,14 @@ pressing Enter).
    - A value that isn't a valid language tag (e.g. `ja_JP`) is ignored with a warning (if no
      valid value remains, it's `en`).
    - See [Multilingual sites](./i18n.md) for how to build a multilingual site.
-6. **Site name (`SITE_NAME`)** (v1.7.0 or later)
+5. **Site name (`SITE_NAME`)** (v1.7.0 or later)
    - The site name used in the navigation header and when the page is shared on social media.
      If left empty, the repository name is used at build time. The site name is shared by all
      languages.
 
-That is all six questions. The empty custom CSS template (`.github/tsuzuri/styles/custom.css`) is always
-created without a question (an existing one is never overwritten).
+That is all five questions. There is no question about the look: the settings file starts with
+`THEME=default.css` (the default custom style, included in the package). To use another custom style, download it from the
+[gallery](./gallery.md) and put its file name in `THEME` (see [Theming](./theming.md)).
 
 ## Generated files
 
@@ -147,16 +142,15 @@ Based on your answers, the following files are generated.
 | File | Always generated? | Contents |
 |---|---|---|
 | `.github/workflows/tsuzuri-pages.yml` | Always | A self-contained workflow that holds the build and deploy steps itself (it no longer calls `build.yml` with `uses:` as it used to) |
-| `.github/tsuzuri/config` | Always | The settings file. `TRIGGER_BRANCH` / `ROOT_MD` / `THEME` / `NAV_ENABLED` / `LANGUAGES` / `SITE_NAME` reflect your answers; the other keys are written with their defaults. You edit this file |
+| `.github/tsuzuri/config` | Always | The settings file. `TRIGGER_BRANCH` / `ROOT_MD` / `NAV_ENABLED` / `LANGUAGES` / `SITE_NAME` reflect your answers; the other keys, including `THEME=default.css`, are written with their defaults. You edit this file |
 | `.github/tsuzuri/build-docs.mjs` | Always | The build script itself (identical to `.github/scripts/build-docs.mjs` in the Tsuzuri repository) |
 | `.github/tsuzuri/lib/*.mjs` | Always | The modules the build script depends on (config, copy-button, crawler, emoji, emoji-data, frontmatter, html-renderer, i18n, image-size, link-extractor, llms-txt, path-utils, search, site-tree, sitemap, slugger, theme-toggle; 17 files) |
-| `.github/tsuzuri/styles/*.css` | Always | The CSS of the built-in themes (`base.css` plus `material` / `glass` / `neumorphism` / `editorial` / `minimal` / `kintsugi` / `blueprint` / `nineties`). All themes are always copied, in case a page uses a theme other than the selected one through the frontmatter `theme` key ([see here](./frontmatter.md#theme)) |
+| `.github/tsuzuri/styles/base.css`, `default.css` | Always | The base CSS (`base.css`) and the default custom style (`default.css`). Only these two are placed; the other custom styles are not distributed, and you download them from the [gallery](./gallery.md) |
 | `.github/tsuzuri/package.json`, `package-lock.json` | Always (v1.7.0 or later) | The versions of the build dependencies (marked and others) and the hashes used to verify the downloaded contents. The workflow and `preview` install them exactly as listed, with `npm ci` |
 | `.github/tsuzuri/.gitignore` | Always | Keeps the dependencies installed for local previews (`node_modules/`) out of commits |
-| `.github/tsuzuri/styles/custom.css` | Always (an existing one is never overwritten, even with `--force`) | An empty custom CSS template containing only comments, placed in the same folder as the built-in theme CSS. It is the file the default `STYLE_FILE=custom.css` points to. You edit this file (and can add other CSS files next to it) |
 
-Under `.github/tsuzuri/`, you edit only the settings file `config` and your own CSS files in
-`styles/` (`custom.css` by default). Do not edit the built-in theme CSS or the scripts; deleting
+Under `.github/tsuzuri/`, you edit only the settings file `config` and your own custom styles in
+`styles/`. Do not edit `base.css`, `default.css` or the scripts; deleting
 or changing them can make the build fail, because they *are* the build script that
 `build-docs.mjs` loads when it runs. To update the script to the latest version, see "Updating
 to the latest version (`--update`)" below.
@@ -183,18 +177,17 @@ So that it's safe to run in a repository where these files already exist, it ask
 overwrite any existing file it finds.
 
 - **The workflow and the build script** (`tsuzuri-pages.yml` and everything under
-  `.github/tsuzuri/` except `config` and your own CSS) only work when they're the same version,
+  `.github/tsuzuri/` except `config`) only work when they're the same version,
   so it asks once for all of them at the start.
 
   ```
-  The workflow and the build scripts (under .github/tsuzuri/, except config and your own CSS) already exist. Overwrite them with the latest version? (y/N):
+  The workflow and the build scripts (under .github/tsuzuri/, except config) already exist. Overwrite them with the latest version? (y/N):
   ```
 
   (Up to v1.36.0, and with `--lang ja`, the question is in Japanese:
-  `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N):`)
+  `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config を除く)は既に存在します。最新版で上書きしますか? (y/N):`)
 
-- **The settings file** (`.github/tsuzuri/config`) is asked about separately. An existing
-  custom CSS (`custom.css`) is kept without asking.
+- **The settings file** (`.github/tsuzuri/config`) is asked about separately.
 
   ```
   .github/tsuzuri/config already exists. Overwrite it? (y/N):
@@ -219,9 +212,9 @@ It asks nothing and works as follows.
 | File | With `--update` |
 |---|---|
 | `.github/workflows/tsuzuri-pages.yml` | Overwritten with the latest version |
-| Build script and built-in theme CSS under `.github/tsuzuri/` | Overwritten with the latest version (new files are added; scripts under `lib/` no longer used by the latest version are deleted). If a CSS file you added to `styles/` has the same name as a built-in theme (such as `material.css`), it is overwritten too; other CSS files in `styles/` are never deleted |
+| Build script, `base.css` and `default.css` under `.github/tsuzuri/` | Overwritten with the latest version (new files are added; scripts under `lib/` no longer used by the latest version are deleted). `default.css` is overwritten, so copy it under another name if you want to edit it; CSS files in `styles/` are never deleted |
 | `.github/tsuzuri/config` | **Not changed** (a `LANG` in a settings file created up to v1.27.0 is not rewritten to `LANGUAGES` either) |
-| Custom CSS (`.github/tsuzuri/styles/custom.css`, and other CSS files you added to `styles/`) | If `custom.css` exists, **not changed**; if it doesn't, an empty template is created |
+| Custom styles you put in `.github/tsuzuri/styles/` (the ones downloaded from the gallery, and your own) | **Not changed** (and not deleted; an old `material.css` and the like are left too) |
 
 If you run `--update` with a settings file created up to v1.27.0 (one with `LANG` but no
 `LANGUAGES`), it points out `LANGUAGES` under "Keys missing from the settings file". Without a
@@ -229,8 +222,7 @@ language the site becomes English, so for a Japanese site add `LANGUAGES=ja` and
 `LANG` line (see the [configuration reference](./configuration.md#languages)).
 
 `--lang` does not change what `--update` writes, except for one case: with `init --update --lang ja`,
-the messages are in Japanese, and an empty `custom.css` template that is created because none
-existed has Japanese comments. The workflow, `.gitignore` and `package.json` it overwrites are the
+the messages are in Japanese. The workflow, `.gitignore`, `package.json` and CSS files it overwrites are the
 same with or without `--lang`.
 
 After it runs, check the changes with `git diff` before committing and pushing. Running it in a

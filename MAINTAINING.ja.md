@@ -7,7 +7,7 @@
 
 `docs/`(と `README.md`)が、利用者向けサイトの原本です。サイトは Tsuzuri 自身で作っています。`main` にマージすると `.github/workflows/tsuzuri-pages.yml` が動き、サイトが GitHub Pages に公開されます。利用者向けドキュメントの修正も、コードと同じように `main` への PR で行います。
 
-- `.github/tsuzuri/`(ビルドスクリプト、`lib/`、組み込みテーマ CSS、`package.json`・`package-lock.json`、`.gitignore`)と `tsuzuri-pages.yml` は、リリース時の `init --update` だけで変わります(「リリース」を参照)。手で編集しないでください。ただし、action の SHA とバージョンのコメントは例外で、「依存パッケージの更新」の手順で、ほかの 3 ファイルと同時に `tsuzuri-pages.yml` も手で直します。`.github/tsuzuri/config` と `.github/tsuzuri/styles/` に置いた独自 CSS(`custom.css` や `plain.css` など)は、このサイト自身の設定で、`init --update` では変更されません。
+- `.github/tsuzuri/`(ビルドスクリプト、`lib/`、`styles/` の `base.css` と `default.css`、`package.json`・`package-lock.json`、`.gitignore`)と `tsuzuri-pages.yml` は、リリース時の `init --update` だけで変わります(「リリース」を参照)。手で編集しないでください。ただし、action の SHA とバージョンのコメントは例外で、「依存パッケージの更新」の手順で、ほかの 3 ファイルと同時に `tsuzuri-pages.yml` も手で直します。`.github/tsuzuri/config` と、`.github/tsuzuri/styles/` に置いた `default.css` 以外のカスタムスタイル(`custom.css` や `plain.css`、ギャラリーで配るスタイルの `glass.css` ほかと `none.css` など)は、このサイト自身のファイルで、`init --update` では変更されません。ギャラリーで配るカスタムスタイルの CSS は、パッケージには含めて配らないので、手で保守します(`.github/tsuzuri/` を手で編集しないという決まりの例外です)。
 - 公開は CI の成功を待ちません。マージ前のサイトの確認は、CI の `docs-build` ジョブ(公開せずにビルドだけ行う)で行います。
 
 ## リポジトリの初期設定(1 回だけ)
@@ -75,7 +75,7 @@
 手順:
 
 1. `main` で `npm test` と `npm run lint` が通り、CI が成功していることを確認する。
-2. `node scripts/check-package.mjs` を実行する。利用者が受け取るのと同じ、パッケージにまとめた中身を確かめる(内容はスクリプトの先頭のコメントを参照)。`init --update` が設定ファイル(`.github/tsuzuri/config`)と独自 CSS(`.github/tsuzuri/styles/custom.css`)を保持することも含まれる。
+2. `node scripts/check-package.mjs` を実行する。利用者が受け取るのと同じ、パッケージにまとめた中身を確かめる(内容はスクリプトの先頭のコメントを参照)。`init` が `.github/tsuzuri/styles/` に置くのは `base.css` と `default.css` だけであること、`init --update` が設定ファイル(`.github/tsuzuri/config`)と利用者が `styles/` に置いたカスタムスタイルを保持し、`default.css` を上書きすることも含まれる。
 3. タグを付ける前に `CHANGELOG.md` を書く。`[Unreleased]` に、前回のタグから今回までの利用者に見える変更をまとめる(材料は、マージした PR と `git log v<前回の版>..main`。`v<前回の版>` の部分は前回のリリースのタグにする)。カテゴリは `CHANGELOG.md` の冒頭の説明に従う。見出しを `## [X.Y.Z] - YYYY-MM-DD` に改め、その上に空の `[Unreleased]` を追加する。各リリースの節には、英語のブロック、`<!-- ja -->` の行、日本語のカテゴリ名を使った日本語のブロックの順に書く(`CHANGELOG.md` の冒頭を参照)。`scripts/release-notes.mjs` は `## [X.Y.Z]` の節が無い、または空のとき、`<!-- ja -->` の行が無いとき、どちらかのブロックが空のときにエラーで止まり、`release.yml` はタグの push のあとにこれを実行する。
 4. `docs/ai-reference.md` と `docs/ai-reference.ja.md` の対象バージョン(英語版は 13 行と 19 行、日本語版は 12 行と 18 行の `v1.37.0`)を、新しい版に更新する。`CHANGELOG.md` と同じコミットでかまいません。本文中の例(`#v1.36.0` など。英語版は 74・78・809 行、日本語版は 70・73・739 行付近)は例示なので、実在する版であれば更新は任意です。
 5. `package.json` と `package-lock.json` の `version` を `X.Y.Z` にする(先頭の `version` と `packages[""].version`。依存パッケージの版は変えない)。

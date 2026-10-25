@@ -1,17 +1,18 @@
 ---
 title: エディトリアル(editorial)
-theme: editorial
+theme: editorial.css
 styleFile: plain.css
-description: Tsuzuriの組み込みテーマ「エディトリアル(editorial)」の見本ページ
+description: カスタムスタイル「エディトリアル(editorial)」の見本ページ
 ---
 
 # エディトリアル(editorial)
 
 雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色。
 
-このテーマをサイト全体で使うには、`.github/tsuzuri/config`で`THEME=editorial`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: editorial`と書きます
-([テーマ・スタイル](../theming.ja.md)参照)。
+使うには、[ギャラリー](../gallery.ja.md#エディトリアルeditorial)で`editorial.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+`.github/tsuzuri/config`で`THEME=editorial.css`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: editorial.css`と書きます
+([スタイル(Theming)](../theming.ja.md)参照)。
 
 [← ニューモーフィズム(neumorphism)](neumorphism.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [ミニマル(minimal) →](minimal.ja.md)
 
@@ -36,7 +37,7 @@ description: Tsuzuriの組み込みテーマ「エディトリアル(editorial)�
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `material` | 組み込みテーマ名 |
+| `THEME` | `default.css` | カスタムスタイルのファイル名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANGUAGES` | `en` | サイトの言語(`<html lang>`の値) |
 

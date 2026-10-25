@@ -11,11 +11,11 @@
  * 処理の順序(実際のセクション見出しに合わせた概要):
  *   - OUT_DIR・ROOT_MD の確認(不正・不在なら console.error + 致命的エラー・終了コード1)
  *   - ${styleDir}/base.css の読み込み(不在なら致命的エラー。OSS本体自身の欠陥であり
- *     利用者側の設定ミスではないため STYLE_FILE 不在時とは扱いを分ける)
- *   - THEME !== "none" なら ${styleDir}/${theme}.css の読み込み
- *     (不在なら console.warn + themeCss="" にフォールバック。fail-open)
+ *     利用者側の設定ミスではないため THEME 不在時とは扱いを分ける)
+ *   - THEME(サイト全体のカスタムスタイル)の ${VENDOR_DIR}/styles/${theme} の読み込み
+ *     (不在なら console.warn + ベースだけにフォールバック。fail-open。STYLE_DIR には影響されない)
  *   - crawler.crawlSite() と、翻訳の対応表の作成
- *   - STYLE_FILE / FAVICON_FILE の読み込み(不在なら console.warn のみ・非致命的)
+ *   - FAVICON_FILE の読み込み(不在なら console.warn のみ・非致命的)
  *   - llms.txt の扱い(コピー・自動生成・なし)の決定
  *   - 出力ディレクトリの準備(目印のある前回の出力を消す・.nojekyll・CNAME・favicon のコピー)
  *   - 各ページの HTML 生成と書き出し(見出しid付与。ROOT_MD と各ディレクトリの README.md は
@@ -34,7 +34,7 @@
  *   main() 全体を呼び出し元(本ファイル末尾)で catch し、未分類の例外は
  *   「ビルド中に予期しないエラーが発生しました」+ err.message を出力してから
  *   終了コード1で終了する。ROOT_MD 不在・base.css 不在のみ main() 内部で
- *   個別に致命的エラーとして扱う。STYLE_FILE/FAVICON_FILE/THEME本体の不在・
+ *   個別に致命的エラーとして扱う。FAVICON_FILE/THEME(カスタムスタイル)の不在・
  *   missing link・rejected link は非致命的(warn継続)。
  */
 
@@ -48,7 +48,6 @@ import hljs from "highlight.js/lib/common";
 
 import {
   loadConfig,
-  ALLOWED_THEMES,
   parseConfigText,
   withConfigFileDefaults,
   VENDOR_DIR,
@@ -127,7 +126,7 @@ export function removeCjkLineBreaks(html) {
 
 // 手元でビルドするときの環境変数。GitHub Actions の外では、
 //   - .github/tsuzuri/config の値を、環境変数で指定していないキーの既定値にする
-//   - STYLE_DIR を指定せず、init でコピーしたテーマCSS(.github/tsuzuri/styles)があればそれを使う
+//   - STYLE_DIR を指定せず、init でコピーしたベース(.github/tsuzuri/styles/base.css)があればそれを使う
 // ことで、公開サイトと同じ設定でプレビューできるようにする。
 function localBuildEnv(env, repoRoot) {
   if (env.GITHUB_ACTIONS === "true") return env;
@@ -203,7 +202,7 @@ async function main() {
 
   // ---------- 2. base.css 読み込み(必須・致命的) ----------
   // OSS本体自身が同梱すべきファイルであるため、不在は利用者の設定ミスではなく
-  // パッケージ自体の欠陥として扱う(STYLE_FILE/テーマ本体の不在とは扱いを分ける)。
+  // パッケージ自体の欠陥として扱う(THEME のカスタムスタイルの不在とは扱いを分ける)。
   const baseCssAbs = path.resolve(REPO_ROOT, config.styleDir, "base.css");
   if (!fs.existsSync(baseCssAbs)) {
     console.error(
@@ -213,85 +212,53 @@ async function main() {
   }
   const baseCss = fs.readFileSync(baseCssAbs, "utf-8");
 
-  // ---------- 3. THEME CSS 読み込み(非致命的・fail-open) ----------
-  let themeCss = "";
-  if (config.theme !== "none") {
-    const themeCssAbs = path.resolve(REPO_ROOT, config.styleDir, `${config.theme}.css`);
-    if (fs.existsSync(themeCssAbs)) {
-      themeCss = fs.readFileSync(themeCssAbs, "utf-8");
-    } else {
-      console.warn(
-        `[build-docs] ${config.styleDir}/${config.theme}.css was not found. Continuing the build without a theme (base.css only).`
-      );
-      themeCss = "";
+  // ---------- 3. カスタムスタイル(THEME・frontmatter の theme)の読み込み ----------
+  // ${VENDOR_DIR}/styles/ の中の ○○.css(STYLE_DIR には影響されない。STYLE_DIR はベースの場所だけ)。
+  // リポジトリ外を指すシンボリックリンクは読まない。結果は名前ごとにキャッシュする(警告は呼び出しごとに出す)。
+  const styleCache = new Map(); // ファイル名 -> { style: { css, rel } | null, problem: "outside" | "missing" | null }
+  function loadCustomStyle(name) {
+    if (!styleCache.has(name)) {
+      const rel = styleFilePath(name);
+      const abs = resolveInsideRepo(REPO_ROOT, rel);
+      let result;
+      if (!abs) result = { style: null, problem: "outside" };
+      else if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) result = { style: null, problem: "missing" };
+      else result = { style: { css: fs.readFileSync(abs, "utf-8"), rel }, problem: null };
+      styleCache.set(name, result);
     }
+    return styleCache.get(name);
   }
+  // サイト全体(config.theme は config.mjs が検査済み)。読めないときは警告して、ベースだけで続ける
+  const siteLoaded = loadCustomStyle(config.theme);
+  if (siteLoaded.problem === "outside") {
+    console.warn(`[build-docs] THEME ("${config.theme}") points outside the repository, so it is ignored. Continuing the build with base.css only.`);
+  } else if (siteLoaded.problem === "missing") {
+    console.warn(
+      `[build-docs] THEME ("${config.theme}") was not found (${styleFilePath(config.theme)}). Continuing the build with base.css only.`
+    );
+  }
+  const siteStyle = siteLoaded.style ?? { css: "", rel: "" };
+  if (siteLoaded.style) console.log(`Custom style loaded: ${siteStyle.rel}`);
 
-  // ---------- 3.5 ページ単位のテーマ上書き(frontmatter `theme`)解決 ----------
-  // frontmatterの `theme` キーは、値の終わりで見分ける:
-  //   - ".css" で終わる(大文字・小文字は区別しない) → 独自CSSのファイル名。ファイル名だけを書き、
-  //     ${VENDOR_DIR}/styles/ の中のファイルを読み込む(isStyleFileName を満たさない値は使わない)。
-  //   - それ以外 → 組み込みテーマ名(config.mjs の ALLOWED_THEMES)。${config.styleDir}/${theme}.css を
-  //     読み込む(サイト全体のTHEMEと同じ解決方法)。組み込みテーマ名の中に ".css" で終わるものは無い。
-  // どちらも使えない場合(不正な値・ファイル不在等)は console.warn した上で、
-  // サイト全体のTHEME(themeCss)にフォールバックする(既存のfail-open方針を踏襲)。
-  // 同じ指定が複数ページで使われるケースに備え、指定ごとに読み込み結果をキャッシュする。
-  const pageThemeCssCache = new Map(); // "builtin:material" | "file:my-theme.css" -> css文字列
-  function resolveThemeCssForPage(rel, rawThemeSpec) {
-    if (typeof rawThemeSpec !== "string") return themeCss;
+  // ページ単位(frontmatter の theme)。サイト全体のカスタムスタイルを置き換える(混ぜない)。
+  // 使えない値・読めない場合は警告して、サイト全体のものに戻す。
+  const siteBack = `Using the site-wide custom style (THEME "${config.theme}") instead.`;
+  function resolveStyleForPage(rel, rawThemeSpec) {
+    if (typeof rawThemeSpec !== "string" || !rawThemeSpec.trim()) return siteStyle;
     const spec = rawThemeSpec.trim();
-    if (!spec) return themeCss;
-
-    if (!/\.css$/i.test(spec)) {
-      if (!ALLOWED_THEMES.includes(spec)) {
-        console.warn(
-          `[build-docs] ${rel}: the theme "${spec}" given in the frontmatter is neither a built-in theme name (${ALLOWED_THEMES.join(
-            "/"
-          )}) nor a CSS file name ending in .css. Falling back to the site-wide THEME ("${config.theme}").`
-        );
-        return themeCss;
-      }
-      if (spec === "none") return "";
-      const cacheKey = `builtin:${spec}`;
-      if (pageThemeCssCache.has(cacheKey)) return pageThemeCssCache.get(cacheKey);
-      const abs = path.resolve(REPO_ROOT, config.styleDir, `${spec}.css`);
-      if (!fs.existsSync(abs)) {
-        console.warn(
-          `[build-docs] ${rel}: the CSS (${config.styleDir}/${spec}.css) for the theme "${spec}" given in the frontmatter was not found. Falling back to the site-wide THEME ("${config.theme}").`
-        );
-        return themeCss;
-      }
-      const css = fs.readFileSync(abs, "utf-8");
-      pageThemeCssCache.set(cacheKey, css);
-      return css;
-    }
-
-    // ".css" で終わる → ${VENDOR_DIR}/styles/ の中の独自CSSファイル。リポジトリ外を指す
-    // シンボリックリンクのファイルは読み込まない。
     if (!isStyleFileName(spec)) {
       console.warn(
-        `[build-docs] ${rel}: the theme "${spec}" given in the frontmatter cannot be used as a CSS file name (write only a file name that has no /, \\ or :, does not start with ., and ends in .css). Falling back to the site-wide THEME ("${config.theme}").`
+        `[build-docs] ${rel}: the theme "${spec}" given in the frontmatter cannot be used as a custom style (write only a file name that has no /, \\ or :, does not start with ., and ends in .css). ${siteBack}`
       );
-      return themeCss;
+      return siteStyle;
     }
-    const cacheKey = `file:${spec}`;
-    if (pageThemeCssCache.has(cacheKey)) return pageThemeCssCache.get(cacheKey);
-    const abs = resolveInsideRepo(REPO_ROOT, styleFilePath(spec));
-    if (!abs) {
-      console.warn(
-        `[build-docs] ${rel}: the theme "${spec}" given in the frontmatter points outside the repository, so it is ignored. Falling back to the site-wide THEME ("${config.theme}").`
-      );
-      return themeCss;
+    const { style, problem } = loadCustomStyle(spec);
+    if (problem === "outside") {
+      console.warn(`[build-docs] ${rel}: the theme "${spec}" given in the frontmatter points outside the repository, so it is ignored. ${siteBack}`);
+    } else if (problem === "missing") {
+      console.warn(`[build-docs] ${rel}: the custom style (${styleFilePath(spec)}) for the theme "${spec}" given in the frontmatter was not found. ${siteBack}`);
     }
-    if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
-      console.warn(
-        `[build-docs] ${rel}: the file (${styleFilePath(spec)}) for the theme "${spec}" given in the frontmatter was not found. Falling back to the site-wide THEME ("${config.theme}").`
-      );
-      return themeCss;
-    }
-    const css = fs.readFileSync(abs, "utf-8");
-    pageThemeCssCache.set(cacheKey, css);
-    return css;
+    return style ?? siteStyle;
   }
 
   // ---------- 4. crawlSite ----------
@@ -386,52 +353,7 @@ async function main() {
     }
   }
 
-  // ---------- 5. STYLE_FILE / FAVICON_FILE 読み込み(非致命的) ----------
-  // STYLE_FILE はファイル名だけ(config.mjs が検査済み。使えない値は "" になっている)。
-  // 実際のファイルは ${VENDOR_DIR}/styles/ の中。customStyleRel はそのリポジトリの直下からのパス(使わないときは "")
-  const customStyleRel = config.styleFile ? styleFilePath(config.styleFile) : "";
-  let customCss = "";
-  if (customStyleRel) {
-    const styleAbs = resolveInsideRepo(REPO_ROOT, customStyleRel);
-    if (!styleAbs) {
-      console.warn(`STYLE_FILE (${config.styleFile}) points outside the repository, so it is ignored.`);
-    } else if (fs.existsSync(styleAbs)) {
-      customCss = fs.readFileSync(styleAbs, "utf-8");
-      console.log(`Custom style loaded: ${customStyleRel}`);
-    } else {
-      // 独自CSSは任意なので、無くても警告にはしない
-      console.log(`Custom style file not used (${customStyleRel} does not exist).`);
-    }
-  }
-
-  // ページ単位の独自CSS(frontmatter `styleFile`。STYLE_FILE と同じく、${VENDOR_DIR}/styles/ の中のファイル名だけ)。
-  // 指定したページでは、サイト全体の STYLE_FILE の代わりにこのファイルを3層目として使う(中身が空のファイルを
-  // 指定すれば、そのページには独自CSSを当てない)。使えない値・読めない場合は警告して、サイト全体の STYLE_FILE を使う。
-  const pageStyleCache = new Map(); // 指定 -> { css, rel } | null
-  function resolveCustomStyleForPage(rel, rawSpec) {
-    if (typeof rawSpec !== "string" || !rawSpec.trim()) return { css: customCss, rel: customStyleRel };
-    const spec = rawSpec.trim();
-    if (!pageStyleCache.has(spec)) {
-      let loaded = null;
-      if (!isStyleFileName(spec)) {
-        console.warn(
-          `[build-docs] ${rel}: the styleFile "${spec}" in the frontmatter cannot be used as a CSS file name (write only a file name that has no /, \\ or :, does not start with ., and ends in .css). Using the site-wide STYLE_FILE.`
-        );
-      } else {
-        const specRel = styleFilePath(spec);
-        const abs = resolveInsideRepo(REPO_ROOT, specRel);
-        if (!abs) {
-          console.warn(`[build-docs] ${rel}: the styleFile "${spec}" in the frontmatter points outside the repository, so it is ignored.`);
-        } else if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
-          console.warn(`[build-docs] ${rel}: the styleFile "${spec}" in the frontmatter was not found. Using the site-wide STYLE_FILE.`);
-        } else {
-          loaded = { css: fs.readFileSync(abs, "utf-8"), rel: specRel };
-        }
-      }
-      pageStyleCache.set(spec, loaded);
-    }
-    return pageStyleCache.get(spec) ?? { css: customCss, rel: customStyleRel };
-  }
+  // ---------- 5. FAVICON_FILE 読み込み(非致命的) ----------
 
   // faviconも画像(imageSet)と同様に、リポジトリルートからの相対パス構造を
   // 維持したまま OUT_DIR 配下にコピーする。ベースネームのみでコピーすると、
@@ -853,7 +775,7 @@ async function main() {
 
   // ページのCSSは、内容ごとに1つのファイル(tsuzuri-<内容のハッシュ>.css)に書き出して <link> で読み込む。
   // 全ページで同じファイルを使うのでブラウザのキャッシュが効き、内容が変わればファイル名も変わる。
-  // (ページごとに theme・styleFile を変えたページは、その組み合わせのファイルを使う)
+  // (ページごとに theme を変えたページは、そのカスタムスタイルのファイルを使う)
   const stylesheets = new Map(); // css -> href
   function stylesheetFor(css) {
     if (!stylesheets.has(css)) {
@@ -1108,13 +1030,8 @@ async function main() {
         })
       : "";
 
-    const pageStyle = resolveCustomStyleForPage(rel, meta.styleFile);
-    const css = composeCss({
-      baseCss,
-      themeCss: resolveThemeCssForPage(rel, meta.theme),
-      customCss: pageStyle.css,
-      styleFileRel: pageStyle.rel,
-    });
+    const pageStyle = resolveStyleForPage(rel, meta.theme);
+    const css = composeCss({ baseCss, customCss: pageStyle.css, styleFileRel: pageStyle.rel });
     return pageTemplate({
       title,
       body: bodyHtml,
@@ -1375,8 +1292,6 @@ async function main() {
     const sitemap = buildSitemap({
       root: siteRootRel,
       basePath: config.basePath,
-      styleFile: customStyleRel,
-      customStyleApplied: Boolean(customCss),
       visitedMd,
       imageSet,
       fileSet,

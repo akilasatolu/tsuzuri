@@ -1,16 +1,17 @@
 ---
 title: 90s (nineties)
-theme: nineties
+theme: nineties.css
 styleFile: plain.css
-description: A sample page of Tsuzuri's built-in theme "90s (nineties)"
+description: A sample page of the custom style "90s (nineties)"
 ---
 
 # 90s (nineties)
 
 90s nostalgia. A Windows 95-style teal desktop with gray windows and raised buttons. Light only.
 
-To use this theme for the whole site, set `THEME=nineties` in `.github/tsuzuri/config`.
-To use it for a single page, write `theme: nineties` in that page's frontmatter
+To use it, download `nineties.css` from the [gallery](../gallery.md#90s-nineties), put it in `.github/tsuzuri/styles/`,
+and set `THEME=nineties.css` in `.github/tsuzuri/config`.
+To use it for a single page only, write `theme: nineties.css` in that page's frontmatter
 (see [Theming](../theming.md)).
 
 [← Blueprint (blueprint)](blueprint.md) · [Gallery](../gallery.md) · [No decoration (none) →](none.md)
@@ -36,7 +37,7 @@ This is also where you can check the line spacing and readability of longer pass
 
 | Setting | Default | Description |
 |---|---|---|
-| `THEME` | `material` | The built-in theme name |
+| `THEME` | `default.css` | The custom style file name |
 | `NAV_ENABLED` | `false` | Whether to show the navigation |
 | `LANGUAGES` | `en` | The site language (the value of `<html lang>`) |
 

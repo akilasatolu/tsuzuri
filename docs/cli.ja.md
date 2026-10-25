@@ -35,11 +35,10 @@ npx github:akilasatolu/tsuzuri#v1 init
 | `-y`, `--yes` | 対話なしで、すべて既定値で生成する |
 | `--branch <名前>` | トリガーブランチ(`TRIGGER_BRANCH`)。既定: リポジトリの既定ブランチ(`origin`の既定ブランチ。分からなければ`main`。v1.3.0以前は今のブランチになることがある) |
 | `--root <パス>` | 起点となるMarkdownファイル(`ROOT_MD`)。既定: `README.md` |
-| `--theme <名前>` | テーマ(`THEME`)。`material` / `glass` / `neumorphism` / `editorial` / `minimal` / `kintsugi` / `blueprint` / `nineties` / `none`。既定: `material` |
 | `--languages <一覧>` | サイトの言語(`LANGUAGES`)。カンマ区切りで、先頭が基本言語(例: `ja`・`ja,en`)。既定: `en`(v1.28.0以降) |
 | `--site-name <名前>` | サイト名(`SITE_NAME`)。既定: 空(ビルド時にリポジトリ名になる) |
 | `--no-nav` | ナビ・サイト内検索・目次を表示しない(`NAV_ENABLED=false`)。既定: 表示する |
-| `--lang <en\|ja>` | 表示するメッセージと、生成する設定ファイル・独自CSSのひな形のコメントの言語(v1.37.0以降)。既定: `en`。質問は省略しない |
+| `--lang <en\|ja>` | 表示するメッセージと、生成する設定ファイルのコメントの言語(v1.37.0以降)。既定: `en`。質問は省略しない |
 | `--force` | 対話なしのとき、既存ファイルも上書きする |
 | `--port <番号>` | `preview`で使うポート番号。既定: `4000` |
 | `--no-watch` | `preview`で、ファイルの変更を見張らない(自動でビルドし直さない) |
@@ -47,17 +46,17 @@ npx github:akilasatolu/tsuzuri#v1 init
 | `-v`, `--version` | バージョンを表示する |
 | `-h`, `--help` | 使い方を表示する |
 
-`--yes`・`--branch`・`--root`・`--theme`・`--languages`・`--site-name`・`--no-nav`のいずれかを付けると、質問せずに生成します
+`--yes`・`--branch`・`--root`・`--languages`・`--site-name`・`--no-nav`のいずれかを付けると、質問せずに生成します
 (スクリプトやCIから実行する場合に使えます)。このとき、既に存在するファイルは上書きせずに
-スキップします。上書きしたい場合は`--force`を付けてください。設定ファイル`.github/tsuzuri/config`も上書きされます(設定が、生成される内容に置き換わります)。既にある`custom.css`だけは、`--force`でも上書きしません。
+スキップします。上書きしたい場合は`--force`を付けてください。設定ファイル`.github/tsuzuri/config`も上書きされます(設定が、生成される内容に置き換わります)。`.github/tsuzuri/styles/`に自分で置いたカスタムスタイルは、`init`が作るものではないので、上書きされません。
 
 ```
-npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --theme nineties --languages ja
+npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs --languages ja
 ```
 
 `init`と`preview`のメッセージは英語で表示されます(v1.37.0以降。v1.36.0までは日本語でした)。日本語で
 表示したいときは、`npx github:akilasatolu/tsuzuri#v1 init --lang ja`のように、コマンドに`--lang ja`を付けます。
-`init`が作る設定ファイルと独自CSSのひな形のコメントも日本語になります。値は`en`と`ja`(小文字)だけで、
+`init`が作る設定ファイルのコメントも日本語になります。値は`en`と`ja`(小文字)だけで、
 付けたコマンドのときだけ有効です。サイトの言語(`LANGUAGES`。[configuration.md](./configuration.ja.md#languages)参照)とは別のものです。
 `init`が生成するワークフローと`.gitignore`は、常に英語です。
 
@@ -108,24 +107,22 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
      それも分からなければ`main`です。
 2. **起点となるMarkdownファイル(`ROOT_MD`)** `[README.md]`
    - サイトの入り口となるMarkdownファイルのパスです。未入力なら`README.md`になります。
-3. **テーマ(`THEME`)の選択**
-   - `material`(マテリアル・推奨)/`glass`(グラス)/`neumorphism`(ニューモーフィズム)/`editorial`(エディトリアル)/`minimal`(ミニマル)/`kintsugi`(金継ぎ)/`blueprint`(ブループリント)/`nineties`(90年代)/`none`(装飾なし)の
-     9択が番号(1〜9)付きで表示されるので、番号を入力します。未入力なら`1`(`material`)になります。
-   - テーマの見た目の詳細は[theming.md](./theming.ja.md)を参照してください。
-4. **ナビを表示するか(`NAV_ENABLED`)(Y/n)**(v1.7.0以降)
+3. **ナビを表示するか(`NAV_ENABLED`)(Y/n)**(v1.7.0以降)
    - サイドバーのナビ・サイト内検索・ページ内の目次・前後のページへのリンクを表示するかどうかです。
      未入力(または`y`)なら表示します。
-5. **サイトの言語(`LANGUAGES`)** `[en]`(v1.28.0以降)
+4. **サイトの言語(`LANGUAGES`)** `[en]`(v1.28.0以降)
    - サイトの言語を、カンマ区切りで入力します。先頭はREADMEの言語(基本言語)にします。
      READMEが日本語なら`ja`、日本語と英語のサイトにするなら`ja,en`です。入力した順のまま設定ファイルに
      書かれます。未入力なら`en`(英語)になります。
    - 言語タグとして正しくない値(例: `ja_JP`)は、警告を出したうえで無視されます(正しい値が残らなければ`en`)。
    - 多言語のサイトの作り方は[多言語サイト](./i18n.ja.md)を参照してください。
-6. **サイト名(`SITE_NAME`)**(v1.7.0以降)
+5. **サイト名(`SITE_NAME`)**(v1.7.0以降)
    - ナビの見出しやSNSでのシェアに使うサイト名です。未入力ならビルド時にリポジトリ名になります。
      サイト名はすべての言語で共通です。
 
-質問は以上の6つです。独自CSSの空のひな形(`.github/tsuzuri/styles/custom.css`)は、質問なしで必ず作られます(既にあれば上書きしません)。
+質問は以上の5つです。見た目についての質問はありません。設定ファイルは`THEME=default.css`(パッケージに入っている標準の
+カスタムスタイル)で始まります。ほかのカスタムスタイルを使うときは、[ギャラリー](./gallery.ja.md)でダウンロードして、
+そのファイル名を`THEME`に書きます([スタイル(Theming)](./theming.ja.md)参照)。
 
 ## 生成されるファイル
 
@@ -134,16 +131,15 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 | ファイル | 常に生成されるか | 内容 |
 |---|---|---|
 | `.github/workflows/tsuzuri-pages.yml` | 常に生成 | ビルド・デプロイの手順を直接持つ、自己完結型のワークフロー(以前のように`build.yml`を`uses:`で呼び出すことはしない) |
-| `.github/tsuzuri/config` | 常に生成 | `TRIGGER_BRANCH`/`ROOT_MD`/`THEME`/`NAV_ENABLED`/`LANGUAGES`/`SITE_NAME`は回答内容を反映し、それ以外のキーは既定値で出力される設定ファイル。利用者が編集するファイル |
+| `.github/tsuzuri/config` | 常に生成 | `TRIGGER_BRANCH`/`ROOT_MD`/`NAV_ENABLED`/`LANGUAGES`/`SITE_NAME`は回答内容を反映し、それ以外のキー(`THEME=default.css`を含む)は既定値で出力される設定ファイル。利用者が編集するファイル |
 | `.github/tsuzuri/build-docs.mjs` | 常に生成 | ビルド本体のスクリプト(OSS本体リポジトリの`.github/scripts/build-docs.mjs`と同一内容) |
 | `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/copy-button/crawler/emoji/emoji-data/frontmatter/html-renderer/i18n/image-size/link-extractor/llms-txt/path-utils/search/site-tree/sitemap/slugger/theme-toggle の17ファイル) |
-| `.github/tsuzuri/styles/*.css` | 常に生成 | 組み込みテーマ(`base.css`+`material`/`glass`/`neumorphism`/`editorial`/`minimal`/`kintsugi`/`blueprint`/`nineties`)のCSS一式。frontmatterの`theme`キー([参照](./frontmatter.ja.md#theme))で選択中以外のテーマを使う場合に備え、常に全テーマ分コピーされる |
+| `.github/tsuzuri/styles/base.css`・`default.css` | 常に生成 | ベースCSS(`base.css`)と、標準のカスタムスタイル(`default.css`)。置かれるのはこの2つだけで、ほかのカスタムスタイルは配布せず、[ギャラリー](./gallery.ja.md)でダウンロードして使う |
 | `.github/tsuzuri/package.json`・`package-lock.json` | 常に生成(v1.7.0以降) | ビルド用の依存(marked など)の版と、ダウンロードした中身を確かめるハッシュ。ワークフローと`preview`はこのとおりに`npm ci`でインストールする |
 | `.github/tsuzuri/.gitignore` | 常に生成 | 手元でプレビューするときにインストールする依存(`node_modules/`)をコミットしないための設定 |
-| `.github/tsuzuri/styles/custom.css` | 常に生成(既にあれば上書きしない。`--force`でも) | コメントのみの空の独自CSSひな形。組み込みテーマCSSと同じディレクトリに置かれる。`STYLE_FILE`の既定の`custom.css`がこのファイル。利用者が編集するファイル(同じ場所に別のCSSファイルを足してもよい) |
 
-`.github/tsuzuri/`配下で編集してよいのは、設定ファイル`config`と、`styles/`に置く独自CSS
-(既定は`custom.css`)だけです。組み込みのテーマCSSとスクリプトは、`build-docs.mjs`実行時に
+`.github/tsuzuri/`配下で編集してよいのは、設定ファイル`config`と、`styles/`に置く自分のカスタムスタイル
+だけです。`base.css`・`default.css`とスクリプトは、`build-docs.mjs`実行時に
 読み込まれる「ビルドスクリプト本体そのもの」なので、編集しないでください(削除・改変すると
 ビルドが失敗することがあります)。スクリプトを最新版に更新したい場合は、
 後述の「最新版に更新する(`--update`)」を参照してください。
@@ -166,17 +162,17 @@ LANGUAGES=ja
 場合は上書きするかどうかを確認します。
 
 - **ワークフローとビルドスクリプト一式**(`tsuzuri-pages.yml`と、`.github/tsuzuri/`配下の
-  `config`と独自CSSを除くファイル)は、同じバージョンでそろっていないと動かないため、
+  `config`を除くファイル)は、同じバージョンでそろっていないと動かないため、
   最初に1回だけまとめて確認します。
 
   ```
-  The workflow and the build scripts (under .github/tsuzuri/, except config and your own CSS) already exist. Overwrite them with the latest version? (y/N):
+  The workflow and the build scripts (under .github/tsuzuri/, except config) already exist. Overwrite them with the latest version? (y/N):
   ```
 
   (v1.36.0までと、`--lang ja`のときは、日本語で表示されます:
-  `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config と独自 CSS を除く)は既に存在します。最新版で上書きしますか? (y/N):`)
+  `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config を除く)は既に存在します。最新版で上書きしますか? (y/N):`)
 
-- **設定ファイル**(`.github/tsuzuri/config`)は、ファイルごとに確認します。独自CSS(`custom.css`)は、既にあれば確認せずに残します。
+- **設定ファイル**(`.github/tsuzuri/config`)は、ファイルごとに確認します。
 
   ```
   .github/tsuzuri/config already exists. Overwrite it? (y/N):
@@ -200,18 +196,17 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 | ファイル | `--update`での扱い |
 |---|---|
 | `.github/workflows/tsuzuri-pages.yml` | 最新版で上書き |
-| `.github/tsuzuri/`配下のビルドスクリプト・組み込みテーマCSS | 最新版で上書き(新しく増えたファイルは追加。最新版で使われなくなった`lib/`配下のスクリプトは削除)。`styles/`に足した独自CSSが組み込みテーマと同じ名前(`material.css`など)だと、それも上書きされる。それ以外の`styles/`のCSSは削除されない |
+| `.github/tsuzuri/`配下のビルドスクリプト・`base.css`・`default.css` | 最新版で上書き(新しく増えたファイルは追加。最新版で使われなくなった`lib/`配下のスクリプトは削除)。`default.css`は上書きされるので、編集したいときは別の名前にコピーする。`styles/`のCSSは削除されない |
 | `.github/tsuzuri/config` | **変更しない**(v1.27.0までに作った設定ファイルの`LANG`も、`LANGUAGES`に書き換えない) |
-| 独自CSS(`.github/tsuzuri/styles/custom.css`と、`styles/`に足したほかのCSS) | `custom.css`が既にあれば**変更しない**。無ければ空のひな形を作る |
+| `styles/`に自分で置いたカスタムスタイル(ギャラリーからダウンロードしたものや、自作のもの) | **変更しない**(削除もしない。昔の`material.css`などもそのまま残る) |
 
 v1.27.0までに作った設定ファイル(`LANG`だけで`LANGUAGES`が無いもの)で`--update`すると、
 「Keys missing from the settings file」(設定ファイルに無い項目。`--lang ja`なら「設定ファイルに無い項目があります」)として`LANGUAGES`が案内されます。言語を書かないとサイトは英語になる
 ので、日本語のサイトなら`LANGUAGES=ja`を書き足し、`LANG`の行は消してください
 ([configuration.md](./configuration.ja.md#languages)参照)。
 
-`--lang`は`--update`が書く内容を変えません。例外は1つで、`init --update --lang ja`のときは、メッセージが日本語になり、
-`custom.css`が無くて空のひな形を作る場合に限り、そのひな形のコメントが日本語になります。上書きされるワークフロー・
-`.gitignore`・`package.json`は、`--lang`の有無で変わりません。
+`--lang`は`--update`が書く内容を変えません。例外は1つで、`init --update --lang ja`のときは、メッセージが日本語になります。
+上書きされるワークフロー・`.gitignore`・`package.json`・CSSは、`--lang`の有無で変わりません。
 
 実行後、`git diff`で変更内容を確認してからコミット・pushしてください。
 `.github/tsuzuri/config`が無いリポジトリ(まだ`init`していない)で実行すると、

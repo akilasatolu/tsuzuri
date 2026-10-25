@@ -1,17 +1,18 @@
 ---
 title: ミニマル(minimal)
-theme: minimal
+theme: minimal.css
 styleFile: plain.css
-description: Tsuzuriの組み込みテーマ「ミニマル(minimal)」の見本ページ
+description: カスタムスタイル「ミニマル(minimal)」の見本ページ
 ---
 
 # ミニマル(minimal)
 
 Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青。
 
-このテーマをサイト全体で使うには、`.github/tsuzuri/config`で`THEME=minimal`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: minimal`と書きます
-([テーマ・スタイル](../theming.ja.md)参照)。
+使うには、[ギャラリー](../gallery.ja.md#ミニマルminimal)で`minimal.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+`.github/tsuzuri/config`で`THEME=minimal.css`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: minimal.css`と書きます
+([スタイル(Theming)](../theming.ja.md)参照)。
 
 [← エディトリアル(editorial)](editorial.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [金継ぎ(kintsugi) →](kintsugi.ja.md)
 
@@ -36,7 +37,7 @@ Vercel や Linear のドキュメントのような、白・黒・グレーだ�
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `material` | 組み込みテーマ名 |
+| `THEME` | `default.css` | カスタムスタイルのファイル名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANGUAGES` | `en` | サイトの言語(`<html lang>`の値) |
 

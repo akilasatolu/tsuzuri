@@ -1,17 +1,18 @@
 ---
 title: ブループリント(blueprint)
-theme: blueprint
+theme: blueprint.css
 styleFile: plain.css
-description: Tsuzuriの組み込みテーマ「ブループリント(blueprint)」の見本ページ
+description: カスタムスタイル「ブループリント(blueprint)」の見本ページ
 ---
 
 # ブループリント(blueprint)
 
 設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示。
 
-このテーマをサイト全体で使うには、`.github/tsuzuri/config`で`THEME=blueprint`を指定します。
-1ページだけ使う場合は、そのページのfrontmatterに`theme: blueprint`と書きます
-([テーマ・スタイル](../theming.ja.md)参照)。
+使うには、[ギャラリー](../gallery.ja.md#ブループリントblueprint)で`blueprint.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+`.github/tsuzuri/config`で`THEME=blueprint.css`を指定します。
+1ページだけ使う場合は、そのページのfrontmatterに`theme: blueprint.css`と書きます
+([スタイル(Theming)](../theming.ja.md)参照)。
 
 [← 金継ぎ(kintsugi)](kintsugi.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [90年代(nineties) →](nineties.ja.md)
 
@@ -36,7 +37,7 @@ description: Tsuzuriの組み込みテーマ「ブループリント(blueprint)�
 
 | 設定キー | 既定値 | 説明 |
 |---|---|---|
-| `THEME` | `material` | 組み込みテーマ名 |
+| `THEME` | `default.css` | カスタムスタイルのファイル名 |
 | `NAV_ENABLED` | `false` | ナビゲーションの表示 |
 | `LANGUAGES` | `en` | サイトの言語(`<html lang>`の値) |
 

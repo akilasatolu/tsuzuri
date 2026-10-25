@@ -23,21 +23,23 @@ order: 1
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-実行すると、トリガーブランチ・起点となるMarkdownファイル・テーマ・ナビの表示・サイトの言語・
-サイト名について、6つの質問が対話形式で表示されます。すべてEnterキーだけで既定値
-(リポジトリの既定ブランチ・`README.md`・マテリアルテーマ・ナビを表示・英語(`en`)・リポジトリ名)を
-選ぶこともできます。空の独自CSSひな形は、質問なしで必ず作られます。READMEが日本語なら、サイトの言語の質問には`ja`と答えてください。
+実行すると、トリガーブランチ・起点となるMarkdownファイル・ナビの表示・サイトの言語・
+サイト名について、5つの質問が対話形式で表示されます。すべてEnterキーだけで既定値
+(リポジトリの既定ブランチ・`README.md`・ナビを表示・英語(`en`)・リポジトリ名)を
+選ぶこともできます。見た目は質問されず、設定ファイルは、パッケージに入っている標準のカスタムスタイル
+`THEME=default.css`で始まります。READMEが日本語なら、サイトの言語の質問には`ja`と答えてください。
 対話フローの詳細は[cli.md](./cli.ja.md)を参照してください。
 
 このコマンドにより、ワークフロー・設定ファイルに加えて、ビルドスクリプト本体一式が
 リポジトリに生成されます。
 
 - `.github/workflows/tsuzuri-pages.yml`
-- `.github/tsuzuri/`(利用者が編集する設定ファイル`config`と、ビルドスクリプト本体一式。`build-docs.mjs`・`lib/*.mjs`・`styles/*.css`と、ビルド用の依存を固定する`package.json`・`package-lock.json`、`.gitignore`)
-- `.github/tsuzuri/styles/custom.css`(組み込みテーマCSSと同じディレクトリに置かれる、空の独自CSSひな形。既にあれば上書きしません)
+- `.github/tsuzuri/`(利用者が編集する設定ファイル`config`と、ビルドスクリプト本体一式。`build-docs.mjs`・`lib/*.mjs`・`styles/base.css`と`styles/default.css`、ビルド用の依存を固定する`package.json`・`package-lock.json`、`.gitignore`)
 
-`.github/tsuzuri/`配下で編集してよいのは、設定ファイル`config`と、`styles/`に置く独自CSS
-(既定は`custom.css`)だけです。組み込みのテーマCSSとスクリプトは編集しないでください。
+`.github/tsuzuri/`配下で編集してよいのは、設定ファイル`config`と、`styles/`に置く自分のカスタムスタイル
+だけです。`base.css`・`default.css`・スクリプトは編集しないでください。ほかの見た目にしたいときは、
+[ギャラリー](./gallery.ja.md)でカスタムスタイルをダウンロードして`styles/`に置き、`THEME`に指定します
+([スタイル(theming.md)](./theming.ja.md)参照)。
 
 ビルドスクリプト本体もリポジトリにコピーされるため、生成後のワークフローは実行のたびに
 OSS本体リポジトリ(tsuzuri)を参照することなく、このリポジトリの中だけでビルド・
@@ -105,7 +107,7 @@ npx github:akilasatolu/tsuzuri#v1 preview
    node .github/tsuzuri/build-docs.mjs
    ```
 
-   試しに設定を変えたいときは、`THEME=nineties node .github/tsuzuri/build-docs.mjs`のように
+   試しに設定を変えたいときは、`THEME=glass.css node .github/tsuzuri/build-docs.mjs`のように
    環境変数で渡すと、そのキーだけ設定ファイルより優先されます。
 
    > [!NOTE]
@@ -134,5 +136,5 @@ npx github:akilasatolu/tsuzuri#v1 preview
 
 - サイトがどのように組み立てられているかを知りたい場合は[仕組み(concepts.md)](./concepts.ja.md)
 - 設定できる項目の一覧は[設定リファレンス(configuration.md)](./configuration.ja.md)
-- 見た目(配色・装飾)を変えたい場合は[テーマ・スタイル(theming.md)](./theming.ja.md)
+- 見た目(配色・装飾)を変えたい場合は[スタイル(theming.md)](./theming.ja.md)
 - 導入の作業をAIエージェントに手伝ってもらう場合は[AIエージェント向けの参考情報](./ai-reference.ja.md)

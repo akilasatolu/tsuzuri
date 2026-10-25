@@ -29,8 +29,8 @@ push しなくても、作業ツリーをそのまま実行して試せます。
 STYLE_DIR=~/dev/tsuzuri/styles node ~/dev/tsuzuri/.github/scripts/build-docs.mjs
 ```
 
-- `STYLE_DIR` を指定すると、作業ツリーのテーマ CSS が使われます。
-- GitHub Actions の外では、`.github/tsuzuri/config` があれば読みます。環境変数で指定した値が優先されます(例: `THEME=nineties`)。サイトの言語は `LANGUAGES` で決まり、OS の `LANG` は使いません。
+- `STYLE_DIR` を指定すると、作業ツリーの `base.css` が使われます。`STYLE_DIR` はベースの場所だけで、カスタムスタイル(`THEME=名前.css`、`theme: 名前.css`)は、常にサイトの `.github/tsuzuri/styles/` から読みます。作業ツリーの `default.css` を試すときは、`node bin/cli.mjs init --update` でそこにコピーします。
+- GitHub Actions の外では、`.github/tsuzuri/config` があれば読みます。環境変数で指定した値が優先されます(例: `THEME=default.css`)。サイトの言語は `LANGUAGES` で決まり、OS の `LANG` は使いません。
 - 出力先は `_site/` です。前回のビルドが置いた目印のファイル `.tsuzuri-build` があれば、ビルドの前に中身をすべて消します。目印のないディレクトリは、消さずに上書きするだけです。
 
 `init` 済みのディレクトリでは、`node ~/dev/tsuzuri/bin/cli.mjs preview` で、ビルドから配信と変更時の再ビルドまでまとめて試せます。
@@ -91,7 +91,7 @@ npm run lint
 - `bin/`: セットアップ CLI。`bin/cli.mjs` は、利用者が受け取る内容(ワークフロー・設定ファイル・取り込む対象)の唯一の正で、`bin/preview.mjs` は `preview` の本体、`bin/messages.mjs` は CLI のメッセージの文言(英語と日本語)のカタログです(文言を足すときは両方に足します。ワークフローと `.github/tsuzuri/.gitignore` は常に英語です)。
 - `templates/`: ワークフローのひな形(`.github/workflows/tsuzuri-pages.yml`)と、利用者に配るビルド用の依存の `package.json`・`package-lock.json` の完成品。
 - `.github/scripts/`: ビルド本体(`build-docs.mjs` と `lib/`)。
-- `styles/`: テーマ CSS。
+- `styles/`: ベースと default のスタイル(`base.css`、`default.css`)。
 - `test/`: テスト。フィクスチャは `test/fixtures/` にあります。
 - `scripts/`: 開発・CI 用の補助(利用者には配りません)。各スクリプトの先頭に説明のコメントがあります。
 - `.github/workflows/`・`.github/PULL_REQUEST_TEMPLATE.md`・`.npmrc`: このリポジトリ自身の CI・リリース・依存パッケージの方針・PR テンプレート。

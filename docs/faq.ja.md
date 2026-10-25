@@ -79,15 +79,17 @@ from Y)」(フォルダのときは「is a folder」)という警告が出ます
 
 見た目が期待通りにならない場合は、以下を順番に確認してください。
 
-1. `THEME`のスペルミス。存在しないテーマ名(例: `sepia`)を指定すると警告のうえ
-   自動的に`material`にフォールバックします([configuration.md](./configuration.ja.md))。
-2. `STYLE_FILE`に指定したファイル名のファイルが、`.github/tsuzuri/styles/`の中に実際に存在しているか。
-   存在しない場合は警告は出ず(ビルドのログに`Custom style file not used`と出るだけで)、独自CSSは反映されません。
-   また、`STYLE_FILE`にはファイル名だけを書きます。フォルダを含むパス(`.github/tsuzuri/styles/custom.css`など)や
-   `.css`で終わらない名前は、警告のうえ無視されます。
-3. 3層カスケード(基礎CSS→THEME→STYLE_FILE)の優先順位。`STYLE_FILE`は最後に
-   読み込まれる最優先層のため、ここに書いたCSSルールが期待通り上書きしているか、
-   詳細度(セレクタの強さ)の観点でも確認してください。詳しくは
+1. `THEME`のスペルミス。CSSファイル名でない値(`none`、`material`のような昔のテーマ名、
+   `.github/tsuzuri/styles/glass.css`のようなフォルダを含むパス、`.css`で終わらない名前)を指定すると、
+   警告のうえ自動的に`default.css`にフォールバックします([configuration.md](./configuration.ja.md))。
+2. `THEME`に指定したファイル名のファイルが、`.github/tsuzuri/styles/`の中に実際に存在しているか。
+   存在しない場合は警告が出て(`THEME ("…") was not found`)、ベースだけでビルドされます。
+   `default.css`以外のカスタムスタイルはパッケージに入っていないので、[ギャラリー](./gallery.ja.md)で
+   ダウンロードしてください。
+3. 2層(ベースCSS→カスタムスタイル)の優先順位。カスタムスタイルはベースの後に
+   読み込まれるため、ここに書いたCSSルールが期待通り上書きしているか、
+   詳細度(セレクタの強さ)の観点でも確認してください。ページのfrontmatterの`theme`は、
+   そのページだけサイト全体のカスタムスタイルを置き換えます。詳しくは
    [theming.md](./theming.ja.md)を参照してください。
 
 ## previewの表示が公開サイトと違う

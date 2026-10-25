@@ -57,7 +57,7 @@ jobs:
             # Import only known setting keys as environment variables, so that others (such as NODE_OPTIONS)
             # cannot be injected through the settings file.
             case "$key" in
-              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|STYLE_FILE|LANGUAGES|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS|SITEMAP_JSON|LAST_UPDATED|EDIT_LINK|REPO_LINK|REPO_VERSION|REPO_LICENSE|LLMS_TXT)
+              TRIGGER_BRANCH|ROOT_MD|OUT_DIR|LANGUAGES|NAV_ENABLED|FAVICON_FILE|SITE_NAME|CUSTOM_DOMAIN|OGP_DEFAULT_IMAGE|THEME|STRICT_LINKS|SITEMAP_JSON|LAST_UPDATED|EDIT_LINK|REPO_LINK|REPO_VERSION|REPO_LICENSE|LLMS_TXT)
                 echo "${key}=${value}" >> "$GITHUB_ENV" ;;
               *)
                 echo "::warning::Ignoring unknown setting key ${key}" ;;
@@ -139,7 +139,7 @@ jobs:
         # The values of the settings file (written to $GITHUB_ENV by the Load config step) and BASE_PATH / SITE_ORIGIN
         # (written by the Determine base path / site origin step) are passed on as environment variables as they are.
         env:
-          # The base directory for resolving THEME. Points to the vendored location copied by init.
+          # The directory of base.css. Points to the vendored location copied by init (custom styles are always read from there too).
           STYLE_DIR: __VENDOR_DIR__/styles
         run: node __VENDOR_DIR__/build-docs.mjs
 

@@ -13,10 +13,10 @@ title: デプロイ設定(Deployment)
 利用者リポジトリ
 .github/workflows/tsuzuri-pages.yml  … ビルド・デプロイの手順一式(自己完結)
 .github/tsuzuri/config               … 動作をカスタマイズする設定ファイル(利用者が編集する)
-.github/tsuzuri/styles/custom.css    … 独自CSSの空のひな形(利用者が編集する)
 .github/tsuzuri/build-docs.mjs       … ビルド本体のスクリプト(コピー済み)
 .github/tsuzuri/lib/*.mjs            … ビルド本体が依存するモジュール一式(コピー済み)
-.github/tsuzuri/styles/*.css         … 組み込みテーマのCSS一式(コピー済み)
+.github/tsuzuri/styles/base.css      … ベースCSS(コピー済み)
+.github/tsuzuri/styles/default.css   … 標準のカスタムスタイル(コピー済み。自分で足すカスタムスタイルはこの隣に置く)
 .github/tsuzuri/package.json         … ビルド用の依存(marked など)の版
 .github/tsuzuri/package-lock.json    … 同上(ダウンロードした中身を確かめるハッシュを含む)
 .github/tsuzuri/.gitignore           … 手元でインストールした依存(node_modules/)をコミットしないための設定
@@ -36,8 +36,8 @@ title: デプロイ設定(Deployment)
   利用者はこのファイルを直接編集することはなく、`.github/tsuzuri/config`の値を
   変更することで動作をカスタマイズします。
 - **`.github/tsuzuri/`配下**: ビルドスクリプト本体と、利用者が編集するファイルがあります。
-  編集してよいのは、設定ファイル`config`と、`styles/`に置く独自CSS(既定は`custom.css`)
-  だけです。組み込みのテーマCSSとスクリプトは編集しないでください(削除・改変すると
+  編集してよいのは、設定ファイル`config`と、`styles/`に置く自分のカスタムスタイル
+  だけです。`base.css`・`default.css`とスクリプトは編集しないでください(削除・改変すると
   ビルドが失敗することがあります)。
 
 ## トリガーブランチの変更
@@ -120,8 +120,8 @@ CUSTOM_DOMAIN=docs.example.com
 仕組みではなくなりました)。
 
 最新版のtsuzuriに更新したい場合は、`--update`を付けてセットアップコマンドを実行してください。
-ワークフローとビルドスクリプト(組み込みテーマのCSSを含む)だけが最新版に上書きされ、`.github/tsuzuri/config`や
-独自CSS(`STYLE_FILE`)はそのまま残ります(詳しくは[CLIリファレンス](./cli.ja.md)の
+ワークフローとビルドスクリプト(`base.css`と`default.css`を含む)だけが最新版に上書きされ、`.github/tsuzuri/config`や
+`styles/`に置いたカスタムスタイルはそのまま残ります(詳しくは[CLIリファレンス](./cli.ja.md)の
 「最新版に更新する(`--update`)」を参照)。
 
 ```sh
