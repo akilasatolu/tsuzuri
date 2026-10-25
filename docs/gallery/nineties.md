@@ -1,7 +1,6 @@
 ---
 title: 90s (nineties)
 theme: nineties.css
-styleFile: plain.css
 description: A sample page of the custom style "90s (nineties)"
 ---
 

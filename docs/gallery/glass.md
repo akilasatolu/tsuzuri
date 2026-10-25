@@ -1,7 +1,6 @@
 ---
 title: Glass (glass)
 theme: glass.css
-styleFile: plain.css
 description: A sample page of the custom style "Glass (glass)"
 ---
 

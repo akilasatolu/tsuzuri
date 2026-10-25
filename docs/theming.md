@@ -79,7 +79,7 @@ Download one, put it in `.github/tsuzuri/styles/`, and set `THEME=<file name>.cs
 - **none (`none.css`)**: a CSS file that contains only comments. Only the base CSS is applied, and
   the colors and decoration are the browser's defaults. (There is no `THEME=none` keyword; use
   `none.css` like any other custom style.)
-- **Tsuzuri (`custom.css`)**: this site's own look (see below).
+- **Tsuzuri (`tsuzuri.css`)**: this site's own look (see below).
 
 Blueprint always looks the same and 90s is light only; the others switch between light and dark
 automatically to match the OS setting. Glass's glass (the background blur) is shown as
@@ -120,8 +120,8 @@ below.
 
 > [!TIP]
 > This site itself is built with a custom style of its own, a "thread" design
-> ([custom.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/custom.css)). See it as an example of how to write
-> one (you can see the result in the [custom style example](gallery/custom.md)).
+> ([tsuzuri.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/tsuzuri.css)). See it as an example of how to write
+> one (you can see the result in the [custom style example](gallery/tsuzuri.md)).
 >
 > This site's [gallery](gallery.md) shows each custom style on its own page by writing
 > [`theme`](frontmatter.md#theme) in the frontmatter of the sample pages.

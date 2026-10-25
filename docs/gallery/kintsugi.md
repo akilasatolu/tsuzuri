@@ -1,7 +1,6 @@
 ---
 title: Kintsugi (kintsugi)
 theme: kintsugi.css
-styleFile: plain.css
 description: A sample page of the custom style "Kintsugi (kintsugi)"
 ---
 

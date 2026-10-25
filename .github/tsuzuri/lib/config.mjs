@@ -9,12 +9,8 @@
 import path from "node:path";
 import { normalizeBasePath, isStyleFileName } from "./path-utils.mjs";
 
-// 組み込みテーマ名の一覧。frontmatterの `theme` キー(ページ単位のテーマ上書き)が組み込みテーマ名か
-// を判定するため、build-docs.mjs からも参照するので export する。`.css` で終わる `theme` の値は
-// 独自CSSのファイル名(.github/tsuzuri/styles/ の中)として build-docs.mjs が別に扱う。
-// そのため、ここの名前は `.css` で終わってはいけない(test/config.test.mjs が確かめる)。
-// `.css` で終わらず、この配列にも無い値は、警告してサイト全体のTHEMEにフォールバックする。
-export const ALLOWED_THEMES = ["material", "glass", "neumorphism", "editorial", "minimal", "kintsugi", "blueprint", "nineties", "none"];
+// THEME の既定値(パッケージに入っているカスタムスタイル)
+export const DEFAULT_THEME = "default.css";
 const HOSTNAME_RE = /^[a-zA-Z0-9.-]+$/;
 // BCP 47 形式の言語タグ(例: "ja" / "en" / "en-US" / "zh-Hant-TW")の簡易チェック。
 // "en_US" のような書き間違いを弾く。
@@ -24,7 +20,6 @@ export const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  * @typedef {object} Config
  * @property {string} rootMd
  * @property {string} outDir
- * @property {string} styleFile - 独自CSSのファイル名(.github/tsuzuri/styles/ の中。空なら独自CSSを使わない)
  * @property {string} basePath
  * @property {string} siteOrigin
  * @property {string[]} languages - サイトの言語(1つ以上。先頭が基本言語)
@@ -46,16 +41,15 @@ export const LANG_TAG_RE = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
  */
 
 // 利用者のリポジトリでの、Tsuzuri のファイルの置き場所
-export const VENDOR_DIR = ".github/tsuzuri"; // ビルドスクリプト一式・組み込みテーマCSS・ビルド用の依存、設定ファイル(config)、独自CSS(styles/custom.css)
+export const VENDOR_DIR = ".github/tsuzuri"; // ビルドスクリプト一式・ベース(base.css)と default.css・ビルド用の依存、設定ファイル(config)、利用者が置くカスタムスタイル(styles/名前.css)
 export const WORKFLOW_PATH = ".github/workflows/tsuzuri-pages.yml"; // 生成するワークフロー
-export const CONFIG_FILE_PATH = `${VENDOR_DIR}/config`; // 設定ファイル(利用者が編集する。VENDOR_DIR の中で編集してよいのは、これと、styles/ に置く独自CSS(既定は custom.css)だけ。組み込みのテーマCSSとスクリプトは編集しない)
+export const CONFIG_FILE_PATH = `${VENDOR_DIR}/config`; // 設定ファイル(利用者が編集する。VENDOR_DIR の中で編集してよいのは、これと、styles/ に置く自分のカスタムスタイルだけ。ベース(base.css)・default.css・スクリプトは編集しない)
 
 // 設定ファイル(.github/tsuzuri/config)に書けるキー。ワークフローの Load config と同じ一覧
 export const CONFIG_FILE_KEYS = [
   "TRIGGER_BRANCH",
   "ROOT_MD",
   "OUT_DIR",
-  "STYLE_FILE",
   "LANGUAGES",
   "NAV_ENABLED",
   "FAVICON_FILE",
@@ -115,8 +109,6 @@ export function loadConfig(env = process.env) {
   // 同じ表記になるよう正規化する(そうしないと起点ページが別のページとして二重に扱われる)。
   const rootMd = normalizeRootMd(trimOr(env.ROOT_MD, "README.md"));
   const outDir = trimOr(env.OUT_DIR, "_site");
-  // init が生成する設定ファイルと同じ既定値(組み込みテーマCSSと同じディレクトリの custom.css)
-  const styleFile = resolveStyleFile(env.STYLE_FILE);
   const siteOrigin = trimOr(env.SITE_ORIGIN, "");
   const faviconFile = trimOr(env.FAVICON_FILE, "");
   const ogDefaultImage = trimOr(env.OGP_DEFAULT_IMAGE, "");
@@ -162,7 +154,6 @@ export function loadConfig(env = process.env) {
   return {
     rootMd,
     outDir,
-    styleFile,
     basePath,
     siteOrigin,
     languages,
@@ -190,29 +181,13 @@ function normalizeRootMd(raw) {
 }
 
 /**
- * 独自CSSのリポジトリの直下からのパス(.github/tsuzuri/styles/ の中のファイル)。
- * 設定 STYLE_FILE・frontmatter の styleFile・theme には、ファイル名だけを書く。
+ * カスタムスタイルのリポジトリの直下からのパス(.github/tsuzuri/styles/ の中のファイル)。
+ * 設定 THEME・frontmatter の theme には、ファイル名だけを書く(STYLE_DIR には影響されない。STYLE_DIR はベースの場所だけ)。
  * @param {string} name - isStyleFileName を満たすファイル名
  * @returns {string}
  */
 export function styleFilePath(name) {
   return `${VENDOR_DIR}/styles/${name}`;
-}
-
-/**
- * STYLE_FILE を読む。未設定・空は既定の custom.css。独自CSSのファイル名として使えない値
- * (パス・.css で終わらない名前など)は、警告して "" にする(独自CSSを使わない)。
- * @param {string|undefined} raw
- * @returns {string}
- */
-function resolveStyleFile(raw) {
-  const name = trimOr(raw, "custom.css");
-  if (isStyleFileName(name)) return name;
-  console.warn(
-    `[config] The value of STYLE_FILE is invalid ("${name}"). Write only a file name (e.g. custom.css)` +
-      ` (it is read as a file in ${VENDOR_DIR}/styles/). The custom CSS is not used.`
-  );
-  return "";
 }
 
 // 値をtrimし、空ならデフォルト値を返す。未設定(undefined/null)も空扱い。
@@ -315,13 +290,15 @@ function resolveCustomDomain(raw) {
   return "";
 }
 
-// 省略(未設定・空文字)は既定値 "material" として黙って扱い、不正値のときだけ warn する。
+// THEME(サイト全体のカスタムスタイル)を読む。ファイル名(○○.css)だけを書く。
+// 省略(未設定・空文字)は既定値 DEFAULT_THEME として黙って扱い、ファイル名として使えない値
+// (none・旧テーマ名・パス・.css で終わらない名前)のときだけ warn して DEFAULT_THEME にする。
 function resolveTheme(raw) {
   const trimmed = (raw ?? "").trim();
-  if (trimmed === "") return "material";
-  if (ALLOWED_THEMES.includes(trimmed)) return trimmed;
+  if (trimmed === "") return DEFAULT_THEME;
+  if (isStyleFileName(trimmed)) return trimmed;
   console.warn(
-    `[config] The value of THEME is invalid ("${trimmed}"). Falling back to "material".`
+    `[config] The value of THEME is invalid ("${trimmed}"). Write the file name of a custom style (e.g. ${DEFAULT_THEME}). Falling back to "${DEFAULT_THEME}".`
   );
-  return "material";
+  return DEFAULT_THEME;
 }

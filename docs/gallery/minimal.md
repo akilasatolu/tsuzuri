@@ -1,7 +1,6 @@
 ---
 title: Minimal (minimal)
 theme: minimal.css
-styleFile: plain.css
 description: A sample page of the custom style "Minimal (minimal)"
 ---
 

@@ -1,7 +1,6 @@
 ---
 title: 90年代(nineties)
 theme: nineties.css
-styleFile: plain.css
 description: カスタムスタイル「90年代(nineties)」の見本ページ
 ---
 

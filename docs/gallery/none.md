@@ -1,7 +1,6 @@
 ---
 title: No decoration (none)
 theme: none.css
-styleFile: plain.css
 description: A sample page of the custom style "No decoration (none)"
 ---
 
@@ -14,7 +13,7 @@ and set `THEME=none.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: none.css` in that page's frontmatter
 (see [Theming](../theming.md)).
 
-[← 90s (nineties)](nineties.md) · [Gallery](../gallery.md) · [Custom style example (this site) →](custom.md)
+[← 90s (nineties)](nineties.md) · [Gallery](../gallery.md) · [Custom style example (this site) →](tsuzuri.md)
 
 ## Heading level 2
 
@@ -51,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../../assets/favicon.svg)
 
-[← 90s (nineties)](nineties.md) · [Gallery](../gallery.md) · [Custom style example (this site) →](custom.md)
+[← 90s (nineties)](nineties.md) · [Gallery](../gallery.md) · [Custom style example (this site) →](tsuzuri.md)

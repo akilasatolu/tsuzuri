@@ -1,7 +1,6 @@
 ---
 title: デフォルト(default)
 theme: default.css
-styleFile: plain.css
 description: カスタムスタイル「デフォルト(default)」の見本ページ
 ---
 

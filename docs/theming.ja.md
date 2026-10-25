@@ -67,7 +67,7 @@ THEME=glass.css
 - **90年代(`nineties.css`)**: 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。
 - **装飾なし(`none.css`)**: コメントだけのCSSファイル。ベースだけが適用され、色や装飾はブラウザの既定の見た目になります
   (`THEME=none`というキーワードはありません。`none.css`をほかのカスタムスタイルと同じように使います)。
-- **Tsuzuri(`custom.css`)**: このサイト自身の見た目(下の囲みを参照)。
+- **Tsuzuri(`tsuzuri.css`)**: このサイト自身の見た目(下の囲みを参照)。
 
 ライト/ダーク表示は、ブループリントが常に同じ表示、90年代がライトのみで、それ以外はOSの設定に合わせて
 自動で切り替わります。グラスのガラス(背景のぼかし)は、ブラウザが対応していない場合は半透明のカードとして表示されます。
@@ -106,8 +106,8 @@ THEME=glass.css
 
 > [!TIP]
 > このサイト自体も、自分用のカスタムスタイル(「スレッド」のデザイン。
-> [custom.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/custom.css))で見た目を作っています。
-> 書き方の例として参考にしてください(見た目は[カスタムスタイルの例](gallery/custom.ja.md)で確認できます)。
+> [tsuzuri.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/tsuzuri.css))で見た目を作っています。
+> 書き方の例として参考にしてください(見た目は[カスタムスタイルの例](gallery/tsuzuri.ja.md)で確認できます)。
 >
 > このサイトの[ギャラリー](gallery.ja.md)は、見本ページのfrontmatterに[`theme`](frontmatter.ja.md#theme)を
 > 書いて、カスタムスタイルごとにそのスタイルだけの見た目で表示しています。

@@ -162,10 +162,10 @@ Vercel や Linear のドキュメントのような、白・黒・グレーだ�
 
 このサイト自身の見た目。自分用のカスタムスタイルだけで作っています。
 
-使い方: `.github/tsuzuri/styles/`に置いて、`THEME=custom.css`にします。
+使い方: `.github/tsuzuri/styles/`に置いて、`THEME=tsuzuri.css`にします。
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/custom.css" download>custom.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>tsuzuri.css</a>
 
-[見本ページ](gallery/custom.ja.md)
+[見本ページ](gallery/tsuzuri.ja.md)
 
 配色をさらに細かく調整したい場合は、`default.css`を別の名前にコピーして、CSS変数(`--fg`・`--bg`・`--accent`など)を上書きし、`THEME`に指定します([スタイル(Theming)](theming.ja.md#自分でカスタムスタイルを作る)参照)。

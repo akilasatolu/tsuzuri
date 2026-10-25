@@ -12,7 +12,7 @@ The documentation site you're reading is built with Tsuzuri itself
 ([source](https://github.com/akilasatolu/tsuzuri/tree/main)). It combines the following features.
 
 - **A look made with a custom style of its own**: it builds the colors, cards and
-  buttons in its own custom style (`THEME`) ([custom style example](gallery/custom.md)).
+  buttons in its own custom style (`THEME`) ([custom style example](gallery/tsuzuri.md)).
 - **The top page entrance**: the beginning of `README.md` contains HTML with classes, such as
   `<div class="tsuzuri-hero">`, styled with the custom style. On GitHub the classes are dropped and it
   shows as ordinary text, so it still reads fine on GitHub.

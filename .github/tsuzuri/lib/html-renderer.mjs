@@ -8,7 +8,7 @@
  *   renderNav         — サイト内ナビ。NAV_ENABLED=true のときのみ呼び出し側が呼ぶ。
  *                        site-tree.mjs のサイトツリー(ディレクトリ階層)をそのまま <ul> の入れ子にする。
  *   renderMetaTags    — SEO用メタタグ(description/OGP/canonical/robots/favicon/og:site_name)を生成する。
- *   composeCss        — 基礎CSS・THEME・STYLE_FILE を、この順(3層カスケード)につなげる。
+ *   composeCss        — ベース(base.css)とカスタムスタイル(THEME・frontmatter の theme)を、この順(2層)につなげる。
  *   pageTemplate      — ページ全体のHTML。CSS は composeCss の結果を書き出したファイルを <link> で読み込む。
  *   preprocessRawHtmlPaths — 生のHTMLの <a href>・<img src> などのリンク先を書き換える(basePath は引数で渡す)。
  *   renderLangSwitch  — 多言語サイトの言語切り替えボタン(JavaScript を使わない普通のリンク)。
@@ -371,10 +371,10 @@ export function preprocessRawHtmlPaths(
     });
 }
 
-// ページに適用するCSS(基礎CSS → テーマ → 独自CSS の順につなげたもの)。
+// ページに適用するCSS(ベース → カスタムスタイル の順につなげたもの)。
 // build-docs.mjs が内容ごとに共通のCSSファイルへ書き出し、pageTemplate の stylesheetHref で読み込む。
-export function composeCss({ baseCss = "", themeCss = "", customCss = "", styleFileRel }) {
-  return `${baseCss}${themeCss}${customCss ? `/* ---- Custom style: ${styleFileRel} ---- */\n${customCss}` : ""}`;
+export function composeCss({ baseCss = "", customCss = "", styleFileRel }) {
+  return `${baseCss}${customCss ? `/* ---- Custom style: ${styleFileRel} ---- */\n${customCss}` : ""}`;
 }
 
 /**

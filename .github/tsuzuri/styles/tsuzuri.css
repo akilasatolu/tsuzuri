@@ -1,15 +1,15 @@
 /*
- * Tsuzuri サイト用の独自スタイル(STYLE_FILE)
+ * Tsuzuri サイト用のカスタムスタイル(THEME=tsuzuri.css)
  *
- * THEME=none(基礎CSSのみ)の上に、Tsuzuri(綴り)の名前とロゴをそのまま形にした「スレッド」の見た目を作る。
+ * ベース(base.css)の上に、Tsuzuri(綴り)の名前とロゴをそのまま形にした「スレッド」の見た目を作る。
  *   - 本文の左に、ページを綴じる1本の糸が通る。h1 はロゴの中心のような灯った点から始まり、h2 は糸の上の結び目
  *   - 糸は読み進めるほど上から炎の色に染まり、結び目は読んだ章まで灯る(どこまで読んだかが分かる)
  *   - ナビは、ページどうしが線でつながる木の形。今いるページの点だけが灯る
  *   - ライト表示は生成りの紙と紺のインク、ダーク表示は夜の紺。動きに対応していないブラウザや、
  *     動きを減らす設定の人には、糸と結び目は動かずにそのまま表示される
  *
- * テーマの見本ページ(docs/gallery/*.md)は、それぞれのテーマの見た目をそのまま見せるため、
- * frontmatter の styleFile で中身が空の plain.css を指定して、このスタイルを当てないようにしている。
+ * ギャラリーの見本ページ(docs/gallery/*.md)は、frontmatter の theme でそれぞれのカスタムスタイルを
+ * 指定しているので、このスタイルは当たらない(サイト全体のカスタムスタイルが置き換えられる)。
  */
 :root {
   color-scheme: light dark;
@@ -156,7 +156,7 @@ main h4 { margin: 1.5em 0 0.4em; font-size: 1em; color: var(--muted); }
 main a { color: var(--accent); font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.2em; text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); }
 main a:hover { color: var(--accent-2); text-decoration-color: var(--accent-2); }
 
-/* 本文の部品(角を丸く、テーマの質感で) */
+/* 本文の部品(角を丸く、このスタイルの質感で) */
 main strong { color: var(--heading); }
 main blockquote { margin: 1.4em 0; padding: 0.8em 1.2em; color: var(--muted); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
 main hr { margin: 2.5em 0; height: 3px; border: 0; border-radius: 3px; background: var(--hr); }

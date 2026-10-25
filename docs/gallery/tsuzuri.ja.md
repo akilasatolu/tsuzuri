@@ -1,20 +1,21 @@
 ---
 title: カスタムスタイルの例(このサイト)
+theme: tsuzuri.css
 description: このサイト自身のカスタムスタイルで作った、このサイト自身の見た目の見本ページ
 ---
 
 # カスタムスタイルの例(このサイト)
 
-このサイト自身のカスタムスタイル(`custom.css`)で作った見た目です。
+このサイト自身のカスタムスタイル(`tsuzuri.css`)で作った見た目です。
 このサイト全体がこの見た目になっています。Tsuzuri(綴り)の名前とロゴをそのまま形にした「スレッド」のデザインで、
 本文の左にページを綴じる1本の糸が通り、h1 はロゴの中心のような灯った点から、h2 は糸の上の結び目になります。
 糸は読み進めるほど上から炎の色に染まり、結び目は読んだ章まで灯るので、どこまで読んだかが分かります。
 ナビは、ページどうしが線でつながる木の形です。
 
-使っているCSSは[custom.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/custom.css)です。
+使っているCSSは[tsuzuri.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/tsuzuri.css)です。
 書き方は[スタイル(Theming)](../theming.ja.md#自分でカスタムスタイルを作る)を参照してください。
-自分のサイトで使うには、[ギャラリー](../gallery.ja.md#tsuzuriこのサイト)で`custom.css`をダウンロードし、
-`.github/tsuzuri/styles/`に置いて、`THEME=custom.css`にします。
+自分のサイトで使うには、[ギャラリー](../gallery.ja.md#tsuzuriこのサイト)で`tsuzuri.css`をダウンロードし、
+`.github/tsuzuri/styles/`に置いて、`THEME=tsuzuri.css`にします。
 
 [← 装飾なし(none)](none.ja.md) ・ [ギャラリー一覧](../gallery.ja.md)
 

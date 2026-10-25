@@ -1,7 +1,6 @@
 ---
 title: エディトリアル(editorial)
 theme: editorial.css
-styleFile: plain.css
 description: カスタムスタイル「エディトリアル(editorial)」の見本ページ
 ---
 

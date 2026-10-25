@@ -1,7 +1,6 @@
 ---
 title: 金継ぎ(kintsugi)
 theme: kintsugi.css
-styleFile: plain.css
 description: カスタムスタイル「金継ぎ(kintsugi)」の見本ページ
 ---
 

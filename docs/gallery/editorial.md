@@ -1,7 +1,6 @@
 ---
 title: Editorial (editorial)
 theme: editorial.css
-styleFile: plain.css
 description: A sample page of the custom style "Editorial (editorial)"
 ---
 
