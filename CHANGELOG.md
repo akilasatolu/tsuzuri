@@ -33,6 +33,34 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+## [1.37.0] - 2026-10-25
+
+### Added
+
+- Added the `--lang <en|ja>` option to `init` and `preview` (and `--help`, `--update`). It sets the language of the messages the command prints. Only `en` (the default) and `ja`, in lowercase, are accepted; any other value is an error. It applies only to the command it is given to: there is no environment variable for it, and the OS locale is not read. `--lang` alone does not skip the questions (only `--yes`, `--branch` and the like do), and it is not the language of the site (that is still `LANGUAGES` in the config file).
+
+### Changed
+
+- The messages of `init` and `preview` (questions, progress lines, warnings, errors and `--help`) are now in English by default. Up to v1.36.0 they were always in Japanese; add `--lang ja` to get the Japanese messages.
+- The comments in the config file (`.github/tsuzuri/config`) and in the empty custom CSS template (`.github/tsuzuri/styles/custom.css`) that `init` creates follow `--lang`: English by default, Japanese with `--lang ja` (they were always Japanese). The keys and values written to the config file are the same in both languages. The workflow (`.github/workflows/tsuzuri-pages.yml`) and `.github/tsuzuri/.gitignore` that `init` generates are always in English, whatever `--lang` is.
+- The messages of the build script (the log of the build on GitHub Actions and of the build that `preview` runs: warnings, errors, and the list of problems printed with `STRICT_LINKS=true`) are now always in English; `--lang` does not change them. The text of `.tsuzuri-build`, the marker file the build writes to the output directory, is in English too. If you search the logs for a message, the wording has changed: the old Japanese wording and the new English wording of the main messages are listed in `docs/ai-reference.md` and `docs/faq.md`.
+- The first comment of the generated workflow now reads `# tsuzuri vX.Y.Z generated this self-contained workflow with npx ...` (it was Japanese up to v1.36.0). `preview` reads the version from the beginning of this comment (`# tsuzuri vX.Y.Z `), so it works with both the old and the new text.
+- What `init --update` changes in an existing repository: the workflow `.github/workflows/tsuzuri-pages.yml` (the log messages and the comments become English; the steps themselves do not change), the comment in `.github/tsuzuri/.gitignore`, the `description` line of `.github/tsuzuri/package.json`, and the build scripts under `.github/tsuzuri/` (whose messages become English). The config file `.github/tsuzuri/config` and an existing `.github/tsuzuri/styles/custom.css` are not changed. Because the build script is updated by `init --update`, a repository that has not run it yet keeps printing the Japanese messages.
+
+<!-- ja -->
+
+### 追加
+
+- `init` と `preview`(`--help`・`--update` も含む)に、`--lang <en|ja>` オプションを追加した。コマンドが表示するメッセージの言語を決める。指定できるのは `en`(既定)と `ja`(小文字)だけで、ほかの値はエラーになる。付けたコマンドのときだけ有効で、環境変数は用意していない。OS のロケールも見ない。`--lang` だけでは質問を省略しない(省略するのは `--yes`・`--branch` などを付けたとき)。サイトの言語でもない(サイトの言語は、これまでどおり設定ファイルの `LANGUAGES`)。
+
+### 変更
+
+- `init` と `preview` のメッセージ(質問・進み具合の表示・警告・エラー・`--help`)を、既定で英語にした。v1.36.0 までは常に日本語だった。日本語で表示したいときは `--lang ja` を付ける。
+- `init` が作る設定ファイル(`.github/tsuzuri/config`)と空の独自 CSS のひな形(`.github/tsuzuri/styles/custom.css`)のコメントは、`--lang` に従うようにした。既定は英語で、`--lang ja` なら日本語(これまでは常に日本語)。設定ファイルに書かれるキーと値は、どちらの言語でも同じ。`init` が生成するワークフロー(`.github/workflows/tsuzuri-pages.yml`)と `.github/tsuzuri/.gitignore` は、`--lang` に関係なく常に英語。
+- ビルドスクリプトのメッセージ(GitHub Actions でのビルドと、`preview` が実行するビルドのログ。警告・エラー・`STRICT_LINKS=true` のときに出す問題の一覧)を、常に英語にした。`--lang` では変わらない。ビルドが出力先に書く目印のファイル `.tsuzuri-build` の中身も英語にした。ログからメッセージを検索している場合は、文言が変わっている。主なメッセージの、古い日本語の文言と新しい英語の文言は、`docs/ai-reference.md` と `docs/faq.md`(どちらにも日本語版がある)に載せている。
+- 生成するワークフローの最初のコメントを、`# tsuzuri vX.Y.Z generated this self-contained workflow with npx ...` の形にした(v1.36.0 までは日本語)。`preview` はこのコメントの先頭 `# tsuzuri vX.Y.Z ` から版を読むので、古い文言でも新しい文言でも動く。
+- 既存のリポジトリで `init --update` を実行すると変わるもの: ワークフロー `.github/workflows/tsuzuri-pages.yml`(ログのメッセージとコメントが英語になる。手順そのものは変わらない)、`.github/tsuzuri/.gitignore` のコメント、`.github/tsuzuri/package.json` の `description` の 1 行、`.github/tsuzuri/` 配下のビルドスクリプト(メッセージが英語になる)。設定ファイル `.github/tsuzuri/config` と、既にある `.github/tsuzuri/styles/custom.css` は変わらない。ビルドスクリプトは `init --update` で更新されるので、まだ実行していないリポジトリは、日本語のメッセージのままになる。
+
 ## [1.36.0] - 2026-10-19
 
 ### Changed
