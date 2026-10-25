@@ -59,7 +59,7 @@ export function parseFrontmatter(rawContent) {
 
   if (endIndex === -1) {
     console.warn(
-      "frontmatter終端の --- が見つかりません。frontmatterとして解釈せず本文として扱います。"
+      "The closing --- of the frontmatter was not found. It is treated as body text, not as frontmatter."
     );
     return { meta: {}, body: rawContent };
   }

@@ -1,2 +1,2 @@
-# 手元でビルドするときにインストールする依存(コミットしない)
+# Dependencies installed for local builds (do not commit)
 node_modules/
