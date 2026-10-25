@@ -1,7 +1,6 @@
 ---
 title: Blueprint (blueprint)
 theme: blueprint.css
-styleFile: plain.css
 description: A sample page of the custom style "Blueprint (blueprint)"
 ---
 

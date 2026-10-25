@@ -1,7 +1,6 @@
 ---
 title: ニューモーフィズム(neumorphism)
 theme: neumorphism.css
-styleFile: plain.css
 description: カスタムスタイル「ニューモーフィズム(neumorphism)」の見本ページ
 ---
 

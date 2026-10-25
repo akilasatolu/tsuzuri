@@ -30,12 +30,12 @@
   main code { background: var(--code-bg); padding: 2px 5px; border-radius: 4px; font-size: 0.9em; }
   main pre code { background: none; padding: 0; }
   /* 表は内容に合わせた幅にし、入り切らないときは表の中だけを横にスクロールさせる(本文ごと横に動かさない)。
-     overflow-x は、テーマや独自CSSの main table { overflow: hidden; }(角を丸く切る指定)より優先させるため、body を付けて書く */
+     overflow-x は、カスタムスタイルの main table { overflow: hidden; }(角を丸く切る指定)より優先させるため、body を付けて書く */
   main table { display: block; width: max-content; max-width: 100%; border-collapse: collapse; }
   body main table { overflow-x: auto; }
 
   /* コードの色分け(言語名付きのコードブロックを highlight.js でビルド時に色分けしたもの)。
-     色はテーマのアクセント色・文字色から決める。独自CSSで --hl-* 変数を指定すれば個別に変えられる。 */
+     色はカスタムスタイルのアクセント色・文字色から決める。カスタムスタイルで --hl-* 変数を指定すれば個別に変えられる。 */
   .hljs-comment, .hljs-quote { color: var(--hl-comment, var(--fg)); opacity: 0.6; font-style: italic; }
   .hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-type, .hljs-meta {
     color: var(--hl-keyword, var(--accent));
@@ -63,7 +63,7 @@
   /* サイト内ナビゲーション(NAV_ENABLED=true のときだけ body 直下に出力される)。
      広い画面では左側に固定したサイドバー、狭い画面では本文の上に「メニュー」ボタンを置き、
      押すとページ一覧が開く(JavaScriptは使わず、チェックボックスとラベルで開閉する)。
-     色はテーマの変数を使うため、どのテーマでもそのまま馴染む。 */
+     色はカスタムスタイルの変数を使うため、どのカスタムスタイルでもそのまま馴染む。 */
   body > nav {
     font-size: 0.9em;
     line-height: 1.5;
@@ -160,7 +160,7 @@
   }
   [data-fn-ref] { text-decoration: none; }
 
-  /* コードブロックのコピーボタン(tsuzuri-copy.js が付ける)。常に表示する。カーソルを当てると、テーマのアクセント色になる(カーソルのある端末だけ)。
+  /* コードブロックのコピーボタン(tsuzuri-copy.js が付ける)。常に表示する。カーソルを当てると、カスタムスタイルのアクセント色になる(カーソルのある端末だけ)。
      ボタンが文字に重ならないよう、ボタンを付けたコードブロックは上の余白を広げ、ボタンの下から文字を始める */
   .tsuzuri-code { position: relative; }
   .tsuzuri-code > pre { padding-top: 40px; }
@@ -247,6 +247,10 @@
     .tsuzuri-nav-label { display: none; }
     body:has(> nav) > main { width: 100%; }
   }
+
+/* ---------- カルーセル(ギャラリーの見本画像。JavaScript を使わず、横にスクロールして切り替える) ---------- */
+.tsuzuri-carousel { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 0 12px; }
+.tsuzuri-carousel > img { flex: 0 0 100%; max-width: 100%; height: auto; scroll-snap-align: start; }
 
 /* ---------- 言語の切り替え ここから(多言語サイトのときだけ出力される) ---------- */
 :is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch {

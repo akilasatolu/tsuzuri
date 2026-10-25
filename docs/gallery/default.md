@@ -1,7 +1,6 @@
 ---
 title: Default (default)
 theme: default.css
-styleFile: plain.css
 description: A sample page of the custom style "Default (default)"
 ---
 

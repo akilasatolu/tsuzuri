@@ -1,7 +1,6 @@
 ---
 title: ミニマル(minimal)
 theme: minimal.css
-styleFile: plain.css
 description: カスタムスタイル「ミニマル(minimal)」の見本ページ
 ---
 

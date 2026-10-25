@@ -12,7 +12,7 @@ title: 使用例(Examples)
 ([ソース](https://github.com/akilasatolu/tsuzuri/tree/main))。次の機能を組み合わせています。
 
 - **自分用のカスタムスタイルで作った見た目**: 配色・カード・ボタンを、自分用のカスタムスタイル
-  (`THEME`)で作っています([カスタムスタイルの例](gallery/custom.ja.md))。
+  (`THEME`)で作っています([カスタムスタイルの例](gallery/tsuzuri.ja.md))。
 - **トップページの入口**: `README.md`の冒頭に、`<div class="tsuzuri-hero">`のようにclass付きのHTMLを書き、
   カスタムスタイルで見た目を付けています。GitHub上ではclassが消えて普通の文章として表示されるので、
   GitHubで読んでも崩れません。

@@ -7,7 +7,7 @@
 
 `docs/`(と `README.md`)が、利用者向けサイトの原本です。サイトは Tsuzuri 自身で作っています。`main` にマージすると `.github/workflows/tsuzuri-pages.yml` が動き、サイトが GitHub Pages に公開されます。利用者向けドキュメントの修正も、コードと同じように `main` への PR で行います。
 
-- `.github/tsuzuri/`(ビルドスクリプト、`lib/`、`styles/` の `base.css` と `default.css`、`package.json`・`package-lock.json`、`.gitignore`)と `tsuzuri-pages.yml` は、リリース時の `init --update` だけで変わります(「リリース」を参照)。手で編集しないでください。ただし、action の SHA とバージョンのコメントは例外で、「依存パッケージの更新」の手順で、ほかの 3 ファイルと同時に `tsuzuri-pages.yml` も手で直します。`.github/tsuzuri/config` と、`.github/tsuzuri/styles/` に置いた `default.css` 以外のカスタムスタイル(`custom.css` や `plain.css`、ギャラリーで配るスタイルの `glass.css` ほかと `none.css` など)は、このサイト自身のファイルで、`init --update` では変更されません。ギャラリーで配るカスタムスタイルの CSS は、パッケージには含めて配らないので、手で保守します(`.github/tsuzuri/` を手で編集しないという決まりの例外です)。
+- `.github/tsuzuri/`(ビルドスクリプト、`lib/`、`styles/` の `base.css` と `default.css`、`package.json`・`package-lock.json`、`.gitignore`)と `tsuzuri-pages.yml` は、リリース時の `init --update` だけで変わります(「リリース」を参照)。手で編集しないでください。ただし、action の SHA とバージョンのコメントは例外で、「依存パッケージの更新」の手順で、ほかの 3 ファイルと同時に `tsuzuri-pages.yml` も手で直します。`.github/tsuzuri/config` と、`.github/tsuzuri/styles/` に置いた `default.css` 以外のカスタムスタイル(`tsuzuri.css`、ギャラリーで配るスタイルの `glass.css` ほかと `none.css` など)は、このサイト自身のファイルで、`init --update` では変更されません。ギャラリーで配るカスタムスタイルの CSS は、パッケージには含めて配らないので、手で保守します(`.github/tsuzuri/` を手で編集しないという決まりの例外です)。
 - 公開は CI の成功を待ちません。マージ前のサイトの確認は、CI の `docs-build` ジョブ(公開せずにビルドだけ行う)で行います。
 
 ## リポジトリの初期設定(1 回だけ)

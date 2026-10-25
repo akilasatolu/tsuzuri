@@ -163,10 +163,10 @@ Use: put it in `.github/tsuzuri/styles/` and set `THEME=none.css`.
 
 This site's own look, made with a custom style of its own.
 
-Use: put it in `.github/tsuzuri/styles/` and set `THEME=custom.css`.
+Use: put it in `.github/tsuzuri/styles/` and set `THEME=tsuzuri.css`.
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/custom.css" download>custom.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>tsuzuri.css</a>
 
-[Sample page](gallery/custom.md)
+[Sample page](gallery/tsuzuri.md)
 
 To fine-tune the colors further, copy `default.css` under another name, override CSS variables (`--fg`, `--bg`, `--accent` and so on) in it, and set it in `THEME` (see [Theming](theming.md#writing-your-own-custom-style)).

@@ -1,7 +1,6 @@
 ---
 title: Neumorphism (neumorphism)
 theme: neumorphism.css
-styleFile: plain.css
 description: A sample page of the custom style "Neumorphism (neumorphism)"
 ---
 

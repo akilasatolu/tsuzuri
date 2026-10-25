@@ -1,7 +1,6 @@
 ---
 title: 装飾なし(none)
 theme: none.css
-styleFile: plain.css
 description: カスタムスタイル「装飾なし(none)」の見本ページ
 ---
 
@@ -14,7 +13,7 @@ description: カスタムスタイル「装飾なし(none)」の見本ページ
 1ページだけ使う場合は、そのページのfrontmatterに`theme: none.css`と書きます
 ([スタイル(Theming)](../theming.ja.md)参照)。
 
-[← 90年代(nineties)](nineties.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [カスタムスタイルの例(このサイト) →](custom.ja.md)
+[← 90年代(nineties)](nineties.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [カスタムスタイルの例(このサイト) →](tsuzuri.ja.md)
 
 ## 見出しレベル2
 
@@ -51,4 +50,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../../assets/favicon.svg)
 
-[← 90年代(nineties)](nineties.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [カスタムスタイルの例(このサイト) →](custom.ja.md)
+[← 90年代(nineties)](nineties.ja.md) ・ [ギャラリー一覧](../gallery.ja.md) ・ [カスタムスタイルの例(このサイト) →](tsuzuri.ja.md)

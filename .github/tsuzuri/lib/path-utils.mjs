@@ -39,7 +39,7 @@ export function isExternal(link) {
   return false;
 }
 
-// 独自CSSのファイル名(設定 STYLE_FILE・frontmatter の styleFile・theme)として使える文字列か。
+// カスタムスタイルのファイル名(設定 THEME・frontmatter の theme)として使える文字列か。
 // ファイル名だけを書く決まり: "/"・"\"・":"・制御文字を含まず、"." で始まらず(".." や隠しファイルを除く)、
 // ".css" で終わる(大文字・小文字は区別しない)。実際のファイルは .github/tsuzuri/styles/ の中から読む。
 const STYLE_FILE_NAME_RE = /^(?!\.)[^/\\:\p{Cc}]+\.css$/iu;
@@ -71,12 +71,13 @@ const IMAGE_EXTS = [
 ];
 
 // 動画・音声の拡張子。リンクされていればコピーする一覧(LINKED_FILE_EXTS)と、"." で始まるディレクトリの中でも
-// コピーする一覧(PUBLISHABLE_IN_DOT_DIR_EXTS)の両方をここから作る(2つの一覧がずれないように)
+// コピーする一覧(PUBLISHABLE_IN_DOT_DIR_EXTS)の両方をここから作る(2つの一覧がずれないように)。
+// CSS(ギャラリーのカスタムスタイルのダウンロード用)も同じ
 const VIDEO_EXTS = ["mp4", "webm", "mov", "m4v", "ogv", "avi", "mkv"];
 const AUDIO_EXTS = ["mp3", "m4a", "wav", "ogg", "oga", "flac", "aac", "opus", "weba"];
 
 // Markdown・画像以外で、リンクされていればサイトにコピーする拡張子。
-// アプリやブラウザで開いて使うものだけをコピーし、テキストとして中身を読むもの(コード・設定ファイル・.txt・.csv など)と
+// アプリやブラウザで開いて使うもの(と、ダウンロードして使う CSS)だけをコピーし、テキストとして中身を読むもの(コード・設定ファイル・.txt・.csv など)と
 // 一覧にない拡張子は、知らない種類のファイルを意図せず公開しないよう、GitHub 上のURLへのリンクにする。1行に1種類
 const DOCUMENT_EXTS = [
   "pdf",
@@ -95,11 +96,12 @@ const DOCUMENT_EXTS = [
 ];
 const ARCHIVE_EXTS = ["zip", "tar", "gz", "tgz", "bz2", "xz", "7z"];
 
-const LINKED_FILE_EXTS = new Set([...DOCUMENT_EXTS, ...ARCHIVE_EXTS, ...VIDEO_EXTS, ...AUDIO_EXTS]);
+const CSS_EXTS = ["css"];
+const LINKED_FILE_EXTS = new Set([...DOCUMENT_EXTS, ...ARCHIVE_EXTS, ...VIDEO_EXTS, ...AUDIO_EXTS, ...CSS_EXTS]);
 
-// "." で始まるディレクトリにあってもサイトにコピーする、動画・音声・PDF の拡張子
+// "." で始まるディレクトリにあってもサイトにコピーする、動画・音声・PDF・CSS の拡張子
 // (設定ファイルなどを誤って公開しないよう、それ以外は "." で始まるパスならコピーしない)
-const PUBLISHABLE_IN_DOT_DIR_EXTS = new Set(["pdf", ...VIDEO_EXTS, ...AUDIO_EXTS]);
+const PUBLISHABLE_IN_DOT_DIR_EXTS = new Set(["pdf", ...VIDEO_EXTS, ...AUDIO_EXTS, ...CSS_EXTS]);
 
 const IMAGE_EXT_SET = new Set(IMAGE_EXTS);
 
@@ -118,7 +120,7 @@ export function isImagePath(p) {
 //   - 拡張子が LINKED_FILE_EXTS にあるものだけが対象。拡張子の無いパスは対象外
 //     (`docs/` のようなディレクトリへのリンクの可能性があるため)。対象外のものは GitHub 上のURLへのリンクになる
 //   - "." で始まるファイル(.env 等)は対象外。"." で始まるディレクトリ(.github/ 等)の中のファイルは、
-//     動画・音声・PDF だけを対象にする(誤って設定ファイルなどを公開しないため)
+//     動画・音声・PDF・CSS だけを対象にする(誤って設定ファイルなどを公開しないため)
 export function isLinkedFilePath(p) {
   if (isMarkdownPath(p)) return false;
   const segs = p.split("/");

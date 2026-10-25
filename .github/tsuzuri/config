@@ -16,14 +16,11 @@ ROOT_MD=README.md
 # ビルドしたサイトの出力先(リポジトリ内のフォルダ)
 OUT_DIR=_site
 
-# テーマ: material(マテリアル) / glass(グラス) / neumorphism(ニューモーフィズム) / editorial(エディトリアル) / minimal(ミニマル) / kintsugi(金継ぎ) / blueprint(ブループリント) / nineties(90年代) / none(装飾なし)
-# 見た目の比較: https://akilasatolu.github.io/tsuzuri/docs/gallery.html
-# このサイトはテーマを使わず(none)、STYLE_FILE の独自CSSだけで見た目を作っています。
-THEME=none
-
-# 独自のCSSのファイル名(.github/tsuzuri/styles/ の中のファイル。フォルダは書かず、ファイル名だけを書きます)。
-# ファイルがあれば、テーマの後に読み込まれて最優先で反映されます(無ければ使いません)。
-STYLE_FILE=custom.css
+# サイト全体のカスタムスタイル。.github/tsuzuri/styles/ の中のCSSファイルのファイル名(フォルダは書かず、ファイル名だけを書きます)。
+# 既定の default.css はパッケージに入っています。ほかのものは、ギャラリー(https://akilasatolu.github.io/tsuzuri/docs/gallery.html)で
+# ダウンロードして .github/tsuzuri/styles/ に置き、ここにそのファイル名を書きます。
+# このサイトは、自分用のカスタムスタイル(tsuzuri.css)で見た目を作っています。
+THEME=tsuzuri.css
 
 # サイトの言語。カンマ区切りで、先頭が基本言語(起点の README の言語)です。例: ja / en / ja,en
 # 1つなら1言語のサイト、2つ以上なら多言語のサイトになります。空なら en です。

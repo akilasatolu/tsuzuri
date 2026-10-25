@@ -1,7 +1,6 @@
 ---
 title: ブループリント(blueprint)
 theme: blueprint.css
-styleFile: plain.css
 description: カスタムスタイル「ブループリント(blueprint)」の見本ページ
 ---
 

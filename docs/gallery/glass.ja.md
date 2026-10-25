@@ -1,7 +1,6 @@
 ---
 title: グラス(glass)
 theme: glass.css
-styleFile: plain.css
 description: カスタムスタイル「グラス(glass)」の見本ページ
 ---
 
