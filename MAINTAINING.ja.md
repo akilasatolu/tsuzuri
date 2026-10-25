@@ -77,7 +77,7 @@
 1. `main` で `npm test` と `npm run lint` が通り、CI が成功していることを確認する。
 2. `node scripts/check-package.mjs` を実行する。利用者が受け取るのと同じ、パッケージにまとめた中身を確かめる(内容はスクリプトの先頭のコメントを参照)。`init` が `.github/tsuzuri/styles/` に置くのは `base.css` と `default.css` だけであること、`init --update` が設定ファイル(`.github/tsuzuri/config`)と利用者が `styles/` に置いたカスタムスタイルを保持し、`default.css` を上書きすることも含まれる。
 3. タグを付ける前に `CHANGELOG.md` を書く。`[Unreleased]` に、前回のタグから今回までの利用者に見える変更をまとめる(材料は、マージした PR と `git log v<前回の版>..main`。`v<前回の版>` の部分は前回のリリースのタグにする)。カテゴリは `CHANGELOG.md` の冒頭の説明に従う。見出しを `## [X.Y.Z] - YYYY-MM-DD` に改め、その上に空の `[Unreleased]` を追加する。各リリースの節には、英語のブロック、`<!-- ja -->` の行、日本語のカテゴリ名を使った日本語のブロックの順に書く(`CHANGELOG.md` の冒頭を参照)。`scripts/release-notes.mjs` は `## [X.Y.Z]` の節が無い、または空のとき、`<!-- ja -->` の行が無いとき、どちらかのブロックが空のときにエラーで止まり、`release.yml` はタグの push のあとにこれを実行する。
-4. `docs/ai-reference.md` と `docs/ai-reference.ja.md` の対象バージョン(英語版は 13 行と 19 行、日本語版は 12 行と 18 行の `v1.37.0`)を、新しい版に更新する。`CHANGELOG.md` と同じコミットでかまいません。本文中の例(`#v1.36.0` など。英語版は 74・78・809 行、日本語版は 70・73・739 行付近)は例示なので、実在する版であれば更新は任意です。
+4. `docs/ai-reference.md` と `docs/ai-reference.ja.md` の対象バージョン(英語版は 13 行と 19 行、日本語版は 12 行と 18 行の `v1.38.0`)を、新しい版に更新する。`CHANGELOG.md` と同じコミットでかまいません。本文中の例(`#v1.36.0` など。英語版は 74・78・793 行、日本語版は 70・73・728 行付近)は例示なので、実在する版であれば更新は任意です。
 5. `package.json` と `package-lock.json` の `version` を `X.Y.Z` にする(先頭の `version` と `packages[""].version`。依存パッケージの版は変えない)。
 6. コミットして `main` に push し、タグを付けて push する。
 

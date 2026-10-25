@@ -33,6 +33,78 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+## [1.38.0] - 2026-10-26
+
+This release changes how styles are chosen, and it is **not backward compatible** for sites that use `STYLE_FILE`, the frontmatter `styleFile`, `THEME` with a built-in theme name, or `THEME=none`. Read "What to do after `init --update`" below.
+
+### Added
+
+- The look of a page is now the base CSS (`base.css`) plus **one custom style**: a CSS file in `.github/tsuzuri/styles/`. `default.css` (the former `material.css`, renamed) is the one included in the package; the others are offered in the [gallery](https://akilasatolu.github.io/tsuzuri/docs/gallery.html), where each custom style has a screenshot carousel (light and dark) and a download button.
+- A linked `.css` file is now copied to the site like a PDF or a video (also inside folders that start with `.`, such as `.github/tsuzuri/styles/glass.css`, which is written under `_.github/`). The gallery uses this for its download buttons.
+- `base.css` has a CSS-only carousel (`.tsuzuri-carousel`, `overflow-x: auto` with `scroll-snap-type: x mandatory`; no JavaScript, and it has no colors).
+
+### Changed
+
+- `THEME` in `.github/tsuzuri/config` is now the **file name of a custom style** (for example `THEME=default.css` or `THEME=glass.css`). It is always read from `.github/tsuzuri/styles/`; `STYLE_DIR` only affects where `base.css` is read from. The default, when it is omitted or empty, is `default.css`. A value that is not the name of a `.css` file (`none`, an old theme name such as `material`, a path with folders) shows a warning and `default.css` is used. If the file does not exist, a warning is shown and the site is built with `base.css` only.
+- The frontmatter `theme` is now the file name of a custom style too (`theme: glass.css`), and it **replaces** the site-wide custom style (the two are not mixed). A value that cannot be used, or a missing file, shows a warning and the page uses the site-wide custom style.
+- `init` no longer asks about the theme (five questions instead of six). The config file it creates starts with `THEME=default.css`. `init` and `init --update` place only `base.css` and `default.css` in `.github/tsuzuri/styles/`.
+- `init --update` overwrites `default.css` (copy it under another name to edit it). It does not change or delete the custom styles you put in `styles/`; an old `material.css` stays there until you delete it.
+- `sitemap.json` (`SITEMAP_JSON=true`) no longer has `styleFile` and `customStyleApplied`; its `theme` is the custom style file name (for example `default.css`).
+- The pages of the gallery are now samples of custom styles; the wording of the documentation uses "custom style" instead of "built-in theme" and "custom CSS".
+
+### Removed
+
+- `STYLE_FILE` in the config file (the workflow no longer accepts it: GitHub Actions shows `Ignoring unknown setting key STYLE_FILE`), the frontmatter `styleFile`, and the empty `custom.css` template that `init` created.
+- The `--theme` option of `init`, and the theme question.
+- The `THEME=none` keyword and the built-in theme names. Use a CSS file instead: for no decoration, `none.css` (a file that contains only comments) from the gallery.
+- The seven themes `glass`, `neumorphism`, `editorial`, `minimal`, `kintsugi`, `blueprint` and `nineties` are no longer distributed with the package. They are in the gallery as downloadable custom styles (`glass.css` and so on).
+
+**What to do after `init --update`**
+
+`init --update` brings the new build script. Your config file and the custom styles in `styles/` are not changed, so update them by hand:
+
+- Step 1: In `.github/tsuzuri/config`, change `THEME` to a file name: `THEME=material` becomes `THEME=default.css`; for any other built-in theme (for example `THEME=glass`) and for `THEME=none`, download the file (`glass.css`, `none.css`) from the gallery, put it in `.github/tsuzuri/styles/`, and write `THEME=glass.css` (`THEME=none.css`). `none.css` is not placed by `init` or `init --update`; without the file, a warning is shown and the site is built with `base.css` only.
+- Step 2: Delete the `STYLE_FILE` line. The file it pointed to (`custom.css` by default) is not loaded any more. To keep your own rules, make them a custom style: copy the custom style you use (`default.css` or a downloaded one) under another name such as `my.css`, write your rules in the copy, and set `THEME=my.css`.
+- Step 3: In frontmatter, change `theme: nineties` to `theme: nineties.css` (download the file as in step 1), and remove `styleFile:` lines (they are ignored now).
+- Step 4: Delete the files that are no longer used, such as the old `.github/tsuzuri/styles/material.css`.
+- Step 5: Run `npx github:akilasatolu/tsuzuri#v1 preview` to check the look.
+
+<!-- ja -->
+
+このリリースではスタイルの選び方が変わり、`STYLE_FILE`、frontmatter の `styleFile`、組み込みテーマ名の `THEME`、`THEME=none` を使っているサイトでは**互換性がありません**。下の「`init --update` のあとに行うこと」を読んでください。
+
+### 追加
+
+- ページの見た目は、ベース(`base.css`)と**カスタムスタイル1つ**(`.github/tsuzuri/styles/` の中の CSS ファイル)で決まるようになった。パッケージに入っているのは `default.css`(これまでの `material.css` の名前を変えたもの)だけで、ほかのものは[ギャラリー](https://akilasatolu.github.io/tsuzuri/ja/docs/gallery.html)に載せている。ギャラリーには、各カスタムスタイルのスクリーンショットのカルーセル(ライトとダーク)と、ダウンロードのボタンがある。
+- リンクされた `.css` ファイルを、PDF や動画と同じようにサイトへコピーするようにした(`.github/tsuzuri/styles/glass.css` のように `.` で始まるフォルダの中のものも。出力では `_.github/` の下に書かれる)。ギャラリーのダウンロードのボタンが使う。
+- `base.css` に、CSS だけのカルーセル(`.tsuzuri-carousel`。`overflow-x: auto` と `scroll-snap-type: x mandatory`。JavaScript は使わず、色も持たない)を追加した。
+
+### 変更
+
+- 設定ファイル `.github/tsuzuri/config` の `THEME` は、**カスタムスタイルのファイル名**にした(例: `THEME=default.css`、`THEME=glass.css`)。ファイルは常に `.github/tsuzuri/styles/` の中から読む。`STYLE_DIR` は `base.css` を読む場所だけに影響する。省略した場合・空の場合は `default.css`。`.css` のファイル名でない値(`none`、`material` のような昔のテーマ名、フォルダを含むパス)は、警告して `default.css` を使う。ファイルが無い場合は、警告して `base.css` だけでビルドする。
+- frontmatter の `theme` も、カスタムスタイルのファイル名にした(`theme: glass.css`)。サイト全体のカスタムスタイルを**置き換える**(混ざらない)。使えない値や無いファイルは、警告して、そのページはサイト全体のカスタムスタイルを使う。
+- `init` はテーマを質問しなくなった(質問は6つから5つ)。作られる設定ファイルは `THEME=default.css` で始まる。`init` と `init --update` が `.github/tsuzuri/styles/` に置くのは、`base.css` と `default.css` だけ。
+- `init --update` は `default.css` を上書きする(編集したいときは別の名前にコピーする)。`styles/` に置いた自分のカスタムスタイルは、変更も削除もしない。昔の `material.css` は、自分で消すまで残る。
+- `sitemap.json`(`SITEMAP_JSON=true`)から `styleFile` と `customStyleApplied` をなくした。`theme` は、カスタムスタイルのファイル名(例: `default.css`)になる。
+- ギャラリーの各ページは、カスタムスタイルの見本ページになった。ドキュメントの用語も、「組み込みテーマ」「独自 CSS」から「カスタムスタイル」に統一した。
+
+### 削除
+
+- 設定ファイルの `STYLE_FILE`(ワークフローも受け付けなくなり、GitHub Actions では `Ignoring unknown setting key STYLE_FILE` と警告される)、frontmatter の `styleFile`、`init` が作っていた空の `custom.css` のひな形。
+- `init` の `--theme` オプションと、テーマの質問。
+- `THEME=none` というキーワードと、組み込みテーマ名。代わりに CSS ファイルを指定する。装飾なしにしたいときは、ギャラリーの `none.css`(コメントだけのファイル)を使う。
+- `glass`・`neumorphism`・`editorial`・`minimal`・`kintsugi`・`blueprint`・`nineties` の7つのテーマを、パッケージに含めて配らないようにした。ギャラリーに、ダウンロードできるカスタムスタイル(`glass.css` など)として載せている。
+
+**`init --update` のあとに行うこと**
+
+`init --update` は新しいビルドスクリプトを取り込みます。設定ファイルと `styles/` のカスタムスタイルは変更されないので、手で直してください。
+
+- 手順1: `.github/tsuzuri/config` の `THEME` をファイル名にする。`THEME=material` は `THEME=default.css`、ほかの組み込みテーマ(例: `THEME=glass`)と `THEME=none` は、ギャラリーからファイル(`glass.css`、`none.css`)をダウンロードして `.github/tsuzuri/styles/` に置き、`THEME=glass.css`(`THEME=none.css`)にする。`none.css` は `init` も `init --update` も置かないので、ファイルが無いと警告が出て、`base.css` だけでビルドされる。
+- 手順2: `STYLE_FILE` の行を消す。指していたファイル(既定は `custom.css`)は、もう読み込まれない。自分で書いたルールを残すには、カスタムスタイルにする: 使っているカスタムスタイル(`default.css` かダウンロードしたもの)を `my.css` のような別の名前にコピーし、コピーの中にルールを書いて、`THEME=my.css` にする。
+- 手順3: frontmatter の `theme: nineties` を `theme: nineties.css` にし(ファイルは手順 1 と同じようにダウンロードする)、`styleFile:` の行を消す(今は無視される)。
+- 手順4: 昔の `.github/tsuzuri/styles/material.css` など、使われなくなったファイルを消す。
+- 手順5: `npx github:akilasatolu/tsuzuri#v1 preview` で見た目を確かめる。
+
 ## [1.37.0] - 2026-10-25
 
 ### Added
