@@ -95,9 +95,9 @@ Linking and embedding are treated differently. If an image, video or audio embed
 `![](…)`, `<img src>`, `srcset`, `<video src>`, `<audio src>` or `<source src>` points to a file
 that exists but isn't copied (an extension that isn't in the table, or a folder without
 `README.md` or `index.md`), the `src` becomes a link to GitHub, so it can't be shown or played.
-At the end of the build, a warning like "the embedded target X is a kind of file that isn't
-copied, so it can't be shown or played (referenced from Y)" is printed (for a folder, "is a
-folder"). With `STRICT_LINKS=true` this counts as a link problem and the build fails, so an
+At the end of the build, a warning like "The embedded target X is a file of a type that is not
+copied, so it cannot be displayed or played (referenced from Y)" is printed (for a folder, "is a
+folder"; a build script copied by v1.36.0 or earlier prints it in Japanese, as `埋め込みの先 X は…のため、表示・再生できません (referenced from Y)`). With `STRICT_LINKS=true` this counts as a link problem and the build fails, so an
 update can stop a build that used to pass. To fix it, change the file to a format in the table
 or, if you don't need to embed it, turn the embed into a plain link. Plain links such as
 `[x](clip.xyz)` and `<a href>` don't produce this warning.
@@ -143,7 +143,8 @@ work on the generated site.
   `-2` and so on.
 
 If the target page doesn't have that heading (the heading was renamed, misspelled and so on),
-the build log shows it as "a link whose heading isn't found on the target page". With
+the build log shows it as "Links whose target page has no such heading: N" (up to v1.36.0, in Japanese:
+`リンク先のページに見出しが見つからないリンク: N 件`). With
 `STRICT_LINKS=true` the build fails (v1.5.0 or later).
 
 ## Absolute paths and BASE_PATH
@@ -328,8 +329,8 @@ the text as it is, put a backslash before the first colon (`\:x:`) or write it a
 
 **`<picture>` and `srcset`**: the images in the `srcset` of `<img>` and `<source>` written as HTML
 are handled like `src`: they are copied to the site, and their paths are rewritten to paths on
-the site (a missing image gives the same "file not found" warning, and fails the build with
-`STRICT_LINKS=true`). For example, this switches the logo for dark mode:
+the site (a missing image gives the same "The linked file was not found: …" warning, and fails the build with
+`STRICT_LINKS=true`; a build script copied by v1.36.0 or earlier prints it in Japanese, as `リンク先のファイルが見つかりません: …`). For example, this switches the logo for dark mode:
 
 ```html
 <picture>

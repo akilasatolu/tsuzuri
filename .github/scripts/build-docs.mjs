@@ -135,7 +135,7 @@ function localBuildEnv(env, repoRoot) {
   const configAbs = path.join(repoRoot, CONFIG_FILE_PATH);
   if (fs.existsSync(configAbs)) {
     merged = withConfigFileDefaults(env, parseConfigText(fs.readFileSync(configAbs, "utf-8")));
-    console.log(`Config file loaded: ${CONFIG_FILE_PATH} (環境変数で指定したキーは環境変数を優先)`);
+    console.log(`Config file loaded: ${CONFIG_FILE_PATH} (values set as environment variables take precedence)`);
   }
   // リポジトリ直下の styles/ は利用者のアプリの CSS の可能性があるため、init でコピーした方を優先する
   const vendoredStyles = `${VENDOR_DIR}/styles`;
@@ -179,7 +179,7 @@ async function main() {
   // 上書きしてしまう恐れがあるため受け付けない。
   if (!OUT_DIR || OUT_DIR === path.resolve(REPO_ROOT)) {
     console.error(
-      `OUT_DIR (${config.outDir}) にはリポジトリ内のサブディレクトリを指定してください。処理を中止します。`
+      `OUT_DIR (${config.outDir}) must be a subdirectory inside the repository. Aborting.`
     );
     process.exit(1);
   }
@@ -187,7 +187,7 @@ async function main() {
   // ---------- 1. ROOT_MD 存在チェック(致命的) ----------
   const rootMdAbs = resolveInsideRepo(REPO_ROOT, config.rootMd);
   if (!rootMdAbs) {
-    console.error(`起点となる ${config.rootMd} がリポジトリの外を指しています。処理を中止します。`);
+    console.error(`The root file ${config.rootMd} points outside the repository. Aborting.`);
     process.exit(1);
   }
   // ROOT_MD が無くても、基本言語の印付きの版(README.en.md など。実際のファイル名で探す)があれば続ける
@@ -196,7 +196,7 @@ async function main() {
     const markedRoot =
       i18n.markerOf(config.rootMd) === null ? config.rootMd.replace(/\.md$/i, "") + `.${i18n.base}.md` : "";
     console.error(
-      `起点となる ${config.rootMd}${markedRoot ? `(または ${markedRoot})` : " "}が見つかりません。処理を中止します。`
+      `The root file ${config.rootMd}${markedRoot ? ` (or ${markedRoot})` : ""} was not found. Aborting.`
     );
     process.exit(1);
   }
@@ -207,7 +207,7 @@ async function main() {
   const baseCssAbs = path.resolve(REPO_ROOT, config.styleDir, "base.css");
   if (!fs.existsSync(baseCssAbs)) {
     console.error(
-      `${config.styleDir}/base.css が見つかりません。パッケージが破損している可能性があるため処理を中止します。`
+      `${config.styleDir}/base.css was not found. The package may be damaged, so the build is aborted.`
     );
     process.exit(1);
   }
@@ -221,7 +221,7 @@ async function main() {
       themeCss = fs.readFileSync(themeCssAbs, "utf-8");
     } else {
       console.warn(
-        `[build-docs] ${config.styleDir}/${config.theme}.css が見つかりません。テーマなし(base.cssのみ)でビルドを継続します。`
+        `[build-docs] ${config.styleDir}/${config.theme}.css was not found. Continuing the build without a theme (base.css only).`
       );
       themeCss = "";
     }
@@ -245,9 +245,9 @@ async function main() {
     if (!/\.css$/i.test(spec)) {
       if (!ALLOWED_THEMES.includes(spec)) {
         console.warn(
-          `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" は、組み込みテーマ名(${ALLOWED_THEMES.join(
+          `[build-docs] ${rel}: the theme "${spec}" given in the frontmatter is neither a built-in theme name (${ALLOWED_THEMES.join(
             "/"
-          )})でも、.css で終わるCSSのファイル名でもありません。サイト全体のTHEME("${config.theme}")にフォールバックします。`
+          )}) nor a CSS file name ending in .css. Falling back to the site-wide THEME ("${config.theme}").`
         );
         return themeCss;
       }
@@ -257,7 +257,7 @@ async function main() {
       const abs = path.resolve(REPO_ROOT, config.styleDir, `${spec}.css`);
       if (!fs.existsSync(abs)) {
         console.warn(
-          `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" 用のCSS(${config.styleDir}/${spec}.css)が見つかりません。サイト全体のTHEME("${config.theme}")にフォールバックします。`
+          `[build-docs] ${rel}: the CSS (${config.styleDir}/${spec}.css) for the theme "${spec}" given in the frontmatter was not found. Falling back to the site-wide THEME ("${config.theme}").`
         );
         return themeCss;
       }
@@ -270,7 +270,7 @@ async function main() {
     // シンボリックリンクのファイルは読み込まない。
     if (!isStyleFileName(spec)) {
       console.warn(
-        `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" はCSSのファイル名として使えません(/・\\・: を含まず、. で始まらない、.css で終わるファイル名だけを書きます)。サイト全体のTHEME("${config.theme}")にフォールバックします。`
+        `[build-docs] ${rel}: the theme "${spec}" given in the frontmatter cannot be used as a CSS file name (write only a file name that has no /, \\ or :, does not start with ., and ends in .css). Falling back to the site-wide THEME ("${config.theme}").`
       );
       return themeCss;
     }
@@ -279,13 +279,13 @@ async function main() {
     const abs = resolveInsideRepo(REPO_ROOT, styleFilePath(spec));
     if (!abs) {
       console.warn(
-        `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" はリポジトリの外を指しているため無視します。サイト全体のTHEME("${config.theme}")にフォールバックします。`
+        `[build-docs] ${rel}: the theme "${spec}" given in the frontmatter points outside the repository, so it is ignored. Falling back to the site-wide THEME ("${config.theme}").`
       );
       return themeCss;
     }
     if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
       console.warn(
-        `[build-docs] ${rel}: frontmatterで指定されたtheme "${spec}" のファイル(${styleFilePath(spec)})が見つかりません。サイト全体のTHEME("${config.theme}")にフォールバックします。`
+        `[build-docs] ${rel}: the file (${styleFilePath(spec)}) for the theme "${spec}" given in the frontmatter was not found. Falling back to the site-wide THEME ("${config.theme}").`
       );
       return themeCss;
     }
@@ -317,7 +317,7 @@ async function main() {
     }
   }
   for (const { rel, keptRel } of tIndex.excluded) {
-    console.warn(`[build-docs] ${rel} は ${keptRel} と同じページの同じ言語版のため使いません。`);
+    console.warn(`[build-docs] ${rel} is not used because it is the same language version of the same page as ${keptRel}.`);
   }
   /** 使わなかったファイルなら、代わりに使うファイル(置き換えが続くときは最後まで)。それ以外はそのまま */
   function keptRelOf(rel) {
@@ -349,7 +349,7 @@ async function main() {
     const conflictDirs = [...new Set(crawl.prefixConflicts.map((rel) => rel.slice(0, rel.indexOf("/"))))];
     for (const dir of conflictDirs) {
       console.warn(
-        `[build-docs] 多言語のURL(/${dir.toLowerCase()}/)と同じ名前のフォルダ ${dir} のページがあります。出力先が重なるおそれがあります。`
+        `[build-docs] There are pages in the folder ${dir}, which has the same name as the multilingual URL (/${dir.toLowerCase()}/). The output paths may collide.`
       );
     }
     const rels = [...visitedMd.keys()];
@@ -368,19 +368,19 @@ async function main() {
         const name = languageName(tag);
         const rootName = config.rootMd.replace(/\.md$/i, "") + `.${tag}.md`;
         console.warn(
-          `[build-docs] ${name}(${tag})のトップページ(${rootName})が見つかりません。翻訳の無いページの言語切り替えボタンには ${name} を出しません。`
+          `[build-docs] The top page (${rootName}) of ${name} (${tag}) was not found. ${name} is not shown on the language switch button of pages without a translation.`
         );
       }
     }
   }
   if (missing.length) {
-    console.warn(`リンク先が見つからなかったファイル: ${missing.length} 件`);
+    console.warn(`Files that links point to were not found: ${missing.length}`);
     for (const m of missing) {
       console.warn(`  - ${m.rel} (referenced from ${m.referencedFrom})`);
     }
   }
   if (rejected.length) {
-    console.warn(`セキュリティ上の理由で無視されたリンク: ${rejected.length} 件`);
+    console.warn(`Links ignored for security reasons: ${rejected.length}`);
     for (const r of rejected) {
       console.warn(`  - ${r.rel} (referenced from ${r.referencedFrom}, reason: ${r.reason})`);
     }
@@ -394,7 +394,7 @@ async function main() {
   if (customStyleRel) {
     const styleAbs = resolveInsideRepo(REPO_ROOT, customStyleRel);
     if (!styleAbs) {
-      console.warn(`STYLE_FILE (${config.styleFile}) はリポジトリの外を指しているため無視します。`);
+      console.warn(`STYLE_FILE (${config.styleFile}) points outside the repository, so it is ignored.`);
     } else if (fs.existsSync(styleAbs)) {
       customCss = fs.readFileSync(styleAbs, "utf-8");
       console.log(`Custom style loaded: ${customStyleRel}`);
@@ -415,15 +415,15 @@ async function main() {
       let loaded = null;
       if (!isStyleFileName(spec)) {
         console.warn(
-          `[build-docs] ${rel}: frontmatterの styleFile "${spec}" はCSSのファイル名として使えません(/・\\・: を含まず、. で始まらない、.css で終わるファイル名だけを書きます)。サイト全体の STYLE_FILE を使います。`
+          `[build-docs] ${rel}: the styleFile "${spec}" in the frontmatter cannot be used as a CSS file name (write only a file name that has no /, \\ or :, does not start with ., and ends in .css). Using the site-wide STYLE_FILE.`
         );
       } else {
         const specRel = styleFilePath(spec);
         const abs = resolveInsideRepo(REPO_ROOT, specRel);
         if (!abs) {
-          console.warn(`[build-docs] ${rel}: frontmatterの styleFile "${spec}" はリポジトリの外を指しているため無視します。`);
+          console.warn(`[build-docs] ${rel}: the styleFile "${spec}" in the frontmatter points outside the repository, so it is ignored.`);
         } else if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
-          console.warn(`[build-docs] ${rel}: frontmatterの styleFile "${spec}" が見つかりません。サイト全体の STYLE_FILE を使います。`);
+          console.warn(`[build-docs] ${rel}: the styleFile "${spec}" in the frontmatter was not found. Using the site-wide STYLE_FILE.`);
         } else {
           loaded = { css: fs.readFileSync(abs, "utf-8"), rel: specRel };
         }
@@ -444,7 +444,7 @@ async function main() {
     faviconAbs = resolveInsideRepo(REPO_ROOT, config.faviconFile) || "";
     if (!faviconAbs) {
       // コピー先も OUT_DIR の外になってしまうため、リポジトリ外を指す指定は受け付けない
-      console.warn(`FAVICON_FILE (${config.faviconFile}) はリポジトリの外を指しているため無視します。`);
+      console.warn(`FAVICON_FILE (${config.faviconFile}) points outside the repository, so it is ignored.`);
     } else if (fs.existsSync(faviconAbs)) {
       faviconOutRel = outputRelOf(path.relative(REPO_ROOT, faviconAbs).split(path.sep).join("/"));
       faviconHref = `${config.basePath}/${encodeUrlPath(faviconOutRel)}`;
@@ -466,12 +466,12 @@ async function main() {
     if (llmsStat?.isFile()) {
       llmsMode = "copy";
     } else if (llmsStat) {
-      console.warn("[build-docs] llms.txt がシンボリックリンク(または通常のファイル以外)のため、コピーも自動生成もしません。");
+      console.warn("[build-docs] llms.txt is a symbolic link (or not a regular file), so it is neither copied nor generated.");
     } else if (config.siteOrigin) {
       if (LLMS_ORIGIN_RE.test(config.siteOrigin)) {
         llmsMode = "generate";
       } else {
-        console.warn("[build-docs] SITE_ORIGIN の形が正しくないため、llms.txt を作りません。");
+        console.warn("[build-docs] SITE_ORIGIN is not in a valid form, so llms.txt is not generated.");
       }
     }
   }
@@ -499,7 +499,7 @@ async function main() {
     }
   }
   generatedFiles.push(BUILD_MARKER);
-  const writtenBy = new Map(generatedFiles.map((f) => [f, "(Tsuzuri が生成するファイル)"]));
+  const writtenBy = new Map(generatedFiles.map((f) => [f, "(file generated by Tsuzuri)"]));
   const collisions = [];
   // 前回 Tsuzuri が出力したディレクトリ(目印のファイルがある)だけを空にする。
   // 目印が無いディレクトリは利用者のファイルの可能性があるので、消さずに上書きする。
@@ -510,7 +510,7 @@ async function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(
     path.join(OUT_DIR, BUILD_MARKER),
-    "Tsuzuri のビルドの出力先です。次のビルドの前に、このディレクトリの中身はすべて消されます。\n"
+    "This is the output directory of a Tsuzuri build. Everything in it is deleted before the next build.\n"
   );
   fs.writeFileSync(path.join(OUT_DIR, ".nojekyll"), "");
 
@@ -613,11 +613,11 @@ async function main() {
         stdio: ["ignore", "pipe", "ignore"],
       }).trim();
       if (shallow === "true") {
-        console.warn("[build-docs] git の履歴が浅い(shallow clone)ため、最終更新日を表示しません。");
+        console.warn("[build-docs] The git history is shallow (shallow clone), so the last updated dates are not shown.");
         lastUpdatedEnabled = false;
       }
     } catch {
-      console.warn("[build-docs] git の履歴を読めないため、最終更新日を表示しません。");
+      console.warn("[build-docs] The git history cannot be read, so the last updated dates are not shown.");
       lastUpdatedEnabled = false;
     }
   }
@@ -652,7 +652,7 @@ async function main() {
     if (isExternal(rawImage)) return rawImage;
     const resolved = resolveRepoRel(fromRel, rawImage);
     if (resolved.rejected || !resolveInsideRepo(REPO_ROOT, resolved.repoRel)) {
-      console.warn(`og:image (${rawImage}) がリポジトリの外を指しているため出力しません。`);
+      console.warn(`og:image (${rawImage}) points outside the repository, so it is not output.`);
       return "";
     }
     ogImageSet.add(resolved.repoRel);
@@ -723,12 +723,12 @@ async function main() {
   }
   if (config.editLink && !editUrlOf(siteRootRel)) {
     console.warn(
-      "[build-docs] EDIT_LINK=true ですが、GitHub 上のリポジトリかブランチが分からない(git の origin が無い・ブランチ以外をビルドしている等)ため、編集リンクを付けません。"
+      "[build-docs] EDIT_LINK=true, but the repository or branch on GitHub is unknown (no git origin, or something other than a branch is being built), so the edit link is not added."
     );
   }
   if (config.repoLink && !repoBaseUrl) {
     console.warn(
-      "[build-docs] REPO_LINK=true ですが、GitHub 上のリポジトリが分からない(git の origin が無い等)ため、リポジトリへのリンクを付けません。"
+      "[build-docs] REPO_LINK=true, but the repository on GitHub is unknown (for example there is no git origin), so the repository link is not added."
     );
   }
   function repoUrlOf(repoRel, isDir) {
@@ -738,8 +738,8 @@ async function main() {
   for (const [repoRel, target] of linkTargets) {
     if (target.kind === "repo" && !repoUrlOf(repoRel, target.isDir)) {
       console.warn(
-        `[build-docs] ${target.referencedFrom} から ${repoRel} へのリンクは、サイトに含めないファイル・ディレクトリを指しています。` +
-          `GitHub上のURLが分からない(git の origin が無い等)ため、サイト内のパスのままリンクします(サイトには無いので開けません)。`
+        `[build-docs] The link from ${target.referencedFrom} to ${repoRel} points to a file or directory that is not included in the site. ` +
+          `The URL on GitHub is unknown (for example there is no git origin), so the link keeps the path inside the site (it cannot be opened because it is not in the site).`
       );
     }
   }
@@ -859,7 +859,7 @@ async function main() {
     if (!stylesheets.has(css)) {
       const name = `tsuzuri-${createHash("sha256").update(css).digest("hex").slice(0, 10)}.css`;
       fs.writeFileSync(path.join(OUT_DIR, name), css);
-      writtenBy.set(name, "(Tsuzuri が生成するファイル)");
+      writtenBy.set(name, "(file generated by Tsuzuri)");
       stylesheets.set(css, `${config.basePath}/${name}`);
     }
     return stylesheets.get(css);
@@ -1141,8 +1141,8 @@ async function main() {
     const outRel = outputRelOf(repoRel);
     const prev = writtenBy.get(outRel);
     if (prev && prev !== source) {
-      console.warn(`[build-docs] 出力先 ${outRel} が重複しています(${prev} と ${source})。後の ${source} で上書きします。`);
-      collisions.push(`${outRel} (${prev} と ${source})`);
+      console.warn(`[build-docs] The output path ${outRel} is duplicated (${prev} and ${source}). It is overwritten by the later ${source}.`);
+      collisions.push(`${outRel} (${prev} and ${source})`);
     }
     writtenBy.set(outRel, source);
     const outAbs = path.join(OUT_DIR, outRel);
@@ -1220,7 +1220,7 @@ async function main() {
   // ---------- 7.55 コードブロックのコピーボタンのスクリプト(コードブロックがあるページが読み込む) ----------
   if (copyScriptUsed) {
     fs.writeFileSync(path.join(OUT_DIR, COPY_SCRIPT_NAME), COPY_SCRIPT);
-    writtenBy.set(COPY_SCRIPT_NAME, "(Tsuzuri が生成するファイル)");
+    writtenBy.set(COPY_SCRIPT_NAME, "(file generated by Tsuzuri)");
   }
 
   // ---------- 7.6 サイト内検索の索引・スクリプト(NAV_ENABLED=true のとき) ----------
@@ -1248,15 +1248,15 @@ async function main() {
     if (ids && !ids.has(id) && !ids.has(frag)) missingAnchors.push(`${target}#${id} (referenced from ${from})`);
   }
   if (missingAnchors.length) {
-    console.warn(`リンク先のページに見出しが見つからないリンク: ${missingAnchors.length} 件`);
+    console.warn(`Links whose target page has no such heading: ${missingAnchors.length}`);
     for (const a of missingAnchors) console.warn(`  - ${a}`);
   }
 
   if (embedNotCopied.length) {
-    console.warn(`コピーしないファイル・フォルダが埋め込まれているため、表示・再生できません: ${embedNotCopied.length} 件`);
+    console.warn(`Files or folders that are not copied are embedded, so they cannot be displayed or played: ${embedNotCopied.length}`);
     for (const e of embedNotCopied) {
-      const what = e.isDir ? "フォルダ" : "コピーしない種類のファイル";
-      console.warn(`  - 埋め込みの先 ${e.target} は${what}のため、表示・再生できません (referenced from ${e.from})`);
+      const what = e.isDir ? "a folder" : "a file of a type that is not copied";
+      console.warn(`  - The embedded target ${e.target} is ${what}, so it cannot be displayed or played (referenced from ${e.from})`);
     }
   }
 
@@ -1265,12 +1265,12 @@ async function main() {
   for (const assetRel of new Set([...imageSet, ...fileSet, ...ogImageSet])) {
     const src = resolveInsideRepo(REPO_ROOT, assetRel);
     if (!src) {
-      console.warn(`リポジトリの外を指しているためコピーしません: ${assetRel}`);
+      console.warn(`Not copied because it points outside the repository: ${assetRel}`);
       missingAssets.push(assetRel);
       continue;
     }
     if (!fs.existsSync(src) || !fs.statSync(src).isFile()) {
-      console.warn(`リンク先のファイルが見つかりません: ${assetRel}`);
+      console.warn(`The linked file was not found: ${assetRel}`);
       missingAssets.push(assetRel);
       continue;
     }
@@ -1278,9 +1278,9 @@ async function main() {
     const prev = writtenBy.get(outRel);
     if (prev && prev !== assetRel && !(outRel === faviconOutRel && src === faviconAbs)) {
       console.warn(
-        `[build-docs] リンクされた ${assetRel} は、出力先が ${prev} と重なるためコピーしません(生成したファイルを上書きしないため)。`
+        `[build-docs] The linked ${assetRel} is not copied because its output path collides with ${prev} (so that a generated file is not overwritten).`
       );
-      collisions.push(`${outRel} (${prev} と ${assetRel})`);
+      collisions.push(`${outRel} (${prev} and ${assetRel})`);
       continue;
     }
     writtenBy.set(outRel, assetRel);
@@ -1307,10 +1307,10 @@ async function main() {
       // 読めなければ下で警告する
     }
     if (!data) {
-      console.warn("[build-docs] llms.txt を通常のファイルとして読めないため、コピーも自動生成もしません。");
+      console.warn("[build-docs] llms.txt cannot be read as a regular file, so it is neither copied nor generated.");
     } else if (prev) {
-      console.warn(`[build-docs] リポジトリ直下の llms.txt は、出力先が ${prev} と重なるためコピーしません。`);
-      collisions.push(`llms.txt (${prev} と llms.txt)`);
+      console.warn(`[build-docs] The llms.txt at the repository root is not copied because its output path collides with ${prev}.`);
+      collisions.push(`llms.txt (${prev} and llms.txt)`);
     } else {
       writtenBy.set("llms.txt", "llms.txt");
       fs.writeFileSync(path.join(OUT_DIR, "llms.txt"), data);
@@ -1430,18 +1430,18 @@ async function main() {
   // リンク切れ・拒否したリンクがあればビルドを失敗させる(ワークフローはここで止まり公開されない)。
   if (config.strictLinks) {
     const problems = [
-      ...missing.map((m) => `リンク先が見つかりません: ${m.rel} (referenced from ${m.referencedFrom})`),
-      ...rejected.map((r) => `拒否したリンク: ${r.rel} (referenced from ${r.referencedFrom}, reason: ${r.reason})`),
-      ...missingAssets.map((a) => `コピーできなかったファイル: ${a}`),
-      ...collisions.map((c) => `出力先の重複: ${c}`),
-      ...missingAnchors.map((a) => `見出しが見つかりません: ${a}`),
+      ...missing.map((m) => `Link target not found: ${m.rel} (referenced from ${m.referencedFrom})`),
+      ...rejected.map((r) => `Rejected link: ${r.rel} (referenced from ${r.referencedFrom}, reason: ${r.reason})`),
+      ...missingAssets.map((a) => `File could not be copied: ${a}`),
+      ...collisions.map((c) => `Output path collision: ${c}`),
+      ...missingAnchors.map((a) => `Heading not found: ${a}`),
       ...embedNotCopied.map(
-        (e) => `${e.isDir ? "フォルダ" : "コピーしない種類のファイル"}の埋め込み: ${e.target} (referenced from ${e.from})`
+        (e) => `Embedded ${e.isDir ? "folder" : "file of a type that is not copied"}: ${e.target} (referenced from ${e.from})`
       ),
-      ...tIndex.excluded.map((e) => `翻訳の重複: ${e.rel}(${e.keptRel} を使用)`),
+      ...tIndex.excluded.map((e) => `Duplicate translation: ${e.rel} (${e.keptRel} is used)`),
     ];
     if (problems.length) {
-      console.error(`STRICT_LINKS=true のため、リンクの問題 ${problems.length} 件でビルドを失敗させます。`);
+      console.error(`STRICT_LINKS=true, so the build fails because of ${problems.length} link problem(s).`);
       for (const problem of problems) console.error(`  - ${problem}`);
       process.exit(1);
     }
@@ -1451,6 +1451,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("ビルド中に予期しないエラーが発生しました:", err.message);
+  console.error("An unexpected error occurred during the build:", err.message);
   process.exit(1);
 });

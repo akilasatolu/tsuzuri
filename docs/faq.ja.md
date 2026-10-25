@@ -38,8 +38,9 @@ Branch "docs" is not allowed to deploy to github-pages due to environment protec
 Markdown内でリンクした先のファイルが実際には存在しない場合、ビルドはエラーにはならず、
 そのリンクを「見つからなかったリンク」として記録したうえで処理を続けます。
 どのリンクが該当するかは、ActionsタブのワークフローのログのBuildステップに、
-「リンク先が見つからなかったファイル」「セキュリティ上の理由で無視されたリンク」として
-参照元のファイルとともに表示されます。さらに詳しく調べたい場合は、一時的に`SITEMAP_JSON=true`に
+「Files that links point to were not found: N」「Links ignored for security reasons: N」として
+(v1.36.0までのビルドスクリプトでは日本語で、「リンク先が見つからなかったファイル: N 件」
+「セキュリティ上の理由で無視されたリンク: N 件」)参照元のファイルとともに表示されます。さらに詳しく調べたい場合は、一時的に`SITEMAP_JSON=true`に
 してデバッグ用の`sitemap.json`を出力することもできます([concepts.md](./concepts.ja.md)参照)。
 リンク切れのまま公開したくない場合は、`STRICT_LINKS=true`にするとビルドを失敗させられます
 ([configuration.md](./configuration.ja.md#strict_links)参照)。
@@ -52,8 +53,11 @@ Markdown内でリンクした先のファイルが実際には存在しない場
 
 v1.32.0からは、[concepts.md](./concepts.ja.md)の「コピーされるファイル」にある拡張子のファイルだけが
 サイトにコピーされます。`![](…)`・`<img src>`・`<video src>`などで埋め込んだ画像・動画・音声の先が、
-ほかの拡張子のファイル(またはフォルダ)だと、表示・再生できないため、Buildステップに「埋め込みの先Xは
-コピーしない種類のファイル」という趣旨の警告が出ます。`STRICT_LINKS=true`ではビルドが失敗するので、
+ほかの拡張子のファイル(またはフォルダ)だと、表示・再生できないため、Buildステップに「The embedded
+target X is a file of a type that is not copied, so it cannot be displayed or played (referenced
+from Y)」(フォルダのときは「is a folder」)という警告が出ます(v1.36.0までのビルドスクリプトでは日本語で、
+`埋め込みの先 X はコピーしない種類のファイルのため、表示・再生できません (referenced from Y)`)。
+`STRICT_LINKS=true`ではビルドが失敗するので、
 更新する前は通っていたビルドが止まることがあります。対処は、一覧にある形式のファイル
 (動画なら`.mp4`、画像なら`.png`や`.avif`など)に変えるか、`[clip](clip.xyz)`のような普通のリンクに
 変えることです(リンクでは警告は出ません)。

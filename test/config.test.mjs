@@ -231,14 +231,14 @@ test("LANGUAGES: 1つ・複数・前後の空白・空要素。先頭が基本�
 test('resolveLanguages: 不正なタグは警告して捨てる("en,en_US" → ["en"])', () => {
   withCapturedWarn((calls) => {
     assert.deepEqual(resolveLanguages("en,en_US"), ["en"]);
-    assert.deepEqual(calls, ['[config] LANGUAGES の "en_US" は言語タグとして不正なため無視します。']);
+    assert.deepEqual(calls, ['[config] "en_US" in LANGUAGES is ignored because it is not a valid language tag.']);
   });
 });
 
 test('resolveLanguages: 大文字小文字を区別せず重複は警告して捨てる("en,EN" → ["en"])', () => {
   withCapturedWarn((calls) => {
     assert.deepEqual(resolveLanguages("en,EN"), ["en"]);
-    assert.deepEqual(calls, ['[config] LANGUAGES の "EN" が重複しているため無視します。']);
+    assert.deepEqual(calls, ['[config] "EN" in LANGUAGES is ignored because it is a duplicate.']);
   });
 });
 
@@ -246,8 +246,8 @@ test('resolveLanguages: 全部不正("en_US") → ["en"]+警告2つ(不正・全
   withCapturedWarn((calls) => {
     assert.deepEqual(resolveLanguages("en_US"), ["en"]);
     assert.deepEqual(calls, [
-      '[config] LANGUAGES の "en_US" は言語タグとして不正なため無視します。',
-      '[config] LANGUAGES に正しい言語タグがありません。"en" にします。',
+      '[config] "en_US" in LANGUAGES is ignored because it is not a valid language tag.',
+      '[config] LANGUAGES has no valid language tag. Using "en".',
     ]);
   });
 });
@@ -323,7 +323,7 @@ test("LLMS_TXT: 既定は true(未設定・空は警告なし)、false で無効
     for (const bad of ["off", "no", "ture", "0"]) {
       calls.length = 0;
       assert.equal(loadConfig({ LLMS_TXT: bad }).llmsTxt, false, bad);
-      assert.deepEqual(calls, [`[config] LLMS_TXT の値が不正です("${bad}")。false にフォールバックします。`]);
+      assert.deepEqual(calls, [`[config] The value of LLMS_TXT is invalid ("${bad}"). Falling back to false.`]);
     }
   });
 });
@@ -338,7 +338,7 @@ test("真偽値のキー: 既存のキーの既定は false のまま、不正�
     for (const key of ["NAV_ENABLED", "STRICT_LINKS", "SITEMAP_JSON", "LAST_UPDATED", "EDIT_LINK", "REPO_LINK"]) {
       calls.length = 0;
       loadConfig({ [key]: "maybe" });
-      assert.deepEqual(calls, [`[config] ${key} の値が不正です("maybe")。false にフォールバックします。`]);
+      assert.deepEqual(calls, [`[config] The value of ${key} is invalid ("maybe"). Falling back to false.`]);
     }
   });
 });
@@ -452,8 +452,8 @@ test("STYLE_FILE: フォルダを含む値・.css で終わらない値・. で�
     withCapturedWarn((calls) => {
       assert.equal(loadConfig({ STYLE_FILE: value }).styleFile, "", value);
       assert.equal(calls.length, 1, value);
-      assert.match(calls[0], /\[config\] STYLE_FILE の値が不正です/);
-      assert.match(calls[0], /ファイル名だけ/);
+      assert.match(calls[0], /\[config\] The value of STYLE_FILE is invalid/);
+      assert.match(calls[0], /Write only a file name/);
     });
   }
 });

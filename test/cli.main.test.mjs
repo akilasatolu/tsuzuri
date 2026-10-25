@@ -471,6 +471,14 @@ test("main: 既定(--lang なし)では、標準出力・標準エラー・生�
     assert.equal(result.status, 0, result.stderr);
     assert.doesNotMatch(result.stdout + result.stderr, CJK);
   });
+  // 対話の init で、言語に正しくない値(ja_JP)を答えたときの警告([config] で始まる)も英語
+  withTmpDir((dir) => {
+    setupRepo(dir);
+    const result = runCli([], { cwd: dir, input: "\n\n\n\nja_JP\n\n" });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stderr, /\[config\] "ja_JP" in LANGUAGES is ignored because it is not a valid language tag\./);
+    assert.doesNotMatch(result.stdout + result.stderr, CJK);
+  });
   // --help、引数のエラー、init 前の preview
   withTmpDir((dir) => {
     for (const args of [["--help"], ["--bogus"], ["deploy"], ["--theme", "sepia"], ["preview", "--port", "abc"], ["preview"], ["--lang", "fr"]]) {
