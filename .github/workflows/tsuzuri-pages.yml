@@ -1,6 +1,6 @@
 name: "Tsuzuri: Deploy to GitHub Pages"
 
-# tsuzuri v1.38.0 generated this self-contained workflow with npx github:akilasatolu/tsuzuri#v1 init.
+# tsuzuri v1.39.0 generated this self-contained workflow with npx github:akilasatolu/tsuzuri#v1 init.
 # The build scripts (under .github/tsuzuri/) are also copied into this repository,
 # so each run does not fetch the Tsuzuri repository (akilasatolu/tsuzuri).
 # To update the scripts to the latest version, run npx github:akilasatolu/tsuzuri#v1 init --update.
