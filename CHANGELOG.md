@@ -33,6 +33,39 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+## [1.39.0] - 2026-10-26
+
+### Added
+
+- The image carousel (`.tsuzuri-carousel`) now has navigation: "previous" and "next" arrows, dots, and a count such as "1 / 2", under the images. It also appears for a single image ("1 / 1", with the arrows disabled). It is made by a small script (`tsuzuri-carousel.js`) that only pages with a carousel load, and the labels follow the page language (Japanese or English). Where JavaScript doesn't run, nothing is added and the images can still be scrolled sideways. `base.css` has the layout of the navigation, and the carousel scrolls smoothly (not when the reader prefers reduced motion).
+- The Default section of the gallery now has a download button for `default.css`, like the other styles.
+
+### Changed
+
+- The carousel in `base.css` is no longer JavaScript-free: the navigation above needs a small script. The carousel itself still works without it.
+- The download buttons in the gallery now read "Download: glass.css" (Japanese: "ダウンロード: glass.css"), and this site's own custom style (`tsuzuri.css`) gives them an icon.
+- The gallery no longer says that `default.css` "needs no download": it can be used without downloading, and the button gives you a copy.
+
+**What to do after `init --update`**
+
+- `init --update` adds `lib/carousel.mjs` and updates `build-docs.mjs`, `lib/i18n.mjs` and `styles/base.css` in `.github/tsuzuri/`. If you use `.tsuzuri-carousel` in your pages, the navigation appears after the update. Nothing else is needed.
+<!-- ja -->
+
+### 追加
+
+- 画像のカルーセル(`.tsuzuri-carousel`)に、画像の下のナビゲーションを追加した。「前へ」「次へ」の矢印、ドット、「1 / 2」のような枚数の表示が出る。画像が1枚のときも出る(「1 / 1」で、矢印は押せない状態)。小さなスクリプト(`tsuzuri-carousel.js`)が作り、カルーセルのあるページだけが読み込む。ラベルはページの言語(日本語・英語)に合わせる。JavaScript が動かない環境では何も足されず、今までどおり画像を横にスクロールして見られる。`base.css` にナビのレイアウトを追加し、カルーセルは滑らかにスクロールする(動きを減らす設定のときは除く)。
+- ギャラリーの Default 節にも、ほかのスタイルと同じように、`default.css` のダウンロードボタンを置いた。
+
+### 変更
+
+- `base.css` のカルーセルは、JavaScript なしで済むものではなくなった。上のナビには小さなスクリプトが要る。カルーセル自体は、スクリプトなしでも使える。
+- ギャラリーのダウンロードボタンの文言を「Download: glass.css」(日本語は「ダウンロード: glass.css」)にし、このサイト自身のカスタムスタイル(`tsuzuri.css`)でアイコンを付けた。
+- ギャラリーの `default.css` の説明を、「ダウンロードは不要」から「ダウンロードしなくても使えます。ボタンでコピーを取れます」に変えた。
+
+**`init --update` のあとに行うこと**
+
+- `init --update` で、`.github/tsuzuri/` に `lib/carousel.mjs` が増え、`build-docs.mjs`、`lib/i18n.mjs`、`styles/base.css` が更新される。ページで `.tsuzuri-carousel` を使っている場合は、更新のあとにナビが表示される。ほかにすることはない。
+
 ## [1.38.0] - 2026-10-26
 
 This release changes how styles are chosen, and it is **not backward compatible** for sites that use `STYLE_FILE`, the frontmatter `styleFile`, `THEME` with a built-in theme name, or `THEME=none`. Read "What to do after `init --update`" below.

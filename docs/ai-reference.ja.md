@@ -9,13 +9,13 @@ order: 2
 1 つの文章にまとめてあります。枠の右上の「コピー」ボタンで全文をコピーし、
 お使いの AI エージェントに貼り付けて使えます。
 
-内容は Tsuzuri v1.38.0 の時点のものです。人が読むための手順は
+内容は Tsuzuri v1.39.0 の時点のものです。人が読むための手順は
 [Getting Started](getting-started.ja.md) にあります。
 
 ````markdown
 # Tsuzuri 参考情報
 
-- 対象: Tsuzuri v1.38.0(v1 系)
+- 対象: Tsuzuri v1.39.0(v1 系)
 - 最終確認日: 2026-10-26
 - 公式ドキュメント: https://akilasatolu.github.io/tsuzuri/ja/
 - ソースコード: https://github.com/akilasatolu/tsuzuri
