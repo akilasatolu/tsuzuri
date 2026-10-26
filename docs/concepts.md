@@ -393,6 +393,15 @@ the small script (`tsuzuri-copy.js`). The label is "コピー" if the page langu
 and "Copy" otherwise. So that the button never covers the code, code blocks with the button get
 extra space at the top.
 
+## Image carousel
+
+Images placed inside `<div class="tsuzuri-carousel">` ... `</div>` (raw HTML in Markdown) line up
+side by side and can be scrolled sideways. Under them, "previous" and "next" arrows, dots and a count
+such as "1 / 2" appear (v1.39.0 or later). They also appear when there is only one image ("1 / 1",
+with the arrows disabled). Only pages with a carousel load the small script (`tsuzuri-carousel.js`). The
+labels are in Japanese if the page language is Japanese, and in English otherwise. Where JavaScript
+doesn't run, nothing is added and the images can still be scrolled sideways. [The gallery](gallery.md) uses it.
+
 ## Syntax highlighting
 
 Code blocks with a language name, like ```` ```js ````, are highlighted at build time (using

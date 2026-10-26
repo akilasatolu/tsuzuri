@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import vm from "node:vm";
 
 import { COPY_SCRIPT } from "../.github/scripts/lib/copy-button.mjs";
+import { CAROUSEL_SCRIPT } from "../.github/scripts/lib/carousel.mjs";
 import { THEME_SCRIPT } from "../.github/scripts/lib/theme-toggle.mjs";
 
 const JA_LANGS = ["ja", "ja-JP", "JA"];
@@ -26,6 +27,9 @@ function fakeElement(tag) {
     parentElement: null,
     setAttribute(name, value) {
       this.attrs[name] = String(value);
+    },
+    removeAttribute(name) {
+      delete this.attrs[name];
     },
     addEventListener(type, fn) {
       (listeners[type] ??= []).push(fn);
@@ -169,6 +173,116 @@ describe("COPY_SCRIPT(tsuzuri-copy.js)", () => {
     assert.equal(button.type, "button");
     assert.equal(button.className, "tsuzuri-copy");
     assert.equal(button.attrs["aria-live"], "polite");
+  });
+});
+
+// ---------- tsuzuri-carousel.js ----------
+
+/**
+ * CAROUSEL_SCRIPT を動かす。画像は count 枚(幅 100、間隔 10 で並ぶ)。
+ * @param {string | undefined} lang
+ * @param {number} count
+ */
+function runCarouselScript(lang, count) {
+  const carousel = fakeElement("div");
+  carousel.scrollLeft = 0;
+  const imgs = Array.from({ length: count }, (_, i) => ({ offsetLeft: 50 + i * 110 }));
+  carousel.querySelectorAll = (sel) => (sel === "img" ? imgs : []);
+  carousel.scrolledTo = [];
+  carousel.scrollTo = ({ left }) => {
+    carousel.scrolledTo.push(left);
+    carousel.scrollLeft = left;
+  };
+  carousel.after = (node) => (carousel.afterNode = node);
+  const resizeListeners = [];
+  const context = {
+    document: {
+      documentElement: { lang: lang ?? "" },
+      querySelectorAll: (sel) => (sel === "main .tsuzuri-carousel" ? [carousel] : []),
+      createElement: fakeElement,
+    },
+    window: { addEventListener: (_t, fn) => resizeListeners.push(fn) },
+  };
+  vm.runInNewContext(CAROUSEL_SCRIPT, context);
+  const nav = carousel.afterNode;
+  const [prev, dots, countEl, next] = nav?.children ?? [];
+  const scrollTo = (left) => {
+    carousel.scrollLeft = left;
+    return carousel.dispatch("scroll");
+  };
+  return { carousel, nav, prev, dots, countEl, next, scrollTo, resizeListeners };
+}
+
+describe("CAROUSEL_SCRIPT(tsuzuri-carousel.js)", () => {
+  test("画像が2枚: 矢印・ドット2つ・「1 / 2」を、カルーセルの次に置く", () => {
+    const { carousel, nav, prev, dots, countEl, next } = runCarouselScript("en", 2);
+    assert.equal(nav.className, "tsuzuri-carousel-nav");
+    assert.equal(carousel.attrs.tabindex, "0");
+    assert.equal(prev.className, "tsuzuri-carousel-prev");
+    assert.equal(next.className, "tsuzuri-carousel-next");
+    assert.equal(prev.type, "button");
+    assert.equal(dots.children.length, 2);
+    assert.equal(countEl.textContent, "1 / 2");
+    assert.equal(countEl.attrs["aria-live"], "polite");
+    assert.equal(prev.disabled, true);
+    assert.equal(next.disabled, false);
+    assert.equal(dots.children[0].attrs["aria-current"], "true");
+    assert.equal(dots.children[1].attrs["aria-current"], undefined);
+  });
+
+  test("画像が1枚でもナビを出す(1 / 1、矢印は両方押せない、ドットは1つ)", () => {
+    const { prev, dots, countEl, next } = runCarouselScript("en", 1);
+    assert.equal(countEl.textContent, "1 / 1");
+    assert.equal(prev.disabled, true);
+    assert.equal(next.disabled, true);
+    assert.equal(dots.children.length, 1);
+  });
+
+  test("画像が0枚なら何も作らない", () => {
+    const { nav } = runCarouselScript("en", 0);
+    assert.equal(nav, undefined);
+  });
+
+  test("矢印で隣の画像の位置へスクロールし、スクロールに合わせて表示が変わる", async () => {
+    const { carousel, prev, dots, countEl, next, scrollTo } = runCarouselScript("en", 3);
+    await next.dispatch("click");
+    assert.deepEqual(carousel.scrolledTo, [110]);
+    await scrollTo(110);
+    assert.equal(countEl.textContent, "2 / 3");
+    assert.equal(prev.disabled, false);
+    assert.equal(next.disabled, false);
+    assert.equal(dots.children[1].attrs["aria-current"], "true");
+    assert.equal(dots.children[0].attrs["aria-current"], undefined);
+    await scrollTo(220);
+    assert.equal(countEl.textContent, "3 / 3");
+    assert.equal(next.disabled, true);
+    await prev.dispatch("click");
+    assert.deepEqual(carousel.scrolledTo, [110, 110]);
+  });
+
+  test("スクロール量が画像の位置の間にあるときは、近いほうの画像", async () => {
+    const { countEl, scrollTo } = runCarouselScript("en", 3);
+    await scrollTo(50);
+    assert.equal(countEl.textContent, "1 / 3");
+    await scrollTo(160);
+    assert.equal(countEl.textContent, "2 / 3");
+  });
+
+  test("ドットを押すと、その画像へスクロールする", async () => {
+    const { carousel, dots } = runCarouselScript("en", 3);
+    await dots.children[2].dispatch("click");
+    assert.deepEqual(carousel.scrolledTo, [220]);
+  });
+
+  test("ラベルは <html lang> に合わせる(ja は日本語、それ以外は英語)", () => {
+    const ja = runCarouselScript("ja", 2);
+    assert.equal(ja.prev.attrs["aria-label"], "前の画像");
+    assert.equal(ja.next.attrs["aria-label"], "次の画像");
+    assert.equal(ja.dots.children[1].attrs["aria-label"], "2枚目の画像へ");
+    const en = runCarouselScript("fr", 2);
+    assert.equal(en.prev.attrs["aria-label"], "Previous image");
+    assert.equal(en.next.attrs["aria-label"], "Next image");
+    assert.equal(en.dots.children[1].attrs["aria-label"], "Go to image 2");
   });
 });
 

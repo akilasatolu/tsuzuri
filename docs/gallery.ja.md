@@ -7,7 +7,7 @@ description: Tsuzuriのカスタムスタイルの見た目を実際のページ
 
 Tsuzuriのカスタムスタイルの見た目を、実際に生成されたページで確認し、気に入ったものをダウンロードできます。
 各スタイルには同じ見本(見出し・段落・リンク・リスト・表・コード・引用・画像)が並んだ見本ページがあるので、
-見比べながら選んでください。スクリーンショットは、横にスクロールするとライトとダークの見た目を見られます。
+見比べながら選んでください。スクリーンショットは、下の矢印やドットを押すか、横にスクロールすると、ライトとダークの見た目を見られます。
 
 ## カスタムスタイルの使い方
 
@@ -19,9 +19,10 @@ Tsuzuriのカスタムスタイルの見た目を、実際に生成されたペ�
 3. `.github/tsuzuri/config`の`THEME`を、そのファイル名に変える(例: `THEME=glass.css`)。
 
 1ページだけで使う場合は、そのページのfrontmatterに`theme: glass.css`と書きます
-([Frontmatterリファレンス](frontmatter.ja.md#theme)参照)。`default.css`はパッケージに入っているので、ダウンロードは要りません。
+([Frontmatterリファレンス](frontmatter.ja.md#theme)参照)。`default.css`はパッケージに入っているので、ダウンロードしなくても使えます。
 `init`が`.github/tsuzuri/styles/`に置き、設定ファイルも`THEME=default.css`で始まります。
-`init --update`で上書きされるのは`default.css`だけで、自分で置いたスタイルは変わりません。
+手元にコピーを残したいときは、下の「デフォルト」のボタンから取れます。
+`init --update`で上書きされるのは`default.css`だけ(編集したいときは別の名前でコピーして使います)で、自分で置いたスタイルは変わりません。
 
 ## デフォルト(default)
 
@@ -32,7 +33,9 @@ Tsuzuriのカスタムスタイルの見た目を、実際に生成されたペ�
 
 Material Design 3 風の標準スタイル(既定)。青系の配色、角丸のカードと影、トーンのついたナビの選択。ライト/ダークモードを自動で切り替える。
 
-パッケージに入っているので、ダウンロードは不要です。`THEME=default.css`にします(既定)。
+パッケージに入っているので、ダウンロードしなくても使えます。`THEME=default.css`にします(既定)。手元にコピーを残したいときは、ここから取れます。
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/default.css" download>ダウンロード: default.css</a>
 
 [見本ページ](gallery/default.ja.md)
 
@@ -47,7 +50,7 @@ Glassmorphism。ゆっくり揺れて流れるオーロラの地に、色がそ�
 
 使い方: `.github/tsuzuri/styles/`に置いて、`THEME=glass.css`にします。
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/glass.css" download>glass.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/glass.css" download>ダウンロード: glass.css</a>
 
 [見本ページ](gallery/glass.ja.md)
 
@@ -62,7 +65,7 @@ Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこ
 
 使い方: `.github/tsuzuri/styles/`に置いて、`THEME=neumorphism.css`にします。
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/neumorphism.css" download>neumorphism.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/neumorphism.css" download>ダウンロード: neumorphism.css</a>
 
 [見本ページ](gallery/neumorphism.ja.md)
 
@@ -77,7 +80,7 @@ Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこ
 
 使い方: `.github/tsuzuri/styles/`に置いて、`THEME=editorial.css`にします。
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/editorial.css" download>editorial.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/editorial.css" download>ダウンロード: editorial.css</a>
 
 [見本ページ](gallery/editorial.ja.md)
 
@@ -92,7 +95,7 @@ Vercel や Linear のドキュメントのような、白・黒・グレーだ�
 
 使い方: `.github/tsuzuri/styles/`に置いて、`THEME=minimal.css`にします。
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/minimal.css" download>minimal.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/minimal.css" download>ダウンロード: minimal.css</a>
 
 [見本ページ](gallery/minimal.ja.md)
 
@@ -107,7 +110,7 @@ Vercel や Linear のドキュメントのような、白・黒・グレーだ�
 
 使い方: `.github/tsuzuri/styles/`に置いて、`THEME=kintsugi.css`にします。
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/kintsugi.css" download>kintsugi.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/kintsugi.css" download>ダウンロード: kintsugi.css</a>
 
 [見本ページ](gallery/kintsugi.ja.md)
 
@@ -121,7 +124,7 @@ Vercel や Linear のドキュメントのような、白・黒・グレーだ�
 
 使い方: `.github/tsuzuri/styles/`に置いて、`THEME=blueprint.css`にします。
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/blueprint.css" download>blueprint.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/blueprint.css" download>ダウンロード: blueprint.css</a>
 
 [見本ページ](gallery/blueprint.ja.md)
 
@@ -135,7 +138,7 @@ Vercel や Linear のドキュメントのような、白・黒・グレーだ�
 
 使い方: `.github/tsuzuri/styles/`に置いて、`THEME=nineties.css`にします。
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/nineties.css" download>nineties.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/nineties.css" download>ダウンロード: nineties.css</a>
 
 [見本ページ](gallery/nineties.ja.md)
 
@@ -149,7 +152,7 @@ Vercel や Linear のドキュメントのような、白・黒・グレーだ�
 
 使い方: `.github/tsuzuri/styles/`に置いて、`THEME=none.css`にします。
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/none.css" download>none.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/none.css" download>ダウンロード: none.css</a>
 
 [見本ページ](gallery/none.ja.md)
 
@@ -164,7 +167,7 @@ Vercel や Linear のドキュメントのような、白・黒・グレーだ�
 
 使い方: `.github/tsuzuri/styles/`に置いて、`THEME=tsuzuri.css`にします。
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>tsuzuri.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>ダウンロード: tsuzuri.css</a>
 
 [見本ページ](gallery/tsuzuri.ja.md)
 

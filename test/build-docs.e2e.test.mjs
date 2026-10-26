@@ -1649,6 +1649,28 @@ describe("build-docs.mjs :: main (E2E)", () => {
     }
   });
 
+  test("カルーセル(<div class=\"tsuzuri-carousel\">)があるページだけが、ナビのスクリプトを読み込む", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndDefaultStyle(dir);
+      fs.writeFileSync(
+        path.join(dir, "README.md"),
+        '# Root\n\n<div class="tsuzuri-carousel">\n<img src="docs/img.png" alt="a">\n<img src="docs/img.png" alt="b">\n</div>\n\n[A](docs/a.md)\n'
+      );
+      const result = runBuild(dir);
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(readOut(dir, "index.html"), /<script src="\/tsuzuri-carousel\.js" defer><\/script>/);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "tsuzuri-carousel.js")));
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /tsuzuri-carousel\.js/, "カルーセルの無いページは読み込まない");
+      fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[A](docs/a.md)\n");
+      runBuild(dir);
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "tsuzuri-carousel.js")), "カルーセルが無くなれば出力しない");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   test("CSS は内容ごとに1つのファイルに出し、同じ内容のページは同じファイルを読み込む", () => {
     const dir = makeTmpDir();
     try {

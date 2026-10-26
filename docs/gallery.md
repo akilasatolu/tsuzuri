@@ -7,8 +7,8 @@ description: A gallery to compare the look of Tsuzuri's custom styles on real pa
 
 See what Tsuzuri's custom styles look like on actually generated pages, and download the one you like.
 Each style has a sample page with the same content (headings, paragraphs, links, lists, a table, code,
-a quote and an image), so you can compare them. Scroll the screenshots sideways to see the light and
-dark looks.
+a quote and an image), so you can compare them. Use the arrows or dots under a screenshot, or scroll it
+sideways, to see the light and dark looks.
 
 ## How to use a custom style
 
@@ -20,9 +20,11 @@ A custom style is a CSS file in `.github/tsuzuri/styles/`. The look of a page is
 3. Change `THEME` in `.github/tsuzuri/config` to its file name, for example `THEME=glass.css`.
 
 To use a style for a single page only, write `theme: glass.css` in that page's frontmatter (see the
-[frontmatter reference](frontmatter.md#theme)). `default.css` is included in the package, so it needs no download:
-`init` puts it in `.github/tsuzuri/styles/`, and the settings file starts with `THEME=default.css`.
-Only `default.css` is overwritten by `init --update`; the styles you put there yourself are left as they are.
+[frontmatter reference](frontmatter.md#theme)). `default.css` is included in the package, so you can use it
+without downloading it: `init` puts it in `.github/tsuzuri/styles/`, and the settings file starts with
+`THEME=default.css`. To keep your own copy, download it with the button in the Default section below.
+Only `default.css` is overwritten by `init --update` (to edit it, save a copy under another name); the styles
+you put there yourself are left as they are.
 
 ## Default (default)
 
@@ -33,7 +35,9 @@ Only `default.css` is overwritten by `init --update`; the styles you put there y
 
 A standard style inspired by Material Design 3 (the default). Blue colors, rounded cards with shadows, and a tinted selection in the navigation. Switches between light and dark automatically.
 
-Included in the package, so no download is needed. Set `THEME=default.css` (the default).
+Included in the package, so you can use it without downloading it. Set `THEME=default.css` (the default). To keep your own copy, download it here.
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/default.css" download>Download: default.css</a>
 
 [Sample page](gallery/default.md)
 
@@ -48,7 +52,7 @@ Glassmorphism. Thin, clear glass cards that let the colors show through, over a 
 
 Use: put it in `.github/tsuzuri/styles/` and set `THEME=glass.css`.
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/glass.css" download>glass.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/glass.css" download>Download: glass.css</a>
 
 [Sample page](gallery/glass.md)
 
@@ -63,7 +67,7 @@ Neumorphism. Parts in the same color as the background, raised or pressed in wit
 
 Use: put it in `.github/tsuzuri/styles/` and set `THEME=neumorphism.css`.
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/neumorphism.css" download>neumorphism.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/neumorphism.css" download>Download: neumorphism.css</a>
 
 [Sample page](gallery/neumorphism.md)
 
@@ -78,7 +82,7 @@ A style that relies on typography and white space, like a magazine or a polished
 
 Use: put it in `.github/tsuzuri/styles/` and set `THEME=editorial.css`.
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/editorial.css" download>editorial.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/editorial.css" download>Download: editorial.css</a>
 
 [Sample page](gallery/editorial.md)
 
@@ -93,7 +97,7 @@ A calm look in only white, black and gray, like the Vercel or Linear docs. Only 
 
 Use: put it in `.github/tsuzuri/styles/` and set `THEME=minimal.css`.
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/minimal.css" download>minimal.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/minimal.css" download>Download: minimal.css</a>
 
 [Sample page](gallery/minimal.md)
 
@@ -108,7 +112,7 @@ A style after kintsugi, the craft of mending broken pottery with lacquer and gol
 
 Use: put it in `.github/tsuzuri/styles/` and set `THEME=kintsugi.css`.
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/kintsugi.css" download>kintsugi.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/kintsugi.css" download>Download: kintsugi.css</a>
 
 [Sample page](gallery/kintsugi.md)
 
@@ -122,7 +126,7 @@ Like a blueprint, with a white grid and fine lines on blue, and headings with di
 
 Use: put it in `.github/tsuzuri/styles/` and set `THEME=blueprint.css`.
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/blueprint.css" download>blueprint.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/blueprint.css" download>Download: blueprint.css</a>
 
 [Sample page](gallery/blueprint.md)
 
@@ -136,7 +140,7 @@ Use: put it in `.github/tsuzuri/styles/` and set `THEME=blueprint.css`.
 
 Use: put it in `.github/tsuzuri/styles/` and set `THEME=nineties.css`.
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/nineties.css" download>nineties.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/nineties.css" download>Download: nineties.css</a>
 
 [Sample page](gallery/nineties.md)
 
@@ -150,7 +154,7 @@ Only the base CSS is applied, and the page is shown with the browser's default l
 
 Use: put it in `.github/tsuzuri/styles/` and set `THEME=none.css`.
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/none.css" download>none.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/none.css" download>Download: none.css</a>
 
 [Sample page](gallery/none.md)
 
@@ -165,7 +169,7 @@ This site's own look, made with a custom style of its own.
 
 Use: put it in `.github/tsuzuri/styles/` and set `THEME=tsuzuri.css`.
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>tsuzuri.css</a>
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>Download: tsuzuri.css</a>
 
 [Sample page](gallery/tsuzuri.md)
 
