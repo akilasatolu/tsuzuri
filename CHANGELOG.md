@@ -33,6 +33,8 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+## [1.40.0] - 2026-10-31
+
 ### Changed
 
 - `init` now asks only two questions: the trigger branch (`TRIGGER_BRANCH`) and the starting Markdown file (`ROOT_MD`). The questions about the navigation, the site languages and the site name were removed. `init` writes `NAV_ENABLED=true`, `LANGUAGES=en` and an empty `SITE_NAME` (the repository name is used at build time) to the settings file. The format of the settings file does not change, and `init --update` still does not touch it.

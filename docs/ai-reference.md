@@ -11,14 +11,14 @@ from installation to publishing on GitHub Pages. The "Copy" button at its top
 right copies the whole text, which can then be pasted into the AI agent of
 your choice.
 
-The content reflects Tsuzuri v1.39.0. The step-by-step guide written for
+The content reflects Tsuzuri v1.40.0. The step-by-step guide written for
 people is [Getting Started](getting-started.md).
 
 ````markdown
 # Tsuzuri reference
 
-- Covers: Tsuzuri v1.39.0 (v1 series)
-- Last verified: 2026-10-26
+- Covers: Tsuzuri v1.40.0 (v1 series)
+- Last verified: 2026-10-31
 - Official documentation: https://akilasatolu.github.io/tsuzuri/
 - Source code: https://github.com/akilasatolu/tsuzuri
 
