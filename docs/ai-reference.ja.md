@@ -68,19 +68,16 @@ Tsuzuri は次の 4 つで構成されています。
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-- `#v1` は、v1 系の最新のリリースを指すタグです。`#v1.36.0` のように
+- `#v1` は、v1 系の最新のリリースを指すタグです。`#v1.40.0` のように
   完全なバージョンを書くと、そのリリースに固定されます。`#` 以降を省くと、
   リリース前の変更を含む `main` ブランチの内容が実行されます。
-- コマンドは、最初の行に `tsuzuri v1.36.0` の形で、動いているバージョンを
+- コマンドは、最初の行に `tsuzuri v1.40.0` の形で、動いているバージョンを
   表示します。
-- `init` と `preview` の画面の表示は英語です(v1.37.0 以降。v1.36.0 までは
-  日本語でした)。`--lang ja` を付けると、画面の表示と、生成される設定ファイルの
+- `init` と `preview` の画面の表示は英語です。`--lang ja` を付けると、画面の表示と、生成される設定ファイルの
   コメントが日本語になります。生成されるワークフローと
   `.github/tsuzuri/.gitignore` のコメントは、常に英語です。ビルドスクリプトの
   メッセージ(GitHub Actions でのビルドと、`preview` が実行するビルドのログ)も
-  常に英語です(v1.37.0 以降)。`--lang` では変わりません。古いバージョンで
-  コピーされたビルドスクリプトは、`init --update` で更新するまで日本語で
-  表示します。
+  常に英語です。`--lang` では変わりません。
 - `init` は省略できます。サブコマンドが無い場合は `init` として動きます。
 
 ### 3.2 実行する場所
@@ -92,7 +89,7 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 
 `Continue anyway? (y/N): `
 
-(v1.36.0 まで、および `--lang ja` のときは `このまま続けますか? (y/N): ` です。)
+(`--lang ja` のときは `このまま続けますか? (y/N): ` です。)
 
 何も入力しない場合と `n` の場合、`init` は何も生成せずに終了します。
 
@@ -100,7 +97,7 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 
 オプションを付けずに実行すると、`init` は次の 2 つの質問を順に表示します。
 何も入力せずに Enter を押すと、かっこ内の既定値になります。質問は英語で
-表示されます(v1.37.0 以降)。v1.36.0 まで、および `--lang ja` のときは、
+表示されます。`--lang ja` のときは、
 日本語で表示されます(例: `? トリガーブランチ (TRIGGER_BRANCH) [main]: `)。
 
 1. `? Trigger branch (TRIGGER_BRANCH) [main]: `
@@ -127,7 +124,7 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 - `--branch <name>`: `TRIGGER_BRANCH` の値です。
 - `--root <path>`: `ROOT_MD` の値です。
 
-`--lang <en|ja>`(v1.37.0 以降)を付けても、質問は省略されません。画面の
+`--lang <en|ja>`を付けても、質問は省略されません。画面の
 表示と、生成される設定ファイルのコメントの言語です。
 既定は `en` で、`en` と `ja`(小文字)だけを受け付けます。付けたコマンドの
 ときだけ有効です。
@@ -144,7 +141,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main
   付けると上書きされます(設定ファイル `.github/tsuzuri/config` も上書きされます)。
   利用者が `.github/tsuzuri/styles/` に置いたカスタムスタイルは、`init` が作る
   ものではないので、上書きされません。
-- 知らないオプション(`--theme` はありません)と、空の `--branch`・`--root` は、エラーになります。
+- 知らないオプションと、空の `--branch`・`--root` は、エラーになります。
   この場合、`init` は何も生成しません。
 
 そのほかのオプションは次のとおりです。
@@ -197,13 +194,13 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main
 
   `The workflow and the build scripts (under .github/tsuzuri/, except config) already exist. Overwrite them with the latest version? (y/N): `
 
-  (v1.36.0 まで、および `--lang ja` のときは `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config を除く)は既に存在します。最新版で上書きしますか? (y/N): ` です。)
+  (`--lang ja` のときは `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config を除く)は既に存在します。最新版で上書きしますか? (y/N): ` です。)
 
   設定ファイルについては、別に質問します。
 
   `.github/tsuzuri/config already exists. Overwrite it? (y/N): `
 
-  (v1.36.0 まで、および `--lang ja` のときは `.github/tsuzuri/config は既に存在します。上書きしますか? (y/N): ` です。)
+  (`--lang ja` のときは `.github/tsuzuri/config は既に存在します。上書きしますか? (y/N): ` です。)
 
   何も入力しない場合と `n` の場合、そのファイルは変更されません。
 
@@ -249,7 +246,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main
   `.css` で終わる形で書き、フォルダは書きません)。ファイルは
   `.github/tsuzuri/styles/` の中から読まれ、`STYLE_DIR` の影響は受けません。
   ページの見た目は、基礎の CSS とこのカスタムスタイル 1 つで決まります。
-  CSS のファイル名でない値(`none`、`material` のような昔のテーマ名、フォルダを
+  CSS のファイル名でない値(`none`、フォルダを
   含むパス、`.css` で終わらない名前)は、警告のうえで `default.css` になります。
   ファイルが無い場合は、警告のうえで、基礎の CSS だけでビルドされます。
   `THEME=none` というキーワードはありません(装飾なしにするには、ギャラリーの
@@ -459,7 +456,7 @@ order: 1
   `.github/tsuzuri/styles/` の中のカスタムスタイルのファイル名です(ファイル名だけを
   `.css` で終わる形で書き、フォルダは書きません)。サイト全体のカスタムスタイル
   (`THEME`)を置き換えます(混ざりません)。使えない値(フォルダを含むファイル名、
-  `none` や昔のテーマ名を含む `.css` で終わらない名前、無いファイル、リポジトリの外を指す
+  `none` を含む `.css` で終わらない名前、無いファイル、リポジトリの外を指す
   シンボリックリンク)は警告が出て、そのページはサイト全体のカスタムスタイルになります。
   装飾なしにするページは `theme: none.css`(コメントだけのファイル)にします。
 - `nav`: `false` にすると、そのページはナビと前後のページへのリンクに
@@ -589,22 +586,16 @@ order: 1
 
   `Skipping because this push (feature/foo) is not to TRIGGER_BRANCH=main`
 
-  (v1.36.0 までは日本語で、`TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします` でした。)
-
 - 設定ファイルに `TRIGGER_BRANCH` が無い場合と、値が空の場合、ワークフローは
   リポジトリの既定ブランチを使います。このとき、同じステップのログに次の
   表示が出ます。
 
   `The settings file has no TRIGGER_BRANCH (or it is empty), so the repository's default branch main is used`
 
-  (v1.36.0 までは日本語で、`設定ファイルに TRIGGER_BRANCH が無い(または空の)ため、リポジトリの既定ブランチ main を使います` でした。)
-
 - 手動の実行では、ブランチの判定は行われず、選んだブランチの内容が
   デプロイされます。このとき、ログに次の表示が出ます。
 
   `Skipping the branch check because this is a manual run`
-
-  (v1.36.0 までは日本語で、`手動実行のためブランチ判定をスキップします` でした。)
 
   Actions タブの「Run workflow」のボタンは、ワークフローのファイルが
   既定ブランチにある場合に表示されます。
@@ -648,9 +639,6 @@ llmstxt.org の llms.txt の提案の形の Markdown ファイルです。
 npx github:akilasatolu/tsuzuri#v1 preview
 ```
 
-- `.github/tsuzuri/package-lock.json` が無い場合(古い版で `init` したリポジトリ)、
-  `preview` は、依存が入っていてもビルドに進まず、`init --update` を案内して
-  終了します。
 - `.github/tsuzuri/node_modules/` に依存が無い場合、`preview` は
   `.github/tsuzuri/package-lock.json` のとおりに依存をインストールします。
 - `preview` は、リポジトリにコピー済みのビルドスクリプトと設定ファイルで
@@ -709,17 +697,16 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 - `.github/tsuzuri/lib/` の中で、実行したバージョンに無い `.mjs` ファイルは
   削除されます。
 - `.github/tsuzuri/config` は変更されません。`styles/` に利用者が置いたカスタム
-  スタイルは、変更も削除もされません(昔の `material.css` などもそのまま残ります)。
+  スタイルは、変更も削除もされません。
   `default.css` は上書きされます。
 - 設定ファイルに無いキーがある場合、`init` はそのキーの名前を表示します。
-  `LLMS_TXT` が無い場合も表示され、`true` として動きます。
 - `.github/tsuzuri/config` が無いリポジトリでは、`init` は何も書き込まずに
   エラーで終了します。
 - 更新のあと、変更されたファイルをコミットして push すると、サイトに
   反映されます。
 
 リポジトリにコピー済みのバージョンは、`.github/workflows/tsuzuri-pages.yml` の
-先頭のコメントに、`tsuzuri v1.36.0` の形で書かれています。更新しない限り、
+先頭のコメントに、`tsuzuri v1.40.0` の形で書かれています。更新しない限り、
 リポジトリの中のバージョンは変わりません。
 
 ## 11. つまずきやすい点
@@ -739,7 +726,6 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   症状が出ない条件: push されたブランチが `TRIGGER_BRANCH` と同じです。
 - 症状: ビルドが次のエラーで終了します。
   `The root file README.md (or README.en.md) was not found. Aborting.`
-  (v1.36.0 までは日本語で、`起点となる README.md(または README.en.md)が見つかりません。処理を中止します。` でした。)
   原因: `ROOT_MD` のファイルがリポジトリにありません。
   症状が出ない条件: `ROOT_MD` のファイルが、そのブランチにコミットされています。
 - 症状: README が日本語なのに、「Menu」などの画面の文言が英語になります。
@@ -769,14 +755,13 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   症状が出ない条件: `STRICT_LINKS=true` です。この場合、ビルドは次の表示を
   出して失敗し、サイトは前回の内容のままになります。
   `STRICT_LINKS=true, so the build fails because of 3 link problem(s).`
-  (v1.36.0 までは日本語で、`STRICT_LINKS=true のため、リンクの問題 3 件でビルドを失敗させます。` でした。)
 - 症状: `.github/tsuzuri/` の中のファイルへの変更が、更新のあとに消えます。
   原因: `init --update` が、ビルドスクリプト、`base.css`、`default.css` を上書きします。
   症状が出ない条件: 見た目の変更が、別の名前のカスタムスタイル(`default.css` のコピーなど)に
   書かれ、`THEME` で指定されています。
 - 症状: カスタムスタイルが反映されず、ビルドのログに `THEME` の値が不正という
   警告が出ます(`default.css` が使われます)。
-  原因: `THEME` に、`none` や `material` のような昔のテーマ名、フォルダを含むパス
+  原因: `THEME` に、`none`、フォルダを含むパス
   (例: `.github/tsuzuri/styles/glass.css`)、`.css` で終わらない名前が書かれています。
   症状が出ない条件: `.github/tsuzuri/styles/` の中のファイルのファイル名だけが
   書かれています(例: `THEME=glass.css`)。
@@ -790,7 +775,7 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   症状が出ない条件: コマンドに `#v1` か、完全なバージョンのタグが付いています。
 - 症状: `preview` が次の表示を含むエラーで終了します。
   `Port 4000 is in use. Choose another number with --port (e.g. --port 4001)`
-  (v1.36.0 まで、および `--lang ja` のときは日本語で、`ポート 4000 は使用中です。--port で別の番号を指定してください(例: --port 4001)` でした。)
+  (`--lang ja` のときは日本語で、`ポート 4000 は使用中です。--port で別の番号を指定してください(例: --port 4001)` です。)
   原因: ほかのプログラムが同じポートを使っています。
   症状が出ない条件: `--port` オプションで、空いているポート番号が
   指定されています。

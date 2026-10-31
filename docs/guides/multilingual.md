@@ -6,8 +6,7 @@ order: 30
 
 # Multilingual sites
 
-You can build a site in several languages, such as English and Japanese, from one repository
-(v1.28.0 or later). Put each translated page in the same place as the original, with the
+You can build a site in several languages, such as English and Japanese, from one repository. Put each translated page in the same place as the original, with the
 language added to the end of the file name (the Japanese version of `docs/cli.md` is
 `docs/cli.ja.md`).
 
@@ -35,10 +34,6 @@ LANGUAGES=en,ja
 
 Write languages as language tags such as `ja`, `en`, `pt-BR` and `zh-Hant`. For how invalid
 values and duplicates are handled, see the [configuration reference](../reference/configuration.md#languages).
-
-> [!NOTE]
-> The old setting key `LANG` is no longer used. If it's written, it isn't read (it's ignored like
-> any other key that isn't in the list), so rewrite it as `LANGUAGES` (e.g. `LANG=ja` becomes `LANGUAGES=ja`).
 
 ## Arranging the files
 
@@ -181,7 +176,7 @@ The 404 page and single-language sites don't get the button.
 
 GitHub Pages returns the single `404.html` at the top of the site for any URL that doesn't exist,
 even under `/ja/`, so a site has only one 404 page. On a multilingual site, that one page shows
-the notice in the language of the URL that was opened (v1.29.0 or later).
+the notice in the language of the URL that was opened.
 
 - Put the notice for each language in a block with `lang`, written directly in `404.md`:
 

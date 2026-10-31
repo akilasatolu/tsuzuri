@@ -35,9 +35,9 @@ npx github:akilasatolu/tsuzuri#v1 init
 | (なし) | 対話形式で質問に答えながら生成する(次の「対話フロー」) |
 | `--update` | 対話なしで最新版に更新する([後述](../guides/update.ja.md#最新版に更新する--update)) |
 | `-y`, `--yes` | 対話なしで、すべて既定値で生成する |
-| `--branch <名前>` | トリガーブランチ(`TRIGGER_BRANCH`)。既定: リポジトリの既定ブランチ(`origin`の既定ブランチ。分からなければ`main`。v1.3.0以前は今のブランチになることがある) |
+| `--branch <名前>` | トリガーブランチ(`TRIGGER_BRANCH`)。既定: リポジトリの既定ブランチ(`origin`の既定ブランチ。分からなければ`main`) |
 | `--root <パス>` | 起点となるMarkdownファイル(`ROOT_MD`)。既定: `README.md` |
-| `--lang <en\|ja>` | 表示するメッセージと、生成する設定ファイルのコメントの言語(v1.37.0以降)。既定: `en`。質問は省略しない |
+| `--lang <en\|ja>` | 表示するメッセージと、生成する設定ファイルのコメントの言語。既定: `en`。質問は省略しない |
 | `--force` | 対話なしのとき、既存ファイルも上書きする |
 | `--port <番号>` | `preview`で使うポート番号。既定: `4000` |
 | `--no-watch` | `preview`で、ファイルの変更を見張らない(自動でビルドし直さない) |
@@ -53,7 +53,7 @@ npx github:akilasatolu/tsuzuri#v1 init
 npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs
 ```
 
-`init`と`preview`のメッセージは英語で表示されます(v1.37.0以降。v1.36.0までは日本語でした)。日本語で
+`init`と`preview`のメッセージは英語で表示されます。日本語で
 表示したいときは、`npx github:akilasatolu/tsuzuri#v1 init --lang ja`のように、コマンドに`--lang ja`を付けます。
 `init`が作る設定ファイルのコメントも日本語になります。値は`en`と`ja`(小文字)だけで、
 付けたコマンドのときだけ有効です。サイトの言語(`LANGUAGES`。[設定リファレンス](./configuration.ja.md#languages)参照)とは別のものです。
@@ -63,7 +63,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch docs
 
 ## 手元で確認する(`preview`)
 
-pushする前に、公開時と同じ設定でサイトを手元にビルドして、ブラウザで確認できます(v1.5.0以降)。
+pushする前に、公開時と同じ設定でサイトを手元にビルドして、ブラウザで確認できます。
 `init`済みのリポジトリの直下で実行します。
 
 ```
@@ -72,13 +72,11 @@ npx github:akilasatolu/tsuzuri#v1 preview
 
 1. ビルド用の依存が`.github/tsuzuri/node_modules/`に無ければ、ワークフローと同じく
    `.github/tsuzuri/package-lock.json`のとおりにインストールします(`init`が作る`.github/tsuzuri/.gitignore`で
-   コミットの対象外になっています)。`.github/tsuzuri/package-lock.json`が無い(古い版でinitした)
-   リポジトリでは、依存が入っていてもビルドに進まず、`init --update`を案内して終了します。
+   コミットの対象外になっています)。
 2. `.github/tsuzuri/`のビルドスクリプトで、`.github/tsuzuri/config`の設定どおりにビルドします
    (リンク切れなどの警告もここに表示されます)。
 3. 出力先(`OUT_DIR`、既定は`_site/`)を`http://localhost:4000/`で配信します。
-4. ファイルを保存すると、自動でビルドし直して、開いているページを再読み込みします(v1.6.0以降。
-   v1.5.0では、`Ctrl+C`で止めてからもう一度実行します)。
+4. ファイルを保存すると、自動でビルドし直して、開いているページを再読み込みします。
 
 `--open`を付けると、起動したときにブラウザでサイトを開きます。
 ポートが使用中の場合は、`--port 4001`のように別の番号を指定してください。自動でビルドし直したくない場合は
@@ -119,12 +117,12 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 
 | ファイル | 常に生成されるか | 内容 |
 |---|---|---|
-| `.github/workflows/tsuzuri-pages.yml` | 常に生成 | ビルド・デプロイの手順を直接持つ、自己完結型のワークフロー(以前のように`build.yml`を`uses:`で呼び出すことはしない) |
+| `.github/workflows/tsuzuri-pages.yml` | 常に生成 | ビルド・デプロイの手順を直接持つ、自己完結型のワークフロー |
 | `.github/tsuzuri/config` | 常に生成 | `TRIGGER_BRANCH`/`ROOT_MD`は回答内容を反映し、それ以外のキー(`THEME=default.css`を含む)は既定値で出力される設定ファイル。利用者が編集するファイル |
 | `.github/tsuzuri/build-docs.mjs` | 常に生成 | ビルド本体のスクリプト(OSS本体リポジトリの`.github/scripts/build-docs.mjs`と同一内容) |
 | `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/copy-button/crawler/emoji/emoji-data/frontmatter/html-renderer/i18n/image-size/link-extractor/llms-txt/path-utils/search/site-tree/sitemap/slugger/theme-toggle の17ファイル) |
 | `.github/tsuzuri/styles/base.css`・`default.css` | 常に生成 | ベースCSS(`base.css`)と、標準のカスタムスタイル(`default.css`)。置かれるのはこの2つだけで、ほかのカスタムスタイルは配布せず、[ギャラリー](../../gallery/README.ja.md)でダウンロードして使う |
-| `.github/tsuzuri/package.json`・`package-lock.json` | 常に生成(v1.7.0以降) | ビルド用の依存(marked など)の版と、ダウンロードした中身を確かめるハッシュ。ワークフローと`preview`はこのとおりに`npm ci`でインストールする |
+| `.github/tsuzuri/package.json`・`package-lock.json` | 常に生成 | ビルド用の依存(marked など)の版と、ダウンロードした中身を確かめるハッシュ。ワークフローと`preview`はこのとおりに`npm ci`でインストールする |
 | `.github/tsuzuri/.gitignore` | 常に生成 | 手元でプレビューするときにインストールする依存(`node_modules/`)をコミットしないための設定 |
 
 `.github/tsuzuri/`配下で編集してよいのは、設定ファイル`config`と、`styles/`に置く自分のカスタムスタイル
@@ -134,7 +132,7 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 後述の「最新版に更新する(`--update`)」を参照してください。
 
 生成される設定ファイルでは、サイトの言語は常に次のように書かれます(`init`は言語を聞きません。READMEが日本語なら、あとで`LANGUAGES=ja`に直します)。コメントは英語です
-(`--lang ja`を付けると日本語になります。v1.36.0までは常に日本語でした)。
+(`--lang ja`を付けると日本語になります)。
 
 ```
 # Site languages, comma-separated; the first is the base language (the language of the starting README). Examples: ja / en / ja,en
@@ -158,7 +156,7 @@ LANGUAGES=en
   The workflow and the build scripts (under .github/tsuzuri/, except config) already exist. Overwrite them with the latest version? (y/N):
   ```
 
-  (v1.36.0までと、`--lang ja`のときは、日本語で表示されます:
+  (`--lang ja`のときは、日本語で表示されます:
   `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config を除く)は既に存在します。最新版で上書きしますか? (y/N):`)
 
 - **設定ファイル**(`.github/tsuzuri/config`)は、ファイルごとに確認します。
@@ -167,7 +165,7 @@ LANGUAGES=en
   .github/tsuzuri/config already exists. Overwrite it? (y/N):
   ```
 
-  (v1.36.0までと、`--lang ja`のときは、`.github/tsuzuri/config は既に存在します。上書きしますか? (y/N):`と表示されます)
+  (`--lang ja`のときは、`.github/tsuzuri/config は既に存在します。上書きしますか? (y/N):`と表示されます)
 
 「n」(または未入力)を選んだファイルはスキップされ、既存の内容がそのまま保持されます。
 ワークフローとスクリプトだけを最新版にしたい場合は、次の`--update`を使うと確認なしで行えます。

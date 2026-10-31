@@ -20,7 +20,6 @@ like
 Skipping because this push (feature/foo) is not to TRIGGER_BRANCH=main
 ```
 
-(up to v1.36.0 the message is in Japanese: `TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします`),
 this is the cause. Merge
 or push to the target branch, or change the value of `TRIGGER_BRANCH` itself (for manual runs
 (`workflow_dispatch`) this check isn't done and it always deploys; see
@@ -42,8 +41,7 @@ This happens when you set a branch other than the default branch as `TRIGGER_BRA
 If a file linked from Markdown doesn't actually exist, the build doesn't fail; it records the link
 as "a link that wasn't found" and continues. Which links these are is shown in the Build step of
 the workflow log in the Actions tab, as "Files that links point to were not found: N" and "Links ignored
-for security reasons: N" (up to v1.36.0, in Japanese: `リンク先が見つからなかったファイル: N 件` and
-`セキュリティ上の理由で無視されたリンク: N 件`), along with the file that contains them. To dig deeper, you can temporarily
+for security reasons: N", along with the file that contains them. To dig deeper, you can temporarily
 set `SITEMAP_JSON=true` to output the debugging `sitemap.json` (see [How it works](./reference/how-it-works.md)). If
 you don't want to publish with broken links, set `STRICT_LINKS=true` to make the build fail (see
 the [configuration reference](./reference/configuration.md#strict_links)).
@@ -52,20 +50,6 @@ A link to a file whose extension isn't in the list of copied files (such as `src
 checked the same way: if the file exists it becomes a link to GitHub, and if it doesn't exist it
 is reported as a link whose target wasn't found. See "Which files are copied" in
 [How it works](./reference/how-it-works.md).
-
-## The build stopped after an update, with a warning about an embedded file
-
-Since v1.32.0, only the files with the extensions listed in "Which files are copied" in
-[How it works](./reference/how-it-works.md) are copied to the site. If an image, video or audio embedded with
-`![](…)`, `<img src>`, `<video src>` and so on points to a file with another extension (or to a
-folder), it can't be shown or played, so the Build step shows a warning like "The embedded
-target X is a file of a type that is not copied, so it cannot be displayed or played (referenced
-from Y)" (for a folder, "is a folder"; a build script copied by v1.36.0 or earlier prints it in
-Japanese: `埋め込みの先 X はコピーしない種類のファイルのため、表示・再生できません (referenced from Y)`).
-With `STRICT_LINKS=true`, this makes the build
-fail, so it can stop a build that passed before you updated. To fix it, change the file to a
-format on the list (for example `.mp4` for video, `.png` or `.avif` for images), or replace the
-embed with a plain link such as `[clip](clip.xyz)`, which doesn't produce the warning.
 
 ## Links to GitHub don't open (private repositories)
 
@@ -87,8 +71,7 @@ search too.
 
 If the look isn't what you expect, check the following in order.
 
-1. A typo in `THEME`. A value that isn't the file name of a CSS file (`none`, an old theme name
-   such as `material`, a path with folders such as `.github/tsuzuri/styles/glass.css`, or a name
+1. A typo in `THEME`. A value that isn't the file name of a CSS file (`none`, a path with folders such as `.github/tsuzuri/styles/glass.css`, or a name
    that doesn't end with `.css`) falls back to `default.css` automatically, with a warning (see the
    [configuration reference](./reference/configuration.md)).
 2. Whether a file with the name set in `THEME` actually exists in `.github/tsuzuri/styles/`.
@@ -117,7 +100,7 @@ it doesn't, check the following.
 
 ## preview says "Port 4000 is in use"
 
-(Up to v1.36.0, and with `--lang ja`, the message is in Japanese: `ポート 4000 は使用中です`.)
+(With `--lang ja`, the message is in Japanese: `ポート 4000 は使用中です`.)
 Another app (or another `preview`) is using the same port. Choose another number, like
 `--port 4001` (see the [CLI reference](reference/cli.md#previewing-locally-preview)).
 

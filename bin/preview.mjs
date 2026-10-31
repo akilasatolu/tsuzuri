@@ -220,8 +220,8 @@ export async function runPreview({
     warn(t("preview.versionMismatch", { vendored, version }));
   }
 
-  // package-lock.json が無いのは、v1.7.0 より前に init した古いビルドスクリプト。
-  // 依存が入っていても、公開時と同じ依存かを確かめられないので、更新を案内して止める
+  // package-lock.json が無いと、依存が入っていても、公開時と同じ依存かを確かめられない。
+  // そのため、init --update を案内して止める
   if (!existsSync(join(cwd, VENDOR_DIR, "package-lock.json"))) {
     warn(t("preview.noLock", { vendorDir: VENDOR_DIR }));
     return null;

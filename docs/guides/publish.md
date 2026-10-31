@@ -24,10 +24,7 @@ Your repository
 .github/tsuzuri/.gitignore           … keeps locally installed dependencies (node_modules/) out of commits
 ```
 
-In earlier versions, your workflow file was a thin wrapper that just called the reusable
-workflow (`build.yml`) of the Tsuzuri repository with `uses:`, and the actual build script was
-fetched from the Tsuzuri repository on every run. Now `init` copies (vendors) the build script
-itself under `.github/tsuzuri/`, so **the generated workflow doesn't depend on the Tsuzuri
+`init` copies (vendors) the build script itself under `.github/tsuzuri/`, so **the generated workflow doesn't depend on the Tsuzuri
 repository at all, and builds and deploys entirely inside your repository**. Nothing fetches the
 Tsuzuri repository over the network (no second `checkout` or the like).
 

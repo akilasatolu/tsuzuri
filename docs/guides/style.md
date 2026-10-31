@@ -32,8 +32,7 @@ heading weight and line spacing, as one "visual identity"** (it isn't a feature 
 the colors).
 
 - If `THEME` is left out or empty, it's `default.css`.
-- A value that isn't the file name of a `.css` file (such as `none`, an old theme name like
-  `material`, or a path with folders) shows a warning, and `default.css` is used.
+- A value that isn't the file name of a `.css` file (such as `none` or a path with folders) shows a warning, and `default.css` is used.
 - If the file doesn't exist, a warning is shown, and the site is built with the base CSS only.
 - The file is always read from `.github/tsuzuri/styles/`. `STYLE_DIR` doesn't affect it (`STYLE_DIR` is
   only the location of the base CSS).
@@ -134,7 +133,7 @@ specificity, what you write wins.
 ## Supporting light and dark
 
 On sites with `NAV_ENABLED=true`, readers can choose light or dark with a button in the
-navigation (v1.7.0 or later). The chosen mode is added as `<html data-theme="light">` or
+navigation. The chosen mode is added as `<html data-theme="light">` or
 `<html data-theme="dark">` (nothing is added when they haven't chosen, and the OS setting is
 followed).
 
@@ -161,9 +160,6 @@ this way too.
   --bg: #14161a;
 }
 ```
-
-The older style, with only `:root` inside `@media (prefers-color-scheme: dark)`, doesn't break
-the page, but if the OS is in dark mode and the reader chooses "light", those colors stay dark.
 
 ## Two layers: base and a custom style
 

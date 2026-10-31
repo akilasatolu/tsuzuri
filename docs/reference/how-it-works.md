@@ -33,8 +33,7 @@ and PDFs (settings files, for example), are never copied, so they aren't publish
 ### Which files are copied
 
 Among the linked files, the ones with the following extensions are copied (the extension is
-compared ignoring case, so `A.PDF` is copied too, and `app.tar.gz` is matched by `gz`; v1.32.0
-or later. Before that, every file with an extension was copied; `css` is copied from v1.38.0 or later).
+compared ignoring case, so `A.PDF` is copied too, and `app.tar.gz` is matched by `gz`).
 
 | Kind | Extensions |
 |---|---|
@@ -63,16 +62,13 @@ for example, visitors without access can't open it, so for files you want them t
 copied format or write the contents on the page.
 
 Pages and images in folders starting with `.`, such as `.github/`, are written to a path with
-a leading `_`, like `_.github/` (e.g. `.github/logo.png` → `_.github/logo.png`; v1.4.0 or
-later). This is because the artifact uploaded to GitHub Pages can't contain files or folders
+a leading `_`, like `_.github/` (e.g. `.github/logo.png` → `_.github/logo.png`). This is because the artifact uploaded to GitHub Pages can't contain files or folders
 starting with `.`. Links are rewritten to this path automatically. Video (`.mp4`, `.webm` and
-so on), audio (`.mp3` and so on) and PDFs are written the same way (v1.5.0 or later; in v1.4.0
-they become links to the file on GitHub).
+so on), audio (`.mp3` and so on) and PDFs are written the same way.
 
 If the output path of a linked file collides with a generated page or a file Tsuzuri creates
 (`index.html`, `404.html` and so on), the file is not copied, so the generated
-one isn't overwritten, and a warning is shown (with `STRICT_LINKS=true` the build fails;
-v1.4.0 or later).
+one isn't overwritten, and a warning is shown (with `STRICT_LINKS=true` the build fails).
 
 Links to paths without an extension, to paths starting with `.`, or to files whose extension
 isn't in the table above are handled as follows, depending on what actually exists in the
@@ -90,9 +86,7 @@ When building on GitHub Actions, the URL for links to GitHub is known automatica
 building locally, it's made from git's `origin` (the GitHub repository) and the current branch
 name (links to files you haven't pushed yet won't open on GitHub). If neither is known, a
 warning is shown and the link keeps the path within the site (it won't open, since the file
-isn't on the site, but the target exists, so it isn't treated as a broken link). This includes
-files such as `.js` that used to be copied: with a host other than GitHub, for example, they
-no longer open.
+isn't on the site, but the target exists, so it isn't treated as a broken link).
 
 ### Embedding files that aren't copied
 
@@ -102,8 +96,7 @@ that exists but isn't copied (an extension that isn't in the table, or a folder 
 `README.md` or `index.md`), the `src` becomes a link to GitHub, so it can't be shown or played.
 At the end of the build, a warning like "The embedded target X is a file of a type that is not
 copied, so it cannot be displayed or played (referenced from Y)" is printed (for a folder, "is a
-folder"; a build script copied by v1.36.0 or earlier prints it in Japanese, as `埋め込みの先 X は…のため、表示・再生できません (referenced from Y)`). With `STRICT_LINKS=true` this counts as a link problem and the build fails, so an
-update can stop a build that used to pass. To fix it, change the file to a format in the table
+folder"). With `STRICT_LINKS=true` this counts as a link problem and the build fails. To fix it, change the file to a format in the table
 or, if you don't need to embed it, turn the embed into a plain link. Plain links such as
 `[x](../clip.xyz)` and `<a href>` don't produce this warning.
 
@@ -148,9 +141,8 @@ work on the generated site.
   `-2` and so on.
 
 If the target page doesn't have that heading (the heading was renamed, misspelled and so on),
-the build log shows it as "Links whose target page has no such heading: N" (up to v1.36.0, in Japanese:
-`リンク先のページに見出しが見つからないリンク: N 件`). With
-`STRICT_LINKS=true` the build fails (v1.5.0 or later).
+the build log shows it as "Links whose target page has no such heading: N". With
+`STRICT_LINKS=true` the build fails.
 
 ## Absolute paths and BASE_PATH
 
@@ -221,8 +213,7 @@ the top page and a folder's `README.md`, the canonical URL is the top URL or the
 
 ## llms.txt
 
-When building on GitHub Actions (when the site URL is known), a `llms.txt` is also written
-(v1.34.0 or later). It is a list of the pages of the site in the form proposed at
+When building on GitHub Actions (when the site URL is known), a `llms.txt` is also written. It is a list of the pages of the site in the form proposed at
 [llmstxt.org](https://llmstxt.org/), and it is on by default (`LLMS_TXT`, see the
 [configuration reference](./configuration.md#llms_txt)). It's written right under the site: for
 `https://<owner>.github.io/<repo>/` it is `https://<owner>.github.io/<repo>/llms.txt`.

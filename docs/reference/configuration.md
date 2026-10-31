@@ -23,6 +23,8 @@ as part of the value, so be careful (write comments on their own line).
 
 ## Settings
 
+Every key is optional. A key you leave out (or leave empty) uses the default described under it.
+
 ### TRIGGER_BRANCH
 The name of the branch that triggers deployment. If left out (no key, or an
 empty value), it's the repository's default branch (usually `main`). Deployment to GitHub
@@ -41,12 +43,11 @@ repository, the build exits with an error.
 The folder where the built HTML is written. The default is `_site`. Set a subfolder inside the
 repository. If you set a path outside the repository or the repository root (`.`), the build
 exits with an error so existing files aren't overwritten. If the key is left out or the value
-is empty, it's `_site` too (with workflows from v1.3.0 or earlier, leaving it out makes the
-upload to GitHub Pages fail, so write `OUT_DIR=_site`).
+is empty, it's `_site` too.
 
 The build puts a marker file (`.tsuzuri-build`) in the output folder. On the next build, if the
 marker is there, everything in the output folder is deleted before writing, so deleted or
-renamed pages don't linger (v1.5.0 or later). Folders without the marker (a folder containing
+renamed pages don't linger. Folders without the marker (a folder containing
 files you made yourself, for example) are not deleted.
 
 ### THEME
@@ -59,8 +60,7 @@ package, and `init` (and `init --update`) puts it in `.github/tsuzuri/styles/`. 
 (for example `THEME=glass.css`).
 
 - If left out (no key, or an empty value), it's `default.css` without a warning.
-- A value that can't be used as the file name of a CSS file (`none`, an old theme name such as
-  `material`, a path with folders, a name that doesn't end with `.css`, a name starting with `.`, and so on) falls back to
+- A value that can't be used as the file name of a CSS file (`none`, a path with folders, a name that doesn't end with `.css`, a name starting with `.`, and so on) falls back to
   `default.css` with a warning.
 - If the file doesn't exist, or is a symbolic link pointing outside the repository, a warning is shown and
   the site is built with the base CSS only.
@@ -70,7 +70,7 @@ There is no `THEME=none` keyword. To show the site with no decoration, use a cus
 contains only comments, such as `none.css` from the gallery. See [Change the look](../guides/style.md) for details.
 
 ### LANGUAGES
-The languages of the site (v1.28.0 or later). Write language tags (BCP 47) such as `ja`, `en`
+The languages of the site. Write language tags (BCP 47) such as `ja`, `en`
 and `pt-BR`, separated by commas.
 
 ```
@@ -84,8 +84,7 @@ LANGUAGES=en
   HTML and the fixed interface text (such as "Menu") are in that language.
 - With two or more languages (e.g. `LANGUAGES=en,ja`) you get a multilingual site. See
   [Multilingual sites](../guides/multilingual.md) for how to arrange the files.
-- If left out (no key, or an empty value), it's `en` (English) without a warning. **This changed
-  from the default `ja` used up to v1.27.0.** If your README is in Japanese, write
+- If left out (no key, or an empty value), it's `en` (English) without a warning. If your README is in Japanese, write
   `LANGUAGES=ja`.
 - Spaces around each language are removed. Values that aren't valid language tags, such as
   `en_US`, and values that duplicate another regardless of case, are ignored one by one with a
@@ -94,11 +93,6 @@ LANGUAGES=en
 The language of a page is decided by its file name and `LANGUAGES`, and can't be changed in the
 frontmatter (see [Multilingual sites](../guides/multilingual.md) for details).
 
-> [!NOTE]
-> The setting key `LANG` used up to v1.27.0 is no longer used. If it's in the settings file, it's
-> ignored like any other key that isn't in the list (it isn't read as `LANGUAGES`). If you wrote `LANG=ja`, rewrite it as
-> `LANGUAGES=ja`. The OS environment variable `LANG` (such as `ja_JP.UTF-8`) isn't used either.
-
 ### NAV_ENABLED
 Whether to output the automatically generated page navigation (a list of links to every page on
 the site). Only `true` or `false` (case-insensitive) are valid, and the default is `false`. If
@@ -106,9 +100,8 @@ left out (no key, or an empty value), it's `false` without a warning. Any other 
 `yes`) is treated as `false` with a warning.
 
 The navigation is a hierarchy (nested lists) that follows the folder structure of the
-repository. Folders can be collapsed by clicking them (v1.7.0 or later). At first every folder
-is open, so links to every page are visible whichever page you're on (v1.14.0 or later; from
-v1.7.0 to v1.13.0, only the top level and the folder containing the current page were open).
+repository. Folders can be collapsed by clicking them. At first every folder
+is open, so links to every page are visible whichever page you're on.
 On wide screens (960px or more) it's a sidebar fixed on the left; on narrow screens
 (smartphones and so on) it's a "Menu" button above the content, and pressing it opens the page
 list (no JavaScript is used). The button reads "メニュー" if the page language is Japanese and
@@ -122,7 +115,7 @@ Next to the navigation header there's a button that switches between light and d
 [Page features](./features.md#switching-between-light-and-dark)).
 
 Settings files newly created with `npx github:akilasatolu/tsuzuri#v1 init` have it set to
-`true` (v1.7.0 or later).
+`true`.
 
 ```
 README.md             … page (link)
@@ -190,11 +183,9 @@ and the default is `false`.
   - A linked image or file doesn't exist or can't be copied
   - An image, video or audio embedded in a page points to a file that exists but isn't copied to
     the site (an extension that isn't in the list in [How it works](./how-it-works.md), or a folder)
-    (v1.32.0 or later)
   - The output path of a linked file collides with a generated page or a file Tsuzuri creates
-    (such as `index.html`) (v1.4.0 or later)
+    (such as `index.html`)
   - The heading in a link to a heading (`page.md#heading`) doesn't exist on the target page
-    (v1.5.0 or later)
 
 The list of problems is shown in the workflow run log in the Actions tab.
 
@@ -207,7 +198,7 @@ longer for repositories with a long history). If the git history can't be read, 
 continues without dates, with a warning.
 
 ### EDIT_LINK
-Whether to add an "Edit this page on GitHub" link at the end of each page (v1.30.0 or later).
+Whether to add an "Edit this page on GitHub" link at the end of each page.
 `true` or `false`, and the default is `false` (no link).
 
 With `true`, the link opens the page's Markdown file in GitHub's editor, so readers can fix a typo
@@ -223,7 +214,7 @@ The link points to the branch that was built: on GitHub Actions, the branch that
 site uses `EDIT_LINK=true`.
 
 ### REPO_LINK
-Whether to show a link to the GitHub repository at the end of each page (v1.33.0 or later). `true`
+Whether to show a link to the GitHub repository at the end of each page. `true`
 or `false`, and the default is `false` (no link). You don't write the URL; the repository's URL is
 used.
 
@@ -245,7 +236,7 @@ REPO_LINK=true
 ```
 
 ### REPO_VERSION
-The version to show at the end of each page (v1.33.0 or later). One line of text, and the default
+The version to show at the end of each page. One line of text, and the default
 is empty (not shown). For example, `v1.2.3`.
 
 The value you write is shown as it is, as "Version: v1.2.3" ("バージョン: v1.2.3" on Japanese
@@ -260,7 +251,7 @@ REPO_VERSION=v1.2.3
 ```
 
 ### REPO_LICENSE
-The license to show at the end of each page (v1.33.0 or later). One line of text, and the default
+The license to show at the end of each page. One line of text, and the default
 is empty (not shown). For example, `MIT`.
 
 The value you write is shown as it is, as "License: MIT" ("ライセンス: MIT" on Japanese pages),
@@ -283,7 +274,7 @@ date. To change its look from your custom style, use these class names.
 | `tsuzuri-repo-license` | The license |
 
 ### LLMS_TXT
-Whether to output `llms.txt`, a file that lists the pages of the site (v1.34.0 or later). `true` or
+Whether to output `llms.txt`, a file that lists the pages of the site. `true` or
 `false`, and the default is `true` (output): you don't need to write it. It is written in the form
 proposed at [llmstxt.org](https://llmstxt.org/), at the top level of the output: with
 `BASE_PATH` (a site like `https://<owner>.github.io/<repo>/`) it is
@@ -296,10 +287,6 @@ Any value other than `true` and `false` (`off`, for example) is ignored with a w
 treated as `false`. If you put your own `llms.txt` right under the repository, it is copied as it
 is and no file is generated (see "llms.txt" in [How it works](./how-it-works.md)).
 
-If your settings file doesn't have `LLMS_TXT`, `init --update` lists it under "Keys missing from
-the settings file". It works without adding anything (it is on); add `LLMS_TXT=false` only when
-you want to turn it off.
-
 ```
 LLMS_TXT=true
 ```
@@ -310,21 +297,3 @@ broken links and so on). `true` or `false`, and the default is `false` (not outp
 `true` it's included in the public site too, and things like the names of broken link targets
 are visible to anyone, so we recommend setting it to `true` only temporarily while
 investigating (see "About sitemap.json" in [How it works](./how-it-works.md) for details).
-
-## Backward compatibility
-
-The fifteen keys `LANGUAGES`, `NAV_ENABLED`, `FAVICON_FILE`, `SITE_NAME`, `CUSTOM_DOMAIN`,
-`OGP_DEFAULT_IMAGE`, `THEME`, `STRICT_LINKS`, `SITEMAP_JSON`, `LAST_UPDATED`, `EDIT_LINK`,
-`REPO_LINK`, `REPO_VERSION`, `REPO_LICENSE` and `LLMS_TXT` are
-**all optional**. If you set none of them, all the defaults above apply, and the behavior is the same
-as the versions before these keys were introduced. You can keep using an existing settings file
-(with only the original four keys) without anything breaking.
-
-The site language is the one exception. v1.28.0 removed `LANG`, and the default when no
-language is written changed from `ja` to `en`. With a settings file that doesn't write
-`LANGUAGES` (including one that only writes `LANG=ja`), the site becomes an English site
-(`<html lang="en">` and English interface text). For a Japanese site, add `LANGUAGES=ja`.
-
-`LLMS_TXT` is the other exception. From v1.34.0, `llms.txt` is output even if you don't write
-`LLMS_TXT` (the default is on). The output gains one file, and the existing pages don't change.
-To stop it, write `LLMS_TXT=false`.

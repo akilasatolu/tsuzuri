@@ -20,7 +20,7 @@ order: 60
 Skipping because this push (feature/foo) is not to TRIGGER_BRANCH=main
 ```
 
-のようなメッセージ(v1.36.0までは日本語で、`TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします`)が出ていれば、これが原因です。対象ブランチへマージ・pushするか、
+のようなメッセージが出ていれば、これが原因です。対象ブランチへマージ・pushするか、
 `TRIGGER_BRANCH`の値自体を変更してください(手動実行(`workflow_dispatch`)の場合は
 この判定自体が行われず常にデプロイされます。詳細は[公開の設定](./guides/publish.ja.md))。
 
@@ -40,9 +40,7 @@ Branch "docs" is not allowed to deploy to github-pages due to environment protec
 Markdown内でリンクした先のファイルが実際には存在しない場合、ビルドはエラーにはならず、
 そのリンクを「見つからなかったリンク」として記録したうえで処理を続けます。
 どのリンクが該当するかは、ActionsタブのワークフローのログのBuildステップに、
-「Files that links point to were not found: N」「Links ignored for security reasons: N」として
-(v1.36.0までのビルドスクリプトでは日本語で、「リンク先が見つからなかったファイル: N 件」
-「セキュリティ上の理由で無視されたリンク: N 件」)参照元のファイルとともに表示されます。さらに詳しく調べたい場合は、一時的に`SITEMAP_JSON=true`に
+「Files that links point to were not found: N」「Links ignored for security reasons: N」として、参照元のファイルとともに表示されます。さらに詳しく調べたい場合は、一時的に`SITEMAP_JSON=true`に
 してデバッグ用の`sitemap.json`を出力することもできます([ビルドの仕組み](./reference/how-it-works.ja.md)参照)。
 リンク切れのまま公開したくない場合は、`STRICT_LINKS=true`にするとビルドを失敗させられます
 ([設定リファレンス](./reference/configuration.ja.md#strict_links)参照)。
@@ -50,19 +48,6 @@ Markdown内でリンクした先のファイルが実際には存在しない場
 コピーするファイルの一覧にない拡張子のファイル(`src/foo.js`など)へのリンクも、同じように確かめます。
 実在すればGitHubへのリンクになり、実在しなければ「リンク先が見つからなかった」リンクとして記録されます。
 [ビルドの仕組み](./reference/how-it-works.ja.md)の「コピーされるファイル」を参照してください。
-
-## 更新したらビルドが止まった(埋め込みの警告)
-
-v1.32.0からは、[ビルドの仕組み](./reference/how-it-works.ja.md)の「コピーされるファイル」にある拡張子のファイルだけが
-サイトにコピーされます。`![](…)`・`<img src>`・`<video src>`などで埋め込んだ画像・動画・音声の先が、
-ほかの拡張子のファイル(またはフォルダ)だと、表示・再生できないため、Buildステップに「The embedded
-target X is a file of a type that is not copied, so it cannot be displayed or played (referenced
-from Y)」(フォルダのときは「is a folder」)という警告が出ます(v1.36.0までのビルドスクリプトでは日本語で、
-`埋め込みの先 X はコピーしない種類のファイルのため、表示・再生できません (referenced from Y)`)。
-`STRICT_LINKS=true`ではビルドが失敗するので、
-更新する前は通っていたビルドが止まることがあります。対処は、一覧にある形式のファイル
-(動画なら`.mp4`、画像なら`.png`や`.avif`など)に変えるか、`[clip](clip.xyz)`のような普通のリンクに
-変えることです(リンクでは警告は出ません)。
 
 ## GitHubへのリンクが開けない(非公開リポジトリ)
 
@@ -81,7 +66,7 @@ from Y)」(フォルダのときは「is a folder」)という警告が出ます
 
 見た目が期待通りにならない場合は、以下を順番に確認してください。
 
-1. `THEME`のスペルミス。CSSファイル名でない値(`none`、`material`のような昔のテーマ名、
+1. `THEME`のスペルミス。CSSファイル名でない値(`none`、
    `.github/tsuzuri/styles/glass.css`のようなフォルダを含むパス、`.css`で終わらない名前)を指定すると、
    警告のうえ自動的に`default.css`にフォールバックします([設定リファレンス](./reference/configuration.ja.md))。
 2. `THEME`に指定したファイル名のファイルが、`.github/tsuzuri/styles/`の中に実際に存在しているか。
@@ -107,7 +92,7 @@ from Y)」(フォルダのときは「is a folder」)という警告が出ます
 
 ## previewで「Port 4000 is in use」と出る
 
-(v1.36.0までと、`--lang ja`のときは日本語で、「ポート 4000 は使用中です」と出ます。)
+(`--lang ja`のときは日本語で、「ポート 4000 は使用中です」と出ます。)
 別のアプリ(または別の`preview`)が同じポートを使っています。`--port 4001`のように別の番号を
 指定してください([CLIリファレンス](reference/cli.ja.md#手元で確認するpreview))。
 

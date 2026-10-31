@@ -73,7 +73,7 @@ the text as it is, put a backslash before the first colon (`\:x:`) or write it a
 **`<picture>` and `srcset`**: the images in the `srcset` of `<img>` and `<source>` written as HTML
 are handled like `src`: they are copied to the site, and their paths are rewritten to paths on
 the site (a missing image gives the same "The linked file was not found: …" warning, and fails the build with
-`STRICT_LINKS=true`; a build script copied by v1.36.0 or earlier prints it in Japanese, as `リンク先のファイルが見つかりません: …`). For example, this switches the logo for dark mode:
+`STRICT_LINKS=true`). For example, this switches the logo for dark mode:
 
 ```html
 <picture>
@@ -102,7 +102,7 @@ Images written in Markdown (`![alt](../image.png)`) get `loading="lazy"`, so the
 scroll to where they appear. Pages with many images show up faster.
 
 Images in the repository (PNG, GIF, JPEG, WebP, and SVGs with a stated size) also get `width`
-and `height` read from the image file (v1.5.0 or later). This keeps the text below from
+and `height` read from the image file. This keeps the text below from
 jumping while images load. The displayed size doesn't change (images wider than the content
 are scaled down, keeping their aspect ratio).
 
@@ -117,18 +117,17 @@ workflow fetches the full git history before computing the dates (see the
 
 Pages with a diagram (mermaid) load mermaid from a CDN (jsDelivr) in the browser. The loaded
 file carries a hash check (SRI), so if its contents were swapped on the CDN, the browser won't
-run it (the diagram is shown as code; v1.7.0 or later).
+run it (the diagram is shown as code).
 
 The build dependencies (marked, highlight.js and marked-footnote) are installed exactly as the
 versions and hashes written in `.github/tsuzuri/package-lock.json`. If the downloaded contents
 differ, the installation stops, and it also checks that the packages were published with
 npm's official signatures (`npm audit signatures`). Package scripts are not run during
-installation (v1.7.0 or later).
+installation.
 
 ## Copy button for code
 
-A "Copy" button appears at the top right of code blocks; click it to copy the code (v1.6.0 or
-later). The button is always shown. Only pages with code blocks load
+A "Copy" button appears at the top right of code blocks; click it to copy the code. The button is always shown. Only pages with code blocks load
 the small script (`tsuzuri-copy.js`). The label is "コピー" if the page language is Japanese,
 and "Copy" otherwise. So that the button never covers the code, code blocks with the button get
 extra space at the top.
@@ -137,7 +136,7 @@ extra space at the top.
 
 Images placed inside `<div class="tsuzuri-carousel">` ... `</div>` (raw HTML in Markdown) line up
 side by side and can be scrolled sideways. Under them, "previous" and "next" arrows, dots and a count
-such as "1 / 2" appear (v1.39.0 or later). They also appear when there is only one image ("1 / 1",
+such as "1 / 2" appear. They also appear when there is only one image ("1 / 1",
 with the arrows disabled). Only pages with a carousel load the small script (`tsuzuri-carousel.js`). The
 labels are in Japanese if the page language is Japanese, and in English otherwise. Where JavaScript
 doesn't run, nothing is added and the images can still be scrolled sideways. [The gallery](../../gallery/README.md) uses it.
@@ -164,12 +163,12 @@ shows them.
 - Where JavaScript doesn't run, the search box simply isn't shown, and the navigation still
   works.
 - It works from the keyboard too. Press ↓ in the search box to move to the results, pick one
-  with ↑↓ and open it with Enter. Esc returns to the search box and clears it (v1.7.0 or later).
+  with ↑↓ and open it with Enter. Esc returns to the search box and clears it.
 
 ## Switching between light and dark
 
 With `NAV_ENABLED=true`, a button that switches between light and dark (☀/☾) appears next to
-the navigation header (v1.7.0 or later). Your choice is saved in the browser, so the page looks
+the navigation header. Your choice is saved in the browser, so the page looks
 the same the next time you open it. If you haven't chosen, it follows the OS setting (dark mode
 or not), as before.
 
@@ -180,14 +179,13 @@ on), the button isn't shown. To write dark colors in your custom style, see
 ## How the CSS is loaded
 
 The page CSS (the base CSS and the custom style) is combined into one file
-(`tsuzuri-<string made from its contents>.css`) that every page loads (v1.7.0 or later; before
-that it was embedded in each page). Since all pages use the same file, the browser cache makes
+(`tsuzuri-<string made from its contents>.css`) that every page loads. Since all pages use the same file, the browser cache makes
 the second and later pages show up faster. When the CSS changes, the file name changes too, so
 an old CSS never sticks around. Pages that change `theme` load a file for that
 combination.
 
 Readers who chose "reduce motion" in their OS don't get animations such as cards lifting on
-hover (v1.7.0 or later).
+hover.
 
 ## About sitemap.json (for debugging)
 

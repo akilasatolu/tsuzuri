@@ -72,19 +72,17 @@ npx github:akilasatolu/tsuzuri#v1 init
 ```
 
 - `#v1` is a tag that points to the latest release of the v1 series. A full
-  version such as `#v1.36.0` pins that release. Without the part from `#`
+  version such as `#v1.40.0` pins that release. Without the part from `#`
   onward, the content of the `main` branch runs, which can include changes
   that are not released yet.
 - The command prints the running version on its first line, in the form
-  `tsuzuri v1.36.0`.
-- The screen output of `init` and `preview` is in English (v1.37.0 or later;
-  up to v1.36.0 it was in Japanese). With `--lang ja`, the screen output and
+  `tsuzuri v1.40.0`.
+- The screen output of `init` and `preview` is in English. With `--lang ja`, the screen output and
   the comments in the generated settings file are in Japanese. The comments in the generated workflow and in
   `.github/tsuzuri/.gitignore` are always in English. The messages of the
   build script (the log of the build on GitHub Actions, and of the build that
-  `preview` runs) are always in English too (v1.37.0 or later); `--lang` does
-  not change them. A build script copied by an older version prints them in
-  Japanese until `init --update` updates it.
+  `preview` runs) are always in English too; `--lang` does
+  not change them.
 - `init` can be omitted. Without a subcommand, the command behaves as `init`.
 
 ### 3.2 Where the command runs
@@ -96,7 +94,7 @@ mode, it then shows the following question.
 
 `Continue anyway? (y/N): `
 
-(Up to v1.36.0, and with `--lang ja`, it is `このまま続けますか? (y/N): `.)
+(With `--lang ja`, it is `このまま続けますか? (y/N): `.)
 
 With an empty answer or `n`, `init` exits without generating anything.
 
@@ -104,7 +102,7 @@ With an empty answer or `n`, `init` exits without generating anything.
 
 Without options, `init` shows the following two questions in order. An
 empty answer (Enter alone) results in the default in brackets. The questions
-are in English (v1.37.0 or later). Up to v1.36.0, and with `--lang ja`, they
+are in English. With `--lang ja`, they
 are in Japanese (for example `? トリガーブランチ (TRIGGER_BRANCH) [main]: `).
 
 1. `? Trigger branch (TRIGGER_BRANCH) [main]: `
@@ -135,7 +133,7 @@ questions.
 - `--branch <name>`: the value of `TRIGGER_BRANCH`.
 - `--root <path>`: the value of `ROOT_MD`.
 
-`--lang <en|ja>` (v1.37.0 or later) does not turn on a non-interactive run.
+`--lang <en|ja>` does not turn on a non-interactive run.
 It is the language of the screen output and of the comments in the generated
 settings file. The default is `en`, and only `en` and
 `ja` (in lowercase) are accepted. It applies only to the command it is given
@@ -155,7 +153,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main
   `.github/tsuzuri/config`). The custom styles that the user put in
   `.github/tsuzuri/styles/` are not created by `init`, so they are not
   overwritten.
-- An unknown option (`--theme` no longer exists) and an empty `--branch` or `--root` each result in an error.
+- An unknown option and an empty `--branch` or `--root` each result in an error.
   In that case `init` generates nothing.
 
 The other options are as follows.
@@ -212,13 +210,13 @@ follows.
 
   `The workflow and the build scripts (under .github/tsuzuri/, except config) already exist. Overwrite them with the latest version? (y/N): `
 
-  (Up to v1.36.0, and with `--lang ja`: `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config を除く)は既に存在します。最新版で上書きしますか? (y/N): `.)
+  (With `--lang ja`: `ワークフローとビルドスクリプト一式(.github/tsuzuri/ 配下。config を除く)は既に存在します。最新版で上書きしますか? (y/N): `.)
 
   For the settings file, it asks separately.
 
   `.github/tsuzuri/config already exists. Overwrite it? (y/N): `
 
-  (Up to v1.36.0, and with `--lang ja`: `.github/tsuzuri/config は既に存在します。上書きしますか? (y/N): `.)
+  (With `--lang ja`: `.github/tsuzuri/config は既に存在します。上書きしますか? (y/N): `.)
 
   With an empty answer or `n`, that file is left unchanged.
 
@@ -268,7 +266,7 @@ written in the settings file that `init` generates.
   name, ending with `.css`, no folders). The file is read from
   `.github/tsuzuri/styles/`; `STYLE_DIR` does not affect it. The look of a page
   is the base CSS plus this one custom style. A value that is not the file
-  name of a CSS file (`none`, an old theme name such as `material`, a path with
+  name of a CSS file (`none`, a path with
   folders, a name that does not end with `.css`) becomes `default.css` with a
   warning. When the file is missing, the build shows a warning and uses the
   base CSS only. There is no `THEME=none` keyword (for no decoration, use a
@@ -493,8 +491,8 @@ The keys are the following 10.
   of a custom style in `.github/tsuzuri/styles/` (only the file name, ending
   with `.css`, no folders). It replaces the site-wide custom style (`THEME`);
   the two are not mixed. A value that cannot be used (a file name with a
-  folder, a name that does not end with `.css` including `none` and the old
-  theme names, a missing file, a symbolic link to outside the repository)
+  folder, a name that does not end with `.css` including `none`,
+  a missing file, a symbolic link to outside the repository)
   shows a warning, and the page uses the site-wide custom style. For a page
   with no decoration, use `theme: none.css` (a file with only comments).
 - `nav`: with `false`, the page is left out of the navigation and of the
@@ -639,23 +637,17 @@ file and `.github/tsuzuri/` work from the state committed on that branch.
 
   `Skipping because this push (feature/foo) is not to TRIGGER_BRANCH=main`
 
-  (Up to v1.36.0: `TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします`.)
-
 - When the settings file has no `TRIGGER_BRANCH`, or its value is empty, the
   workflow uses the default branch of the repository. In this case the log
   of the same step shows the following line.
 
   `The settings file has no TRIGGER_BRANCH (or it is empty), so the repository's default branch main is used`
 
-  (Up to v1.36.0: `設定ファイルに TRIGGER_BRANCH が無い(または空の)ため、リポジトリの既定ブランチ main を使います`.)
-
 - In a manual run, the branch check is not performed, and the content of the
   selected branch is deployed. In this case the log shows the following
   line.
 
   `Skipping the branch check because this is a manual run`
-
-  (Up to v1.36.0: `手動実行のためブランチ判定をスキップします`.)
 
   The "Run workflow" button in the Actions tab is shown when the workflow
   file is on the default branch.
@@ -705,10 +697,6 @@ following command.
 npx github:akilasatolu/tsuzuri#v1 preview
 ```
 
-- When `.github/tsuzuri/package-lock.json` does not exist (a repository set
-  up with an old version), `preview` does not go on to the build, even if the
-  dependencies are installed. It tells the user to run `init --update` and
-  ends.
 - When `.github/tsuzuri/node_modules/` has no dependencies, `preview`
   installs them exactly as `.github/tsuzuri/package-lock.json` says.
 - `preview` builds with the build script and the settings file copied in the
@@ -772,17 +760,16 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 - Inside `.github/tsuzuri/lib/`, `.mjs` files that the version that ran does
   not have are deleted.
 - `.github/tsuzuri/config` is not changed. The custom styles that the user put
-  in `styles/` are not changed or deleted (an old `material.css` and the like
-  stay as they are). `default.css` is overwritten.
+  in `styles/` are not changed or deleted. `default.css` is overwritten.
 - When the settings file lacks some keys, `init` prints the names of those
-  keys. A missing `LLMS_TXT` is printed as well, and works as `true`.
+  keys.
 - In a repository without `.github/tsuzuri/config`, `init` ends with an
   error without writing anything.
 - After the update, committing the changed files and pushing them brings
   the change to the site.
 
 The version copied into the repository is written in the comment at the top
-of `.github/workflows/tsuzuri-pages.yml`, in the form `tsuzuri v1.36.0`. The
+of `.github/workflows/tsuzuri-pages.yml`, in the form `tsuzuri v1.40.0`. The
 version inside the repository stays the same until an update.
 
 ## 11. Common pitfalls
@@ -803,7 +790,6 @@ version inside the repository stays the same until an update.
   `TRIGGER_BRANCH`.
 - Symptom: the build ends with the following error.
   `The root file README.md (or README.en.md) was not found. Aborting.`
-  (Up to v1.36.0: `起点となる README.md(または README.en.md)が見つかりません。処理を中止します。`)
   Cause: the file named by `ROOT_MD` is not in the repository.
   The symptom does not occur when: the file named by `ROOT_MD` is committed
   on that branch.
@@ -840,7 +826,6 @@ version inside the repository stays the same until an update.
   this case the build fails with the following line, and the site keeps its
   previous content.
   `STRICT_LINKS=true, so the build fails because of 3 link problem(s).`
-  (Up to v1.36.0: `STRICT_LINKS=true のため、リンクの問題 3 件でビルドを失敗させます。`)
 - Symptom: changes made to files inside `.github/tsuzuri/` disappear after
   an update.
   Cause: `init --update` overwrites the build script, `base.css` and
@@ -850,7 +835,7 @@ version inside the repository stays the same until an update.
   `THEME`.
 - Symptom: the custom style is not applied, and the build log shows a warning
   that the value of `THEME` is invalid (and `default.css` is used).
-  Cause: `THEME` holds `none`, an old theme name such as `material`, a path
+  Cause: `THEME` holds `none`, a path
   with folders (for example `.github/tsuzuri/styles/glass.css`) or a name that
   does not end with `.css`.
   The symptom does not occur when: only the file name of a file in
@@ -867,7 +852,7 @@ version inside the repository stays the same until an update.
   tag.
 - Symptom: `preview` ends with an error that contains the following text.
   `Port 4000 is in use. Choose another number with --port (e.g. --port 4001)`
-  (Up to v1.36.0, and with `--lang ja`: `ポート 4000 は使用中です。--port で別の番号を指定してください(例: --port 4001)`.)
+  (With `--lang ja`: `ポート 4000 は使用中です。--port で別の番号を指定してください(例: --port 4001)`.)
   Cause: another program is using the same port.
   The symptom does not occur when: a free port number is given with the
   `--port` option.

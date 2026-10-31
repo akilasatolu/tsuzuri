@@ -22,13 +22,8 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 |---|---|
 | `.github/workflows/tsuzuri-pages.yml` | 最新版で上書き |
 | `.github/tsuzuri/`配下のビルドスクリプト・`base.css`・`default.css` | 最新版で上書き(新しく増えたファイルは追加。最新版で使われなくなった`lib/`配下のスクリプトは削除)。`default.css`は上書きされるので、編集したいときは別の名前にコピーする。`styles/`のCSSは削除されない |
-| `.github/tsuzuri/config` | **変更しない**(v1.27.0までに作った設定ファイルの`LANG`も、`LANGUAGES`に書き換えない) |
-| `styles/`に自分で置いたカスタムスタイル(ギャラリーからダウンロードしたものや、自作のもの) | **変更しない**(削除もしない。昔の`material.css`などもそのまま残る) |
-
-v1.27.0までに作った設定ファイル(`LANG`だけで`LANGUAGES`が無いもの)で`--update`すると、
-「Keys missing from the settings file」(設定ファイルに無い項目。`--lang ja`なら「設定ファイルに無い項目があります」)として`LANGUAGES`が案内されます。言語を書かないとサイトは英語になる
-ので、日本語のサイトなら`LANGUAGES=ja`を書き足し、`LANG`の行は消してください
-([設定リファレンス](../reference/configuration.ja.md#languages)参照)。
+| `.github/tsuzuri/config` | **変更しない** |
+| `styles/`に自分で置いたカスタムスタイル(ギャラリーからダウンロードしたものや、自作のもの) | **変更しない**(削除もしない) |
 
 `--lang`は`--update`が書く内容を変えません。例外は1つで、`init --update --lang ja`のときは、メッセージが日本語になります。
 上書きされるワークフロー・`.gitignore`・`package.json`・CSSは、`--lang`の有無で変わりません。
@@ -40,9 +35,7 @@ v1.27.0までに作った設定ファイル(`LANG`だけで`LANGUAGES`が無い�
 ## バージョンの固定・更新
 
 ビルドスクリプト本体は`init`実行時に`.github/tsuzuri/`配下へコピーされるため、
-**一度生成した後は、利用者側で何もしない限りバージョンが自動的に変わることはありません**
-(以前のバージョンの`uses: ...@v1`のように、ワークフロー実行のたびに自動で最新化される
-仕組みではなくなりました)。
+**一度生成した後は、利用者側で何もしない限りバージョンが自動的に変わることはありません**。
 
 最新版のtsuzuriに更新したい場合は、`--update`を付けてセットアップコマンドを実行してください。
 ワークフローとビルドスクリプト(`base.css`と`default.css`を含む)だけが最新版に上書きされ、`.github/tsuzuri/config`や
@@ -52,10 +45,9 @@ v1.27.0までに作った設定ファイル(`LANG`だけで`LANGUAGES`が無い�
 npx github:akilasatolu/tsuzuri#v1 init --update
 ```
 
-ビルド用の依存(marked など)も、`.github/tsuzuri/package-lock.json`に書かれた版とハッシュで固定されています
-(v1.7.0以降)。`--update`を実行するまで変わりません。
+ビルド用の依存(marked など)も、`.github/tsuzuri/package-lock.json`に書かれた版とハッシュで固定されています。`--update`を実行するまで変わりません。
 
-特定のバージョンに固定したい場合は、タグを指定します。`#v1`はv1系の最新版(互換性を保ったまま更新される)、
+特定のバージョンに固定したい場合は、タグを指定します。`#v1`はv1系の最新版、
 `#v1.2.0`のように完全なバージョンを指定すると、そのリリースに固定されます。
 
 ```sh
@@ -74,7 +66,7 @@ npx github:akilasatolu/tsuzuri#v1.2.0 init --update
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-`v1`は互換性を保ったまま最新化されるタグです(破壊的変更が入る場合のみ`v2`が新設されます)。
+`v1`は、v1系の最新版を指すタグです。
 「実行するたびに挙動が変わってしまう/最新の変更が反映されない」といった場合は、
 まずこの`#v1`指定を試してください。
 

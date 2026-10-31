@@ -44,8 +44,7 @@ The title of the page. Where it's used, and what happens when it isn't set:
 To use different names in `<title>` and the navigation (to show a shorter name in the
 navigation, for example), write a `title`.
 
-The same title as in the `<title>` tag is used for the page's line in `llms.txt` (v1.34.0 or
-later).
+The same title as in the `<title>` tag is used for the page's line in `llms.txt`.
 
 ### description
 The description of the page. It's used for both `<meta name="description">` and
@@ -53,10 +52,9 @@ The description of the page. It's used for both `<meta name="description">` and
 social media).
 
 If not set, a description of up to 120 characters is made automatically from the first
-paragraph of the text (excluding alert titles) (v1.6.0 or later; in earlier versions these tags
-aren't output at all).
+paragraph of the text (excluding alert titles).
 
-The same description is used for the page's line in `llms.txt` (v1.34.0 or later).
+The same description is used for the page's line in `llms.txt`.
 
 ### ogImage
 The image shown when the page is shared on social media (the OGP image). You can give either a
@@ -74,7 +72,7 @@ Set to `true` if you don't want search engines to index this page. Only when it'
 tag isn't output at all (it's case-insensitive, and only a value equal to `"true"` counts as
 true).
 
-A page with `noindex: true` isn't listed in `llms.txt` either (v1.34.0 or later).
+A page with `noindex: true` isn't listed in `llms.txt` either.
 
 ### theme
 Replaces the custom style of this page alone. The site-wide custom style is `THEME` in
@@ -83,8 +81,7 @@ Replaces the custom style of this page alone. The site-wide custom style is `THE
 Write the **file name of a custom style**: a `.css` file in `.github/tsuzuri/styles/`, such as
 `glass.css` (see [Change the look](../guides/style.md) for what custom styles are, and the [gallery](../../gallery/README.md) for
 the ones you can download). Write **only the file name** (no folders). A value containing `/`, `\` or
-`:`, or starting with `.`, or not ending with `.css`, can't be used (such as `../x.css`, `assets/x.css`,
-or the old theme names such as `material`). `none` can't be used either; to show the page with no
+`:`, or starting with `.`, or not ending with `.css`, can't be used (such as `../x.css`, `assets/x.css`). `none` can't be used either; to show the page with no
 decoration, use `none.css` (a file that contains only comments, which you put in `.github/tsuzuri/styles/`).
 
 ```markdown
@@ -102,9 +99,9 @@ itself doesn't stop; a "fail-open" behavior).
 
 ### nav
 With `false`, the page isn't listed in the navigation (sidebar) or in the "previous page / next
-page" links (v1.6.0 or later). The page itself is still output, so it opens from links on other
+page" links. The page itself is still output, so it opens from links on other
 pages. It's still included in site search. In `llms.txt`, it's listed under `## Optional` instead of
-`## Docs` (v1.34.0 or later).
+`## Docs`.
 
 Use it for pages that aren't worth listing in the navigation, such as sample or supplementary
 pages.
@@ -116,7 +113,7 @@ nav: false
 ```
 
 ### order
-Sets the order in the navigation as a number (v1.6.0 or later). Within the same folder, pages
+Sets the order in the navigation as a number. Within the same folder, pages
 with an `order` come first, smallest first, and pages without one come after them, in the order
 they were found through links. A folder's position can be set with the `order` of the
 `README.md` (or `index.md`) inside it. On a [multilingual site](../guides/multilingual.md), a navigation is made
