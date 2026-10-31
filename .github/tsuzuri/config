@@ -2,7 +2,7 @@
 #
 # 「KEY=VALUE」の形で1行に1項目を書きます。# で始まる行と空行は無視されます。
 # ワークフロー(.github/workflows/tsuzuri-pages.yml)を編集しなくても、ここを変えるだけで動作を変えられます。
-# 各項目の詳しい説明: https://akilasatolu.github.io/tsuzuri/docs/configuration.html
+# 各項目の詳しい説明: https://akilasatolu.github.io/tsuzuri/docs/reference/configuration.html
 
 # 公開(デプロイ)するブランチ。このブランチに push したときだけサイトが更新されます。
 # 省略するか空にすると、リポジトリの既定ブランチになります。
@@ -17,7 +17,7 @@ ROOT_MD=README.md
 OUT_DIR=_site
 
 # サイト全体のカスタムスタイル。.github/tsuzuri/styles/ の中のCSSファイルのファイル名(フォルダは書かず、ファイル名だけを書きます)。
-# 既定の default.css はパッケージに入っています。ほかのものは、ギャラリー(https://akilasatolu.github.io/tsuzuri/docs/gallery.html)で
+# 既定の default.css はパッケージに入っています。ほかのものは、ギャラリー(https://akilasatolu.github.io/tsuzuri/gallery/)で
 # ダウンロードして .github/tsuzuri/styles/ に置き、ここにそのファイル名を書きます。
 # このサイトは、自分用のカスタムスタイル(tsuzuri.css)で見た目を作っています。
 THEME=tsuzuri.css

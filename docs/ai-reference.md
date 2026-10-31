@@ -1,6 +1,7 @@
 ---
 title: Reference for AI agents
-order: 2
+description: One page to paste into an AI agent so that it sets Tsuzuri up for you
+order: 50
 ---
 
 # Reference for AI agents
@@ -101,7 +102,7 @@ With an empty answer or `n`, `init` exits without generating anything.
 
 ### 3.3 Interactive questions
 
-Without options, `init` shows the following five questions in order. An
+Without options, `init` shows the following two questions in order. An
 empty answer (Enter alone) results in the default in brackets. The questions
 are in English (v1.37.0 or later). Up to v1.36.0, and with `--lang ja`, they
 are in Japanese (for example `? トリガーブランチ (TRIGGER_BRANCH) [main]: `).
@@ -113,17 +114,13 @@ are in Japanese (for example `? トリガーブランチ (TRIGGER_BRANCH) [main]
 2. `? Root Markdown file (ROOT_MD) [README.md]: `
    The Markdown file that is the entry point of the site. The default is
    `README.md`.
-3. `? Show the sidebar navigation, site search and in-page table of contents? (NAV_ENABLED) (Y/n): `
-   The default is "show".
-4. `? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [en]: `
-   The default is `en`. A value that is not a valid language tag (for
-   example `ja_JP`) is ignored with a warning. When no valid value is left,
-   the result is `en`.
-5. `? Site name (SITE_NAME; the repository name if empty) []: `
-   The default is empty. When it is empty, the repository name becomes the
-   site name in builds on GitHub Actions.
 
-`init` does not ask about the theme or the custom style. The settings file
+`init` does not ask about the navigation, the site languages or the site name.
+It always writes `NAV_ENABLED=true`, `LANGUAGES=en` and `SITE_NAME=` (empty) to
+the settings file. To change them, edit `.github/tsuzuri/config` after `init`
+(for example, write `LANGUAGES=ja` when the README is in Japanese).
+
+`init` does not ask about the theme or the custom style either. The settings file
 always starts with `THEME=default.css`, and `init` places only `base.css` and
 `default.css` in `.github/tsuzuri/styles/` (see section 3.5). To use another
 custom style, the user downloads it from the gallery and writes its file name
@@ -137,9 +134,6 @@ questions.
 - `-y`, `--yes`: `init` generates everything with the defaults.
 - `--branch <name>`: the value of `TRIGGER_BRANCH`.
 - `--root <path>`: the value of `ROOT_MD`.
-- `--languages <list>`: the value of `LANGUAGES` (for example `ja`, `ja,en`).
-- `--site-name <name>`: the value of `SITE_NAME`.
-- `--no-nav`: results in `NAV_ENABLED=false`.
 
 `--lang <en|ja>` (v1.37.0 or later) does not turn on a non-interactive run.
 It is the language of the screen output and of the comments in the generated
@@ -150,7 +144,7 @@ to.
 Example:
 
 ```
-npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
+npx github:akilasatolu/tsuzuri#v1 init --yes --branch main
 ```
 
 - In a non-interactive run, the default trigger branch is the default branch
@@ -161,10 +155,8 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
   `.github/tsuzuri/config`). The custom styles that the user put in
   `.github/tsuzuri/styles/` are not created by `init`, so they are not
   overwritten.
-- An unknown option (`--theme` no longer exists), a
-  `--languages` that is not a valid language tag, and an empty `--branch`,
-  `--root` or `--languages` each result in an error. In that case `init`
-  generates nothing.
+- An unknown option (`--theme` no longer exists) and an empty `--branch` or `--root` each result in an error.
+  In that case `init` generates nothing.
 
 The other options are as follows.
 
@@ -289,12 +281,12 @@ written in the settings file that `init` generates.
   makes a single-language site, and two or more make a multilingual site.
   Invalid tags and duplicated tags are ignored with a warning.
   When omitted: `en`
-  Value from init: the answer to question 5.
+  Value from init: `en`
 - `NAV_ENABLED`: whether the sidebar navigation, the site search, the
   in-page table of contents, the links to the previous and next pages, and
   the light/dark toggle button are shown.
   When omitted: `false`
-  Value from init: the answer to question 4 (the default is `true`).
+  Value from init: `true`
 - `FAVICON_FILE`: the image used as the favicon. The value is a path from
   the root of the repository.
   When omitted: there is no favicon.
@@ -303,7 +295,7 @@ written in the settings file that `init` generates.
   `og:site_name`.
   When omitted: the repository name in builds on GitHub Actions. It is empty
   in local builds.
-  Value from init: the answer to question 6.
+  Value from init: empty
 - `CUSTOM_DOMAIN`: the custom domain (for example `docs.example.com`). A
   value that contains `https://` or a path is ignored with a warning. When
   it is set, a `CNAME` file is generated in the output directory.
@@ -885,15 +877,16 @@ version inside the repository stays the same until an update.
 The detailed description of each topic is at the following URLs.
 
 - Installation steps: https://akilasatolu.github.io/tsuzuri/docs/getting-started.html
-- Concepts: https://akilasatolu.github.io/tsuzuri/docs/concepts.html
-- Settings keys: https://akilasatolu.github.io/tsuzuri/docs/configuration.html
-- Custom styles (theming): https://akilasatolu.github.io/tsuzuri/docs/theming.html
-- Style gallery (samples and downloads): https://akilasatolu.github.io/tsuzuri/docs/gallery.html
-- Frontmatter: https://akilasatolu.github.io/tsuzuri/docs/frontmatter.html
-- Multilingual sites: https://akilasatolu.github.io/tsuzuri/docs/i18n.html
-- Commands: https://akilasatolu.github.io/tsuzuri/docs/cli.html
-- Deployment: https://akilasatolu.github.io/tsuzuri/docs/deployment.html
-- Examples: https://akilasatolu.github.io/tsuzuri/docs/examples.html
+- How it works: https://akilasatolu.github.io/tsuzuri/docs/reference/how-it-works.html
+- Page features: https://akilasatolu.github.io/tsuzuri/docs/reference/features.html
+- Settings keys: https://akilasatolu.github.io/tsuzuri/docs/reference/configuration.html
+- Changing the look (custom styles): https://akilasatolu.github.io/tsuzuri/docs/guides/style.html
+- Style gallery (samples and downloads): https://akilasatolu.github.io/tsuzuri/gallery/
+- Frontmatter: https://akilasatolu.github.io/tsuzuri/docs/reference/frontmatter.html
+- Multilingual sites: https://akilasatolu.github.io/tsuzuri/docs/guides/multilingual.html
+- Commands: https://akilasatolu.github.io/tsuzuri/docs/reference/cli.html
+- Publish settings: https://akilasatolu.github.io/tsuzuri/docs/guides/publish.html
+- Update: https://akilasatolu.github.io/tsuzuri/docs/guides/update.html
 - Frequently asked questions: https://akilasatolu.github.io/tsuzuri/docs/faq.html
 - List of releases: https://github.com/akilasatolu/tsuzuri/releases
 ````

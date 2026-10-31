@@ -18,8 +18,6 @@ import { execFileSync } from "node:child_process";
 import { runPreview } from "./preview.mjs";
 import { t, setCliLang, detectLangFromArgv, isCliLang } from "./messages.mjs";
 import {
-  LANG_TAG_RE,
-  resolveLanguages,
   VENDOR_DIR,
   WORKFLOW_PATH,
   CONFIG_FILE_PATH,
@@ -425,7 +423,9 @@ export function createAsker(rl) {
 }
 
 /**
- * 対話プロンプトで5項目(TRIGGER_BRANCH/ROOT_MD/NAV_ENABLED/LANGUAGES/SITE_NAME)を収集する。
+ * 対話プロンプトで2項目(TRIGGER_BRANCH/ROOT_MD)を収集する。
+ * NAV_ENABLED・LANGUAGES・SITE_NAME は聞かず、既定値(DEFAULT_ANSWERS)をそのまま返す
+ * (変えたいときは、init の後に設定ファイルを直す)。
  * readlineインターフェースは呼び出し側から注入する(テスト時は標準入力をモックしたものを渡す)。
  */
 export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
@@ -435,17 +435,13 @@ export async function promptAnswers(rl, defaults = DEFAULT_ANSWERS) {
   const rootMdInput = await rl.question(t("prompt.rootMd", { default: DEFAULT_ANSWERS.rootMd }));
   const rootMd = rootMdInput.trim() || DEFAULT_ANSWERS.rootMd;
 
-  const navInput = await rl.question(t("prompt.nav"));
-  const navEnabled = parseYesNo(navInput, DEFAULT_ANSWERS.navEnabled);
-
-  const languagesInput = await rl.question(t("prompt.languages", { default: DEFAULT_ANSWERS.languages }));
-  // config.mjs と同じ決まりで確かめる(不正なタグは同じ警告を出して捨てる。空なら en)。入力した順のまま書く
-  const languages = resolveLanguages(languagesInput).join(",");
-
-  const siteNameInput = await rl.question(t("prompt.siteName"));
-  const siteName = siteNameInput.trim();
-
-  return { triggerBranch, rootMd, navEnabled, languages, siteName };
+  return {
+    triggerBranch,
+    rootMd,
+    navEnabled: DEFAULT_ANSWERS.navEnabled,
+    languages: DEFAULT_ANSWERS.languages,
+    siteName: DEFAULT_ANSWERS.siteName,
+  };
 }
 
 /**
@@ -521,7 +517,7 @@ export function buildHelpText() {
  *
  * @param {string[]} argv - process.argv.slice(2) 相当
  * @returns {{ update: boolean, yes: boolean, force: boolean, version: boolean,
- *   help: boolean, branch?: string, root?: string, languages?: string, port: number, command: "init" | "preview",
+ *   help: boolean, branch?: string, root?: string, port: number, command: "init" | "preview",
  *   nonInteractive: boolean }}
  */
 export function parseCliArgs(argv = []) {
@@ -550,10 +546,7 @@ function parseCliArgsRaw(argv) {
       force: { type: "boolean", default: false },
       branch: { type: "string" },
       root: { type: "string" },
-      languages: { type: "string" },
       lang: { type: "string" },
-      "site-name": { type: "string" },
-      "no-nav": { type: "boolean", default: false },
       port: { type: "string" },
       "no-watch": { type: "boolean", default: false },
       open: { type: "boolean", default: false },
@@ -573,29 +566,16 @@ function parseCliArgsRaw(argv) {
       throw new Error(t("error.port", { value: values.port }));
     }
   }
-  for (const key of ["branch", "root", "languages"]) {
+  for (const key of ["branch", "root"]) {
     if (values[key] !== undefined && !values[key].trim()) {
       throw new Error(t("error.emptyValue", { name: key }));
     }
   }
-  if (values.languages !== undefined && !isValidLanguagesOption(values.languages)) {
-    throw new Error(t("error.languages", { value: values.languages }));
-  }
   if (values.lang !== undefined && !isCliLang(values.lang)) {
     throw new Error(t("error.lang", { value: values.lang }));
   }
-  const nonInteractive =
-    values.yes ||
-    values["no-nav"] ||
-    ["branch", "root", "languages", "site-name"].some((k) => values[k] !== undefined);
+  const nonInteractive = values.yes || ["branch", "root"].some((k) => values[k] !== undefined);
   return { ...values, command, port, nonInteractive };
-}
-
-// --languages で明示した値が正しいか。空でない要素が1つ以上あり、すべて言語タグの形であること。
-// (対話の答えと違い、明示した値の書き間違いは警告で済ませずにエラーにする)
-function isValidLanguagesOption(raw) {
-  const items = raw.split(",").map((item) => item.trim()).filter((item) => item !== "");
-  return items.length > 0 && items.every((item) => LANG_TAG_RE.test(item));
 }
 
 /**
@@ -606,9 +586,9 @@ export function answersFromArgs(args, defaults = DEFAULT_ANSWERS) {
   return {
     triggerBranch: args.branch?.trim() ?? defaults.triggerBranch,
     rootMd: args.root?.trim() ?? DEFAULT_ANSWERS.rootMd,
-    navEnabled: !args["no-nav"],
-    languages: args.languages !== undefined ? resolveLanguages(args.languages).join(",") : DEFAULT_ANSWERS.languages,
-    siteName: args["site-name"]?.trim() ?? DEFAULT_ANSWERS.siteName,
+    navEnabled: DEFAULT_ANSWERS.navEnabled,
+    languages: DEFAULT_ANSWERS.languages,
+    siteName: DEFAULT_ANSWERS.siteName,
   };
 }
 

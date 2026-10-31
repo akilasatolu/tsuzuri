@@ -1,5 +1,7 @@
 ---
 title: FAQ
+description: Tsuzuriの導入や実行でよくある困りごとへの答え
+order: 60
 ---
 
 # FAQ
@@ -20,7 +22,7 @@ Skipping because this push (feature/foo) is not to TRIGGER_BRANCH=main
 
 のようなメッセージ(v1.36.0までは日本語で、`TRIGGER_BRANCH=main ではない push (feature/foo) のためスキップします`)が出ていれば、これが原因です。対象ブランチへマージ・pushするか、
 `TRIGGER_BRANCH`の値自体を変更してください(手動実行(`workflow_dispatch`)の場合は
-この判定自体が行われず常にデプロイされます。詳細は[deployment.md](./deployment.ja.md))。
+この判定自体が行われず常にデプロイされます。詳細は[公開の設定](./guides/publish.ja.md))。
 
 デプロイジョブ自体は起動したのに、次のエラーで失敗している場合は原因が異なります。
 
@@ -30,7 +32,7 @@ Branch "docs" is not allowed to deploy to github-pages due to environment protec
 
 これは、既定ブランチ以外を`TRIGGER_BRANCH`にしたときに、`github-pages`環境で
 そのブランチからのデプロイが許可されていないことが原因です。
-[デプロイ設定](./deployment.ja.md)の「既定ブランチ以外をトリガーブランチにする場合」の
+[公開の設定](./guides/publish.ja.md)の「既定ブランチ以外をトリガーブランチにする場合」の
 手順で許可してください。
 
 ## リンク切れの警告が出る
@@ -41,17 +43,17 @@ Markdown内でリンクした先のファイルが実際には存在しない場
 「Files that links point to were not found: N」「Links ignored for security reasons: N」として
 (v1.36.0までのビルドスクリプトでは日本語で、「リンク先が見つからなかったファイル: N 件」
 「セキュリティ上の理由で無視されたリンク: N 件」)参照元のファイルとともに表示されます。さらに詳しく調べたい場合は、一時的に`SITEMAP_JSON=true`に
-してデバッグ用の`sitemap.json`を出力することもできます([concepts.md](./concepts.ja.md)参照)。
+してデバッグ用の`sitemap.json`を出力することもできます([ビルドの仕組み](./reference/how-it-works.ja.md)参照)。
 リンク切れのまま公開したくない場合は、`STRICT_LINKS=true`にするとビルドを失敗させられます
-([configuration.md](./configuration.ja.md#strict_links)参照)。
+([設定リファレンス](./reference/configuration.ja.md#strict_links)参照)。
 
 コピーするファイルの一覧にない拡張子のファイル(`src/foo.js`など)へのリンクも、同じように確かめます。
 実在すればGitHubへのリンクになり、実在しなければ「リンク先が見つからなかった」リンクとして記録されます。
-[concepts.md](./concepts.ja.md)の「コピーされるファイル」を参照してください。
+[ビルドの仕組み](./reference/how-it-works.ja.md)の「コピーされるファイル」を参照してください。
 
 ## 更新したらビルドが止まった(埋め込みの警告)
 
-v1.32.0からは、[concepts.md](./concepts.ja.md)の「コピーされるファイル」にある拡張子のファイルだけが
+v1.32.0からは、[ビルドの仕組み](./reference/how-it-works.ja.md)の「コピーされるファイル」にある拡張子のファイルだけが
 サイトにコピーされます。`![](…)`・`<img src>`・`<video src>`などで埋め込んだ画像・動画・音声の先が、
 ほかの拡張子のファイル(またはフォルダ)だと、表示・再生できないため、Buildステップに「The embedded
 target X is a file of a type that is not copied, so it cannot be displayed or played (referenced
@@ -81,16 +83,16 @@ from Y)」(フォルダのときは「is a folder」)という警告が出ます
 
 1. `THEME`のスペルミス。CSSファイル名でない値(`none`、`material`のような昔のテーマ名、
    `.github/tsuzuri/styles/glass.css`のようなフォルダを含むパス、`.css`で終わらない名前)を指定すると、
-   警告のうえ自動的に`default.css`にフォールバックします([configuration.md](./configuration.ja.md))。
+   警告のうえ自動的に`default.css`にフォールバックします([設定リファレンス](./reference/configuration.ja.md))。
 2. `THEME`に指定したファイル名のファイルが、`.github/tsuzuri/styles/`の中に実際に存在しているか。
    存在しない場合は警告が出て(`THEME ("…") was not found`)、ベースだけでビルドされます。
-   `default.css`以外のカスタムスタイルはパッケージに入っていないので、[ギャラリー](./gallery.ja.md)で
+   `default.css`以外のカスタムスタイルはパッケージに入っていないので、[ギャラリー](../gallery/README.ja.md)で
    ダウンロードしてください。
 3. 2層(ベースCSS→カスタムスタイル)の優先順位。カスタムスタイルはベースの後に
    読み込まれるため、ここに書いたCSSルールが期待通り上書きしているか、
    詳細度(セレクタの強さ)の観点でも確認してください。ページのfrontmatterの`theme`は、
    そのページだけサイト全体のカスタムスタイルを置き換えます。詳しくは
-   [theming.md](./theming.ja.md)を参照してください。
+   [見た目を変える](./guides/style.ja.md)を参照してください。
 
 ## previewの表示が公開サイトと違う
 
@@ -107,7 +109,7 @@ from Y)」(フォルダのときは「is a folder」)という警告が出ます
 
 (v1.36.0までと、`--lang ja`のときは日本語で、「ポート 4000 は使用中です」と出ます。)
 別のアプリ(または別の`preview`)が同じポートを使っています。`--port 4001`のように別の番号を
-指定してください([CLIリファレンス](cli.ja.md#手元で確認するpreview))。
+指定してください([CLIリファレンス](reference/cli.ja.md#手元で確認するpreview))。
 
 ## npx実行時にキャッシュが古い
 
@@ -134,7 +136,7 @@ npx github:akilasatolu/tsuzuri#v<最新のバージョン> init --update
 まずビルドが正しい`CUSTOM_DOMAIN`の値を認識しているか(ホスト名として妥当な形式に
 なっているか。スキームやパスを含めると無効な値として空文字にフォールバックします)、
 `SITEMAP_JSON=true`で出力した`sitemap.json`の`customDomain`/`siteOrigin`の値を確認してください。詳細は
-[deployment.md](./deployment.ja.md)の「カスタムドメインの設定」を参照してください。
+[公開の設定](./guides/publish.ja.md)の「カスタムドメインの設定」を参照してください。
 
 ## `llms.txt`を作りたくない・自分で書いたものを使いたい
 
@@ -142,7 +144,7 @@ npx github:akilasatolu/tsuzuri#v<最新のバージョン> init --update
 `.github/tsuzuri/config`に`LLMS_TXT=false`と書きます。自分で書いたものを使うには、
 リポジトリの直下に`llms.txt`を置きます。それがそのままサイトにコピーされ、自動では作られません。
 シンボリックリンクや、通常のファイルでないものは使われません(警告が表示され、コピーも自動生成もされません)。
-詳しくは[concepts.md](./concepts.ja.md)の「llms.txt」を参照してください。
+詳しくは[ビルドの仕組み](./reference/how-it-works.ja.md)の「llms.txt」を参照してください。
 
 ## Markdownに書いたHTMLはそのまま出力される?
 

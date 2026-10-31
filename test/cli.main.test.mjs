@@ -34,7 +34,7 @@ const UPDATE_INTRO = "Updating to the latest version (the settings file is not c
 const UPDATE_DONE = "\nUpdate complete. You can review the changes with 'git diff'.\n";
 const WARN_NO_GIT = "⚠ This does not look like a git repository. Run this at the root of the repository you want to publish.\n";
 const warnNoRoot = (rootMd) => `⚠ The root file ${rootMd} does not exist yet. Create it before you push (the build fails without it).\n`;
-const BLANK_ANSWERS = "\n\n\n\n\n";
+const BLANK_ANSWERS = "\n\n";
 const BUNDLE_QUESTION = "The workflow and the build scripts";
 
 function makeTmpDir() {
@@ -168,7 +168,7 @@ test("main: --update で設定ファイルに無い項目があると、生成�
     assert.equal(result.stderr, "");
     const notice =
       `ℹ Keys missing from the settings file (defaults are used): ${keys.join(", ")}\n` +
-      `  Add them to ${CONFIG_FILE_PATH} if you want to use them. See: ${DOCS_URL}docs/configuration.html\n`;
+      `  Add them to ${CONFIG_FILE_PATH} if you want to use them. See: ${DOCS_URL}docs/reference/configuration.html\n`;
     assert.equal(result.stdout, BANNER + UPDATE_INTRO + notice + created(updateTargets()) + UPDATE_DONE);
     assert.equal(read(dir, CONFIG_FILE_PATH), config);
   });
@@ -214,7 +214,7 @@ test("main: -y は、git の外・起点なしだと、標準エラーに場所�
 test("main: -y に付けたオプション(--branch など)が、生成物と完了メッセージに渡る", () => {
   withTmpDir((dir) => {
     setupRepo(dir);
-    const args = ["--branch", "docs", "--root", "docs/index.md", "--languages", "ja,en", "--site-name", "Demo", "--no-nav"];
+    const args = ["--branch", "docs", "--root", "docs/index.md"];
     const answers = answersFromArgs(parseCliArgs(args));
     const result = runCli(args, { cwd: dir });
     assert.equal(result.status, 0, result.stderr);
@@ -256,9 +256,6 @@ test("main: 対話の init は、見出し・質問・生成の一覧・作成�
     assertInOrder(result.stdout, [
       "? Trigger branch (TRIGGER_BRANCH) [main]: ",
       "(ROOT_MD)",
-      "(NAV_ENABLED)",
-      "(LANGUAGES",
-      "(SITE_NAME",
       "\n--- The following files will be generated ---\n",
       ...targets.map((t) => `  ${t.relPath}  (target)\n`),
       ...targets.map((t) => `✔ ${t.relPath} created\n`),
@@ -269,16 +266,30 @@ test("main: 対話の init は、見出し・質問・生成の一覧・作成�
   });
 });
 
+test("main: 対話の init は質問が2つで終わり、設定ファイルに NAV_ENABLED=true・LANGUAGES=en・SITE_NAME=(空)を書く", () => {
+  withTmpDir((dir) => {
+    setupRepo(dir);
+    const result = runCli([], { cwd: dir, input: BLANK_ANSWERS });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal((result.stdout.match(/\? [A-Z][^:]*\(\w+\)[^:]*: /g) ?? []).length, 2, result.stdout);
+    assert.doesNotMatch(result.stdout, /NAV_ENABLED\)|\(LANGUAGES|\(SITE_NAME/);
+    const config = read(dir, ".github/tsuzuri/config");
+    assert.match(config, /^NAV_ENABLED=true$/m);
+    assert.match(config, /^LANGUAGES=en$/m);
+    assert.match(config, /^SITE_NAME=$/m);
+  });
+});
+
 test("main: 対話の init で答えた内容が、設定ファイルと完了メッセージに入り、起点が無ければ標準エラーで警告する", () => {
   withTmpDir((dir) => {
     gitInit(dir);
-    const input = "docs\ndocs/index.md\nn\nja,en\nMy Site\n";
+    const input = "docs\ndocs/index.md\n";
     const answers = {
       triggerBranch: "docs",
       rootMd: "docs/index.md",
-      navEnabled: false,
-      languages: "ja,en",
-      siteName: "My Site",
+      navEnabled: true,
+      languages: "en",
+      siteName: "",
     };
     const result = runCli([], { cwd: dir, input });
     assert.equal(result.status, 0, result.stderr);
@@ -458,14 +469,6 @@ test("main: 既定(--lang なし)では、標準出力・標準エラー・生�
     assert.equal(result.status, 0, result.stderr);
     assert.doesNotMatch(result.stdout + result.stderr, CJK);
   });
-  // 対話の init で、言語に正しくない値(ja_JP)を答えたときの警告([config] で始まる)も英語
-  withTmpDir((dir) => {
-    setupRepo(dir);
-    const result = runCli([], { cwd: dir, input: "\n\n\nja_JP\n\n" });
-    assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stderr, /\[config\] "ja_JP" in LANGUAGES is ignored because it is not a valid language tag\./);
-    assert.doesNotMatch(result.stdout + result.stderr, CJK);
-  });
   // --help、引数のエラー、init 前の preview
   withTmpDir((dir) => {
     for (const args of [["--help"], ["--bogus"], ["deploy"], ["--theme", "nineties"], ["preview", "--port", "abc"], ["preview"], ["--lang", "fr"]]) {
@@ -497,7 +500,7 @@ test("main: --lang ja で、質問・生成の一覧・完了メッセージ・�
     assert.equal(read(dir, ".github/tsuzuri/config"), ja.config);
     assert.match(read(dir, ".github/tsuzuri/config"), CJK);
     // --lang ja だけでは質問を省略しない(質問に答えた)
-    assert.match(result.stdout, /\? サイト名 \(SITE_NAME/);
+    assert.match(result.stdout, /\? トリガーブランチ \(TRIGGER_BRANCH\)/);
   });
 });
 

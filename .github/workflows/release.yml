@@ -1,8 +1,21 @@
 name: Release
 
 # vX.Y.Z のタグが push されたら、GitHub の Release を作成し、メジャーバージョンのタグ
-# (v1 など)をそのコミットに付け替える。手順は MAINTAINING.md の「Releasing」(日本語は MAINTAINING.ja.md の「リリース」)を参照。
+# (v1 など)をそのコミットに付け替える。
 #
+# リリースの手順(運営者が行う):
+#   1. main で npm test と npm run lint が通り、CI が緑であることを確かめる
+#   2. node scripts/check-package.mjs で、配る中身(npm pack したもの)を確かめる
+#   3. CHANGELOG.md の [Unreleased] を、日英で [X.Y.Z] - YYYY-MM-DD の節に改め、空の [Unreleased] を足す
+#   4. docs/ai-reference.md・docs/ai-reference.ja.md の対象版と、package.json・package-lock.json の version(最上位の version と
+#      packages[""].version だけ)を X.Y.Z に更新する
+#   5. commit して main に push し、git tag vX.Y.Z して、そのタグを push する(このワークフローが動く)
+#   6. Actions で結果を確かめる(下の 1〜3 が行われる)
+#   7. main で npx github:akilasatolu/tsuzuri#vX.Y.Z init --update を実行し、.github/tsuzuri/ と
+#      .github/workflows/tsuzuri-pages.yml の変更を commit して push する(このサイト自身の生成ファイルの更新)
+#   8. CI と tsuzuri-pages が成功し、サイトが公開されたことを確かめる
+#
+# このワークフローが行うこと:
 #   1. タグと package.json の version が一致し、タグのコミットが main に含まれることを確認
 #   2. CHANGELOG.md の該当する節から Release の本文を作り(scripts/release-notes.mjs)、Release を作成
 #   3. メジャーバージョンのタグ(vX)を付け替えて push

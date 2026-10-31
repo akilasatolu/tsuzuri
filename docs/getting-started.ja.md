@@ -1,9 +1,12 @@
 ---
-title: Getting Started
-order: 1
+title: はじめる
+description: READMEをGitHub Pagesのサイトとして公開する3つの手順: initを実行し、Pagesを設定し、pushする
+order: 10
 ---
 
-# Getting Started
+# はじめる
+
+READMEをサイトとして公開するには、3つの手順です。`init`を実行し、GitHub PagesのSourceをGitHub Actionsにして(最初の1回だけ)、pushします。[このサイト](../README.ja.md)も、まさにこの手順で公開しています。
 
 ## 前提条件
 
@@ -23,12 +26,13 @@ order: 1
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-実行すると、トリガーブランチ・起点となるMarkdownファイル・ナビの表示・サイトの言語・
-サイト名について、5つの質問が対話形式で表示されます。すべてEnterキーだけで既定値
-(リポジトリの既定ブランチ・`README.md`・ナビを表示・英語(`en`)・リポジトリ名)を
-選ぶこともできます。見た目は質問されず、設定ファイルは、パッケージに入っている標準のカスタムスタイル
-`THEME=default.css`で始まります。READMEが日本語なら、サイトの言語の質問には`ja`と答えてください。
-対話フローの詳細は[cli.md](./cli.ja.md)を参照してください。
+実行すると、トリガーブランチと起点となるMarkdownファイルについて、2つの質問が対話形式で表示されます。
+すべてEnterキーだけで既定値(リポジトリの既定ブランチと`README.md`)を選ぶこともできます。
+ナビの表示・サイトの言語・サイト名は質問されません。`init`は`NAV_ENABLED=true`・`LANGUAGES=en`・空の`SITE_NAME`
+(リポジトリ名になります)を書き、設定ファイルは、パッケージに入っている標準のカスタムスタイル
+`THEME=default.css`で始まります。READMEが日本語なら、`init`の後に`.github/tsuzuri/config`の
+`LANGUAGES`を直してください(例: `LANGUAGES=ja`)。
+対話フローの詳細は[cli.md](./reference/cli.ja.md)を参照してください。
 
 このコマンドにより、ワークフロー・設定ファイルに加えて、ビルドスクリプト本体一式が
 リポジトリに生成されます。
@@ -38,12 +42,12 @@ npx github:akilasatolu/tsuzuri#v1 init
 
 `.github/tsuzuri/`配下で編集してよいのは、設定ファイル`config`と、`styles/`に置く自分のカスタムスタイル
 だけです。`base.css`・`default.css`・スクリプトは編集しないでください。ほかの見た目にしたいときは、
-[ギャラリー](./gallery.ja.md)でカスタムスタイルをダウンロードして`styles/`に置き、`THEME`に指定します
-([スタイル(theming.md)](./theming.ja.md)参照)。
+[ギャラリー](../gallery/README.ja.md)でカスタムスタイルをダウンロードして`styles/`に置き、`THEME`に指定します
+([見た目を変える](./guides/style.ja.md)参照)。
 
 ビルドスクリプト本体もリポジトリにコピーされるため、生成後のワークフローは実行のたびに
 OSS本体リポジトリ(tsuzuri)を参照することなく、このリポジトリの中だけでビルド・
-デプロイが完結します。詳しくは[デプロイ設定(deployment.md)](./deployment.ja.md)を
+デプロイが完結します。詳しくは[公開の設定](./guides/publish.ja.md)を
 参照してください。
 
 ## GitHub Pagesの設定
@@ -60,7 +64,7 @@ OSS本体リポジトリ(tsuzuri)を参照することなく、このリポジ�
 
 `TRIGGER_BRANCH`に既定ブランチ(通常は`main`)以外のブランチを指定した場合は、
 さらに`Settings > Environments > github-pages`でそのブランチからのデプロイを許可する
-必要があります。手順は[デプロイ設定](./deployment.ja.md)の「既定ブランチ以外を
+必要があります。手順は[公開の設定](./guides/publish.ja.md)の「既定ブランチ以外を
 トリガーブランチにする場合」を参照してください。
 
 ## 初回デプロイ
@@ -74,67 +78,10 @@ OSS本体リポジトリ(tsuzuri)を参照することなく、このリポジ�
 `Settings > Pages`のページに表示されるURLから、生成されたサイトを確認できます
 (反映まで数分かかる場合があります)。
 
-## pushする前に手元で確認する(任意)
-
-pushしてGitHub Actionsを待たなくても、手元で同じビルドを実行して見た目やリンク切れを確認できます
-(Node.js 20以上が必要です)。リポジトリの直下で、次のコマンドを実行するのがいちばん簡単です(v1.5.0以降)。
-
-```sh
-npx github:akilasatolu/tsuzuri#v1 preview
-```
-
-ビルドが終わると`http://localhost:4000/`でサイトを開けます(詳しくは[CLIリファレンス](cli.ja.md#手元で確認するpreview))。
-
-`preview`を使わずに、手動で同じことをする場合は次の順に実行します。
-
-1. ビルドに使う依存を`.github/tsuzuri/`にインストールします。`.github/tsuzuri/package-lock.json`の
-   とおりに入るので、ワークフローと同じ版になります(v1.7.0以降)。
-
-   ```sh
-   npm ci --prefix .github/tsuzuri --ignore-scripts
-   ```
-
-   `.github/tsuzuri/package-lock.json`が無い(古い版で`init`した)リポジトリでは、先に
-   `npx github:akilasatolu/tsuzuri#v1 init --update`で更新してください。
-
-   インストール先の`.github/tsuzuri/node_modules/`は、`init`が生成する`.github/tsuzuri/.gitignore`に
-   よってコミットの対象外になっています。
-
-2. ビルドします。`.github/tsuzuri/config`の設定がそのまま使われるので、公開サイトと同じ
-   見た目で確認できます。
-
-   ```sh
-   node .github/tsuzuri/build-docs.mjs
-   ```
-
-   試しに設定を変えたいときは、`THEME=glass.css node .github/tsuzuri/build-docs.mjs`のように
-   環境変数で渡すと、そのキーだけ設定ファイルより優先されます。
-
-   > [!NOTE]
-   > 設定ファイルを自動で読むのはv1.4.0以降です。それより前のバージョンでは、設定ファイルの値を
-   > 環境変数で渡してください(例: `STYLE_DIR=.github/tsuzuri/styles NAV_ENABLED=true node .github/tsuzuri/build-docs.mjs`)。
-   > リポジトリにコピー済みのバージョンは、`.github/workflows/tsuzuri-pages.yml`の先頭のコメント
-   > (`# tsuzuri v1.37.0 generated this …`。v1.36.0までは`# tsuzuri v1.4.0 の …`)で確認できます。古い場合は`init --update`で更新できます
-   > ([CLIリファレンス](cli.ja.md)参照)。
-
-3. できあがった`_site/`を簡易サーバーで開きます(ファイルを直接開くとリンクが切れます)。
-
-   ```sh
-   npx serve _site
-   ```
-
-   `http://localhost:3000/`などで確認できます。確認が終わったら`_site/`は削除して構いません。
-   v1.5.0以降は、ビルドの前に前回の出力が自動で消されます(それより前のバージョンでは、ページを
-   削除・改名したときは`_site/`を消してからビルドし直してください)。
-   `_site/`を誤ってコミットしないよう、リポジトリの`.gitignore`に次の1行を追加しておくと安心です。
-
-   ```
-   _site/
-   ```
+pushする前に、自分のパソコンでサイトを確認することもできます。[公開前にローカルで確認する](./preview.ja.md)を見てください。
 
 ## 次のステップ
 
-- サイトがどのように組み立てられているかを知りたい場合は[仕組み(concepts.md)](./concepts.ja.md)
-- 設定できる項目の一覧は[設定リファレンス(configuration.md)](./configuration.ja.md)
-- 見た目(配色・装飾)を変えたい場合は[スタイル(theming.md)](./theming.ja.md)
-- 導入の作業をAIエージェントに手伝ってもらう場合は[AIエージェント向けの参考情報](./ai-reference.ja.md)
+- [ギャラリー](../gallery/README.ja.md)で見た目を選び、`THEME`に指定します([見た目を変える](./guides/style.ja.md)参照)。
+- READMEからリンクを足して、ページを増やします([ページを書く](./guides/write-pages.ja.md)参照)。
+- AIエージェントに任せるなら、[AIエージェント向けの参考情報](./ai-reference.ja.md)を貼り付けます。

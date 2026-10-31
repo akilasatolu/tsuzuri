@@ -75,10 +75,10 @@ function fakeRl(answers) {
 
 // --- 対話ロジック(promptAnswers)のテスト ---
 // 標準入力を直接モックする代わりに、question()を差し替えたrlオブジェクトを注入する。
-// 質問の順番: TRIGGER_BRANCH / ROOT_MD / NAV_ENABLED / LANGUAGES / SITE_NAME(テーマ(THEME)は聞かない。設定ファイルは THEME=default.css で始まる)
+// 質問の順番: TRIGGER_BRANCH / ROOT_MD の2つだけ(NAV_ENABLED・LANGUAGES・SITE_NAME・テーマ(THEME)は聞かない。設定ファイルは THEME=default.css で始まる)
 
 test("promptAnswers: 全てデフォルト値で応答すると既定値が返る", async () => {
-  const rl = fakeRl(["", "", "", "", ""]);
+  const rl = fakeRl(["", ""]);
   const answers = await promptAnswers(rl);
   assert.deepEqual(answers, {
     triggerBranch: "main",
@@ -89,125 +89,65 @@ test("promptAnswers: 全てデフォルト値で応答すると既定値が返�
   });
 });
 
-test("promptAnswers: テーマ(THEME)とカスタムスタイルは聞かない(5つの質問で終わる。6つ目を聞くと答えが足りずに失敗する)", async () => {
+test("promptAnswers: 質問は2つで終わり(3つ目を聞くと答えが足りずに失敗する)、ナビ・言語・サイト名・テーマ(THEME)は聞かない", async () => {
   const asked = [];
   const rl = { question: async (prompt) => (asked.push(prompt), "") };
   const answers = await promptAnswers(rl);
-  assert.equal(asked.length, 5);
-  assert.ok(!asked.some((q) => /THEME|theme|custom style|custom CSS|custom\.css/i.test(q)));
+  assert.equal(asked.length, 2);
+  assert.ok(asked[0].includes("TRIGGER_BRANCH"));
+  assert.ok(asked[1].includes("ROOT_MD"));
+  assert.ok(!asked.some((q) => /THEME|theme|custom style|custom CSS|custom\.css|NAV_ENABLED|LANGUAGES|SITE_NAME/i.test(q)));
   assert.equal("theme" in answers, false);
   assert.equal("createStyleFile" in answers, false);
 });
 
-test("promptAnswers: ナビ(n で無効)とサイト名を聞き、設定ファイルに書く", async () => {
-  const answers = await promptAnswers(fakeRl(["", "", "n", "", "  My Docs  "]));
-  assert.equal(answers.navEnabled, false);
-  assert.equal(answers.siteName, "My Docs");
+test("promptAnswers: 2つの答えを使い、設定ファイルには NAV_ENABLED=true・LANGUAGES=en・SITE_NAME=(空)が書かれる", async () => {
+  const answers = await promptAnswers(fakeRl(["docs", "docs/index.md"]));
+  assert.equal(answers.triggerBranch, "docs");
+  assert.equal(answers.rootMd, "docs/index.md");
   const config = buildDocsPagesConfig(answers);
-  assert.ok(config.includes("\nNAV_ENABLED=false\n"));
-  assert.ok(config.includes("\nSITE_NAME=My Docs\n"));
-  assert.ok(buildDocsPagesConfig({}).includes("\nNAV_ENABLED=true\n"), "既定ではナビを表示する");
+  assert.ok(config.includes("\nTRIGGER_BRANCH=docs\n"));
+  assert.ok(config.includes("\nROOT_MD=docs/index.md\n"));
+  assert.ok(config.includes("\nNAV_ENABLED=true\n"));
+  assert.ok(config.includes("\nLANGUAGES=en\n"));
+  assert.ok(config.includes("\nSITE_NAME=\n"));
 });
 
-// console.warn を一時的に差し替えて、出た警告を集める
-async function captureWarn(fn) {
-  const calls = [];
-  const original = console.warn;
-  console.warn = (...args) => calls.push(args.join(" "));
-  try {
-    return { result: await fn(), calls };
-  } finally {
-    console.warn = original;
+test("--languages・--site-name・--no-nav は削除済みで、知らないオプションとして拒否される", () => {
+  for (const argv of [["--languages", "ja"], ["--languages=ja,en"], ["--site-name", "Docs"], ["--no-nav"]]) {
+    assert.throws(() => parseCliArgs(argv), /Unknown option|unknown option|--languages|--site-name|--no-nav/, argv.join(" "));
   }
-}
-
-test("promptAnswers: サイトの言語(LANGUAGES)をサイト名の前に聞き、入力した順のまま設定ファイルに書く", async () => {
-  const cases = [
-    ["", "en"],
-    ["ja", "ja"],
-    ["ja, en", "ja,en"],
-    [" en , ja ", "en,ja"],
-  ];
-  for (const [input, expected] of cases) {
-    const prompts = [];
-    const rl = fakeRl(["", "", "", input, "Site"]);
-    const { result: answers, calls } = await captureWarn(() =>
-      promptAnswers({ question: (q) => (prompts.push(q), rl.question(q)) }),
-    );
-    assert.equal(answers.languages, expected, input);
-    assert.equal(answers.siteName, "Site", "次の質問はサイト名");
-    assert.deepEqual(calls, [], input);
-    assert.equal(
-      prompts[3],
-      "? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [en]: ",
-    );
-    assert.match(prompts[4], /Site name/);
-    assert.ok(buildDocsPagesConfig(answers).includes(`\nLANGUAGES=${expected}\n`), input);
-  }
-});
-
-test("promptAnswers: 不正な言語タグ(ja_JP)は警告して en にする", async () => {
-  const { result: answers, calls } = await captureWarn(() => promptAnswers(fakeRl(["", "", "", "ja_JP", ""])));
+  // --yes / --branch / --root は今までどおり、質問なしの実行になる
+  assert.equal(parseCliArgs(["--yes"]).nonInteractive, true);
+  assert.equal(parseCliArgs(["--branch", "docs"]).nonInteractive, true);
+  assert.equal(parseCliArgs(["--root", "docs/index.md"]).nonInteractive, true);
+  const answers = answersFromArgs(parseCliArgs(["--yes"]));
+  assert.equal(answers.navEnabled, true);
   assert.equal(answers.languages, "en");
-  assert.deepEqual(calls, [
-    '[config] "ja_JP" in LANGUAGES is ignored because it is not a valid language tag.',
-    '[config] LANGUAGES has no valid language tag. Using "en".',
-  ]);
+  assert.equal(answers.siteName, "");
 });
 
-test("--languages で対話なしに指定できる。--yes だけなら en", () => {
-  const args = parseCliArgs(["--languages", "ja,en"]);
-  assert.equal(args.nonInteractive, true);
-  assert.equal(answersFromArgs(args).languages, "ja,en");
-  assert.equal(answersFromArgs(parseCliArgs(["--languages", " ja , en "])).languages, "ja,en");
-  assert.equal(answersFromArgs(parseCliArgs(["--yes"])).languages, "en");
-  assert.throws(() => parseCliArgs(["--languages", " "]), /--languages cannot be empty/);
-  // 明示した値の書き間違いは --port と同じくエラーで止める(対話の答えは警告して en)
-  assert.throws(() => parseCliArgs(["--languages", "ja_JP"]), /^Error: --languages needs language tags separated by commas \(e\.g\. ja \/ en \/ ja,en\) \(given: ja_JP\)$/);
-  assert.throws(() => parseCliArgs(["--languages", "ja,ja_JP"]), /--languages needs/);
-  assert.throws(() => parseCliArgs(["--languages", ","]), /--languages needs.*\(given: ,\)$/);
-  assert.doesNotThrow(() => parseCliArgs(["--languages", "ja,en"]));
-  assert.match(buildHelpText(), /--languages <list>\n\s+Site languages \(LANGUAGES; the first is the base language\)\. Default: en\n/);
-  assert.match(buildHelpText(), /Giving any of --branch \/ --root \/ --languages \/ --site-name .* also runs without questions/);
+test("buildHelpText: --languages・--site-name・--no-nav は載せず、--branch / --root で質問なしになることを書く", () => {
+  const help = buildHelpText();
+  assert.doesNotMatch(help, /--languages|--site-name|--no-nav/);
+  assert.match(help, /Giving --branch or --root also runs without questions/);
   withLang("ja", () => {
-    assert.match(buildHelpText(), /--languages <一覧>\n\s+サイトの言語\(LANGUAGES。先頭が基本言語\)。既定: en\n/);
-    assert.match(buildHelpText(), /--root \/ --languages \/ --site-name .*のいずれかを指定した場合も、対話なしで実行します/);
+    const ja = buildHelpText();
+    assert.doesNotMatch(ja, /--languages|--site-name|--no-nav/);
+    assert.match(ja, /--branch \/ --root のどちらかを指定した場合も、対話なしで実行します/);
   });
 });
 
-test("CLI: --languages の不正な値は --port の不正な値と同じ終了コード・形のエラーで止まり、ファイルを作らない", () => {
+test("CLI: init --languages ja / --site-name Docs / --no-nav は、エラーで終了し、ファイルを作らない", () => {
   const dir = makeTmpDir();
   try {
     const cli = join(PACKAGE_ROOT, "bin/cli.mjs");
-    const port = spawnSync(process.execPath, [cli, "--port", "abc"], { cwd: dir, encoding: "utf8" });
-    for (const value of ["ja_JP", ","]) {
-      const result = spawnSync(process.execPath, [cli, "--languages", value], { cwd: dir, encoding: "utf8" });
-      assert.notEqual(result.status, 0, value);
-      assert.equal(result.status, port.status, value);
-      assert.ok(result.stderr.includes(`--languages needs language tags separated by commas (e.g. ja / en / ja,en) (given: ${value})`), result.stderr);
-      // 前後の文言の形も --port のエラーと同じ
-      assert.equal(
-        result.stderr.replace(/--languages needs.*?\(given: [^)]*\)/, "X"),
-        port.stderr.replace(/--port needs.*?\(given: [^)]*\)/, "X"),
-        value,
-      );
-      assert.ok(!existsSync(join(dir, ".github")), value);
+    for (const argv of [["init", "--languages", "ja"], ["init", "--site-name", "Docs"], ["init", "--no-nav"]]) {
+      const result = spawnSync(process.execPath, [cli, ...argv], { cwd: dir, encoding: "utf8" });
+      assert.notEqual(result.status, 0, argv.join(" "));
+      assert.ok(result.stderr.includes(argv[1]), result.stderr);
+      assert.ok(!existsSync(join(dir, ".github")), argv.join(" "));
     }
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
-
-test("CLI: --yes --languages ja で、設定ファイルに LANGUAGES=ja を書く", () => {
-  const dir = makeTmpDir();
-  try {
-    spawnSync("git", ["init", "-q", "-b", "main"], { cwd: dir });
-    writeFileSync(join(dir, "README.md"), "# x\n");
-    const result = spawnSync(process.execPath, [join(PACKAGE_ROOT, "bin/cli.mjs"), "-y", "--languages", "ja"], { cwd: dir, encoding: "utf8" });
-    assert.equal(result.status, 0, result.stderr);
-    const config = readFileSync(join(dir, ".github/tsuzuri/config"), "utf8");
-    assert.match(config, /^LANGUAGES=ja$/m);
-    assert.doesNotMatch(config, /^LANG=/m);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -221,7 +161,7 @@ test("buildDocsPagesConfig: LANG の行は無く、LANGUAGES と説明があり�
       [
         "# Site languages, comma-separated; the first is the base language (the language of the starting README). Examples: ja / en / ja,en",
         '# With one language you get a single-language site (<html lang="..."> and the interface text use that language).',
-        "# With two or more you get a multilingual site (how to place pages: https://akilasatolu.github.io/tsuzuri/docs/i18n.html). If empty, it is en.",
+        "# With two or more you get a multilingual site (how to place pages: https://akilasatolu.github.io/tsuzuri/docs/guides/multilingual.html). If empty, it is en.",
         "LANGUAGES=ja,en",
       ].join("\n"),
     ),
@@ -232,7 +172,7 @@ test("buildDocsPagesConfig: LANG の行は無く、LANGUAGES と説明があり�
         [
           "# サイトの言語。カンマ区切りで、先頭が基本言語(起点の README の言語)です。例: ja / en / ja,en",
           '# 1つなら1言語のサイト(ページの言語 <html lang="..."> と画面の文言がその言語になります)。',
-          "# 2つ以上なら多言語のサイトになります(ページの置き方: https://akilasatolu.github.io/tsuzuri/docs/i18n.html)。空なら en です。",
+          "# 2つ以上なら多言語のサイトになります(ページの置き方: https://akilasatolu.github.io/tsuzuri/docs/guides/multilingual.html)。空なら en です。",
           "LANGUAGES=ja,en",
         ].join("\n"),
       ),
@@ -241,15 +181,6 @@ test("buildDocsPagesConfig: LANG の行は無く、LANGUAGES と説明があり�
   const loaded = loadConfig(parseConfigText(config));
   assert.deepEqual(loaded.languages, ["ja", "en"]);
   assert.deepEqual(loadConfig(parseConfigText(buildDocsPagesConfig({}))).languages, ["en"], "既定は en");
-});
-
-test("--site-name / --no-nav で対話なしに指定できる", () => {
-  const args = parseCliArgs(["--site-name", "Docs", "--no-nav"]);
-  assert.equal(args.nonInteractive, true);
-  const answers = answersFromArgs(args);
-  assert.equal(answers.siteName, "Docs");
-  assert.equal(answers.navEnabled, false);
-  assert.equal(answersFromArgs(parseCliArgs(["-y"])).navEnabled, true);
 });
 
 test("parseYesNo: y/yes/大文字小文字を真、それ以外・空文字はデフォルト値", () => {
@@ -357,8 +288,7 @@ test("コミットしてあるビルド用の lockfile の完成品が、本体�
   const built = buildBuildLockfiles();
   const committed = readBuildLockfiles();
   const hint =
-    `${BUILD_LOCKFILES_DIR}/ が古い。node scripts/build-lockfiles.mjs で作り直して同じPRにコミットする` +
-    "(依存を手で更新するときの手順は MAINTAINING.md の「Updating dependencies」)";
+    `${BUILD_LOCKFILES_DIR}/ が古い。node scripts/build-lockfiles.mjs で作り直して同じコミットに入れる`;
   assert.equal(committed.packageJson, built.packageJson, hint);
   assert.equal(committed.packageLock, built.packageLock, hint);
   const vendor = Object.fromEntries(buildVendorTargets().map((t) => [t.relPath, t.content]));
@@ -391,7 +321,7 @@ test("buildDocsPagesConfig: THEME の値は、答えにかかわらず default.c
 test("buildDocsPagesConfig: THEME のコメントは、カスタムスタイルをギャラリーからダウンロードして置く手順を案内する", () => {
   const config = buildDocsPagesConfig({});
   assert.ok(config.includes("# The custom style of the whole site: the file name of a CSS file in .github/tsuzuri/styles/"));
-  assert.ok(config.includes("# (https://akilasatolu.github.io/tsuzuri/docs/gallery.html), put it in .github/tsuzuri/styles/ and write its file name here."));
+  assert.ok(config.includes("# (https://akilasatolu.github.io/tsuzuri/gallery/), put it in .github/tsuzuri/styles/ and write its file name here."));
   withLang("ja", () => {
     const ja = buildDocsPagesConfig({});
     assert.ok(ja.includes("# サイト全体のカスタムスタイル。.github/tsuzuri/styles/ の中のCSSファイルのファイル名"));

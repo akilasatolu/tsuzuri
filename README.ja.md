@@ -4,9 +4,13 @@
 
 # Tsuzuri
 
-<p class="tsuzuri-hero-lead">README を綴じて、あなたのサイトに。</p>
+<p class="tsuzuri-hero-lead">READMEが、そのままドキュメントに。二重に書かなくてよい、READMEのサイトを作ります。</p>
 
-<p class="tsuzuri-hero-sub">README を起点にリンクをたどり、つながった Markdown を GitHub Pages のサイトにして自動で公開します。</p>
+<p class="tsuzuri-hero-sub">コマンド1つで、READMEからテーマ付きのGitHub Pagesのサイトができあがり、あとの更新の手間もかかりません。</p>
+
+```sh
+npx github:akilasatolu/tsuzuri#v1 init
+```
 
 <p class="tsuzuri-hero-actions"><a class="tsuzuri-button tsuzuri-button-primary" href="docs/getting-started.ja.md">はじめる</a><span class="tsuzuri-sep"> ・ </span><a class="tsuzuri-button" href="#ドキュメント">ドキュメント</a><span class="tsuzuri-sep"> ・ </span><a class="tsuzuri-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
 
@@ -15,26 +19,49 @@
 
 </div>
 
-## Tsuzuriとは
+AIエージェントに導入を任せたいときは、[AIエージェント向けの参考情報](docs/ai-reference.ja.md)を貼り付けるだけです。
 
-Tsuzuri(綴)は、リポジトリの`README.md`を起点にして本文中のリンクをたどり、
-つながっているMarkdownファイルと画像をそのままGitHub Pagesのサイトへ変換・
-デプロイするツールです。名前は「複数の紙を綴じて1冊にする」という製本用語に
-由来しており、README起点でつながった複数のMarkdownファイルを1つのサイトに
-束ねる、というこのツールの動きをそのまま表しています。
+## できあがるサイト
 
-設定ファイルを1つ用意するだけで、READMEやdocsフォルダの構成をほぼそのまま
-Webサイトとして公開できます。ページ数が増えても、READMEにリンクを追加する
-だけで自動的にサイトへ反映されるので、ナビゲーションを手作業で作り直す必要
-はありません。
+このドキュメント自体も、READMEとそこからリンクしたMarkdownから、Tsuzuriで生成し、GitHub Pagesで公開しています: https://akilasatolu.github.io/tsuzuri/
 
-**ブランディングについての注意**: ロゴ(紺の地に、炎の橙に灯る中心から白いページへ線が
-つながる形)の配色は、Tsuzuri自身のブランディングです。利用者が
-生成するページ側のfavicon(`FAVICON_FILE`設定キーで指定するもの)とは無関係
-なので混同しないでください。
+## なぜTsuzuriか
 
-このドキュメント自体もTsuzuriで生成し、GitHub Pagesで公開しています:
-https://akilasatolu.github.io/tsuzuri/
+READMEを書けば、それがサイトになります。こんな悩みに答えます。
+
+| こんな悩み | Tsuzuriの答え | 詳しく見る |
+|---|---|---|
+| READMEとドキュメントサイトに同じ内容を二度書いて、片方が古くなる。 | READMEがそのままサイトになる。リンクをたどるので、二重の管理がない。 | [ページを書く](docs/guides/write-pages.ja.md) |
+| ドキュメントツールの学習と設定が重くて、サイトを作らないままになる。 | `init`を1回と、設定ファイル1つだけ。 | [はじめる](docs/getting-started.ja.md) |
+| サイトを作っても、ツールや依存の更新への追従が続く。 | 更新はコマンド1つ(`init --update`)。 | [更新する](docs/guides/update.ja.md) |
+| 飾りのないサイトは、最初の数秒で離脱される。 | `init`を1回で、テーマ付きのサイトになる。ほかの見た目はギャラリーから選ぶ。 | [ギャラリー](gallery/README.ja.md) |
+
+だから、書くのはREADMEだけです。
+
+## 仕組み
+
+```mermaid
+flowchart LR
+    A[README.md] -->|リンクをたどる| B[静的サイト]
+    B -->|GitHub Actions| C[GitHub Pages]
+```
+
+READMEを起点にリンクをたどり、つながったMarkdownと画像を静的なサイトにして、GitHub Pagesで公開します。ページを増やすには、READMEか別のページからリンクを張ります。
+
+## クイックスタート
+
+1. リポジトリの直下で、次のコマンドを実行します。質問は2つ(トリガーブランチと、起点のMarkdownファイル)で、Enterだけで既定値になります。
+
+   ```sh
+   npx github:akilasatolu/tsuzuri#v1 init
+   ```
+
+   ワークフロー(`.github/workflows/tsuzuri-pages.yml`)と設定ファイル(`.github/tsuzuri/config`)が作られ、ビルドスクリプト一式が`.github/tsuzuri/`にコピーされます。以後のビルドとデプロイは、リポジトリの中だけで完結します。
+
+2. GitHubリポジトリの **Settings → Pages** を開き、Sourceを **GitHub Actions** にします(最初の1回だけ)。
+3. `.github/tsuzuri/config`の`TRIGGER_BRANCH`に指定したブランチ(省略した場合は、リポジトリの既定ブランチ。通常は`main`)にpushまたはマージします。
+
+ワークフローがActionsタブで実行され、完了するとサイトが公開されます。URLはSettings → Pagesに表示されます。各手順の詳細は[はじめる](docs/getting-started.ja.md)を見てください。
 
 ## 特徴
 
@@ -53,95 +80,36 @@ https://akilasatolu.github.io/tsuzuri/
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">探</span><span class="tsuzuri-sep">】</span>ナビ・検索・目次</h3>
-<p>サイドバーのナビ、サイト内検索、ページ内の目次を自動で作ります。OGP・favicon・sitemap.xmlにも対応しています。</p>
+<p>サイドバーのナビ、サイト内検索、ページ内の目次を自動で作ります。OGP・favicon・sitemap.xml・多言語のサイトにも対応しています。</p>
 </div>
 </div>
 
-## クイックスタート
+## 見た目を選ぶ
 
-詳しい手順は[Getting Started](docs/getting-started.ja.md)で説明しています。
+見た目は、`.github/tsuzuri/styles/`にあるCSSファイル(カスタムスタイル)で決まります。パッケージに入っている`default.css`が最初から使われます。ほかのスタイルは、[ギャラリー](gallery/README.ja.md)でダウンロードして`.github/tsuzuri/styles/`に置き、`.github/tsuzuri/config`の`THEME`に指定します(例: `THEME=glass.css`)。
 
-1. 自分のリポジトリのルートで次のコマンドを実行する(対話形式でファイルが生成されます)。
+<div class="tsuzuri-carousel">
+<img src="assets/gallery/default-light.png" alt="default(ライト)" width="320">
+<img src="assets/gallery/default-dark.png" alt="default(ダーク)" width="320">
+<img src="assets/gallery/glass-light.png" alt="glass(ライト)" width="320">
+<img src="assets/gallery/kintsugi-dark.png" alt="kintsugi(ダーク)" width="320">
+</div>
 
-   ```sh
-   npx github:akilasatolu/tsuzuri#v1 init
-   ```
+[ギャラリーですべてのスタイルを見る](gallery/README.ja.md)。
 
-   このコマンドは、ワークフロー(`.github/workflows/tsuzuri-pages.yml`)に加えて、
-   設定ファイル(`.github/tsuzuri/config`)の生成と、ビルドスクリプト本体一式の
-   コピー(どちらも`.github/tsuzuri/`配下)をリポジトリに行います。生成後は、実行のたびに
-   `akilasatolu/tsuzuri`本体を参照することなく、あなたのリポジトリの中だけで
-   ビルド・デプロイが完結します(詳しくは[CLIリファレンス](docs/cli.ja.md)を参照)。
+## 向いている人・向かない人
 
-2. GitHubリポジトリの **Settings → Pages** で、Sourceを **GitHub Actions** に設定する(初回のみ)。
-3. `.github/tsuzuri/config`の`TRIGGER_BRANCH`に指定したブランチ(省略した場合は、リポジトリの既定ブランチ。通常は`main`)にpush/マージする。
-
-Actionsタブでワークフローが実行され、完了するとGitHub Pagesに公開されます。URLは
-Settings → Pagesに表示されます。設定ファイルの各項目の詳細は
-[設定リファレンス](docs/configuration.ja.md)を参照してください。
+- **向いている**: READMEと、そこからリンクした数ページがドキュメントになっているプロジェクトで、見た目よく、手間をかけずにGitHub Pagesで公開したい人。
+- **向かない**: GitHub Pages以外で公開したいサイト(TsuzuriはGitHub Pages専用です)と、版ごとに別のドキュメントを持ちたい場合(サイトの版は1つで、公開するブランチの内容です)。
 
 ## ドキュメント
 
-- [Getting Started](docs/getting-started.ja.md)
-- [AIエージェント向けの参考情報](docs/ai-reference.ja.md)
-- [仕組み(Concepts)](docs/concepts.ja.md)
-- [設定リファレンス(Configuration)](docs/configuration.ja.md)
-- [スタイル(Theming)](docs/theming.ja.md)
-- [ギャラリー(Gallery)](docs/gallery.ja.md)
-- [Frontmatterリファレンス](docs/frontmatter.ja.md)
-- [多言語サイト(i18n)](docs/i18n.ja.md)
-- [CLIリファレンス](docs/cli.ja.md)
-- [デプロイ設定(Deployment)](docs/deployment.ja.md)
-- [使用例(Examples)](docs/examples.ja.md)
-- [FAQ](docs/faq.ja.md)
+- [はじめる](docs/getting-started.ja.md): READMEをサイトとして公開する、3つの手順。
+- [ギャラリー](gallery/README.ja.md): 見た目を選ぶ。
+- [ドキュメント](docs/README.ja.md): ガイドとリファレンス。
+- [FAQ](docs/faq.ja.md): よくある困りごとへの答え。
+- [掲載・お問い合わせ](docs/contact.ja.md): ギャラリーへの掲載の依頼や、質問・希望。
 - [更新履歴(リリースノート)](https://github.com/akilasatolu/tsuzuri/releases)
-
-## スタイルのカスタマイズ
-
-見た目を変えたい場合、CSSを自分で書く必要は必ずしもありません。
-見た目は、ベースCSSと、`.github/tsuzuri/styles/`の中のCSSファイル1つ(カスタムスタイル)で決まります。
-パッケージに入っている`THEME=default.css`が既定です。[ギャラリー](docs/gallery.ja.md)で、グラス(`glass.css`)/
-90年代(`nineties.css`)/装飾なし(`none.css`)などのカスタムスタイルをダウンロードして
-`.github/tsuzuri/styles/`に置き、`.github/tsuzuri/config`の`THEME=glass.css`のように指定するだけで、配色や
-リンクの下線の有無などの見た目がまとめて切り替わります。詳しくは
-[スタイル(Theming)](docs/theming.ja.md)を参照してください。
-
-さらに細かく配色だけを調整したい場合は、`default.css`を別の名前にコピーして、その中で、以下のCSSカスタムプロパティを
-上書きし、`.github/tsuzuri/config`の`THEME`にそのファイル名を指定してください。
-
-| 変数 | 意味 |
-|---|---|
-| `--fg` | 本文の文字色 |
-| `--bg` | 背景色 |
-| `--border` | テーブル罫線・区切り線の色 |
-| `--accent` | リンクなどの強調色 |
-| `--code-bg` | コードブロック・インラインコードの背景色 |
-| `--font` | 本文のフォント指定(font-family) |
-| `--content-width` | 本文カラムの最大幅(例: `860px`) |
-| `color-scheme` | `light` / `dark` / `light dark`(OS設定に追従) |
-
-変数を何も定義しないカスタムスタイル(コメントだけの`none.css`など)の場合は、これらの変数がどこにも定義されないため、
-ブラウザの既定の見た目(黒文字・白背景など)がそのまま使われます。
-
-## スタイルのプレビュー
-
-カスタムスタイルの見た目は、[ギャラリー](docs/gallery.ja.md)で実際のページとして
-見比べられます。
-
-自分のサイトで見比べたい場合は、frontmatterの`theme`キーで
-ページごとに異なるカスタムスタイルを指定できます(サイト全体の`THEME`設定とは別に、
-1ページだけカスタムスタイルを置き換える機能。詳しくは[Frontmatterリファレンス](docs/frontmatter.ja.md#theme)を参照)。
-複数のMarkdownファイルにそれぞれ違う`theme`を指定してビルドすれば、
-通常の`tsuzuri-pages.yml`だけで見た目を比較できます。
-
-## コントリビュート
-
-コード・ドキュメントいずれの貢献も歓迎します。Tsuzuri本体(CLI・ビルドスクリプト・
-スタイル)も、このサイト(利用者向けドキュメント、`docs/`)も、同じリポジトリの
-[`main`ブランチ](https://github.com/akilasatolu/tsuzuri/tree/main)で開発しています。
-このサイトは、Tsuzuri自身を使ってGitHub Pagesに公開しています。開発環境のセットアップ方法や
-PRの作法は
-[CONTRIBUTING.ja.md](https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.ja.md)を参照してください。
 
 ## ライセンス
 

@@ -4,9 +4,13 @@
 
 # Tsuzuri
 
-<p class="tsuzuri-hero-lead">Bind your README into a website.</p>
+<p class="tsuzuri-hero-lead">Your README is already your docs — Tsuzuri turns it into a site, with no second copy to maintain.</p>
 
-<p class="tsuzuri-hero-sub">Starting from your README, Tsuzuri follows the links, turns the connected Markdown into a GitHub Pages site, and publishes it automatically.</p>
+<p class="tsuzuri-hero-sub">One command gives you a themed GitHub Pages site made from your README, and keeping it up to date takes no extra work.</p>
+
+```sh
+npx github:akilasatolu/tsuzuri#v1 init
+```
 
 <p class="tsuzuri-hero-actions"><a class="tsuzuri-button tsuzuri-button-primary" href="docs/getting-started.md">Get started</a><span class="tsuzuri-sep"> · </span><a class="tsuzuri-button" href="#documentation">Documentation</a><span class="tsuzuri-sep"> · </span><a class="tsuzuri-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
 
@@ -15,25 +19,49 @@
 
 </div>
 
-## What is Tsuzuri?
+Prefer to let an AI agent set it up? Paste the [reference for AI agents](docs/ai-reference.md) into it.
 
-Tsuzuri starts from your repository's `README.md`, follows the links in the text, and turns
-the connected Markdown files and images into a GitHub Pages site, then deploys it. The name
-(綴, *tsuzuri*) is a bookbinding term for binding many sheets of paper into one volume, which
-is exactly what the tool does: it binds the Markdown files linked from your README into a
-single site.
+## What you get
 
-With a single settings file, you can publish your README and docs folder as a website
-almost as they are. As you add pages, just link them from the README and they appear on
-the site automatically, so you never have to rebuild the navigation by hand.
+This documentation is itself built with Tsuzuri from the README and the Markdown files it links, and published on GitHub Pages: https://akilasatolu.github.io/tsuzuri/
 
-**A note on branding**: the colors of the logo (lines running from a flame-orange center to
-white pages on a navy background) are Tsuzuri's own branding. They have nothing to do with
-the favicon of the pages you generate (the one you set with the `FAVICON_FILE` setting), so
-please don't confuse the two.
+## Why Tsuzuri
 
-This documentation is itself generated with Tsuzuri and published on GitHub Pages:
-https://akilasatolu.github.io/tsuzuri/
+Write your README, and that is your site. Here is what it answers.
+
+| Your trouble | Tsuzuri's answer | Details |
+|---|---|---|
+| You write the same content twice, in the README and on a docs site, and one of them goes stale. | The README is the site: Tsuzuri follows its links, so there is no second copy. | [Write pages](docs/guides/write-pages.md) |
+| Docs tools are heavy to learn and set up, so the site never gets made. | One `init` and one settings file. | [Get started](docs/getting-started.md) |
+| Even after the site is up, tools and dependencies need upkeep. | Updating is one command: `init --update`. | [Update](docs/guides/update.md) |
+| A plain site loses visitors in the first few seconds. | `init` once and you get a themed site. Pick another look from the gallery. | [Gallery](gallery/README.md) |
+
+So all you have to write is the README.
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[README.md] -->|follow the links| B[Static site]
+    B -->|GitHub Actions| C[GitHub Pages]
+```
+
+Starting from your README, Tsuzuri follows the links, turns the connected Markdown files and images into a static site, and publishes it on GitHub Pages. To add a page, link it from the README or from another page.
+
+## Quick start
+
+1. Run the following command at the root of your repository. It asks two questions (the trigger branch and the starting Markdown file); press Enter to accept the defaults.
+
+   ```sh
+   npx github:akilasatolu/tsuzuri#v1 init
+   ```
+
+   It creates the workflow (`.github/workflows/tsuzuri-pages.yml`) and the settings file (`.github/tsuzuri/config`), and copies the build script into `.github/tsuzuri/`. After that, builds and deployments run entirely inside your repository.
+
+2. In your GitHub repository, open **Settings → Pages** and set Source to **GitHub Actions** (first time only).
+3. Push or merge to the branch set in `TRIGGER_BRANCH` of `.github/tsuzuri/config` (the repository's default branch, usually `main`, if left out).
+
+The workflow runs in the Actions tab, and when it finishes the site is published. The URL is shown under Settings → Pages. [Get started](docs/getting-started.md) explains each step in detail.
 
 ## Features
 
@@ -56,94 +84,32 @@ https://akilasatolu.github.io/tsuzuri/
 </div>
 </div>
 
-## Quick start
+## Pick a look
 
-[Getting Started](docs/getting-started.md) explains each step in detail.
+The look is a custom style, a CSS file in `.github/tsuzuri/styles/`. `default.css` is included in the package and is used from the start. Download any other style from the [gallery](gallery/README.md), put it in `.github/tsuzuri/styles/`, and set `THEME` in `.github/tsuzuri/config` (for example `THEME=glass.css`).
 
-1. Run the following command at the root of your repository (it asks a few questions and
-   generates the files).
+<div class="tsuzuri-carousel">
+<img src="assets/gallery/default-light.png" alt="default (light)" width="320">
+<img src="assets/gallery/default-dark.png" alt="default (dark)" width="320">
+<img src="assets/gallery/glass-light.png" alt="glass (light)" width="320">
+<img src="assets/gallery/kintsugi-dark.png" alt="kintsugi (dark)" width="320">
+</div>
 
-   ```sh
-   npx github:akilasatolu/tsuzuri#v1 init
-   ```
+[See all the styles in the gallery](gallery/README.md).
 
-   Besides the workflow (`.github/workflows/tsuzuri-pages.yml`), this command creates the
-   settings file (`.github/tsuzuri/config`) and copies the whole build script
-   (all under `.github/tsuzuri/`) into your repository. After that, builds and deployments run
-   entirely inside your repository, without fetching `akilasatolu/tsuzuri` each time
-   (see the [CLI reference](docs/cli.md) for details).
+## Is it for you?
 
-2. In your GitHub repository, open **Settings → Pages** and set Source to **GitHub Actions**
-   (first time only).
-3. Push or merge to the branch set in `TRIGGER_BRANCH` of `.github/tsuzuri/config`
-   (the repository's default branch, usually `main`, if left out).
-
-The workflow runs in the Actions tab, and when it finishes the site is published on GitHub
-Pages. The URL is shown under Settings → Pages. For each item in the settings file, see the
-[configuration reference](docs/configuration.md).
+- **A good fit**: a project whose README (and a few linked pages) is its documentation, which you want to publish on GitHub Pages with a good look and little upkeep.
+- **Not a fit**: sites that are published somewhere other than GitHub Pages (Tsuzuri is for GitHub Pages only), and documentation that keeps a separate copy for each version (there is one version of the site: the branch you publish).
 
 ## Documentation
 
-- [Getting Started](docs/getting-started.md)
-- [Reference for AI agents](docs/ai-reference.md)
-- [Concepts](docs/concepts.md)
-- [Configuration reference](docs/configuration.md)
-- [Theming](docs/theming.md)
-- [Style gallery](docs/gallery.md)
-- [Frontmatter reference](docs/frontmatter.md)
-- [Multilingual sites (i18n)](docs/i18n.md)
-- [CLI reference](docs/cli.md)
-- [Deployment](docs/deployment.md)
-- [Examples](docs/examples.md)
-- [FAQ](docs/faq.md)
+- [Get started](docs/getting-started.md): publish your README as a site in three steps.
+- [Gallery](gallery/README.md): choose a look.
+- [Documentation](docs/README.md): guides and reference.
+- [FAQ](docs/faq.md): answers to the common problems.
+- [Contribute & contact](docs/contact.md): ask to list your style in the gallery, or send a question or a wish.
 - [Changelog (release notes)](https://github.com/akilasatolu/tsuzuri/releases)
-
-## Customizing the style
-
-You don't have to write CSS to change the look. The look is the base CSS plus one custom style, a CSS
-file in `.github/tsuzuri/styles/`. `THEME=default.css` (included in the package) is the default.
-Download another custom style, such as Glass (`glass.css`), 90s (`nineties.css`) or no decoration
-(`none.css`), from the [gallery](docs/gallery.md), put it in `.github/tsuzuri/styles/`, and set
-`THEME=glass.css` in `.github/tsuzuri/config`; the colors, link underlines and the rest of the look
-switch together. See [Theming](docs/theming.md) for details.
-
-If you only want to fine-tune the colors, copy `default.css` under another name, override the
-following CSS custom properties in it, and set that file name in `THEME` of
-`.github/tsuzuri/config`.
-
-| Variable | Meaning |
-|---|---|
-| `--fg` | Text color |
-| `--bg` | Background color |
-| `--border` | Color of table borders and dividers |
-| `--accent` | Accent color for links and the like |
-| `--code-bg` | Background of code blocks and inline code |
-| `--font` | Body font (font-family) |
-| `--content-width` | Maximum width of the content column (e.g. `860px`) |
-| `color-scheme` | `light` / `dark` / `light dark` (follows the OS setting) |
-
-With a custom style that defines none of them (such as `none.css`, which contains only comments), these
-variables are not defined anywhere, so the browser's default look (black text on a white background, and
-so on) is used as is.
-
-## Style preview
-
-You can compare the custom styles as real pages in the [gallery](docs/gallery.md).
-
-To compare them on your own site, use the `theme` key in the frontmatter to give each page a
-different custom style (it swaps the custom style of a single page, separately from the site-wide `THEME`
-setting; see the [frontmatter reference](docs/frontmatter.md#theme)). Give several Markdown
-files different `theme` values (file names in `.github/tsuzuri/styles/`) and build, and you can compare the looks with the regular
-`tsuzuri-pages.yml`.
-
-## Contributing
-
-Contributions to both code and documentation are welcome. Tsuzuri itself (the CLI, the build
-script and the styles) and this site (the user documentation, `docs/`) are developed in the
-same repository, on the [`main` branch](https://github.com/akilasatolu/tsuzuri/tree/main). This
-site is published to GitHub Pages with Tsuzuri itself. For setting up a development environment
-and how to send a PR, see
-[CONTRIBUTING.md](https://github.com/akilasatolu/tsuzuri/blob/main/CONTRIBUTING.md).
 
 ## License
 

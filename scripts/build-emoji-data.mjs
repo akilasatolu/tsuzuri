@@ -3,7 +3,7 @@
 //   node scripts/build-emoji-data.mjs
 //
 // 表は配布対象(.github/scripts/)に入れてコミットしておき、gemoji 自体は利用者に配らない(開発用の依存のまま)。
-// gemoji を更新したら、このスクリプトを実行して、emoji-data.mjs の差分を同じPRに入れる(手順は MAINTAINING.md の「Updating dependencies」)。
+// gemoji を更新したら(npm install gemoji@<版> と npm ci の後)、このスクリプトを実行して、emoji-data.mjs の差分が絵文字の追加・変更・削除だけであることを確かめ、同じコミットに入れる。
 // 名前の順に並べて書き出すので、gemoji の中身が同じなら、何度作り直しても同じファイルになる。
 
 import fs from "node:fs";

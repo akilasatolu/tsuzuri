@@ -8,7 +8,7 @@
  *   - ライト表示は生成りの紙と紺のインク、ダーク表示は夜の紺。動きに対応していないブラウザや、
  *     動きを減らす設定の人には、糸と結び目は動かずにそのまま表示される
  *
- * ギャラリーの見本ページ(docs/gallery/*.md)は、frontmatter の theme でそれぞれのカスタムスタイルを
+ * ギャラリーの見本ページ(gallery/*.md)は、frontmatter の theme でそれぞれのカスタムスタイルを
  * 指定しているので、このスタイルは当たらない(サイト全体のカスタムスタイルが置き換えられる)。
  */
 :root {
@@ -56,7 +56,7 @@
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
   --heading-font: var(--font);
-  --content-width: 840px;
+  --content-width: 960px;   /* 840px から広げる(ギャラリーのタイルを3列にするため。全ページで統一) */
 }
 
 /* ダーク表示: OS がダークモードのとき(ライト表示に切り替えたときを除く)と、ダーク表示に切り替えたとき */
@@ -311,6 +311,7 @@ main .tsuzuri-pager a:hover { transform: translateY(-2px); border-color: var(--a
 .tsuzuri-hero h1::after { margin: 14px auto 0; }
 /* 入口では目次を出さない(ナビと「ドキュメント」の一覧で足りるため) */
 .tsuzuri-hero .tsuzuri-toc { display: none; }
+.tsuzuri-hero pre { text-align: left; }
 .tsuzuri-hero-lead {
   margin: 0 0 8px;
   font-size: clamp(1.2rem, 3.4vw, 1.6rem);
@@ -368,6 +369,31 @@ main a.tsuzuri-button[download]:hover::before { transform: translateY(2px); }
 .tsuzuri-hero p:has(> a > img) { margin: 0; }
 .tsuzuri-hero p:has(> a > img) a { background: none; }
 .tsuzuri-hero p:has(> a > img) img { border-radius: 4px; }
+
+/* ---------- ギャラリーのタイル(flex + gap。タイル全体が押せる。列数は枠の幅で決める) ---------- */
+.tsuzuri-tiles { container-type: inline-size; display: flex; flex-wrap: wrap; gap: 20px; margin: 0 0 24px; }
+.tsuzuri-tile {
+  position: relative;               /* 見出しのリンクを広げる基準 */
+  display: flex; flex-direction: column; gap: 10px;
+  flex: 0 0 100%;                   /* 既定は1列(スマホ・狭い本文) */
+  min-width: 0; padding: 14px;
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+@container (min-width: 540px) { .tsuzuri-tile { flex-basis: calc((100% - 20px) / 2); } }   /* 2列 */
+@container (min-width: 830px) { .tsuzuri-tile { flex-basis: calc((100% - 40px) / 3); } }   /* 3列(本文が最大幅 960px のときだけ) */
+.tsuzuri-tile > * { margin: 0; }
+.tsuzuri-tile h3 { margin: 0; padding: 0; }
+.tsuzuri-tile h3::before, .tsuzuri-tile h3::after { content: none; }    /* 糸と結び目の飾りを消す */
+.tsuzuri-tile .tsuzuri-anchor { display: none; }                         /* ビルドが足す見出しの「#」リンクは、タイルの中では隠す(見出しの id は残る) */
+.tsuzuri-tile h3 a:not(.tsuzuri-anchor) { color: var(--heading); text-decoration: none; background: none; }
+.tsuzuri-tile h3 a:not(.tsuzuri-anchor)::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }  /* 本来のリンクだけをタイル全体に広げる(画像の上も含む) */
+.tsuzuri-tile .tsuzuri-carousel-nav, .tsuzuri-tile a.tsuzuri-button { position: relative; z-index: 2; }       /* 矢印・ドット・ダウンロードは前面 */
+.tsuzuri-tile a.tsuzuri-button { align-self: flex-start; padding: 8px 16px; }
+.tsuzuri-tile .tsuzuri-carousel:not([tabindex]) { position: relative; z-index: 2; }   /* JS が動かないとき(JS が付ける tabindex が無い)だけ、画像を前面に出して横スクロールを効かせる */
+.tsuzuri-tile:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (hover: hover) { .tsuzuri-tile:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: var(--shadow-lg); } }
+@media (prefers-reduced-motion: reduce) { .tsuzuri-tile { transition: none; } .tsuzuri-tile:hover { transform: none; } }
 
 /* ---------- 特徴のカード(README の <div class="tsuzuri-features">) ---------- */
 .tsuzuri-features {

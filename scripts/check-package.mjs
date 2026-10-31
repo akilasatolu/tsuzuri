@@ -56,7 +56,7 @@ try {
   run("git", ["init", "-q"], site);
   fs.writeFileSync(path.join(site, "README.md"), "# Package check\n\n[Guide](docs/guide.md)\n");
   fs.writeFileSync(path.join(site, "docs/guide.md"), "# Guide\n\n[Home](../README.md)\n");
-  run("npm", ["exec", "--yes", `--package=${tgz}`, "--", "tsuzuri", "init", "--yes", "--languages", "en"], site);
+  run("npm", ["exec", "--yes", `--package=${tgz}`, "--", "tsuzuri", "init", "--yes"], site);
   for (const rel of [
     ".github/workflows/tsuzuri-pages.yml",
     ".github/tsuzuri/config",

@@ -33,6 +33,24 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+### Changed
+
+- `init` now asks only two questions: the trigger branch (`TRIGGER_BRANCH`) and the starting Markdown file (`ROOT_MD`). The questions about the navigation, the site languages and the site name were removed. `init` writes `NAV_ENABLED=true`, `LANGUAGES=en` and an empty `SITE_NAME` (the repository name is used at build time) to the settings file. The format of the settings file does not change, and `init --update` still does not touch it.
+
+### Removed
+
+- The options `--languages`, `--site-name` and `--no-nav` of `init` were removed, along with their questions. They are now unknown options and end with an error. To change these values, edit `.github/tsuzuri/config` after `init`: write `LANGUAGES=ja` for a Japanese README, set `SITE_NAME=` to a name, or write `NAV_ENABLED=false` to hide the navigation.
+
+<!-- ja -->
+
+### 変更
+
+- `init` の質問を、トリガーブランチ(`TRIGGER_BRANCH`)と起点の Markdown ファイル(`ROOT_MD`)の2つだけにした。ナビ・サイトの言語・サイト名の質問は削除した。設定ファイルには、`NAV_ENABLED=true`、`LANGUAGES=en`、空の `SITE_NAME`(ビルド時にリポジトリ名になる)が書かれる。設定ファイルの形式は変わらず、`init --update` が設定ファイルを触らないことも変わらない。
+
+### 削除
+
+- `init` のオプション `--languages`、`--site-name`、`--no-nav` を、対応する質問とともに削除した。これらは知らないオプションとなり、エラーで終了する。値を変えるときは、`init` の後に `.github/tsuzuri/config` を編集する。README が日本語なら `LANGUAGES=ja`、サイト名は `SITE_NAME=` に名前を書き、ナビを出さないなら `NAV_ENABLED=false` と書く。
+
 ## [1.39.0] - 2026-10-26
 
 ### Added

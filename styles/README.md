@@ -15,7 +15,7 @@
 
 ## 使い方
 
-1. 使いたいカスタムスタイルをギャラリー(https://akilasatolu.github.io/tsuzuri/docs/gallery.html)でダウンロードし、
+1. 使いたいカスタムスタイルをギャラリー(https://akilasatolu.github.io/tsuzuri/gallery/)でダウンロードし、
    `.github/tsuzuri/styles/` に置く(`default.css` は最初から置かれています)。
 2. `.github/tsuzuri/config` の `THEME` に、そのファイル名を書く。
 

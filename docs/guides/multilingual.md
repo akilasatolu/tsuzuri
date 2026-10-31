@@ -1,0 +1,250 @@
+---
+title: Multilingual sites
+description: Make a site in more than one language by putting a *.ja.md next to a page and setting LANGUAGES
+order: 30
+---
+
+# Multilingual sites
+
+You can build a site in several languages, such as English and Japanese, from one repository
+(v1.28.0 or later). Put each translated page in the same place as the original, with the
+language added to the end of the file name (the Japanese version of `docs/cli.md` is
+`docs/cli.ja.md`).
+
+`init` writes `LANGUAGES=en` and does not ask about the languages. To use another base language (for example `ja` for a Japanese README) or more than one language, edit `LANGUAGES` in `.github/tsuzuri/config` after `init`.
+
+## Choosing the site languages (`LANGUAGES`)
+
+Write the site languages, separated by commas, in `LANGUAGES` of `.github/tsuzuri/config`.
+
+```
+LANGUAGES=en,ja
+```
+
+- **The first language is the "base language"**. It's the language of the starting README
+  (`ROOT_MD`) and of files without a language, and its URLs stay as they were. Put the language
+  of your README first.
+- With one language you get a single-language site; with two or more, a multilingual site.
+- If left out (no key, or an empty value), it's `en` (an English-only site).
+
+| README language | The site you want | What to write |
+|---|---|---|
+| English | English only | `LANGUAGES=en` |
+| English | English + Japanese | `LANGUAGES=en,ja` |
+| Japanese | Japanese + English | `LANGUAGES=ja,en` |
+
+Write languages as language tags such as `ja`, `en`, `pt-BR` and `zh-Hant`. For how invalid
+values and duplicates are handled, see the [configuration reference](../reference/configuration.md#languages).
+
+> [!NOTE]
+> The old setting key `LANG` is no longer used. If it's written, it isn't read (it's ignored like
+> any other key that isn't in the list), so rewrite it as `LANGUAGES` (e.g. `LANG=ja` becomes `LANGUAGES=ja`).
+
+## Arranging the files
+
+Example: `LANGUAGES=en,ja` (the README is in English)
+
+```
+README.md            … the English (base language) top page
+README.ja.md         … the Japanese top page
+docs/cli.md          … English
+docs/cli.ja.md       … Japanese
+docs/faq.md          … English only (no Japanese version)
+guide/README.md      … the English entrance of the folder
+guide/README.ja.md   … the Japanese entrance of the folder
+images/a.png         … images are shared by all languages
+```
+
+The top page of another language is `ROOT_MD` with the language added (`README.ja.md` for
+`README.md`). You don't need to copy folders for each language.
+
+### How a file's language is decided
+
+1. If the file name has the form `name.<language>.md` and `<language>` matches one of
+   `LANGUAGES` (including the base language), the page is in that language (case-insensitive).
+2. Every other file is a base-language page. Names with a word that isn't in `LANGUAGES`, such
+   as `config.example.md` or `v2.0.md`, are treated as ordinary names in the base language.
+3. If the base-language version of a page exists both with and without the base language added,
+   the one with it is used (see [the next section](#when-the-base-language-is-marked-too)).
+
+Files whose names differ only in the language (`cli.md` and `cli.ja.md`) are linked
+automatically as language versions of the same page.
+
+### When the base language is marked too
+
+You can add the language to base-language files too. For example, with `LANGUAGES=en`, if both
+`README.en.md` and `README.md` exist, `README.en.md` becomes the top page of the site and
+`README.md` isn't put on the site (files that weren't used are shown in the build log like
+`Not used (a marked base-language file is used instead): README.md → README.en.md`). This is
+handy when you want the `README.md` shown on GitHub to be a short note separate from the site.
+Links to the unmarked file are treated as links to the marked one, so they don't break. The same
+goes for single-language sites.
+
+If `README.md` is in Japanese and `README.en.md` is in English, there are two ways to set it up,
+depending on which language is the base.
+
+- **Keep `README.md` as the Japanese top page**: use `LANGUAGES=ja,en`. Japanese keeps its URLs
+  and English goes under `/en/`.
+- **Make English the base language**: use `LANGUAGES=en,ja` and put the Japanese version in a
+  file named `README.ja.md`. In this case `README.md` isn't used for the site (an unmarked file
+  is always treated as the base language).
+
+## URL structure
+
+Base-language pages keep their URLs, and pages in other languages are written under
+`/<language>/`.
+
+| File | URL (`LANGUAGES=en,ja`) |
+|---|---|
+| `README.md` | `/` (`README.html`) |
+| `README.ja.md` | `/ja/` |
+| `docs/cli.md` | `/docs/cli.html` |
+| `docs/cli.ja.md` | `/ja/docs/cli.html` |
+| `guide/README.ja.md` | `/ja/guide/` |
+
+The language part of the URL is lowercase (`/pt-br/` for `pt-BR`). A file with the base language
+added gets the URL of the name without it (with `LANGUAGES=en`, `docs/cli.en.md` is
+`/docs/cli.html`). If the repository has a folder with the same name as a language other than the
+base language, like `ja/`, a warning is shown, since the output could collide (base-language
+pages aren't written under `/<language>/`, so a folder with the base language's name isn't
+affected).
+
+## Writing links in the text
+
+- **A link to a file goes to exactly the page you wrote.** From a Japanese page to a Japanese
+  page, link with the name including the language, like `cli.ja.md`. Writing `cli.md` goes to
+  the English page.
+- **A link to a folder** (`guide/`) and **a link to the top of the site** (`/`) go to the entrance
+  in the linking page's language (`/ja/guide/` and `/ja/` from a Japanese page). If there's no
+  entrance in that language, they go to the base language's entrance.
+- Links to images point to the same image from any language, so leave them as they are.
+
+> [!WARNING]
+> A link to a heading (`cli.ja.md#options`) depends on the headings of the target page. If the
+> translation changes a heading's wording, a link to the original language's heading breaks.
+> Write it to match the heading in the target language (with `STRICT_LINKS=true`, the build
+> stops so you notice).
+
+## Navigation, previous/next pages and search
+
+The navigation, the "previous page / next page" links and site search are made separately for
+each language, and list **only pages in the current language**.
+
+- **Order**: the base language's navigation is in the order you wrote the links in the README,
+  as before. Other languages' navigation follows the order of the corresponding base-language
+  pages, with pages that exist only as translations at the end (it doesn't follow the order of
+  the links in the translated README). To change the order, use the frontmatter
+  [`order`](../reference/frontmatter.md#order). `order` works within each language's navigation.
+- **Pages without a translation**: they don't appear in that language's navigation, previous/next
+  links or search. The build log shows the list of pages without a translation.
+
+## Translations are collected automatically
+
+Pages are collected by following links from the README, as before. On top of that, if a
+collected page has a file in another language, it's collected and published automatically, even
+without a link.
+
+So an unfinished translation (`draft.ja.md`, for example) is published too, as long as
+`draft.md` is published. Don't put translations you don't want to publish in the repository. If
+you only want to keep a page out of the navigation, write [`nav: false`](../reference/frontmatter.md#nav) in
+its frontmatter.
+
+## The language switch button
+
+On a multilingual site, each page gets a language switch button.
+
+- **Placement**: with the navigation (`NAV_ENABLED=true`), next to the navigation header (before
+  the light/dark switch); without the navigation, at the top right of the content.
+- **Shape**: with two languages, a button with the other language's name. With three or more, a
+  menu that opens a list of languages when pressed. Both are plain links, with no JavaScript.
+- **Pages without a translation**: the button goes to that language's top page, with a note
+  saying there's no translation. If that language has no top page either, it doesn't appear in
+  the button.
+- It doesn't switch automatically to match the browser language, and doesn't remember the chosen
+  language. The language is decided by the URL alone, so a shared link opens the same language
+  for everyone.
+
+The 404 page and single-language sites don't get the button.
+
+## Other behavior
+
+- **Interface text**: fixed text such as "Menu", "Copy" and "Previous page" is in the page's
+  language.
+- **Site name**: `SITE_NAME` and `OGP_DEFAULT_IMAGE` are shared by all languages. Per-page
+  descriptions and OGP images can be changed in the frontmatter as before.
+- **For search engines**: `<html lang>` is the page's language. When the site URL is known (when
+  building on GitHub Actions), `hreflang` markers telling search engines where the other language
+  versions are are output too, and `sitemap.xml` lists the pages of all languages.
+- **The 404 page**: see [the next section](#the-404-page).
+
+## The 404 page
+
+GitHub Pages returns the single `404.html` at the top of the site for any URL that doesn't exist,
+even under `/ja/`, so a site has only one 404 page. On a multilingual site, that one page shows
+the notice in the language of the URL that was opened (v1.29.0 or later).
+
+- Put the notice for each language in a block with `lang`, written directly in `404.md`:
+
+  ```markdown
+  <div lang="en">
+
+  # Page not found
+
+  The page you're looking for may have been moved or deleted.
+
+  </div>
+
+  <div lang="ja">
+
+  # ページが見つかりません
+
+  お探しのページは、移動したか削除された可能性があります。
+
+  </div>
+  ```
+
+  Leave an empty line after `<div lang="…">` and before `</div>` so the inside is rendered as
+  Markdown.
+- If the URL starts with another language's prefix (`/ja/` and so on, after `BASE_PATH`), only that
+  language's block is shown; otherwise only the base language's block is shown. Parts without
+  `lang` are shown in every language. If there's no block for the URL's language, nothing is
+  hidden.
+- A small script in the page decides this. The navigation and the interface text (such as "Menu")
+  stay in the base language. Where JavaScript doesn't run, every language's block is shown.
+- Without a `404.md`, the default content already has a block for each language that has a top
+  page, with a link to that top page, so it works the same way.
+- Only the base language's 404 is read (`404.md`, or `404.<base language>.md` if it exists).
+  Files such as `404.ja.md` aren't used.
+
+## Adding a language
+
+1. Add the language to the end of `LANGUAGES` (e.g. change `LANGUAGES=en,ja` to
+   `LANGUAGES=en,ja,zh-Hant`).
+2. Put `name.<language>.md` next to each page you want to translate. Start with the top page,
+   `README.<language>.md` (a language without a top page gives a warning, and doesn't appear in
+   the switch button on pages without a translation).
+3. Fixed interface text is in that language if it's in Tsuzuri's text table (`UI_STRINGS`; at the
+   moment English and Japanese). Languages not in the table get the English text.
+
+## Changing the look with a custom style
+
+The language switch button can be styled from your custom style with these class
+names.
+
+| Class name | Where |
+|---|---|
+| `.tsuzuri-lang-switch` | The language button (the link with two languages, or the menu button with three or more) |
+| `.tsuzuri-lang-menu` | The whole menu with three or more languages |
+| `.tsuzuri-lang-bar` | The button area placed above the content when there's no navigation |
+
+## For display on GitHub
+
+GitHub shows `README.md` at the top of the repository. Even if you make a file with the base
+language added (such as `README.en.md`) the top page of the site, we recommend keeping a
+`README.md` for people viewing the repository on GitHub (a pointer to the site, links to the
+README in each language, and so on).
+
+## Read next
+
+- [Sharing and search](./share-and-search.md): how links look when shared, the favicon and search.
+- [Update](./update.md): keep Tsuzuri up to date with one command.

@@ -1,6 +1,7 @@
 ---
 title: AIエージェント向けの参考情報
-order: 2
+description: AIエージェントに貼り付けて、Tsuzuriの導入を任せるための1ページ
+order: 50
 ---
 
 # AIエージェント向けの参考情報
@@ -97,7 +98,7 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 
 ### 3.3 対話形式の質問
 
-オプションを付けずに実行すると、`init` は次の 5 つの質問を順に表示します。
+オプションを付けずに実行すると、`init` は次の 2 つの質問を順に表示します。
 何も入力せずに Enter を押すと、かっこ内の既定値になります。質問は英語で
 表示されます(v1.37.0 以降)。v1.36.0 まで、および `--lang ja` のときは、
 日本語で表示されます(例: `? トリガーブランチ (TRIGGER_BRANCH) [main]: `)。
@@ -107,16 +108,13 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
    分からなければ今のブランチ、それも分からなければ `main` です。
 2. `? Root Markdown file (ROOT_MD) [README.md]: `
    サイトの起点になる Markdown ファイルです。既定値は `README.md` です。
-3. `? Show the sidebar navigation, site search and in-page table of contents? (NAV_ENABLED) (Y/n): `
-   既定値は「表示する」です。
-4. `? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [en]: `
-   既定値は `en` です。言語タグとして正しくない値(例: `ja_JP`)は、警告の
-   うえで無視されます。正しい値が残らなければ `en` になります。
-5. `? Site name (SITE_NAME; the repository name if empty) []: `
-   既定値は空です。空の場合、GitHub Actions でのビルドではリポジトリ名が
-   サイト名になります。
 
-`init` は、テーマやカスタムスタイルについては質問しません。設定ファイルは
+`init` は、ナビ・サイトの言語・サイト名については質問しません。設定ファイルには
+常に `NAV_ENABLED=true`、`LANGUAGES=en`、`SITE_NAME=`(空)が書かれます。変えるときは、
+`init` の後に `.github/tsuzuri/config` を編集します(例: README が日本語なら
+`LANGUAGES=ja` に直します)。
+
+`init` は、テーマやカスタムスタイルについても質問しません。設定ファイルは
 常に `THEME=default.css` で始まり、`init` が `.github/tsuzuri/styles/` に置くのは
 `base.css` と `default.css` だけです(3.5 を参照)。ほかのカスタムスタイルを使うには、
 利用者がギャラリーでダウンロードして、そのファイル名を `THEME` に書きます。
@@ -128,9 +126,6 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 - `-y`、`--yes`: `init` は、すべて既定値で生成します。
 - `--branch <name>`: `TRIGGER_BRANCH` の値です。
 - `--root <path>`: `ROOT_MD` の値です。
-- `--languages <list>`: `LANGUAGES` の値です(例: `ja`、`ja,en`)。
-- `--site-name <name>`: `SITE_NAME` の値です。
-- `--no-nav`: `NAV_ENABLED=false` になります。
 
 `--lang <en|ja>`(v1.37.0 以降)を付けても、質問は省略されません。画面の
 表示と、生成される設定ファイルのコメントの言語です。
@@ -140,7 +135,7 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 例:
 
 ```
-npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
+npx github:akilasatolu/tsuzuri#v1 init --yes --branch main
 ```
 
 - 対話なしの場合、トリガーブランチの既定値は、`origin` の既定ブランチ、
@@ -149,8 +144,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
   付けると上書きされます(設定ファイル `.github/tsuzuri/config` も上書きされます)。
   利用者が `.github/tsuzuri/styles/` に置いたカスタムスタイルは、`init` が作る
   ものではないので、上書きされません。
-- 知らないオプション(`--theme` はありません)、言語タグとして正しくない
-  `--languages`、空の `--branch`・`--root`・`--languages` は、エラーになります。
+- 知らないオプション(`--theme` はありません)と、空の `--branch`・`--root` は、エラーになります。
   この場合、`init` は何も生成しません。
 
 そのほかのオプションは次のとおりです。
@@ -267,11 +261,11 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
   当たります。1 つなら 1 言語のサイト、2 つ以上なら多言語のサイトになります。
   正しくないタグと重複したタグは、警告のうえで無視されます。
   省略時: `en`
-  init の値: 質問 5 の答えです。
+  init の値: `en`
 - `NAV_ENABLED`: サイドバーのナビ、サイト内検索、ページ内の目次、前後の
   ページへのリンク、ライトとダークの切り替えボタンを表示するかどうかです。
   省略時: `false`
-  init の値: 質問 4 の答えです(既定値は `true`)。
+  init の値: `true`
 - `FAVICON_FILE`: favicon にする画像です。値は、リポジトリの直下からの
   パスです。
   省略時: favicon はありません。
@@ -279,7 +273,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main --languages ja
 - `SITE_NAME`: サイト名です。ナビの見出しと `og:site_name` に使われます。
   省略時: GitHub Actions でのビルドではリポジトリ名になります。手元のビルド
   では空になります。
-  init の値: 質問 6 の答えです。
+  init の値: 空
 - `CUSTOM_DOMAIN`: 独自ドメインです(例: `docs.example.com`)。`https://` や
   パスを含む値は、警告のうえで無視されます。設定すると、出力先に `CNAME` が
   生成されます。
@@ -806,15 +800,16 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 各項目の詳しい説明は、次の URL にあります。
 
 - 導入の手順: https://akilasatolu.github.io/tsuzuri/ja/docs/getting-started.html
-- 仕組み: https://akilasatolu.github.io/tsuzuri/ja/docs/concepts.html
-- 設定キー: https://akilasatolu.github.io/tsuzuri/ja/docs/configuration.html
-- カスタムスタイル(スタイル): https://akilasatolu.github.io/tsuzuri/ja/docs/theming.html
-- スタイルのギャラリー(見本とダウンロード): https://akilasatolu.github.io/tsuzuri/ja/docs/gallery.html
-- frontmatter: https://akilasatolu.github.io/tsuzuri/ja/docs/frontmatter.html
-- 多言語のサイト: https://akilasatolu.github.io/tsuzuri/ja/docs/i18n.html
-- コマンド: https://akilasatolu.github.io/tsuzuri/ja/docs/cli.html
-- デプロイ: https://akilasatolu.github.io/tsuzuri/ja/docs/deployment.html
-- 使用例: https://akilasatolu.github.io/tsuzuri/ja/docs/examples.html
+- ビルドの仕組み: https://akilasatolu.github.io/tsuzuri/ja/docs/reference/how-it-works.html
+- ページの機能: https://akilasatolu.github.io/tsuzuri/ja/docs/reference/features.html
+- 設定キー: https://akilasatolu.github.io/tsuzuri/ja/docs/reference/configuration.html
+- 見た目を変える(カスタムスタイル): https://akilasatolu.github.io/tsuzuri/ja/docs/guides/style.html
+- スタイルのギャラリー(見本とダウンロード): https://akilasatolu.github.io/tsuzuri/ja/gallery/
+- frontmatter: https://akilasatolu.github.io/tsuzuri/ja/docs/reference/frontmatter.html
+- 多言語のサイト: https://akilasatolu.github.io/tsuzuri/ja/docs/guides/multilingual.html
+- コマンド: https://akilasatolu.github.io/tsuzuri/ja/docs/reference/cli.html
+- 公開の設定: https://akilasatolu.github.io/tsuzuri/ja/docs/guides/publish.html
+- 更新する: https://akilasatolu.github.io/tsuzuri/ja/docs/guides/update.html
 - よくある質問: https://akilasatolu.github.io/tsuzuri/ja/docs/faq.html
 - リリースの一覧: https://github.com/akilasatolu/tsuzuri/releases
 ````

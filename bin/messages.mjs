@@ -25,10 +25,6 @@ export const MESSAGES = {
     "prompt.continue": "Continue anyway? (y/N): ",
     "prompt.triggerBranch": "? Trigger branch (TRIGGER_BRANCH) [{default}]: ",
     "prompt.rootMd": "? Root Markdown file (ROOT_MD) [{default}]: ",
-    "prompt.nav": "? Show the sidebar navigation, site search and in-page table of contents? (NAV_ENABLED) (Y/n): ",
-    "prompt.languages":
-      "? Site languages (LANGUAGES; comma-separated, the first is the language of your README; e.g. ja / en / ja,en) [{default}]: ",
-    "prompt.siteName": "? Site name (SITE_NAME; the repository name if empty) []: ",
     "prompt.overwriteBundle":
       "The workflow and the build scripts (under {vendorDir}/, except config) already exist. Overwrite them with the latest version? (y/N): ",
     "prompt.overwriteFile": "{path} already exists. Overwrite it? (y/N): ",
@@ -44,7 +40,7 @@ export const MESSAGES = {
       "Updating to the latest version (the settings file is not changed; the custom styles you put in styles/ are not changed either)\n",
     "update.done": "\nUpdate complete. You can review the changes with 'git diff'.",
     "update.missingKeys":
-      "ℹ Keys missing from the settings file (defaults are used): {keys}\n  Add them to {config} if you want to use them. See: {docs}docs/configuration.html",
+      "ℹ Keys missing from the settings file (defaults are used): {keys}\n  Add them to {config} if you want to use them. See: {docs}docs/reference/configuration.html",
     "update.deleted": "✖ {path} deleted (no longer used by the latest version)",
     "update.noConfig": "{config} not found. Run init without --update the first time",
 
@@ -59,8 +55,6 @@ export const MESSAGES = {
     "error.subcommand": "Unknown subcommand: {name} (use --help to see the usage)",
     "error.port": "--port needs a number from 1 to 65535 (given: {value})",
     "error.emptyValue": "--{name} cannot be empty",
-    "error.languages":
-      "--languages needs language tags separated by commas (e.g. ja / en / ja,en) (given: {value})",
     "error.lang": "--lang must be en or ja (given: {value})",
     "error.lockfilesMissing":
       "{dir}/package.json and package-lock.json were not found. The downloaded Tsuzuri package may be broken.",
@@ -103,11 +97,6 @@ export const MESSAGES = {
       "      --branch <name> Trigger branch (TRIGGER_BRANCH). Default: the default branch of the repository",
       "                     (origin/HEAD; main if unknown)",
       "      --root <path>   Starting Markdown file (ROOT_MD). Default: README.md",
-      "      --languages <list>",
-      "                     Site languages (LANGUAGES; the first is the base language). Default: en",
-      "      --site-name <name>",
-      "                     Site name (SITE_NAME). Default: empty (the repository name is used at build time)",
-      "      --no-nav       Do not show the navigation, site search and table of contents (NAV_ENABLED=false). Default: shown",
       "      --lang <en|ja> Language of the messages and of the comments in the generated settings file. Default: en",
       "      --force        When running without questions, overwrite existing files too (by default they are skipped)",
       "      --port <number> Port number used by preview. Default: 4000",
@@ -116,7 +105,7 @@ export const MESSAGES = {
       "  -v, --version      Show the version",
       "  -h, --help         Show this help",
       "",
-      "Giving any of --branch / --root / --languages / --site-name / --no-nav also runs without questions.",
+      "Giving --branch or --root also runs without questions.",
     ].join("\n"),
 
     // --- 設定ファイルのコメント(init が .github/tsuzuri/config に書く。各ブロックの先頭は "# ") ---
@@ -125,7 +114,7 @@ export const MESSAGES = {
       "#",
       "# Write one item per line as KEY=VALUE. Lines starting with # and blank lines are ignored.",
       "# You can change the behavior here without editing the workflow (.github/workflows/tsuzuri-pages.yml).",
-      "# Details of each item: {docs}docs/configuration.html",
+      "# Details of each item: {docs}docs/reference/configuration.html",
     ].join("\n"),
     "config.triggerBranch": [
       "# The branch to deploy. The site is updated only when you push to this branch.",
@@ -138,12 +127,12 @@ export const MESSAGES = {
     "config.theme": [
       "# The custom style of the whole site: the file name of a CSS file in {vendorDir}/styles/ (write only the file name, not the folder).",
       "# The default, default.css, is included in the package. To use another one, download it from the gallery",
-      "# ({docs}docs/gallery.html), put it in {vendorDir}/styles/ and write its file name here.",
+      "# ({docs}gallery/), put it in {vendorDir}/styles/ and write its file name here.",
     ].join("\n"),
     "config.languages": [
       "# Site languages, comma-separated; the first is the base language (the language of the starting README). Examples: ja / en / ja,en",
       '# With one language you get a single-language site (<html lang="..."> and the interface text use that language).',
-      "# With two or more you get a multilingual site (how to place pages: {docs}docs/i18n.html). If empty, it is en.",
+      "# With two or more you get a multilingual site (how to place pages: {docs}docs/guides/multilingual.html). If empty, it is en.",
     ].join("\n"),
     "config.navEnabled":
       "# Whether to show the sidebar navigation, site search, in-page table of contents and links to the previous/next page (true/false)",
@@ -204,10 +193,6 @@ export const MESSAGES = {
     "prompt.continue": "このまま続けますか? (y/N): ",
     "prompt.triggerBranch": "? トリガーブランチ (TRIGGER_BRANCH) [{default}]: ",
     "prompt.rootMd": "? ルートとなるMarkdownファイル (ROOT_MD) [{default}]: ",
-    "prompt.nav": "? サイドバーのナビ・サイト内検索・ページ内の目次を表示しますか? (NAV_ENABLED) (Y/n): ",
-    "prompt.languages":
-      "? サイトの言語 (LANGUAGES。カンマ区切りで、先頭は README の言語。例: ja / en / ja,en) [{default}]: ",
-    "prompt.siteName": "? サイト名 (SITE_NAME。空ならリポジトリ名) []: ",
     "prompt.overwriteBundle":
       "ワークフローとビルドスクリプト一式({vendorDir}/ 配下。config を除く)は既に存在します。最新版で上書きしますか? (y/N): ",
     "prompt.overwriteFile": "{path} は既に存在します。上書きしますか? (y/N): ",
@@ -221,7 +206,7 @@ export const MESSAGES = {
     "update.intro": "最新版に更新します(設定ファイルは変更しません。styles/ に置いたカスタムスタイルも変更しません)\n",
     "update.done": "\n更新が完了しました。変更内容は 'git diff' で確認できます。",
     "update.missingKeys":
-      "ℹ 設定ファイルに無い項目があります(既定値で動きます): {keys}\n  使う場合は {config} に追記してください。説明: {docs}docs/configuration.html",
+      "ℹ 設定ファイルに無い項目があります(既定値で動きます): {keys}\n  使う場合は {config} に追記してください。説明: {docs}docs/reference/configuration.html",
     "update.deleted": "✖ {path} を削除しました(最新版では使われていないため)",
     "update.noConfig": "{config} が見つかりません。初回は --update を付けずに init を実行してください",
 
@@ -234,8 +219,6 @@ export const MESSAGES = {
     "error.subcommand": "不明なサブコマンドです: {name}(--help で使い方を表示します)",
     "error.port": "--port には 1〜65535 の番号を指定してください(指定: {value})",
     "error.emptyValue": "--{name} に空の値は指定できません",
-    "error.languages":
-      "--languages には言語タグをカンマ区切りで指定してください(例: ja / en / ja,en)(指定: {value})",
     "error.lang": "--lang には en / ja のどちらかを指定してください(指定: {value})",
     "error.lockfilesMissing":
       "{dir}/package.json・package-lock.json が見つかりません。Tsuzuri の取得物が壊れている可能性があります。",
@@ -274,11 +257,6 @@ export const MESSAGES = {
       "      --branch <名前> トリガーブランチ(TRIGGER_BRANCH)。既定: リポジトリの既定ブランチ",
       "                     (origin/HEAD。分からなければ main)",
       "      --root <パス>   起点となるMarkdownファイル(ROOT_MD)。既定: README.md",
-      "      --languages <一覧>",
-      "                     サイトの言語(LANGUAGES。先頭が基本言語)。既定: en",
-      "      --site-name <名前>",
-      "                     サイト名(SITE_NAME)。既定: 空(ビルド時にリポジトリ名になる)",
-      "      --no-nav       ナビ・サイト内検索・目次を表示しない(NAV_ENABLED=false)。既定: 表示する",
       "      --lang <en|ja> 表示するメッセージと、生成する設定ファイルのコメントの言語。既定: en",
       "      --force        対話なしのとき、既存ファイルも上書きする(既定では既存ファイルはスキップ)",
       "      --port <番号>   preview で使うポート番号。既定: 4000",
@@ -287,7 +265,7 @@ export const MESSAGES = {
       "  -v, --version      バージョンを表示する",
       "  -h, --help         この説明を表示する",
       "",
-      "--branch / --root / --languages / --site-name / --no-nav のいずれかを指定した場合も、対話なしで実行します。",
+      "--branch / --root のどちらかを指定した場合も、対話なしで実行します。",
     ].join("\n"),
 
     "config.header": [
@@ -295,7 +273,7 @@ export const MESSAGES = {
       "#",
       "# 「KEY=VALUE」の形で1行に1項目を書きます。# で始まる行と空行は無視されます。",
       "# ワークフロー(.github/workflows/tsuzuri-pages.yml)を編集しなくても、ここを変えるだけで動作を変えられます。",
-      "# 各項目の詳しい説明: {docs}docs/configuration.html",
+      "# 各項目の詳しい説明: {docs}docs/reference/configuration.html",
     ].join("\n"),
     "config.triggerBranch": [
       "# 公開(デプロイ)するブランチ。このブランチに push したときだけサイトが更新されます。",
@@ -307,13 +285,13 @@ export const MESSAGES = {
     "config.outDir": "# ビルドしたサイトの出力先(リポジトリ内のフォルダ)",
     "config.theme": [
       "# サイト全体のカスタムスタイル。{vendorDir}/styles/ の中のCSSファイルのファイル名(フォルダは書かず、ファイル名だけを書きます)。",
-      "# 既定の default.css はパッケージに入っています。ほかのものは、ギャラリー({docs}docs/gallery.html)で",
+      "# 既定の default.css はパッケージに入っています。ほかのものは、ギャラリー({docs}gallery/)で",
       "# ダウンロードして {vendorDir}/styles/ に置き、ここにそのファイル名を書きます。",
     ].join("\n"),
     "config.languages": [
       "# サイトの言語。カンマ区切りで、先頭が基本言語(起点の README の言語)です。例: ja / en / ja,en",
       '# 1つなら1言語のサイト(ページの言語 <html lang="..."> と画面の文言がその言語になります)。',
-      "# 2つ以上なら多言語のサイトになります(ページの置き方: {docs}docs/i18n.html)。空なら en です。",
+      "# 2つ以上なら多言語のサイトになります(ページの置き方: {docs}docs/guides/multilingual.html)。空なら en です。",
     ].join("\n"),
     "config.navEnabled":
       "# サイドバーのナビゲーション・サイト内検索・ページ内の目次・前後のページへのリンクを表示するか(true/false)",

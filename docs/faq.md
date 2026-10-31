@@ -1,5 +1,7 @@
 ---
 title: FAQ
+description: Answers to the common problems when you set up or run Tsuzuri
+order: 60
 ---
 
 # FAQ
@@ -22,7 +24,7 @@ Skipping because this push (feature/foo) is not to TRIGGER_BRANCH=main
 this is the cause. Merge
 or push to the target branch, or change the value of `TRIGGER_BRANCH` itself (for manual runs
 (`workflow_dispatch`) this check isn't done and it always deploys; see
-[Deployment](./deployment.md)).
+[Publish settings](./guides/publish.md)).
 
 If the deploy job did start but fails with the following error, the cause is different.
 
@@ -33,7 +35,7 @@ Branch "docs" is not allowed to deploy to github-pages due to environment protec
 This happens when you set a branch other than the default branch as `TRIGGER_BRANCH` and the
 `github-pages` environment doesn't allow deployments from that branch. Allow it with the steps in
 "Using a branch other than the default branch as the trigger branch" in
-[Deployment](./deployment.md).
+[Publish settings](./guides/publish.md).
 
 ## I get broken link warnings
 
@@ -42,19 +44,19 @@ as "a link that wasn't found" and continues. Which links these are is shown in t
 the workflow log in the Actions tab, as "Files that links point to were not found: N" and "Links ignored
 for security reasons: N" (up to v1.36.0, in Japanese: `リンク先が見つからなかったファイル: N 件` and
 `セキュリティ上の理由で無視されたリンク: N 件`), along with the file that contains them. To dig deeper, you can temporarily
-set `SITEMAP_JSON=true` to output the debugging `sitemap.json` (see [Concepts](./concepts.md)). If
+set `SITEMAP_JSON=true` to output the debugging `sitemap.json` (see [How it works](./reference/how-it-works.md)). If
 you don't want to publish with broken links, set `STRICT_LINKS=true` to make the build fail (see
-the [configuration reference](./configuration.md#strict_links)).
+the [configuration reference](./reference/configuration.md#strict_links)).
 
 A link to a file whose extension isn't in the list of copied files (such as `src/foo.js`) is
 checked the same way: if the file exists it becomes a link to GitHub, and if it doesn't exist it
 is reported as a link whose target wasn't found. See "Which files are copied" in
-[Concepts](./concepts.md).
+[How it works](./reference/how-it-works.md).
 
 ## The build stopped after an update, with a warning about an embedded file
 
 Since v1.32.0, only the files with the extensions listed in "Which files are copied" in
-[Concepts](./concepts.md) are copied to the site. If an image, video or audio embedded with
+[How it works](./reference/how-it-works.md) are copied to the site. If an image, video or audio embedded with
 `![](…)`, `<img src>`, `<video src>` and so on points to a file with another extension (or to a
 folder), it can't be shown or played, so the Build step shows a warning like "The embedded
 target X is a file of a type that is not copied, so it cannot be displayed or played (referenced
@@ -88,16 +90,16 @@ If the look isn't what you expect, check the following in order.
 1. A typo in `THEME`. A value that isn't the file name of a CSS file (`none`, an old theme name
    such as `material`, a path with folders such as `.github/tsuzuri/styles/glass.css`, or a name
    that doesn't end with `.css`) falls back to `default.css` automatically, with a warning (see the
-   [configuration reference](./configuration.md)).
+   [configuration reference](./reference/configuration.md)).
 2. Whether a file with the name set in `THEME` actually exists in `.github/tsuzuri/styles/`.
    If it doesn't, a warning is shown (`THEME ("…") was not found`), and the site is built with the base
    CSS only. Custom styles other than `default.css` are not included in the package: download
-   them from the [gallery](./gallery.md).
+   them from the [gallery](../gallery/README.md).
 3. The priority of the two layers (base CSS → custom style). The custom style is loaded after the
    base CSS, so check whether the CSS rules you wrote there override as expected,
    including in terms of specificity (the strength of the selector). A `theme` in a page's
    frontmatter replaces the site-wide custom style for that page. See
-   [Theming](./theming.md) for details.
+   [Change the look](./guides/style.md) for details.
 
 ## The preview looks different from the published site
 
@@ -117,7 +119,7 @@ it doesn't, check the following.
 
 (Up to v1.36.0, and with `--lang ja`, the message is in Japanese: `ポート 4000 は使用中です`.)
 Another app (or another `preview`) is using the same port. Choose another number, like
-`--port 4001` (see the [CLI reference](cli.md#previewing-locally-preview)).
+`--port 4001` (see the [CLI reference](reference/cli.md#previewing-locally-preview)).
 
 ## npx uses an old cached version
 
@@ -141,7 +143,7 @@ these values change when you move to a custom domain, if images or CSS fail to l
 contain the path twice, first check whether the build recognizes the right `CUSTOM_DOMAIN` value
 (whether it's a valid host name; including a scheme or path makes it invalid, and it falls back
 to empty) by looking at `customDomain` and `siteOrigin` in the `sitemap.json` output with
-`SITEMAP_JSON=true`. See "Setting up a custom domain" in [Deployment](./deployment.md) for
+`SITEMAP_JSON=true`. See "Setting up a custom domain" in [Publish settings](./guides/publish.md) for
 details.
 
 ## I don't want `llms.txt`, or I want to use one I wrote
@@ -150,7 +152,7 @@ details.
 `LLMS_TXT=false` in `.github/tsuzuri/config`. To use your own, put a `llms.txt` right under
 the repository: it's copied to the site as it is and none is generated. A symbolic link, or
 something that isn't a regular file, isn't used (a warning is shown, and nothing is copied or
-generated). See "llms.txt" in [Concepts](./concepts.md) for details.
+generated). See "llms.txt" in [How it works](./reference/how-it-works.md) for details.
 
 ## Is HTML written in Markdown output as is?
 
