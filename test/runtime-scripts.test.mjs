@@ -34,8 +34,8 @@ function fakeElement(tag) {
     addEventListener(type, fn) {
       (listeners[type] ??= []).push(fn);
     },
-    async dispatch(type) {
-      for (const fn of listeners[type] ?? []) await fn();
+    async dispatch(type, event) {
+      for (const fn of listeners[type] ?? []) await fn(event);
     },
     append(child) {
       this.children.push(child);
@@ -187,7 +187,11 @@ describe("COPY_SCRIPT(tsuzuri-copy.js)", () => {
 function runCarouselScript(lang, count, { tileLink } = {}) {
   const carousel = fakeElement("div");
   carousel.scrollLeft = 0;
-  const imgs = Array.from({ length: count }, (_, i) => ({ offsetLeft: 50 + i * 110 }));
+  carousel.style = {};
+  carousel.classes = new Set();
+  carousel.classList = { add: (c) => carousel.classes.add(c), remove: (c) => carousel.classes.delete(c) };
+  carousel.setPointerCapture = () => {};
+  const imgs = Array.from({ length: count }, (_, i) => ({ offsetLeft: 50 + i * 110, offsetWidth: 100 }));
   carousel.querySelectorAll = (sel) => (sel === "img" ? imgs : []);
   carousel.closest = (sel) => (tileLink && sel === ".tsuzuri-tile" ? { querySelector: () => tileLink } : null);
   carousel.scrolledTo = [];
@@ -203,7 +207,7 @@ function runCarouselScript(lang, count, { tileLink } = {}) {
       querySelectorAll: (sel) => (sel === "main .tsuzuri-carousel" ? [carousel] : []),
       createElement: fakeElement,
     },
-    window: { addEventListener: (_t, fn) => resizeListeners.push(fn) },
+    window: { addEventListener: (_t, fn) => resizeListeners.push(fn), onscrollend: null },
   };
   vm.runInNewContext(CAROUSEL_SCRIPT, context);
   const nav = carousel.afterNode;
@@ -271,6 +275,77 @@ describe("CAROUSEL_SCRIPT(tsuzuri-carousel.js)", () => {
     const { carousel } = runCarouselScript("en", 2);
     await carousel.dispatch("click");
     assert.equal(carousel.afterNode.className, "tsuzuri-carousel-nav");
+  });
+
+  /** マウスで x=from から x=to までドラッグする(離すかどうかは release で決める) */
+  async function mouseDrag(carousel, from, to, { release = true, pointerType = "mouse" } = {}) {
+    await carousel.dispatch("pointerdown", { pointerType, button: 0, clientX: from });
+    await carousel.dispatch("pointermove", { pointerType, buttons: 1, clientX: to, pointerId: 1 });
+    if (release) await carousel.dispatch("pointerup", { pointerType, clientX: to });
+  }
+
+  test("マウスで左へドラッグして離すと次の画像へ移り、そのあとの click ではタイルのリンクを開かない", async () => {
+    let clicked = 0;
+    const { carousel } = runCarouselScript("en", 3, { tileLink: { click: () => clicked++ } });
+    await mouseDrag(carousel, 200, 170, { release: false });
+    assert.equal(carousel.scrollLeft, 30, "ドラッグ中はマウスに付いてくる");
+    assert.equal(carousel.style.scrollSnapType, "none");
+    assert.ok(carousel.classes.has("tsuzuri-carousel-dragging"));
+    await carousel.dispatch("pointerup", { pointerType: "mouse", clientX: 170 });
+    assert.deepEqual(carousel.scrolledTo, [110]);
+    assert.ok(!carousel.classes.has("tsuzuri-carousel-dragging"));
+    await carousel.dispatch("click");
+    assert.equal(clicked, 0);
+    await carousel.dispatch("scrollend");
+    assert.equal(carousel.style.scrollSnapType, "", "スクロールが終わったら吸着を戻す");
+  });
+
+  test("動きが画像の幅の 1/5 未満なら、元の画像へ戻す", async () => {
+    const { carousel } = runCarouselScript("en", 3);
+    await mouseDrag(carousel, 200, 185);
+    assert.deepEqual(carousel.scrolledTo, [0]);
+  });
+
+  test("5 未満しか動かさなければドラッグにならず、click でタイルのリンクを開く", async () => {
+    let clicked = 0;
+    const { carousel } = runCarouselScript("en", 3, { tileLink: { click: () => clicked++ } });
+    await mouseDrag(carousel, 200, 197);
+    assert.equal(carousel.scrollLeft, 0);
+    assert.deepEqual(carousel.scrolledTo, []);
+    await carousel.dispatch("click");
+    assert.equal(clicked, 1);
+  });
+
+  test("タッチではドラッグの処理をしない(ブラウザのスワイプに任せる)", async () => {
+    const { carousel } = runCarouselScript("en", 3);
+    await mouseDrag(carousel, 200, 100, { pointerType: "touch" });
+    assert.deepEqual(carousel.scrolledTo, []);
+    assert.equal(carousel.style.scrollSnapType, undefined);
+  });
+
+  test("最初の画像で右へドラッグしても、最初より前へは行かない", async () => {
+    const { carousel } = runCarouselScript("en", 3);
+    await mouseDrag(carousel, 200, 260);
+    assert.deepEqual(carousel.scrolledTo, [0]);
+  });
+
+  test("続けてドラッグしたとき、前の回の吸着の戻しは、次のドラッグの最中には効かない", async () => {
+    const { carousel } = runCarouselScript("en", 3);
+    await mouseDrag(carousel, 200, 170);
+    await mouseDrag(carousel, 200, 170, { release: false });
+    await carousel.dispatch("scrollend");
+    assert.equal(carousel.style.scrollSnapType, "none");
+    await carousel.dispatch("pointerup", { pointerType: "mouse", clientX: 170 });
+    await carousel.dispatch("scrollend");
+    assert.equal(carousel.style.scrollSnapType, "");
+  });
+
+  test("ボタンを押していない pointermove ではドラッグにならない", async () => {
+    const { carousel } = runCarouselScript("en", 3);
+    await carousel.dispatch("pointerdown", { pointerType: "mouse", button: 0, clientX: 200 });
+    await carousel.dispatch("pointermove", { pointerType: "mouse", buttons: 0, clientX: 100, pointerId: 1 });
+    await carousel.dispatch("pointermove", { pointerType: "mouse", buttons: 1, clientX: 50, pointerId: 1 });
+    assert.equal(carousel.scrollLeft, 0);
   });
 
   test("ドットのラベルは <html lang> に合わせる(ja は日本語、それ以外は英語)", () => {

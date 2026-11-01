@@ -113,8 +113,13 @@ body > nav {
   -webkit-backdrop-filter: var(--card-filter);
   backdrop-filter: var(--card-filter);
 }
+/* 狭い画面(ナビが本文の上に出るとき)は、ナビと本文を同じ幅にして中央に揃える */
+@media (max-width: 959px) {
+  body > nav, body:has(> nav) > main { max-width: min(var(--content-width), 100% - 32px); margin-left: auto; margin-right: auto; }
+}
 @media (max-width: 640px) {
   main { margin: 12px; padding: 28px 20px; }
+  body > nav, body:has(> nav) > main { max-width: calc(100% - 24px); }
 }
 @media (min-width: 960px) {
   body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }

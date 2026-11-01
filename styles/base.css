@@ -259,6 +259,7 @@
 .tsuzuri-carousel-nav .tsuzuri-carousel-dot { position: relative; width: 24px; height: 24px; padding: 0; background: none; border: 0; border-radius: 50%; }
 .tsuzuri-carousel-nav .tsuzuri-carousel-dot::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: var(--border); }
 .tsuzuri-carousel-nav .tsuzuri-carousel-dot[aria-current="true"]::before { background: var(--accent); }
+.tsuzuri-carousel-dragging { cursor: grabbing; user-select: none; }
 
 /* ---------- ダウンロードのボタン(download 属性つきの <a class="tsuzuri-button">。ダウンロードのアイコン + ファイル名。色などはカスタムスタイルで上書きできる) ---------- */
 a.tsuzuri-button[download] { display: inline-flex; align-items: center; gap: 0.5em; padding: 6px 14px; color: var(--accent); font-weight: 600; text-decoration: none; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }

@@ -8,7 +8,7 @@ order: 0
 
 See what Tsuzuri's styles look like on actually generated pages, and download the one you like.
 Click a tile to open a sample page with the same content for every style (headings, paragraphs, links, lists,
-a table, code, a quote and an image), so you can compare them. Swipe a screenshot or use the dots under it to see
+a table, code, a quote and an image), so you can compare them. Swipe or drag a screenshot or use the dots under it to see
 the light and dark looks, and use the button to download the CSS file.
 
 ## How to use a custom style

@@ -33,6 +33,18 @@ describe("ナビの横の本文の幅の CSS", () => {
   }
 });
 
+// 狭い画面(ナビが本文の上に出るとき)に、ナビと本文を同じ幅にして中央に揃える指定
+const NARROW_ALIGNED =
+  "body > nav, body:has(> nav) > main { max-width: min(var(--content-width), 100% - 32px); margin-left: auto; margin-right: auto; }";
+
+describe("狭い画面のナビと本文の幅の CSS", () => {
+  for (const theme of THEMES) {
+    test(`${theme}.css: ナビと本文を同じ幅にして中央に揃えている`, () => {
+      assert.equal(countOf(readCss(theme), NARROW_ALIGNED), 1);
+    });
+  }
+});
+
 describe("styles/README.md", () => {
   test("default と、ベース(base.css)・カスタムスタイルの使い方が載っている", () => {
     const readme = fs.readFileSync(path.join(STYLES_DIR, "README.md"), "utf-8");

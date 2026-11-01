@@ -135,7 +135,7 @@ extra space at the top.
 ## Image carousel
 
 Images placed inside `<div class="tsuzuri-carousel">` ... `</div>` (raw HTML in Markdown) line up
-side by side and can be swiped or scrolled sideways. Under them, dots appear (one per image, with the
+side by side and can be swiped, dragged with the mouse, or scrolled sideways. Under them, dots appear (one per image, with the
 current one marked; press a dot to jump to that image). They are not shown when there is only one image.
 Inside a gallery tile (`<div class="tsuzuri-tile">`), pressing an image opens the link in the tile's heading. Only pages with a
 carousel load the small script (`tsuzuri-carousel.js`). The

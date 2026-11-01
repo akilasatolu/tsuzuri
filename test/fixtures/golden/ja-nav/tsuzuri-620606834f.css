@@ -259,6 +259,7 @@
 .tsuzuri-carousel-nav .tsuzuri-carousel-dot { position: relative; width: 24px; height: 24px; padding: 0; background: none; border: 0; border-radius: 50%; }
 .tsuzuri-carousel-nav .tsuzuri-carousel-dot::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: var(--border); }
 .tsuzuri-carousel-nav .tsuzuri-carousel-dot[aria-current="true"]::before { background: var(--accent); }
+.tsuzuri-carousel-dragging { cursor: grabbing; user-select: none; }
 
 /* ---------- ダウンロードのボタン(download 属性つきの <a class="tsuzuri-button">。ダウンロードのアイコン + ファイル名。色などはカスタムスタイルで上書きできる) ---------- */
 a.tsuzuri-button[download] { display: inline-flex; align-items: center; gap: 0.5em; padding: 6px 14px; color: var(--accent); font-weight: 600; text-decoration: none; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
@@ -438,8 +439,13 @@ body > nav {
   -webkit-backdrop-filter: var(--card-filter);
   backdrop-filter: var(--card-filter);
 }
+/* 狭い画面(ナビが本文の上に出るとき)は、ナビと本文を同じ幅にして中央に揃える */
+@media (max-width: 959px) {
+  body > nav, body:has(> nav) > main { max-width: min(var(--content-width), 100% - 32px); margin-left: auto; margin-right: auto; }
+}
 @media (max-width: 640px) {
   main { margin: 12px; padding: 28px 20px; }
+  body > nav, body:has(> nav) > main { max-width: calc(100% - 24px); }
 }
 @media (min-width: 960px) {
   body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }

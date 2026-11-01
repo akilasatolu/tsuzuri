@@ -39,6 +39,11 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - The image carousel (`tsuzuri-carousel.js`) now shows only dots: the previous/next arrows and the "1 / 2" count were removed, and no dots are shown for a single image. Inside a gallery tile (`<div class="tsuzuri-tile">`), pressing an image opens the link in the tile's heading.
 - `base.css` now gives a link with the `download` attribute and the class `tsuzuri-button` a download-icon button look, so it also looks like a button in custom styles that do not define one.
 - This site's gallery became the style gallery: each style has its own page in the navigation with a download button, tiles show only the images, the name and the download button, the documentation pages were reorganized (Preview locally moved under the guides, the Documentation page was removed) and the contact page was renamed to Contact.
+- The image carousel (`tsuzuri-carousel.js`) can now also be switched by dragging an image with the mouse. Touch keeps the browser's own swipe. After a drag, the link of a gallery tile does not open.
+
+### Fixed
+
+- In the custom styles of the style gallery (`default.css`, `glass.css`, `neumorphism.css`, `editorial.css`, `minimal.css`, `kintsugi.css`, `blueprint.css`, `nineties.css`), on narrow screens where the navigation is shown above the content, the left and right edges of the navigation and the content did not line up. They now have the same width and are centered. `base.css` is unchanged.
 
 <!-- ja -->
 
@@ -48,6 +53,11 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - 画像のカルーセル(`tsuzuri-carousel.js`)は、ドットだけを出すようにした。前へ・次への矢印と「1 / 2」の枚数の表示は削除し、画像が1枚のときはドットも出さない。ギャラリーのタイル(`<div class="tsuzuri-tile">`)の中では、画像を押すとタイルの見出しのリンクが開く。
 - `base.css` で、`download` 属性つきの `tsuzuri-button` クラスのリンクに、ダウンロードのアイコンつきのボタンの見た目を付けた。ボタンを定義していないカスタムスタイルでも、ボタンとして見える。
 - このサイトのギャラリーをスタイルギャラリーにした。各スタイルがナビに自分のページを持ち、ダウンロードボタンが付く。タイルは画像・名前・ダウンロードボタンだけにした。あわせて、ドキュメントのページ構成(「手元で確認する」をガイドの下へ移動、「ドキュメント」ページの削除)を整理し、問い合わせのページを「お問い合わせ」に改めた。
+- 画像のカルーセル(`tsuzuri-carousel.js`)は、マウスで画像をドラッグしても切り替えられるようにした。タッチはブラウザのスワイプのまま。ドラッグしたあとは、ギャラリーのタイルのリンクを開かない。
+
+### 修正
+
+- スタイルギャラリーのカスタムスタイル(`default.css`、`glass.css`、`neumorphism.css`、`editorial.css`、`minimal.css`、`kintsugi.css`、`blueprint.css`、`nineties.css`)で、ナビが本文の上に出る狭い画面のとき、ナビと本文の左右の端が揃っていなかった。同じ幅にして中央に揃えた。`base.css` は変えていない。
 
 ## [1.40.0] - 2026-10-31
 
