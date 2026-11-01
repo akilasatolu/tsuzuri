@@ -79,7 +79,7 @@ Replaces the custom style of this page alone. The site-wide custom style is `THE
 `.github/tsuzuri/config`; this key gives a different one just for this page.
 
 Write the **file name of a custom style**: a `.css` file in `.github/tsuzuri/styles/`, such as
-`glass.css` (see [Change the look](../guides/style.md) for what custom styles are, and the [gallery](../../gallery/README.md) for
+`glass.css` (see [Change the look](../guides/style.md) for what custom styles are, and the [style gallery](../../gallery/style-gallery.md) for
 the ones you can download). Write **only the file name** (no folders). A value containing `/`, `\` or
 `:`, or starting with `.`, or not ending with `.css`, can't be used (such as `../x.css`, `assets/x.css`). `none` can't be used either; to show the page with no
 decoration, use `none.css` (a file that contains only comments, which you put in `.github/tsuzuri/styles/`).
@@ -116,7 +116,8 @@ nav: false
 Sets the order in the navigation as a number. Within the same folder, pages
 with an `order` come first, smallest first, and pages without one come after them, in the order
 they were found through links. A folder's position can be set with the `order` of the
-`README.md` (or `index.md`) inside it. On a [multilingual site](../guides/multilingual.md), a navigation is made
+`README.md` (or `index.md`) inside it. That `README.md` itself is always placed first in its folder,
+whatever its `order` is. On a [multilingual site](../guides/multilingual.md), a navigation is made
 for each language, and `order` works within each language's navigation (the `order` of a
 Japanese page decides the order in the Japanese navigation).
 

@@ -113,5 +113,5 @@ CUSTOM_DOMAIN=docs.example.com
 
 ## 次に読む
 
-- [見た目を変える](./style.ja.md): ギャラリーでスタイルを選ぶ。
+- [見た目を変える](./style.ja.md): スタイルギャラリーでスタイルを選ぶ。
 - [更新する](./update.ja.md): コマンド1つでTsuzuriを最新にする。

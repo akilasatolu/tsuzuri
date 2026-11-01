@@ -6,16 +6,16 @@
 - `default.css`: Tsuzuri の標準の**カスタムスタイル**。Material Design 3 風で、ライト・ダークに対応します。パッケージに入っているので、ダウンロードは要りません。
 
 ページの CSS は「ベース(`base.css`)→ カスタムスタイル1つ」の2層です。カスタムスタイルは、
-`.github/tsuzuri/styles/` に置く `○○.css` のことで、`default.css` も、ギャラリーでダウンロードした
+`.github/tsuzuri/styles/` に置く `○○.css` のことで、`default.css` も、スタイルギャラリーでダウンロードした
 ものも、自分で作ったものも、すべて同じ扱いです。
 
 **`init` と `init --update` が `.github/tsuzuri/styles/` に置くのは、`base.css` と `default.css` だけです。**
-`glass.css` などほかのスタイルは配布しません。ギャラリーに載せているので、ダウンロードして使います。
+`glass.css` などほかのスタイルは配布しません。スタイルギャラリーに載せているので、ダウンロードして使います。
 `default.css` は `init --update` のたびに上書きされるので、編集したいときは別の名前にコピーして使います。
 
 ## 使い方
 
-1. 使いたいカスタムスタイルをギャラリー(https://akilasatolu.github.io/tsuzuri/gallery/)でダウンロードし、
+1. 使いたいカスタムスタイルをスタイルギャラリー(https://akilasatolu.github.io/tsuzuri/gallery/style-gallery.html)でダウンロードし、
    `.github/tsuzuri/styles/` に置く(`default.css` は最初から置かれています)。
 2. `.github/tsuzuri/config` の `THEME` に、そのファイル名を書く。
 

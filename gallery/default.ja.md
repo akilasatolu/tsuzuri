@@ -1,11 +1,13 @@
 ---
-title: デフォルト(default)
+title: Default
 theme: default.css
-description: カスタムスタイル「デフォルト(default)」の見本ページ
-nav: false
+description: スタイル「Default」の見本ページ
+order: 10
 ---
 
-# デフォルト(default)
+# Default
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/default.css" download>default.css</a>
 
 Material Design 3 風。青系の配色、角丸のカードと影、トーンのついたナビの選択。
 
@@ -14,7 +16,7 @@ Material Design 3 風。青系の配色、角丸のカードと影、トーン�
 1ページだけ使う場合は、そのページのfrontmatterに`theme: default.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[ギャラリー一覧](README.ja.md) ・ [グラス(glass) →](glass.ja.md)
+[スタイルギャラリー](style-gallery.ja.md) ・ [Glass →](glass.ja.md)
 
 ## 見出しレベル2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[ギャラリー一覧](README.ja.md) ・ [グラス(glass) →](glass.ja.md)
+[スタイルギャラリー](style-gallery.ja.md) ・ [Glass →](glass.ja.md)

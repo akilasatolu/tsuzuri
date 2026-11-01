@@ -1,11 +1,13 @@
 ---
-title: Custom style example (this site)
+title: Tsuzuri
 theme: tsuzuri.css
 description: A sample page of this site's own look, made with a custom style of its own
-nav: false
+order: 100
 ---
 
-# Custom style example (this site)
+# Tsuzuri
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>tsuzuri.css</a>
 
 This look is a custom style of its own (`tsuzuri.css`), made without relying on any other style.
 The whole site looks like this. It's the "thread" design, which gives shape to the name and logo of
@@ -17,10 +19,10 @@ are connected by lines.
 
 The CSS is [tsuzuri.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/tsuzuri.css).
 See [Change the look](../docs/guides/style.md#writing-your-own-custom-style) for how to write one. To use it on your own
-site, download `tsuzuri.css` from the [gallery](README.md#tsuzuri-this-site), put it in `.github/tsuzuri/styles/`,
+site, download `tsuzuri.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=tsuzuri.css`.
 
-[← No decoration (none)](none.md) · [Gallery](README.md)
+[← None](none.md) · [Style gallery](style-gallery.md)
 
 ## Heading level 2
 
@@ -57,4 +59,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← No decoration (none)](none.md) · [Gallery](README.md)
+[← None](none.md) · [Style gallery](style-gallery.md)

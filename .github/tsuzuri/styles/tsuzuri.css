@@ -370,7 +370,7 @@ main a.tsuzuri-button[download]:hover::before { transform: translateY(2px); }
 .tsuzuri-hero p:has(> a > img) a { background: none; }
 .tsuzuri-hero p:has(> a > img) img { border-radius: 4px; }
 
-/* ---------- ギャラリーのタイル(flex + gap。タイル全体が押せる。列数は枠の幅で決める) ---------- */
+/* ---------- スタイルギャラリーのタイル(flex + gap。タイル全体が押せる。画像・名前・ダウンロードだけ。列数は枠の幅で決める) ---------- */
 .tsuzuri-tiles { container-type: inline-size; display: flex; flex-wrap: wrap; gap: 20px; margin: 0 0 24px; }
 .tsuzuri-tile {
   position: relative;               /* 見出しのリンクを広げる基準 */
@@ -388,9 +388,9 @@ main a.tsuzuri-button[download]:hover::before { transform: translateY(2px); }
 .tsuzuri-tile .tsuzuri-anchor { display: none; }                         /* ビルドが足す見出しの「#」リンクは、タイルの中では隠す(見出しの id は残る) */
 .tsuzuri-tile h3 a:not(.tsuzuri-anchor) { color: var(--heading); text-decoration: none; background: none; }
 .tsuzuri-tile h3 a:not(.tsuzuri-anchor)::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }  /* 本来のリンクだけをタイル全体に広げる(画像の上も含む) */
-.tsuzuri-tile .tsuzuri-carousel-nav, .tsuzuri-tile a.tsuzuri-button { position: relative; z-index: 2; }       /* 矢印・ドット・ダウンロードは前面 */
+.tsuzuri-tile .tsuzuri-carousel, .tsuzuri-tile .tsuzuri-carousel-nav, .tsuzuri-tile a.tsuzuri-button { position: relative; z-index: 2; }   /* 画像(スワイプ)・ドット・ダウンロードは前面。画像を押すとタイルの見出しのリンクを開くのは tsuzuri-carousel.js */
+.tsuzuri-tile .tsuzuri-carousel { cursor: pointer; }
 .tsuzuri-tile a.tsuzuri-button { align-self: flex-start; padding: 8px 16px; }
-.tsuzuri-tile .tsuzuri-carousel:not([tabindex]) { position: relative; z-index: 2; }   /* JS が動かないとき(JS が付ける tabindex が無い)だけ、画像を前面に出して横スクロールを効かせる */
 .tsuzuri-tile:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (hover: hover) { .tsuzuri-tile:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: var(--shadow-lg); } }
 @media (prefers-reduced-motion: reduce) { .tsuzuri-tile { transition: none; } .tsuzuri-tile:hover { transform: none; } }

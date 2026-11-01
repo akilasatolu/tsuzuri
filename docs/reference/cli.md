@@ -113,7 +113,7 @@ Those are the only two questions. There is no question about the navigation, the
 settings file, and it starts with `THEME=default.css` (the default custom style, included in the package). To change them, edit
 `.github/tsuzuri/config` after `init`: write `LANGUAGES=ja` if your README is in Japanese (see [Multilingual sites](../guides/multilingual.md)),
 set `SITE_NAME`, or write `NAV_ENABLED=false`. To use another custom style, download it from the
-[gallery](../../gallery/README.md) and put its file name in `THEME` (see [Change the look](../guides/style.md)).
+[style gallery](../../gallery/style-gallery.md) and put its file name in `THEME` (see [Change the look](../guides/style.md)).
 
 ## Generated files
 
@@ -125,7 +125,7 @@ Based on your answers, the following files are generated.
 | `.github/tsuzuri/config` | Always | The settings file. `TRIGGER_BRANCH` / `ROOT_MD` reflect your answers; the other keys, including `THEME=default.css`, are written with their defaults. You edit this file |
 | `.github/tsuzuri/build-docs.mjs` | Always | The build script itself (identical to `.github/scripts/build-docs.mjs` in the Tsuzuri repository) |
 | `.github/tsuzuri/lib/*.mjs` | Always | The modules the build script depends on (config, copy-button, crawler, emoji, emoji-data, frontmatter, html-renderer, i18n, image-size, link-extractor, llms-txt, path-utils, search, site-tree, sitemap, slugger, theme-toggle; 17 files) |
-| `.github/tsuzuri/styles/base.css`, `default.css` | Always | The base CSS (`base.css`) and the default custom style (`default.css`). Only these two are placed; the other custom styles are not distributed, and you download them from the [gallery](../../gallery/README.md) |
+| `.github/tsuzuri/styles/base.css`, `default.css` | Always | The base CSS (`base.css`) and the default custom style (`default.css`). Only these two are placed; the other custom styles are not distributed, and you download them from the [style gallery](../../gallery/style-gallery.md) |
 | `.github/tsuzuri/package.json`, `package-lock.json` | Always | The versions of the build dependencies (marked and others) and the hashes used to verify the downloaded contents. The workflow and `preview` install them exactly as listed, with `npm ci` |
 | `.github/tsuzuri/.gitignore` | Always | Keeps the dependencies installed for local previews (`node_modules/`) out of commits |
 

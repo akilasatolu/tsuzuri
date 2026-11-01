@@ -1,7 +1,7 @@
 ---
 title: Preview locally
 description: Check the look and the broken links on your own computer before you push
-order: 20
+order: 35
 ---
 
 # Preview locally
@@ -17,7 +17,7 @@ npx github:akilasatolu/tsuzuri#v1 preview
 ```
 
 When the build finishes, open the site at `http://localhost:4000/` (see the
-[CLI reference](reference/cli.md#previewing-locally-preview) for details).
+[CLI reference](../reference/cli.md#previewing-locally-preview) for details).
 
 To do the same thing by hand without `preview`, run the following steps in order.
 
@@ -59,5 +59,5 @@ To do the same thing by hand without `preview`, run the following steps in order
 
 ## Read next
 
-- [Publish settings](./guides/publish.md): choose the branch that publishes the site.
-- [Change the look](./guides/style.md): pick a style in the gallery.
+- [Publish settings](./publish.md): choose the branch that publishes the site.
+- [Change the look](./style.md): pick a style in the style gallery.

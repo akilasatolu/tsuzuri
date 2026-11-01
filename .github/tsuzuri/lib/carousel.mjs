@@ -1,10 +1,13 @@
 /**
  * carousel.mjs
  *
- * 画像のカルーセル(<div class="tsuzuri-carousel"> の中に <img> を並べたもの)に、前へ・次への矢印、
- * ドット、「1 / 2」の枚数の表示を付けるための小さなスクリプト(tsuzuri-carousel.js として出力する)。
+ * 画像のカルーセル(<div class="tsuzuri-carousel"> の中に <img> を並べたもの)に、ドット(今の画像の
+ * 表示と、押すと切り替わるボタン)を付けるための小さなスクリプト(tsuzuri-carousel.js として出力する)。
+ * 矢印や「1 / 2」の枚数は出さない。画像は横にスワイプ・スクロールしても切り替えられる。
+ * カルーセルがタイル(<div class="tsuzuri-tile">)の中にあるときは、画像を押すとそのタイルの見出しのリンクを開く
+ * (スワイプやドットの操作では開かない)。
  * カルーセルがあるページだけが読み込む。ラベルはページの言語(<html lang>)で i18n.mjs の表から選ぶ
- * (表に無い言語は英語)。画像が1枚でも、同じ形のナビを出す(矢印は押せない状態)。
+ * (表に無い言語は英語)。画像が1枚のときは、ドットを出さない。
  * JavaScript が動かない環境では何も足されないだけで、今までどおり横にスクロールして見られる。
  *
  * スクリプトをこのモジュール内の文字列として持っているのは、init が利用者リポジトリに
@@ -15,8 +18,8 @@ import { runtimeStrings, RUNTIME_PICK_SOURCE } from "./i18n.mjs";
 
 export const CAROUSEL_SCRIPT_NAME = "tsuzuri-carousel.js";
 
-// スクリプトに埋め込む文言の表(言語ごとに carouselPrev・carouselNext・carouselDot だけ)
-const STRINGS = JSON.stringify(runtimeStrings(["carouselPrev", "carouselNext", "carouselDot"]));
+// スクリプトに埋め込む文言の表(言語ごとに carouselDot だけ)
+const STRINGS = JSON.stringify(runtimeStrings(["carouselDot"]));
 
 export const CAROUSEL_SCRIPT = `(() => {
   const S = ${STRINGS};
@@ -26,11 +29,10 @@ export const CAROUSEL_SCRIPT = `(() => {
     e.className = className;
     return e;
   };
-  const button = (className, label, text) => {
+  const button = (className, label) => {
     const b = el("button", className);
     b.type = "button";
     b.setAttribute("aria-label", label);
-    if (text) b.textContent = text;
     return b;
   };
   for (const carousel of document.querySelectorAll("main .tsuzuri-carousel")) {
@@ -49,8 +51,6 @@ export const CAROUSEL_SCRIPT = `(() => {
     const go = (i) => carousel.scrollTo({ left: left(Math.max(0, Math.min(imgs.length - 1, i))) });
 
     const nav = el("div", "tsuzuri-carousel-nav");
-    const prev = button("tsuzuri-carousel-prev", s.carouselPrev, "\\u2039");
-    const next = button("tsuzuri-carousel-next", s.carouselNext, "\\u203a");
     const dots = el("span", "tsuzuri-carousel-dots");
     const dotButtons = imgs.map((_, i) => {
       const d = button("tsuzuri-carousel-dot", s.carouselDot.replace("{n}", String(i + 1)));
@@ -58,29 +58,24 @@ export const CAROUSEL_SCRIPT = `(() => {
       dots.append(d);
       return d;
     });
-    const count = el("span", "tsuzuri-carousel-count");
-    count.setAttribute("aria-live", "polite");
-    prev.addEventListener("click", () => go(current() - 1));
-    next.addEventListener("click", () => go(current() + 1));
-    nav.append(prev);
     nav.append(dots);
-    nav.append(count);
-    nav.append(next);
 
     const update = () => {
       const i = current();
-      count.textContent = (i + 1) + " / " + imgs.length;
       dotButtons.forEach((d, k) => {
         if (k === i) d.setAttribute("aria-current", "true");
         else d.removeAttribute("aria-current");
       });
-      prev.disabled = i === 0;
-      next.disabled = i === imgs.length - 1;
     };
     carousel.addEventListener("scroll", update);
     window.addEventListener("resize", update);
-    carousel.after(nav);
-    update();
+    // タイルの中の画像を押したら、タイルの見出しのリンクを開く(スワイプは click にならない)
+    const tileLink = carousel.closest(".tsuzuri-tile")?.querySelector("h3 a:not(.tsuzuri-anchor)");
+    if (tileLink) carousel.addEventListener("click", () => tileLink.click());
+    if (imgs.length > 1) {
+      carousel.after(nav);
+      update();
+    }
   }
 })();
 `;

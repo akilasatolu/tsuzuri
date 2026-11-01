@@ -1,20 +1,22 @@
 ---
-title: エディトリアル(editorial)
+title: Editorial
 theme: editorial.css
-description: カスタムスタイル「エディトリアル(editorial)」の見本ページ
-nav: false
+description: スタイル「Editorial」の見本ページ
+order: 40
 ---
 
-# エディトリアル(editorial)
+# Editorial
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/editorial.css" download>editorial.css</a>
 
 雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色。
 
-使うには、[ギャラリー](README.ja.md#エディトリアルeditorial)で`editorial.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`editorial.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=editorial.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: editorial.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← ニューモーフィズム(neumorphism)](neumorphism.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [ミニマル(minimal) →](minimal.ja.md)
+[← Neumorphism](neumorphism.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Minimal →](minimal.ja.md)
 
 ## 見出しレベル2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← ニューモーフィズム(neumorphism)](neumorphism.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [ミニマル(minimal) →](minimal.ja.md)
+[← Neumorphism](neumorphism.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Minimal →](minimal.ja.md)

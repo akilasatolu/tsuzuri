@@ -11,6 +11,8 @@
  *   そのままナビの並び順になる。
  *   frontmatter に `order`(数値)を書いたページは、同じディレクトリの中で、書いていないページより前に
  *   小さい順に並ぶ。サブディレクトリの位置は、その中の README.md / index.md の `order` で指定できる。
+ *   フォルダの入口のページ(README.md / index.md)は、そのフォルダの中ではいつも先頭に置く
+ *   (`order` はそのフォルダの位置を決めるためのもので、フォルダの中の並びには使わない)。
  *
  * ナビに載せないページ:
  *   frontmatter に `nav: false` と書いたページはツリーに含めない(ページ自体は出力され、リンクで開ける)。
@@ -104,9 +106,10 @@ export function buildSiteTree(visitedMdEntries, { rootMd = "", siteName = "", is
 
 // order を書いたもの(小さい順)を先に、書いていないものは見つかった順のまま後ろに並べる。
 // ディレクトリの order は、その中の入口のページ(isDirIndex が true の最初のページ)の order。
+// 入口のページ自身は、そのフォルダの中でいつも先頭に置く。
 function sortByOrder(dir, isDirIndex) {
   const keyOf = (node) => {
-    if (node.type === "page") return node.order ?? Infinity;
+    if (node.type === "page") return isDirIndex(node.rel) ? -Infinity : (node.order ?? Infinity);
     const index = node.children.find((c) => c.type === "page" && isDirIndex(c.rel));
     return index?.order ?? Infinity;
   };

@@ -1,20 +1,22 @@
 ---
-title: ニューモーフィズム(neumorphism)
+title: Neumorphism
 theme: neumorphism.css
-description: カスタムスタイル「ニューモーフィズム(neumorphism)」の見本ページ
-nav: false
+description: スタイル「Neumorphism」の見本ページ
+order: 30
 ---
 
-# ニューモーフィズム(neumorphism)
+# Neumorphism
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/neumorphism.css" download>neumorphism.css</a>
 
 Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。
 
-使うには、[ギャラリー](README.ja.md#ニューモーフィズムneumorphism)で`neumorphism.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`neumorphism.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=neumorphism.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: neumorphism.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← グラス(glass)](glass.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [エディトリアル(editorial) →](editorial.ja.md)
+[← Glass](glass.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Editorial →](editorial.ja.md)
 
 ## 見出しレベル2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← グラス(glass)](glass.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [エディトリアル(editorial) →](editorial.ja.md)
+[← Glass](glass.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Editorial →](editorial.ja.md)

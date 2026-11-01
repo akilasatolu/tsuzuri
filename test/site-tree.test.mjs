@@ -130,7 +130,17 @@ describe("nav: false / order", () => {
       ["guide/a.md", { meta: { title: "GA" } }],
       ["api/README.md", { meta: { title: "API", order: "1" } }],
     ]);
-    assert.deepEqual(titles(tree.children), ["[api]", "README.md", "[guide]"]);
+    assert.deepEqual(titles(tree.children), ["README.md", "[api]", "[guide]"]);
+  });
+
+  test("フォルダの入口のページ(README.md)は、order が兄弟と同じでも、そのフォルダの先頭に来る", () => {
+    const tree = buildSiteTree([
+      ["README.md", { meta: {} }],
+      ["guide/a.md", { meta: { title: "GA", order: "10" } }],
+      ["guide/README.md", { meta: { title: "Guide", order: "30" } }],
+      ["guide/b.md", { meta: { title: "GB", order: "40" } }],
+    ]);
+    assert.deepEqual(titles(tree.children[1].children), ["Guide", "GA", "GB"]);
   });
 });
 
@@ -146,7 +156,7 @@ describe("isDirIndex(フォルダの入口の判定の差し替え)", () => {
       ["guide/README.en.md", { meta: { title: "Guide", order: "1" } }],
     ];
     const tree = buildSiteTree(entries, { isDirIndex: isReadmeEn });
-    assert.deepEqual(titles(tree.children), ["[guide]", "Top", "[api]"]);
+    assert.deepEqual(titles(tree.children), ["Top", "[guide]", "[api]"]);
     // 省略時(今の判定)では README.en.md は入口ではないので、見つかった順のまま
     assert.deepEqual(titles(buildSiteTree(entries).children), ["Top", "[api]", "[guide]"]);
   });

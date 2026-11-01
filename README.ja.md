@@ -4,9 +4,9 @@
 
 # Tsuzuri
 
-<p class="tsuzuri-hero-lead">READMEが、そのままドキュメントに。二重に書かなくてよい、READMEのサイトを作ります。</p>
+<p class="tsuzuri-hero-lead">READMEから、たった3ステップで、あなただけのサイトを作ります。</p>
 
-<p class="tsuzuri-hero-sub">コマンド1つで、READMEからテーマ付きのGitHub Pagesのサイトができあがり、あとの更新の手間もかかりません。</p>
+<p class="tsuzuri-hero-sub">コマンド1つで、READMEがテーマ付きのGitHub Pagesのサイトになります。二重に書く必要も、あとの更新の手間もありません。</p>
 
 ```sh
 npx github:akilasatolu/tsuzuri#v1 init
@@ -34,7 +34,7 @@ READMEを書けば、それがサイトになります。こんな悩みに答�
 | READMEとドキュメントサイトに同じ内容を二度書いて、片方が古くなる。 | READMEがそのままサイトになる。リンクをたどるので、二重の管理がない。 | [ページを書く](docs/guides/write-pages.ja.md) |
 | ドキュメントツールの学習と設定が重くて、サイトを作らないままになる。 | `init`を1回と、設定ファイル1つだけ。 | [はじめる](docs/getting-started.ja.md) |
 | サイトを作っても、ツールや依存の更新への追従が続く。 | 更新はコマンド1つ(`init --update`)。 | [更新する](docs/guides/update.ja.md) |
-| 飾りのないサイトは、最初の数秒で離脱される。 | `init`を1回で、テーマ付きのサイトになる。ほかの見た目はギャラリーから選ぶ。 | [ギャラリー](gallery/README.ja.md) |
+| 飾りのないサイトは、最初の数秒で離脱される。 | `init`を1回で、テーマ付きのサイトになる。ほかの見た目はスタイルギャラリーから選ぶ。 | [スタイルギャラリー](gallery/style-gallery.ja.md) |
 
 だから、書くのはREADMEだけです。
 
@@ -76,7 +76,7 @@ READMEを起点にリンクをたどり、つながったMarkdownと画像を静
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>カスタムスタイル</h3>
-<p>標準の見た目から始めても、グラス・エディトリアル・ミニマルなどのカスタムスタイルをギャラリーからダウンロードして、自由に調整してもかまいません。このサイトも自分用のカスタムスタイルで作っています。</p>
+<p>標準の見た目から始めても、グラス・エディトリアル・ミニマルなどのカスタムスタイルをスタイルギャラリーからダウンロードして、自由に調整してもかまいません。このサイトも自分用のカスタムスタイルで作っています。</p>
 </div>
 <div class="tsuzuri-feature">
 <h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">探</span><span class="tsuzuri-sep">】</span>ナビ・検索・目次</h3>
@@ -86,7 +86,7 @@ READMEを起点にリンクをたどり、つながったMarkdownと画像を静
 
 ## 見た目を選ぶ
 
-見た目は、`.github/tsuzuri/styles/`にあるCSSファイル(カスタムスタイル)で決まります。パッケージに入っている`default.css`が最初から使われます。ほかのスタイルは、[ギャラリー](gallery/README.ja.md)でダウンロードして`.github/tsuzuri/styles/`に置き、`.github/tsuzuri/config`の`THEME`に指定します(例: `THEME=glass.css`)。
+見た目は、`.github/tsuzuri/styles/`にあるCSSファイル(カスタムスタイル)で決まります。パッケージに入っている`default.css`が最初から使われます。ほかのスタイルは、[スタイルギャラリー](gallery/style-gallery.ja.md)でダウンロードして`.github/tsuzuri/styles/`に置き、`.github/tsuzuri/config`の`THEME`に指定します(例: `THEME=glass.css`)。
 
 <div class="tsuzuri-carousel">
 <img src="assets/gallery/default-light.png" alt="default(ライト)" width="320">
@@ -95,7 +95,7 @@ READMEを起点にリンクをたどり、つながったMarkdownと画像を静
 <img src="assets/gallery/kintsugi-dark.png" alt="kintsugi(ダーク)" width="320">
 </div>
 
-[ギャラリーですべてのスタイルを見る](gallery/README.ja.md)。
+[スタイルギャラリーですべてのスタイルを見る](gallery/style-gallery.ja.md)。
 
 ## 向いている人・向かない人
 
@@ -105,10 +105,11 @@ READMEを起点にリンクをたどり、つながったMarkdownと画像を静
 ## ドキュメント
 
 - [はじめる](docs/getting-started.ja.md): READMEをサイトとして公開する、3つの手順。
-- [ギャラリー](gallery/README.ja.md): 見た目を選ぶ。
-- [ドキュメント](docs/README.ja.md): ガイドとリファレンス。
+- [スタイルギャラリー](gallery/style-gallery.ja.md): 見た目を選ぶ。
+- [ガイド](docs/guides/README.ja.md): ページを足す、見た目を変える、多言語にする、など。
+- [リファレンス](docs/reference/README.ja.md): 設定・frontmatter・コマンド・ビルドの仕組み。
 - [FAQ](docs/faq.ja.md): よくある困りごとへの答え。
-- [掲載・お問い合わせ](docs/contact.ja.md): ギャラリーへの掲載の依頼や、質問・希望。
+- [お問い合わせ](docs/contact.ja.md): 質問や希望、スタイルギャラリーへの掲載の依頼。
 - [更新履歴(リリースノート)](https://github.com/akilasatolu/tsuzuri/releases)
 
 ## ライセンス

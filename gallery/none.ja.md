@@ -1,20 +1,22 @@
 ---
-title: 装飾なし(none)
+title: None
 theme: none.css
-description: カスタムスタイル「装飾なし(none)」の見本ページ
-nav: false
+description: スタイル「None」の見本ページ
+order: 90
 ---
 
-# 装飾なし(none)
+# None
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/none.css" download>none.css</a>
 
 ベースだけを適用し、ブラウザ既定の見た目で表示します。`none.css`はコメントだけのCSSファイルです。
 
-使うには、[ギャラリー](README.ja.md#装飾なしnone)で`none.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`none.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=none.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: none.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← 90年代(nineties)](nineties.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [カスタムスタイルの例(このサイト) →](tsuzuri.ja.md)
+[← 90s](nineties.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Tsuzuri →](tsuzuri.ja.md)
 
 ## 見出しレベル2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← 90年代(nineties)](nineties.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [カスタムスタイルの例(このサイト) →](tsuzuri.ja.md)
+[← 90s](nineties.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Tsuzuri →](tsuzuri.ja.md)

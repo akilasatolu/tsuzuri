@@ -1,11 +1,13 @@
 ---
-title: Default (default)
+title: Default
 theme: default.css
-description: A sample page of the custom style "Default (default)"
-nav: false
+description: A sample page of the style "Default"
+order: 10
 ---
 
-# Default (default)
+# Default
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/default.css" download>default.css</a>
 
 Inspired by Material Design 3. Blue colors, rounded cards with shadows, and a tinted selection in the navigation.
 
@@ -14,7 +16,7 @@ Inspired by Material Design 3. Blue colors, rounded cards with shadows, and a ti
 To use it for a single page only, write `theme: default.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[Gallery](README.md) · [Glass (glass) →](glass.md)
+[Style gallery](style-gallery.md) · [Glass →](glass.md)
 
 ## Heading level 2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[Gallery](README.md) · [Glass (glass) →](glass.md)
+[Style gallery](style-gallery.md) · [Glass →](glass.md)

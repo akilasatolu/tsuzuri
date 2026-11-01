@@ -20,7 +20,7 @@ See the [guide](docs/guide.md).
 
 The folders of your repository become the navigation and the URLs: `docs/guide.md` is published as `docs/guide.html`, under a "docs" group in the navigation. A `README.md` (or `index.md`) in a folder is the entrance of that folder.
 
-To set the order, write `order` in the frontmatter. Pages with an `order` come first, smallest first; the others follow in the order their links were found. The position of a folder is set by the `order` of the `README.md` in it. A page with `nav: false` is left out of the navigation (it can still be opened from a link).
+To set the order, write `order` in the frontmatter. Pages with an `order` come first, smallest first; the others follow in the order their links were found. The position of a folder is set by the `order` of the `README.md` in it, and that `README.md` is always the first page in its folder. A page with `nav: false` is left out of the navigation (it can still be opened from a link).
 
 ## Images and files
 
@@ -48,5 +48,5 @@ Alerts, footnotes, diagrams, task lists and emoji codes work as they do on GitHu
 
 ## Read next
 
-- [Change the look](./style.md): pick a style in the gallery.
+- [Change the look](./style.md): pick a style in the style gallery.
 - [Publish settings](./publish.md): the branch, a custom domain and manual runs.

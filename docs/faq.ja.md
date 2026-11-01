@@ -71,7 +71,7 @@ Markdown内でリンクした先のファイルが実際には存在しない場
    警告のうえ自動的に`default.css`にフォールバックします([設定リファレンス](./reference/configuration.ja.md))。
 2. `THEME`に指定したファイル名のファイルが、`.github/tsuzuri/styles/`の中に実際に存在しているか。
    存在しない場合は警告が出て(`THEME ("…") was not found`)、ベースだけでビルドされます。
-   `default.css`以外のカスタムスタイルはパッケージに入っていないので、[ギャラリー](../gallery/README.ja.md)で
+   `default.css`以外のカスタムスタイルはパッケージに入っていないので、[スタイルギャラリー](../gallery/style-gallery.ja.md)で
    ダウンロードしてください。
 3. 2層(ベースCSS→カスタムスタイル)の優先順位。カスタムスタイルはベースの後に
    読み込まれるため、ここに書いたCSSルールが期待通り上書きしているか、

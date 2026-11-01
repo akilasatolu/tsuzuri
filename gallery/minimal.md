@@ -1,20 +1,22 @@
 ---
-title: Minimal (minimal)
+title: Minimal
 theme: minimal.css
-description: A sample page of the custom style "Minimal (minimal)"
-nav: false
+description: A sample page of the style "Minimal"
+order: 50
 ---
 
-# Minimal (minimal)
+# Minimal
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/minimal.css" download>minimal.css</a>
 
 A calm look in only white, black and gray, like the Vercel or Linear docs. Only links are blue.
 
-To use it, download `minimal.css` from the [gallery](README.md#minimal-minimal), put it in `.github/tsuzuri/styles/`,
+To use it, download `minimal.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=minimal.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: minimal.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← Editorial (editorial)](editorial.md) · [Gallery](README.md) · [Kintsugi (kintsugi) →](kintsugi.md)
+[← Editorial](editorial.md) · [Style gallery](style-gallery.md) · [Kintsugi →](kintsugi.md)
 
 ## Heading level 2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← Editorial (editorial)](editorial.md) · [Gallery](README.md) · [Kintsugi (kintsugi) →](kintsugi.md)
+[← Editorial](editorial.md) · [Style gallery](style-gallery.md) · [Kintsugi →](kintsugi.md)

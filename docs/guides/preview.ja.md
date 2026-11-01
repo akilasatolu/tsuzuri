@@ -1,7 +1,7 @@
 ---
 title: 手元で確認する
 description: pushする前に、自分のパソコンで見た目とリンク切れを確かめる
-order: 20
+order: 35
 ---
 
 # 手元で確認する
@@ -15,7 +15,7 @@ pushしてGitHub Actionsを待たなくても、手元で同じビルドを実�
 npx github:akilasatolu/tsuzuri#v1 preview
 ```
 
-ビルドが終わると`http://localhost:4000/`でサイトを開けます(詳しくは[CLIリファレンス](reference/cli.ja.md#手元で確認するpreview))。
+ビルドが終わると`http://localhost:4000/`でサイトを開けます(詳しくは[CLIリファレンス](../reference/cli.ja.md#手元で確認するpreview))。
 
 `preview`を使わずに、手動で同じことをする場合は次の順に実行します。
 
@@ -55,5 +55,5 @@ npx github:akilasatolu/tsuzuri#v1 preview
 
 ## 次に読む
 
-- [公開の設定](./guides/publish.ja.md): サイトを公開するブランチを決める。
-- [見た目を変える](./guides/style.ja.md): ギャラリーでスタイルを選ぶ。
+- [公開の設定](./publish.ja.md): サイトを公開するブランチを決める。
+- [見た目を変える](./style.ja.md): スタイルギャラリーでスタイルを選ぶ。

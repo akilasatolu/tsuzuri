@@ -9,8 +9,9 @@ order: 30
 Pick the guide for what you want to do.
 
 - **I want to add pages** → [Write pages](./write-pages.md): link a page from your README and it becomes part of the site.
-- **I want to change the look** → [Change the look](./style.md): pick a style in the gallery, or change only the colors.
+- **I want to change the look** → [Change the look](./style.md): pick a style in the style gallery, or change only the colors.
 - **I want my site in more than one language** → [Multilingual sites](./multilingual.md): put a `*.ja.md` next to a page.
+- **I want to check the site before I push** → [Preview locally](./preview.md): build and look at it on your own computer.
 - **I want my own domain** → [Publish settings](./publish.md): the branch, a custom domain and manual runs.
 - **I want a new version** → [Update](./update.md): one command, and your settings stay as they are.
 - **I want my links to look good when shared** → [Sharing and search](./share-and-search.md): OGP, the favicon, the sitemap and `llms.txt`.

@@ -1,20 +1,22 @@
 ---
-title: 90s (nineties)
+title: 90s
 theme: nineties.css
-description: A sample page of the custom style "90s (nineties)"
-nav: false
+description: A sample page of the style "90s"
+order: 80
 ---
 
-# 90s (nineties)
+# 90s
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/nineties.css" download>nineties.css</a>
 
 90s nostalgia. A Windows 95-style teal desktop with gray windows and raised buttons. Light only.
 
-To use it, download `nineties.css` from the [gallery](README.md#90s-nineties), put it in `.github/tsuzuri/styles/`,
+To use it, download `nineties.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=nineties.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: nineties.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← Blueprint (blueprint)](blueprint.md) · [Gallery](README.md) · [No decoration (none) →](none.md)
+[← Blueprint](blueprint.md) · [Style gallery](style-gallery.md) · [None →](none.md)
 
 ## Heading level 2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← Blueprint (blueprint)](blueprint.md) · [Gallery](README.md) · [No decoration (none) →](none.md)
+[← Blueprint](blueprint.md) · [Style gallery](style-gallery.md) · [None →](none.md)

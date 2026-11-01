@@ -1,11 +1,13 @@
 ---
-title: カスタムスタイルの例(このサイト)
+title: Tsuzuri
 theme: tsuzuri.css
 description: このサイト自身のカスタムスタイルで作った、このサイト自身の見た目の見本ページ
-nav: false
+order: 100
 ---
 
-# カスタムスタイルの例(このサイト)
+# Tsuzuri
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>tsuzuri.css</a>
 
 このサイト自身のカスタムスタイル(`tsuzuri.css`)で作った見た目です。
 このサイト全体がこの見た目になっています。Tsuzuri(綴り)の名前とロゴをそのまま形にした「スレッド」のデザインで、
@@ -15,10 +17,10 @@ nav: false
 
 使っているCSSは[tsuzuri.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/tsuzuri.css)です。
 書き方は[見た目を変える](../docs/guides/style.ja.md#自分でカスタムスタイルを作る)を参照してください。
-自分のサイトで使うには、[ギャラリー](README.ja.md#tsuzuriこのサイト)で`tsuzuri.css`をダウンロードし、
+自分のサイトで使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`tsuzuri.css`をダウンロードし、
 `.github/tsuzuri/styles/`に置いて、`THEME=tsuzuri.css`にします。
 
-[← 装飾なし(none)](none.ja.md) ・ [ギャラリー一覧](README.ja.md)
+[← None](none.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md)
 
 ## 見出しレベル2
 
@@ -55,4 +57,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← 装飾なし(none)](none.ja.md) ・ [ギャラリー一覧](README.ja.md)
+[← None](none.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md)

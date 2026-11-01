@@ -77,7 +77,7 @@ If the look isn't what you expect, check the following in order.
 2. Whether a file with the name set in `THEME` actually exists in `.github/tsuzuri/styles/`.
    If it doesn't, a warning is shown (`THEME ("…") was not found`), and the site is built with the base
    CSS only. Custom styles other than `default.css` are not included in the package: download
-   them from the [gallery](../gallery/README.md).
+   them from the [style gallery](../gallery/style-gallery.md).
 3. The priority of the two layers (base CSS → custom style). The custom style is loaded after the
    base CSS, so check whether the CSS rules you wrote there override as expected,
    including in terms of specificity (the strength of the selector). A `theme` in a page's

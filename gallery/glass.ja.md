@@ -1,20 +1,22 @@
 ---
-title: グラス(glass)
+title: Glass
 theme: glass.css
-description: カスタムスタイル「グラス(glass)」の見本ページ
-nav: false
+description: スタイル「Glass」の見本ページ
+order: 20
 ---
 
-# グラス(glass)
+# Glass
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/glass.css" download>glass.css</a>
 
 Glassmorphism。ゆっくり揺れて流れるオーロラの地に、色がそのまま透ける薄い透明なガラスのカード。
 
-使うには、[ギャラリー](README.ja.md#グラスglass)で`glass.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`glass.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=glass.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: glass.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← デフォルト(default)](default.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [ニューモーフィズム(neumorphism) →](neumorphism.ja.md)
+[← Default](default.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Neumorphism →](neumorphism.ja.md)
 
 ## 見出しレベル2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← デフォルト(default)](default.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [ニューモーフィズム(neumorphism) →](neumorphism.ja.md)
+[← Default](default.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Neumorphism →](neumorphism.ja.md)

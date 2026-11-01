@@ -1,20 +1,22 @@
 ---
-title: ブループリント(blueprint)
+title: Blueprint
 theme: blueprint.css
-description: カスタムスタイル「ブループリント(blueprint)」の見本ページ
-nav: false
+description: スタイル「Blueprint」の見本ページ
+order: 70
 ---
 
-# ブループリント(blueprint)
+# Blueprint
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/blueprint.css" download>blueprint.css</a>
 
 設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示。
 
-使うには、[ギャラリー](README.ja.md#ブループリントblueprint)で`blueprint.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`blueprint.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=blueprint.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: blueprint.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← 金継ぎ(kintsugi)](kintsugi.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [90年代(nineties) →](nineties.ja.md)
+[← Kintsugi](kintsugi.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [90s →](nineties.ja.md)
 
 ## 見出しレベル2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← 金継ぎ(kintsugi)](kintsugi.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [90年代(nineties) →](nineties.ja.md)
+[← Kintsugi](kintsugi.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [90s →](nineties.ja.md)

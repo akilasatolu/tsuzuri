@@ -115,5 +115,5 @@ contents, so be careful.
 
 ## Read next
 
-- [Change the look](./style.md): pick a style in the gallery.
+- [Change the look](./style.md): pick a style in the style gallery.
 - [Update](./update.md): keep Tsuzuri up to date with one command.

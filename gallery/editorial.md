@@ -1,20 +1,22 @@
 ---
-title: Editorial (editorial)
+title: Editorial
 theme: editorial.css
-description: A sample page of the custom style "Editorial (editorial)"
-nav: false
+description: A sample page of the style "Editorial"
+order: 40
 ---
 
-# Editorial (editorial)
+# Editorial
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/editorial.css" download>editorial.css</a>
 
 A style that relies on typography and white space, like a magazine or a polished document. Large serif headings with chapter numbers, and a vermilion accent.
 
-To use it, download `editorial.css` from the [gallery](README.md#editorial-editorial), put it in `.github/tsuzuri/styles/`,
+To use it, download `editorial.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=editorial.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: editorial.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← Neumorphism (neumorphism)](neumorphism.md) · [Gallery](README.md) · [Minimal (minimal) →](minimal.md)
+[← Neumorphism](neumorphism.md) · [Style gallery](style-gallery.md) · [Minimal →](minimal.md)
 
 ## Heading level 2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← Neumorphism (neumorphism)](neumorphism.md) · [Gallery](README.md) · [Minimal (minimal) →](minimal.md)
+[← Neumorphism](neumorphism.md) · [Style gallery](style-gallery.md) · [Minimal →](minimal.md)

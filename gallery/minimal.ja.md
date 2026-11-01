@@ -1,20 +1,22 @@
 ---
-title: ミニマル(minimal)
+title: Minimal
 theme: minimal.css
-description: カスタムスタイル「ミニマル(minimal)」の見本ページ
-nav: false
+description: スタイル「Minimal」の見本ページ
+order: 50
 ---
 
-# ミニマル(minimal)
+# Minimal
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/minimal.css" download>minimal.css</a>
 
 Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青。
 
-使うには、[ギャラリー](README.ja.md#ミニマルminimal)で`minimal.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`minimal.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=minimal.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: minimal.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← エディトリアル(editorial)](editorial.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [金継ぎ(kintsugi) →](kintsugi.ja.md)
+[← Editorial](editorial.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Kintsugi →](kintsugi.ja.md)
 
 ## 見出しレベル2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← エディトリアル(editorial)](editorial.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [金継ぎ(kintsugi) →](kintsugi.ja.md)
+[← Editorial](editorial.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Kintsugi →](kintsugi.ja.md)

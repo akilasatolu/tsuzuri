@@ -1,20 +1,22 @@
 ---
-title: 90年代(nineties)
+title: 90s
 theme: nineties.css
-description: カスタムスタイル「90年代(nineties)」の見本ページ
-nav: false
+description: スタイル「90s」の見本ページ
+order: 80
 ---
 
-# 90年代(nineties)
+# 90s
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/nineties.css" download>nineties.css</a>
 
 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。
 
-使うには、[ギャラリー](README.ja.md#90年代nineties)で`nineties.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`nineties.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=nineties.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: nineties.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← ブループリント(blueprint)](blueprint.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [装飾なし(none) →](none.ja.md)
+[← Blueprint](blueprint.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [None →](none.ja.md)
 
 ## 見出しレベル2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← ブループリント(blueprint)](blueprint.ja.md) ・ [ギャラリー一覧](README.ja.md) ・ [装飾なし(none) →](none.ja.md)
+[← Blueprint](blueprint.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [None →](none.ja.md)

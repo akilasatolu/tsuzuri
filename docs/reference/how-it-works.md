@@ -47,7 +47,7 @@ compared ignoring case, so `A.PDF` is copied too, and `app.tar.gz` is matched by
 The idea is that files you open with an app or a browser are copied, while files whose contents
 you read as text (source code, settings files, `.txt`, `.csv` and so on) and files with any
 other extension become links to the file on GitHub. The exception is `css`: a CSS file is copied
-so that it can be downloaded (this is how the [gallery](../../gallery/README.md) offers custom styles). This keeps a kind of file Tsuzuri doesn't
+so that it can be downloaded (this is how the [style gallery](../../gallery/style-gallery.md) offers custom styles). This keeps a kind of file Tsuzuri doesn't
 know from being published unintentionally. Inside folders starting with `.`, only the PDF, video,
 audio and stylesheet (`css`) entries above (and images) are copied. So a CSS file in `.github/` (for
 example `.github/tsuzuri/styles/glass.css`) is copied too, and appears in the site under `_.github/`.

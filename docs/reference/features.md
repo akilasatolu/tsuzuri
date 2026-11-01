@@ -135,11 +135,12 @@ extra space at the top.
 ## Image carousel
 
 Images placed inside `<div class="tsuzuri-carousel">` ... `</div>` (raw HTML in Markdown) line up
-side by side and can be scrolled sideways. Under them, "previous" and "next" arrows, dots and a count
-such as "1 / 2" appear. They also appear when there is only one image ("1 / 1",
-with the arrows disabled). Only pages with a carousel load the small script (`tsuzuri-carousel.js`). The
-labels are in Japanese if the page language is Japanese, and in English otherwise. Where JavaScript
-doesn't run, nothing is added and the images can still be scrolled sideways. [The gallery](../../gallery/README.md) uses it.
+side by side and can be swiped or scrolled sideways. Under them, dots appear (one per image, with the
+current one marked; press a dot to jump to that image). They are not shown when there is only one image.
+Inside a gallery tile (`<div class="tsuzuri-tile">`), pressing an image opens the link in the tile's heading. Only pages with a
+carousel load the small script (`tsuzuri-carousel.js`). The
+labels of the dots are in Japanese if the page language is Japanese, and in English otherwise. Where JavaScript
+doesn't run, nothing is added and the images can still be scrolled sideways. [The style gallery](../../gallery/style-gallery.md) uses it.
 
 ## Syntax highlighting
 

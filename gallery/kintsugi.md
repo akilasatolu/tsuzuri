@@ -1,20 +1,22 @@
 ---
-title: Kintsugi (kintsugi)
+title: Kintsugi
 theme: kintsugi.css
-description: A sample page of the custom style "Kintsugi (kintsugi)"
-nav: false
+description: A sample page of the style "Kintsugi"
+order: 60
 ---
 
-# Kintsugi (kintsugi)
+# Kintsugi
+
+<a class="tsuzuri-button" href="../.github/tsuzuri/styles/kintsugi.css" download>kintsugi.css</a>
 
 A style after kintsugi, the craft of mending broken pottery with lacquer and gold. Gold seams run across porcelain-like cards, and code blocks are lacquer black. Porcelain in light mode, black lacquer in dark mode.
 
-To use it, download `kintsugi.css` from the [gallery](README.md#kintsugi-kintsugi), put it in `.github/tsuzuri/styles/`,
+To use it, download `kintsugi.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=kintsugi.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: kintsugi.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← Minimal (minimal)](minimal.md) · [Gallery](README.md) · [Blueprint (blueprint) →](blueprint.md)
+[← Minimal](minimal.md) · [Style gallery](style-gallery.md) · [Blueprint →](blueprint.md)
 
 ## Heading level 2
 
@@ -51,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← Minimal (minimal)](minimal.md) · [Gallery](README.md) · [Blueprint (blueprint) →](blueprint.md)
+[← Minimal](minimal.md) · [Style gallery](style-gallery.md) · [Blueprint →](blueprint.md)

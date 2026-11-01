@@ -1,14 +1,14 @@
 ---
 title: 見た目を変える
-description: ギャラリーでスタイルを選んでTHEMEに指定する。配色だけならCSS変数をいくつか上書きする
+description: スタイルギャラリーでスタイルを選んでTHEMEに指定する。配色だけならCSS変数をいくつか上書きする
 order: 20
 ---
 
 # 見た目を変える
 
-見た目を変えるには、[ギャラリー](../../gallery/README.ja.md)でスタイルを選んで`THEME`に指定します。配色だけを変えたいときは、いくつかのCSS変数を上書きします。
+見た目を変えるには、[スタイルギャラリー](../../gallery/style-gallery.ja.md)でスタイルを選んで`THEME`に指定します。配色だけを変えたいときは、いくつかのCSS変数を上書きします。
 
-## ギャラリーから選ぶ
+## スタイルギャラリーから選ぶ
 
 1. 気に入ったスタイルのタイルにあるボタンから、CSSファイルをダウンロードする。
 2. `.github/tsuzuri/styles/`に置く。
@@ -19,7 +19,7 @@ order: 20
 ## カスタムスタイル
 
 `.github/tsuzuri/styles/`に置く`○○.css`を、すべて**カスタムスタイル**と呼びます。`default.css`も、
-ギャラリーでダウンロードしたものも、自分で作ったものも、同じ扱いです。サイト全体のカスタムスタイルは、
+スタイルギャラリーでダウンロードしたものも、自分で作ったものも、同じ扱いです。サイト全体のカスタムスタイルは、
 `.github/tsuzuri/config`の`THEME`キーに、**ファイル名だけ**(フォルダは書きません)を指定します。
 
 ```
@@ -45,9 +45,9 @@ THEME=glass.css
 設定ファイルも`THEME=default.css`で始まります。ダウンロードは要りません。
 `init --update`で最新版に上書きされるので、編集したいときは別の名前にコピーして`THEME`で指定します。
 
-### ギャラリーのカスタムスタイル
+### スタイルギャラリーのカスタムスタイル
 
-ほかのカスタムスタイルは、パッケージには含めて配りません。[ギャラリー](../../gallery/README.ja.md)に載せているので、
+ほかのカスタムスタイルは、パッケージには含めて配りません。[スタイルギャラリー](../../gallery/style-gallery.ja.md)に載せているので、
 実際のページでの見た目を確かめて、CSSファイルをダウンロードして使います。
 ダウンロードして`.github/tsuzuri/styles/`に置き、`THEME=ファイル名.css`にします。
 
@@ -95,7 +95,7 @@ CSSを書かなくても、配色だけを変えられます。`default.css`を�
 (コメントだけの`none.css`を`.github/tsuzuri/styles/`に置いておきます)。
 詳しくは[Frontmatterリファレンス](../reference/frontmatter.ja.md#theme)を参照してください。
 
-複数のMarkdownファイルにそれぞれ違う`theme`(`.github/tsuzuri/styles/`のファイル名)を指定してビルドすれば、通常の`tsuzuri-pages.yml`だけで、自分のサイトの上でカスタムスタイルを見比べられます。実際のページでの見比べは、[ギャラリー](../../gallery/README.ja.md)でもできます。
+複数のMarkdownファイルにそれぞれ違う`theme`(`.github/tsuzuri/styles/`のファイル名)を指定してビルドすれば、通常の`tsuzuri-pages.yml`だけで、自分のサイトの上でカスタムスタイルを見比べられます。実際のページでの見比べは、[スタイルギャラリー](../../gallery/style-gallery.ja.md)でもできます。
 
 ## 自分でカスタムスタイルを作る
 
@@ -110,7 +110,7 @@ CSSを書かなくても、配色だけを変えられます。`default.css`を�
 > [tsuzuri.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/tsuzuri.css))で見た目を作っています。
 > 書き方の例として参考にしてください(見た目は[カスタムスタイルの例](../../gallery/tsuzuri.ja.md)で確認できます)。
 >
-> このサイトの[ギャラリー](../../gallery/README.ja.md)は、見本ページのfrontmatterに[`theme`](../reference/frontmatter.ja.md#theme)を
+> このサイトの[スタイルギャラリー](../../gallery/style-gallery.ja.md)は、見本ページのfrontmatterに[`theme`](../reference/frontmatter.ja.md#theme)を
 > 書いて、カスタムスタイルごとにそのスタイルだけの見た目で表示しています。
 
 変数の上書きだけでなく、`main h1 { ... }`のような通常のCSSルールをカスタムスタイルに
@@ -124,7 +124,7 @@ CSSを書かなくても、配色だけを変えられます。`default.css`を�
 (選んでいないときは付かず、OSの設定に従います)。
 
 カスタムスタイルでダーク表示の色を書く場合は、「OSがダークモードのとき(ライト表示を選んだときを除く)」と
-「ダーク表示を選んだとき」の両方に同じ色を書きます。`default.css`やギャラリーのカスタムスタイルもこの書き方です。
+「ダーク表示を選んだとき」の両方に同じ色を書きます。`default.css`やスタイルギャラリーのカスタムスタイルもこの書き方です。
 
 ```css
 /* ライト表示の色 */
