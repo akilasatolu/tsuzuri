@@ -41,6 +41,7 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - This site's gallery became the style gallery: each style has its own page in the navigation with a download button, tiles show only the images, the name and the download button, the documentation pages were reorganized (Preview locally moved under the guides, the Documentation page was removed) and the contact page was renamed to Contact.
 - The image carousel (`tsuzuri-carousel.js`) can now also be switched by dragging an image with the mouse. Touch keeps the browser's own swipe. After a drag, the link of a gallery tile does not open.
 - This site's style gallery was simplified: it no longer shows a table of contents, the steps to use a custom style are shorter, and the "Styles from users" section and the requests to list a style in the gallery were removed. The taglines of the top page were also renewed.
+- In `default.css`, `glass.css`, `neumorphism.css`, `editorial.css`, `minimal.css`, `kintsugi.css`, `blueprint.css` and `nineties.css`, the maximum width of the content (`--content-width`) is now `100%`, so the content spreads to the full width of the screen (next to the navigation when there is one). Next to the navigation, the content fills the width of its column even on pages with little content. Pages without the navigation also keep a margin on the left and right of the content. To keep the former readable width, copy `default.css` under another name as your own custom style and set `--content-width` to `840px` or similar there (`default.css` itself is overwritten by `init --update`).
 
 ### Fixed
 
@@ -57,6 +58,7 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - このサイトのギャラリーをスタイルギャラリーにした。各スタイルがナビに自分のページを持ち、ダウンロードボタンが付く。タイルは画像・名前・ダウンロードボタンだけにした。あわせて、ドキュメントのページ構成(「手元で確認する」をガイドの下へ移動、「ドキュメント」ページの削除)を整理し、問い合わせのページを「お問い合わせ」に改めた。
 - 画像のカルーセル(`tsuzuri-carousel.js`)は、マウスで画像をドラッグしても切り替えられるようにした。タッチはブラウザのスワイプのまま。ドラッグしたあとは、ギャラリーのタイルのリンクを開かない。
 - このサイトのスタイルギャラリーを簡潔にした。目次を出さず、カスタムスタイルの使い方を短くし、「ユーザーのスタイル」の節とスタイルギャラリーへの掲載の依頼の受け付けをやめた。あわせて、トップページのキャッチコピーを改めた。
+- `default.css`、`glass.css`、`neumorphism.css`、`editorial.css`、`minimal.css`、`kintsugi.css`、`blueprint.css`、`nineties.css` で、本文の幅の上限(`--content-width`)を `100%` にし、本文が画面の幅いっぱい(ナビがあるときはナビの横)まで広がるようにした。ナビの横の本文は、中身の少ないページでも列の幅いっぱいになる。ナビのないページでも、本文の左右に余白を残す。元の読みやすい幅にしたいときは、`default.css` を別の名前にコピーした自分のカスタムスタイルで、`--content-width` を `840px` などにする(`default.css` は `init --update` で上書きされるため)。
 
 ### 修正
 

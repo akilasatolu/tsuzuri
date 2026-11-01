@@ -33,9 +33,9 @@ describe("ナビの横の本文の幅の CSS", () => {
   }
 });
 
-// 狭い画面(ナビが本文の上に出るとき)に、ナビと本文を同じ幅にして中央に揃える指定
+// 狭い画面で、本文の左右に余白を残して中央に置く(ナビとも揃える)指定
 const NARROW_ALIGNED =
-  "body > nav, body:has(> nav) > main { max-width: min(var(--content-width), 100% - 32px); margin-left: auto; margin-right: auto; }";
+  "body > nav, body > main { max-width: min(var(--content-width), 100% - 32px); margin-left: auto; margin-right: auto; }";
 
 describe("狭い画面のナビと本文の幅の CSS", () => {
   for (const theme of THEMES) {
