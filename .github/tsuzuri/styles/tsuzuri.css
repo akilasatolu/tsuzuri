@@ -385,7 +385,7 @@ main a.tsuzuri-button[download]::before {
 @container (min-width: 540px) { .tsuzuri-tile { flex-basis: calc((100% - 20px) / 2); } }   /* 2列 */
 @container (min-width: 830px) { .tsuzuri-tile { flex-basis: calc((100% - 40px) / 3); } }   /* 3列(本文が最大幅 960px のときだけ) */
 .tsuzuri-tile > * { margin: 0; }
-.tsuzuri-tile h3 { margin: 0; padding: 0; overflow-wrap: anywhere; }
+.tsuzuri-tile h3 { margin: auto 0 0; padding: 0; overflow-wrap: anywhere; }   /* 見出しとボタンはタイルの下へ寄せる(画像が1枚でドットが無いタイルでも、横のタイルと位置が揃う) */
 .tsuzuri-tile h3::before, .tsuzuri-tile h3::after { content: none; }    /* 糸と結び目の飾りを消す */
 .tsuzuri-tile .tsuzuri-anchor { display: none; }                         /* ビルドが足す見出しの「#」リンクは、タイルの中では隠す(見出しの id は残る) */
 .tsuzuri-tile h3 a:not(.tsuzuri-anchor) { color: var(--heading); text-decoration: none; background: none; }
