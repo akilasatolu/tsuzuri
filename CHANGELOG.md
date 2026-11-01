@@ -40,10 +40,12 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - `base.css` now gives a link with the `download` attribute and the class `tsuzuri-button` a download-icon button look, so it also looks like a button in custom styles that do not define one.
 - This site's gallery became the style gallery: each style has its own page in the navigation with a download button, tiles show only the images, the name and the download button, the documentation pages were reorganized (Preview locally moved under the guides, the Documentation page was removed) and the contact page was renamed to Contact.
 - The image carousel (`tsuzuri-carousel.js`) can now also be switched by dragging an image with the mouse. Touch keeps the browser's own swipe. After a drag, the link of a gallery tile does not open.
+- This site's style gallery was simplified: it no longer shows a table of contents, the steps to use a custom style are shorter, and the "Styles from users" section and the requests to list a style in the gallery were removed. The taglines of the top page were also renewed.
 
 ### Fixed
 
 - In the custom styles of the style gallery (`default.css`, `glass.css`, `neumorphism.css`, `editorial.css`, `minimal.css`, `kintsugi.css`, `blueprint.css`, `nineties.css`), on narrow screens where the navigation is shown above the content, the left and right edges of the navigation and the content did not line up. They now have the same width and are centered. `base.css` is unchanged.
+- In `default.css`, `glass.css`, `neumorphism.css`, `blueprint.css` and `nineties.css`, on wide screens the bottom margin of the content (48px) did not match the one of the navigation (16px). Both are now 16px.
 
 <!-- ja -->
 
@@ -54,10 +56,12 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - `base.css` で、`download` 属性つきの `tsuzuri-button` クラスのリンクに、ダウンロードのアイコンつきのボタンの見た目を付けた。ボタンを定義していないカスタムスタイルでも、ボタンとして見える。
 - このサイトのギャラリーをスタイルギャラリーにした。各スタイルがナビに自分のページを持ち、ダウンロードボタンが付く。タイルは画像・名前・ダウンロードボタンだけにした。あわせて、ドキュメントのページ構成(「手元で確認する」をガイドの下へ移動、「ドキュメント」ページの削除)を整理し、問い合わせのページを「お問い合わせ」に改めた。
 - 画像のカルーセル(`tsuzuri-carousel.js`)は、マウスで画像をドラッグしても切り替えられるようにした。タッチはブラウザのスワイプのまま。ドラッグしたあとは、ギャラリーのタイルのリンクを開かない。
+- このサイトのスタイルギャラリーを簡潔にした。目次を出さず、カスタムスタイルの使い方を短くし、「ユーザーのスタイル」の節とスタイルギャラリーへの掲載の依頼の受け付けをやめた。あわせて、トップページのキャッチコピーを改めた。
 
 ### 修正
 
 - スタイルギャラリーのカスタムスタイル(`default.css`、`glass.css`、`neumorphism.css`、`editorial.css`、`minimal.css`、`kintsugi.css`、`blueprint.css`、`nineties.css`)で、ナビが本文の上に出る狭い画面のとき、ナビと本文の左右の端が揃っていなかった。同じ幅にして中央に揃えた。`base.css` は変えていない。
+- `default.css`、`glass.css`、`neumorphism.css`、`blueprint.css`、`nineties.css` で、広い画面のとき、本文の下の余白(48px)がナビの下の余白(16px)と揃っていなかった。どちらも 16px にした。
 
 ## [1.40.0] - 2026-10-31
 

@@ -148,7 +148,7 @@ body > nav {
 @media (min-width: 960px) {
   body:has(> nav) { grid-template-columns: 290px minmax(0, 1fr); }
   body > nav { top: 16px; height: calc(100vh - 32px); margin: 16px 0 16px 16px; padding: 28px 20px; border: var(--card-border); }
-  body:has(> nav) > main { width: auto; margin: 16px 24px 48px; max-width: min(var(--content-width), 100% - 48px); justify-self: center; }
+  body:has(> nav) > main { width: auto; margin: 16px 24px; max-width: min(var(--content-width), 100% - 48px); justify-self: center; }
 }
 
 /* 見出し */
@@ -385,13 +385,15 @@ main a.tsuzuri-button[download]::before {
 @container (min-width: 540px) { .tsuzuri-tile { flex-basis: calc((100% - 20px) / 2); } }   /* 2列 */
 @container (min-width: 830px) { .tsuzuri-tile { flex-basis: calc((100% - 40px) / 3); } }   /* 3列(本文が最大幅 960px のときだけ) */
 .tsuzuri-tile > * { margin: 0; }
-.tsuzuri-tile h3 { margin: 0; padding: 0; }
+.tsuzuri-tile h3 { margin: 0; padding: 0; overflow-wrap: anywhere; }
 .tsuzuri-tile h3::before, .tsuzuri-tile h3::after { content: none; }    /* 糸と結び目の飾りを消す */
 .tsuzuri-tile .tsuzuri-anchor { display: none; }                         /* ビルドが足す見出しの「#」リンクは、タイルの中では隠す(見出しの id は残る) */
 .tsuzuri-tile h3 a:not(.tsuzuri-anchor) { color: var(--heading); text-decoration: none; background: none; }
 .tsuzuri-tile h3 a:not(.tsuzuri-anchor)::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }  /* 本来のリンクだけをタイル全体に広げる(画像の上も含む) */
 .tsuzuri-tile .tsuzuri-carousel, .tsuzuri-tile .tsuzuri-carousel-nav, .tsuzuri-tile a.tsuzuri-button { position: relative; z-index: 2; }   /* 画像(スワイプ)・ドット・ダウンロードは前面。画像を押すとタイルの見出しのリンクを開くのは tsuzuri-carousel.js */
-.tsuzuri-tile .tsuzuri-carousel { cursor: pointer; }
+/* 画像はカードの左右と上の端まで広げる(タイルの padding 14px の分だけはみ出させる。角はカードに合わせる) */
+.tsuzuri-tile .tsuzuri-carousel { cursor: pointer; margin: -14px -14px 0; border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0; }
+.tsuzuri-tile .tsuzuri-carousel > img { border-radius: 0; }
 .tsuzuri-tile .tsuzuri-carousel.tsuzuri-carousel-dragging { cursor: grabbing; }
 .tsuzuri-tile a.tsuzuri-button { align-self: flex-start; padding: 8px 16px; }
 .tsuzuri-tile:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }

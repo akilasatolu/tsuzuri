@@ -2,26 +2,18 @@
 title: スタイルギャラリー
 description: Tsuzuriのスタイルの見た目を実際のページで比較でき、ダウンロードもできるスタイルギャラリー
 order: 0
+toc: false
 ---
 
 # スタイルギャラリー
 
-Tsuzuriのスタイルの見た目を、実際に生成されたページで確認し、気に入ったものをダウンロードできます。
-タイルをクリックすると、各スタイルで同じ見本(見出し・段落・リンク・リスト・表・コード・引用・画像)が並んだ
-見本ページが開くので、見比べながら選んでください。スクリーンショットはスワイプ・ドラッグするか、下のドットを押すと、
-ライトとダークの見た目を見られます。ボタンから、CSSファイルをダウンロードできます。
-
 ## カスタムスタイルの使い方
 
-1. 気に入ったスタイルのボタンから、CSSファイルをダウンロードする。
-2. リポジトリの`.github/tsuzuri/styles/`に置く。
-3. `.github/tsuzuri/config`の`THEME`を、そのファイル名に変える(例: `THEME=glass.css`)。
+1. 好きなスタイルのCSSファイルをダウンロードする。
+2. `.github/tsuzuri/styles/`に置く。
+3. `.github/tsuzuri/config`に`THEME=ファイル名`を書く(例: `THEME=glass.css`)。
 
-`default.css`はパッケージに入っているので、ダウンロードしなくても使えます(`init`が`.github/tsuzuri/styles/`に置きます)。
-1ページだけで使う場合は、そのページのfrontmatterに`theme: glass.css`と書きます
-([Frontmatterリファレンス](../docs/reference/frontmatter.ja.md#theme)・[見た目を変える](../docs/guides/style.ja.md)参照)。
-配色をさらに細かく調整したい場合は、`default.css`を別の名前にコピーして、CSS変数(`--fg`・`--bg`・`--accent`など)を上書きし、
-`THEME`に指定します([見た目を変える](../docs/guides/style.ja.md#自分でカスタムスタイルを作る)参照)。
+`default.css`は最初から入っているので、ダウンロードは要りません。ページごとの指定や配色の調整は、[見た目を変える](../docs/guides/style.ja.md)を見てください。
 
 ## スタイル
 
@@ -155,7 +147,3 @@ Tsuzuriのスタイルの見た目を、実際に生成されたページで確�
 </div>
 
 </div>
-
-## ユーザーのスタイル
-
-ユーザーのスタイルは、まだありません。あなたのスタイルを載せたいときは、[お問い合わせ](../docs/contact.ja.md)を見てください。

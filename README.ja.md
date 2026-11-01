@@ -4,9 +4,9 @@
 
 # Tsuzuri
 
-<p class="tsuzuri-hero-lead">READMEから、たった3ステップで、あなただけのサイトを作ります。</p>
+<p class="tsuzuri-hero-lead">READMEから、たった3ステップ。手軽に、美しく、あなただけのサイトを。</p>
 
-<p class="tsuzuri-hero-sub">コマンド1つで、READMEがテーマ付きのGitHub Pagesのサイトになります。二重に書く必要も、あとの更新の手間もありません。</p>
+<p class="tsuzuri-hero-sub">コマンドを1回実行するだけ。あなたのREADMEとリンクされたページが、洗練されたGitHub Pagesサイトに変身します。重いツールの学習も、デザインのセットアップも一切不要。あなたの言葉を、そのまま最高の形に。</p>
 
 ```sh
 npx github:akilasatolu/tsuzuri#v1 init
@@ -109,7 +109,7 @@ READMEを起点にリンクをたどり、つながったMarkdownと画像を静
 - [ガイド](docs/guides/README.ja.md): ページを足す、見た目を変える、多言語にする、など。
 - [リファレンス](docs/reference/README.ja.md): 設定・frontmatter・コマンド・ビルドの仕組み。
 - [FAQ](docs/faq.ja.md): よくある困りごとへの答え。
-- [お問い合わせ](docs/contact.ja.md): 質問や希望、スタイルギャラリーへの掲載の依頼。
+- [お問い合わせ](docs/contact.ja.md): 質問や希望。
 - [更新履歴(リリースノート)](https://github.com/akilasatolu/tsuzuri/releases)
 
 ## ライセンス

@@ -2,26 +2,18 @@
 title: Style gallery
 description: Compare the look of Tsuzuri's styles on real pages, and download them
 order: 0
+toc: false
 ---
 
 # Style gallery
 
-See what Tsuzuri's styles look like on actually generated pages, and download the one you like.
-Click a tile to open a sample page with the same content for every style (headings, paragraphs, links, lists,
-a table, code, a quote and an image), so you can compare them. Swipe or drag a screenshot or use the dots under it to see
-the light and dark looks, and use the button to download the CSS file.
-
 ## How to use a custom style
 
-1. Download the CSS file with the button of the style you like.
-2. Put it in `.github/tsuzuri/styles/` in your repository.
-3. Change `THEME` in `.github/tsuzuri/config` to its file name, for example `THEME=glass.css`.
+1. Download the CSS file of the style you like.
+2. Put it in `.github/tsuzuri/styles/`.
+3. Set `THEME=<file name>` in `.github/tsuzuri/config` (for example `THEME=glass.css`).
 
-`default.css` is included in the package, so you can use it without downloading it (`init` puts it in
-`.github/tsuzuri/styles/`). To use a style for a single page only, write `theme: glass.css` in that page's frontmatter
-(see the [frontmatter reference](../docs/reference/frontmatter.md#theme) and [Change the look](../docs/guides/style.md)). To fine-tune the colors further, copy
-`default.css` under another name, override CSS variables (`--fg`, `--bg`, `--accent` and so on) in it, and set it in `THEME`
-(see [Change the look](../docs/guides/style.md#writing-your-own-custom-style)).
+`default.css` is already included, so you don't need to download it. To set a style for one page or adjust the colors, see [Change the look](../docs/guides/style.md).
 
 ## Styles
 
@@ -155,7 +147,3 @@ the light and dark looks, and use the button to download the CSS file.
 </div>
 
 </div>
-
-## Styles from users
-
-There are no styles from users yet. To have your style listed here, see [Contact](../docs/contact.md).

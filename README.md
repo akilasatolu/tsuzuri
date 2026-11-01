@@ -4,9 +4,9 @@
 
 # Tsuzuri
 
-<p class="tsuzuri-hero-lead">Turn your README into your own site in just three steps.</p>
+<p class="tsuzuri-hero-lead">From your README, in just three steps. Your own site, simple and beautiful.</p>
 
-<p class="tsuzuri-hero-sub">Run one command and your README becomes a themed GitHub Pages site, with no second copy to write and no upkeep to follow.</p>
+<p class="tsuzuri-hero-sub">Run one command, and your README and the pages it links to become a polished GitHub Pages site. No heavy tools to learn, no design to set up. Your words, in their best form.</p>
 
 ```sh
 npx github:akilasatolu/tsuzuri#v1 init
@@ -109,7 +109,7 @@ The look is a custom style, a CSS file in `.github/tsuzuri/styles/`. `default.cs
 - [Guides](docs/guides/README.md): add pages, change the look, support more than one language, and more.
 - [Reference](docs/reference/README.md): settings, frontmatter, commands and how the build works.
 - [FAQ](docs/faq.md): answers to the common problems.
-- [Contact](docs/contact.md): send a question or a wish, or ask to list your style in the style gallery.
+- [Contact](docs/contact.md): send a question or a wish.
 - [Changelog (release notes)](https://github.com/akilasatolu/tsuzuri/releases)
 
 ## License
