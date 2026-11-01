@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 // ナビの横の本文が、長い表や折り返さない長いコード行で列からはみ出さない(ナビに重ならない)ことを確かめる。
 // 本文の max-width を列の幅までに抑える指定が、default.css から消えていないかを見る。
+// あわせて、狭い画面のナビと本文の幅の指定と、表のセルが潰れないよう最小幅を付ける指定(base.css)も見る。
 
 const STYLES_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "styles");
 // パッケージに入っているカスタムスタイル(styles/ に置いてあるのは default.css だけ。ほかはギャラリーで配る利用者の管理)
@@ -43,6 +44,15 @@ describe("狭い画面のナビと本文の幅の CSS", () => {
       assert.equal(countOf(readCss(theme), NARROW_ALIGNED), 1);
     });
   }
+});
+
+// 表のセルが潰れないよう、最小幅を付ける指定(ベース。すべてのスタイルに効く)
+const CELL_MIN_WIDTH = "main th, main td { min-width: 10em; }";
+
+describe("表のセルの最小幅の CSS", () => {
+  test("base.css: 表のセルに最小幅を付けている", () => {
+    assert.equal(countOf(readCss("base"), CELL_MIN_WIDTH), 1);
+  });
 });
 
 describe("styles/README.md", () => {

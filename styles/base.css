@@ -33,6 +33,9 @@
      overflow-x は、カスタムスタイルの main table { overflow: hidden; }(角を丸く切る指定)より優先させるため、body を付けて書く */
   main table { display: block; width: max-content; max-width: 100%; border-collapse: collapse; }
   body main table { overflow-x: auto; }
+  /* 表のセルが潰れて読めなくならないよう、最小幅を付ける(em なので、文字の大きさに合わせて変わる)。
+     入り切らない表は、上の指定で表の中だけが横にスクロールする。最小幅をなくしたいときは、カスタムスタイルで main th, main td { min-width: 0; } と書く */
+  main th, main td { min-width: 10em; }
 
   /* コードの色分け(言語名付きのコードブロックを highlight.js でビルド時に色分けしたもの)。
      色はカスタムスタイルのアクセント色・文字色から決める。カスタムスタイルで --hl-* 変数を指定すれば個別に変えられる。 */

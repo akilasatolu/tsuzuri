@@ -42,6 +42,7 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - The image carousel (`tsuzuri-carousel.js`) can now also be switched by dragging an image with the mouse. Touch keeps the browser's own swipe. After a drag, the link of a gallery tile does not open.
 - This site's style gallery was simplified: it no longer shows a table of contents, the steps to use a custom style are shorter, and the "Styles from users" section and the requests to list a style in the gallery were removed. The taglines of the top page were also renewed.
 - In `default.css`, `glass.css`, `neumorphism.css`, `editorial.css`, `minimal.css`, `kintsugi.css`, `blueprint.css` and `nineties.css`, the maximum width of the content (`--content-width`) is now `100%`, so the content spreads to the full width of the screen (next to the navigation when there is one). Next to the navigation, the content fills the width of its column even on pages with little content. Pages without the navigation also keep a margin on the left and right of the content. To keep the former readable width, copy `default.css` under another name as your own custom style and set `--content-width` to `840px` or similar there (`default.css` itself is overwritten by `init --update`).
+- Table cells now have a minimum width of `10em` (about 150–160px with the built-in styles), so columns are no longer squeezed so narrow that the text is hard to read. This is set in `base.css`, so it applies to every style, including `none` and your own custom styles. A table that does not fit in the width of the content scrolls horizontally inside the table, as before. Short tables become wider, and on narrow screens such as smartphones, a table with three or more columns scrolls horizontally. To remove the minimum width, write `main th, main td { min-width: 0; }` in your custom style. Because the shared CSS changed, the CSS file name (the hash at the end) changes.
 
 ### Fixed
 
@@ -59,6 +60,7 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - 画像のカルーセル(`tsuzuri-carousel.js`)は、マウスで画像をドラッグしても切り替えられるようにした。タッチはブラウザのスワイプのまま。ドラッグしたあとは、ギャラリーのタイルのリンクを開かない。
 - このサイトのスタイルギャラリーを簡潔にした。目次を出さず、カスタムスタイルの使い方を短くし、「ユーザーのスタイル」の節とスタイルギャラリーへの掲載の依頼の受け付けをやめた。あわせて、トップページのキャッチコピーを改めた。
 - `default.css`、`glass.css`、`neumorphism.css`、`editorial.css`、`minimal.css`、`kintsugi.css`、`blueprint.css`、`nineties.css` で、本文の幅の上限(`--content-width`)を `100%` にし、本文が画面の幅いっぱい(ナビがあるときはナビの横)まで広がるようにした。ナビの横の本文は、中身の少ないページでも列の幅いっぱいになる。ナビのないページでも、本文の左右に余白を残す。元の読みやすい幅にしたいときは、`default.css` を別の名前にコピーした自分のカスタムスタイルで、`--content-width` を `840px` などにする(`default.css` は `init --update` で上書きされるため)。
+- 表のセルに最小幅(`10em`。組み込みのスタイルでは約 150〜160px)を付け、列が潰れて文字が読みにくくならないようにした。`base.css` で指定するので、`none` と自分のカスタムスタイルを含むすべてのスタイルに効く。本文の幅に入り切らない表は、今までどおり表の中だけが横にスクロールする。短い表は幅が広がり、スマートフォンなどの狭い画面では、3列以上の表は横にスクロールする。最小幅をなくしたいときは、カスタムスタイルで `main th, main td { min-width: 0; }` と書く。共通の CSS を変えたため、CSS のファイル名(後ろのハッシュ)が変わる。
 
 ### 修正
 
