@@ -12,7 +12,7 @@ const STYLES_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".
 const THEMES = ["default"];
 const START = "/* ---------- 言語の切り替え ここから";
 const END = "/* ---------- 言語の切り替え ここまで ---------- */";
-const LANG_SELECTOR = ":is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch";
+const LANG_SELECTOR = ":is(.tzr-nav-head, .tzr-lang-bar) .tzr-lang-switch";
 // テーマのボタンの見た目として写す宣言
 const BUTTON_PROPS = ["color", "background", "border", "border-radius", "box-shadow"];
 
@@ -65,8 +65,8 @@ describe("言語の切り替えの CSS: 目印", () => {
       assert.ok(css.indexOf(START) < css.indexOf(END), "始まりが終わりより前");
       assert.equal(after, "\n", "終わりの目印の後は改行1つだけ");
       assert.ok(original.endsWith("}\n\n"), "かたまりの前に空行1つ");
-      assert.ok(block.includes(".tsuzuri-lang-switch"), "かたまりの中に .tsuzuri-lang-switch がある");
-      assert.ok(!original.includes("tsuzuri-lang"), "かたまりの外に tsuzuri-lang が無い");
+      assert.ok(block.includes(".tzr-lang-switch"), "かたまりの中に .tzr-lang-switch がある");
+      assert.ok(!original.includes("tzr-lang"), "かたまりの外に tzr-lang が無い");
     });
   }
 
@@ -79,7 +79,7 @@ describe("言語の切り替えの CSS: 目印", () => {
 describe("言語の切り替えの CSS: base.css のメニュー", () => {
   const { block } = splitCss(fs.readFileSync(path.join(STYLES_DIR, "base.css"), "utf-8"));
   const rules = parseRules(block);
-  const MENU = ":is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-menu";
+  const MENU = ":is(.tzr-nav-head, .tzr-lang-bar) .tzr-lang-menu";
 
   test("一覧の項目は本文のリストの印を打ち消す(::before・::marker・display: block)", () => {
     assert.equal(finalDecls(rules, `${MENU} li::before`).get("content"), "none");
@@ -104,11 +104,11 @@ describe("言語の切り替えの CSS: base.css のメニュー", () => {
     const start = block.indexOf("@supports selector(::details-content)");
     assert.ok(start > 0, "@supports selector(::details-content) がある");
     const sup = parseRules(block.slice(start));
-    assert.equal(finalDecls(sup, ".tsuzuri-nav-head > .tsuzuri-lang-menu[open]").get("display"), "contents");
-    const content = finalDecls(sup, ".tsuzuri-nav-head > .tsuzuri-lang-menu[open]::details-content");
+    assert.equal(finalDecls(sup, ".tzr-nav-head > .tzr-lang-menu[open]").get("display"), "contents");
+    const content = finalDecls(sup, ".tzr-nav-head > .tzr-lang-menu[open]::details-content");
     assert.equal(content.get("order"), "1");
     assert.equal(content.get("flex"), "0 0 100%");
-    assert.equal(finalDecls(sup, ".tsuzuri-nav-head > .tsuzuri-lang-menu[open] > summary").get("margin-left"), "auto");
+    assert.equal(finalDecls(sup, ".tzr-nav-head > .tzr-lang-menu[open] > summary").get("margin-left"), "auto");
     // 一覧は重ねて表示しない・背景を付けない(設計の決まりを保つ)
     const ul = finalDecls(rules, `${MENU} > ul`);
     assert.equal(ul.get("position"), "static");
@@ -122,14 +122,14 @@ describe("言語の切り替えの CSS: テーマのボタンの見た目を写�
     test(`styles/${theme}.css: 言語ボタンの宣言が「ライト/ダーク」ボタンの最終的な宣言と同じ`, () => {
       const css = fs.readFileSync(path.join(STYLES_DIR, `${theme}.css`), "utf-8");
       const { original, block } = splitCss(css);
-      const expected = finalDecls(parseRules(original), ".tsuzuri-theme-toggle");
+      const expected = finalDecls(parseRules(original), ".tzr-theme-toggle");
       const actual = finalDecls(parseRules(block), LANG_SELECTOR);
       for (const prop of BUTTON_PROPS) {
         assert.ok(expected.has(prop), `元の部分に ${prop} がある`);
         assert.equal(actual.get(prop), expected.get(prop), `${prop} の値`);
       }
       // 「メニュー」ボタンにも同じ最終値が当たっていること(写す元がそろっている)
-      const label = finalDecls(parseRules(original), ".tsuzuri-nav-label");
+      const label = finalDecls(parseRules(original), ".tzr-nav-label");
       for (const prop of BUTTON_PROPS) assert.equal(label.get(prop), expected.get(prop), `メニューの ${prop}`);
       // 新しい宣言を作っていない
       assert.deepEqual([...actual.keys()].sort(), [...BUTTON_PROPS].sort());

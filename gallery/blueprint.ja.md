@@ -7,7 +7,7 @@ order: 70
 
 # Blueprint
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/blueprint.css" download>blueprint.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/blueprint.css" download>blueprint.css</a>
 
 設計図(青焼き)のような、青い地に白い方眼と細線、寸法線付きの見出し。常に同じ表示。
 

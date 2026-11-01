@@ -228,9 +228,9 @@ names.
 
 | Class name | Where |
 |---|---|
-| `.tsuzuri-lang-switch` | The language button (the link with two languages, or the menu button with three or more) |
-| `.tsuzuri-lang-menu` | The whole menu with three or more languages |
-| `.tsuzuri-lang-bar` | The button area placed above the content when there's no navigation |
+| `.tzr-lang-switch` | The language button (the link with two languages, or the menu button with three or more) |
+| `.tzr-lang-menu` | The whole menu with three or more languages |
+| `.tzr-lang-bar` | The button area placed above the content when there's no navigation |
 
 ## For display on GitHub
 

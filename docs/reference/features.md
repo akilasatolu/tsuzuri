@@ -128,17 +128,17 @@ installation.
 ## Copy button for code
 
 A "Copy" button appears at the top right of code blocks; click it to copy the code. The button is always shown. Only pages with code blocks load
-the small script (`tsuzuri-copy.js`). The label is "コピー" if the page language is Japanese,
+the small script (`tzr-copy.js`). The label is "コピー" if the page language is Japanese,
 and "Copy" otherwise. So that the button never covers the code, code blocks with the button get
 extra space at the top.
 
 ## Image carousel
 
-Images placed inside `<div class="tsuzuri-carousel">` ... `</div>` (raw HTML in Markdown) line up
+Images placed inside `<div class="tzr-carousel">` ... `</div>` (raw HTML in Markdown) line up
 side by side and can be swiped, dragged with the mouse, or scrolled sideways. Under them, dots appear (one per image, with the
 current one marked; press a dot to jump to that image). They are not shown when there is only one image.
-Inside a gallery tile (`<div class="tsuzuri-tile">`), pressing an image opens the link in the tile's heading. Only pages with a
-carousel load the small script (`tsuzuri-carousel.js`). The
+Inside a gallery tile (`<div class="tzr-tile">`), pressing an image opens the link in the tile's heading. Only pages with a
+carousel load the small script (`tzr-carousel.js`). The
 labels of the dots are in Japanese if the page language is Japanese, and in English otherwise. Where JavaScript
 doesn't run, nothing is added and the images can still be scrolled sideways. [The style gallery](../../gallery/style-gallery.md) uses it.
 
@@ -154,7 +154,7 @@ in your own custom style (see [Change the look](../guides/style.md)).
 
 With `NAV_ENABLED=true`, a search box appears at the top of the navigation. At build time, an
 index (`search-index.json`) is made from each page's title and text, and when you type in the
-search box, a small script (`tsuzuri-search.js`) finds the matching pages in that index and
+search box, a small script (`tzr-search.js`) finds the matching pages in that index and
 shows them.
 
 - Pages containing all the space-separated words are shown, up to 10, with title matches
@@ -180,7 +180,7 @@ on), the button isn't shown. To write dark colors in your custom style, see
 ## How the CSS is loaded
 
 The page CSS (the base CSS and the custom style) is combined into one file
-(`tsuzuri-<string made from its contents>.css`) that every page loads. Since all pages use the same file, the browser cache makes
+(`tzr-<string made from its contents>.css`) that every page loads. Since all pages use the same file, the browser cache makes
 the second and later pages show up faster. When the CSS changes, the file name changes too, so
 an old CSS never sticks around. Pages that change `theme` load a file for that
 combination.

@@ -7,7 +7,7 @@ order: 90
 
 # None
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/none.css" download>none.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/none.css" download>none.css</a>
 
 Only the base CSS is applied, and the page is shown with the browser's default look. `none.css` is a CSS file that contains only comments.
 

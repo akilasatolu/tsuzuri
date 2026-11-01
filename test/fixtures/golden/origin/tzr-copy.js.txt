@@ -14,12 +14,12 @@
     const pre = code.parentElement;
     // ボタンが横スクロールで一緒に流れないよう、コードブロックを枠で包んでその右上に置く
     const box = document.createElement("div");
-    box.className = "tsuzuri-code";
+    box.className = "tzr-code";
     pre.before(box);
     box.append(pre);
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "tsuzuri-copy";
+    button.className = "tzr-copy";
     button.textContent = label;
     button.setAttribute("aria-live", "polite");
     button.addEventListener("click", async () => {

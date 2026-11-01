@@ -7,7 +7,7 @@ order: 80
 
 # 90s
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/nineties.css" download>nineties.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/nineties.css" download>nineties.css</a>
 
 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。
 

@@ -7,7 +7,7 @@ order: 70
 
 # Blueprint
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/blueprint.css" download>blueprint.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/blueprint.css" download>blueprint.css</a>
 
 Like a blueprint, with a white grid and fine lines on blue, and headings with dimension lines. Always looks the same.
 

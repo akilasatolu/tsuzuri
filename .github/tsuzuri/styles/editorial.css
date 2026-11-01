@@ -146,23 +146,23 @@ main th { text-align: left; color: var(--th-fg); background: var(--th-bg); }
 
 /* 注意書き・目次・前後のページ */
 .markdown-alert { border: 0; border-radius: var(--radius); background: color-mix(in srgb, var(--alert-color) 12%, var(--el-bg)); box-shadow: var(--el-shadow); }
-.tsuzuri-toc { background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
-.tsuzuri-toc > p { color: var(--accent); }
-.tsuzuri-pager { border-top: 0; }
-main .tsuzuri-pager a { color: var(--heading); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--el-shadow); transition: transform 0.15s; }
-main .tsuzuri-pager a:hover { transform: translateY(-2px); color: var(--accent); }
-.tsuzuri-pager span { color: var(--accent); opacity: 1; }
-.tsuzuri-updated { opacity: 1; color: var(--muted); }
+.tzr-toc { background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
+.tzr-toc > p { color: var(--accent); }
+.tzr-pager { border-top: 0; }
+main .tzr-pager a { color: var(--heading); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--el-shadow); transition: transform 0.15s; }
+main .tzr-pager a:hover { transform: translateY(-2px); color: var(--accent); }
+.tzr-pager span { color: var(--accent); opacity: 1; }
+.tzr-updated { opacity: 1; color: var(--muted); }
 
 /* ナビ */
-.tsuzuri-nav-head > p { font-weight: 800; color: var(--heading); }
+.tzr-nav-head > p { font-weight: 800; color: var(--heading); }
 body > nav a { margin: 2px 0; padding: 6px 12px; color: var(--fg); border-radius: var(--pill); }
 body > nav a:hover { color: var(--accent); background: var(--hover-bg); text-decoration: none; }
 body > nav a[aria-current="page"] { color: var(--current-fg); background: var(--current-bg); box-shadow: var(--current-shadow); font-weight: 700; }
 body > nav ul ul { border-left: 2px solid var(--border); }
-.tsuzuri-search input { padding: 9px 16px; background: var(--el-bg); border: 0; border-radius: var(--pill); box-shadow: var(--inset-shadow); }
-.tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
-.tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
+.tzr-search input { padding: 9px 16px; background: var(--el-bg); border: 0; border-radius: var(--pill); box-shadow: var(--inset-shadow); }
+.tzr-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tzr-nav-label, .tzr-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
 
 /* ---- 紙に直接組む(カードの枠や影は使わない) ---- */
 body { line-height: 1.95; letter-spacing: 0.01em; }
@@ -175,7 +175,7 @@ body > nav { background: transparent; border: 0; box-shadow: none; border-radius
 }
 
 /* ---- 見出し ---- */
-main { counter-reset: tsuzuri-ed-chapter; }
+main { counter-reset: editorial-chapter; }
 main :is(h1, h2, h3) { letter-spacing: 0; }
 main h1 { margin: 0 0 0.6em; font-size: clamp(2.2em, 5vw, 3.2em); line-height: 1.2; font-weight: 600; }
 main h1::after { content: ""; display: block; width: 56px; height: 3px; margin-top: 0.5em; background: var(--accent); }
@@ -184,8 +184,8 @@ main h1 + p { font-size: 1.12em; color: var(--muted); line-height: 1.85; }
 /* h2: 上に細い罫線、左上に章の番号(01, 02 ...) */
 main h2 { margin: 3.2em 0 0.9em; padding-top: 0.9em; font-size: 1.7em; line-height: 1.3; border-top: 1px solid var(--rule); }
 main h2::before {
-  counter-increment: tsuzuri-ed-chapter;
-  content: counter(tsuzuri-ed-chapter, decimal-leading-zero);
+  counter-increment: editorial-chapter;
+  content: counter(editorial-chapter, decimal-leading-zero);
   display: block;
   margin-bottom: 0.35em;
   font-family: var(--font);
@@ -213,28 +213,28 @@ main table { background: none; border-radius: 0; box-shadow: none; overflow: vis
 main th { font-family: var(--font); font-size: 0.78em; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; border-bottom: 2px solid var(--rule); }
 main th, main td { padding: 10px 14px 10px 0; }
 main td { border-bottom: 1px solid var(--border); }
-.tsuzuri-toc { background: none; border: 0; border-left: 1px solid var(--border); border-radius: 0; box-shadow: none; }
-.tsuzuri-toc > p { color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.78em; }
+.tzr-toc { background: none; border: 0; border-left: 1px solid var(--border); border-radius: 0; box-shadow: none; }
+.tzr-toc > p { color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.78em; }
 .markdown-alert { background: none; border: 0; border-left: 3px solid var(--alert-color); border-radius: 0; box-shadow: none; }
 
 /* ---- 前後のページ: 罫線の上に、明朝体の大きなタイトル ---- */
-.tsuzuri-pager { border-top: 1px solid var(--rule); padding-top: 1.2em; }
-main .tsuzuri-pager a { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0.4em 0; font-family: var(--heading-font); font-size: 1.15em; font-weight: 600; text-decoration: none; }
-main .tsuzuri-pager a:hover { transform: none; color: var(--accent); }
-.tsuzuri-pager span { font-family: var(--font); font-size: 0.7em; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+.tzr-pager { border-top: 1px solid var(--rule); padding-top: 1.2em; }
+main .tzr-pager a { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0.4em 0; font-family: var(--heading-font); font-size: 1.15em; font-weight: 600; text-decoration: none; }
+main .tzr-pager a:hover { transform: none; color: var(--accent); }
+.tzr-pager span { font-family: var(--font); font-size: 0.7em; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
 
 /* ---- ナビ: 目次のような、飾りのない索引 ---- */
-.tsuzuri-nav-head > p { font-family: var(--heading-font); font-size: 1.4em; font-weight: 600; }
+.tzr-nav-head > p { font-family: var(--heading-font); font-size: 1.4em; font-weight: 600; }
 body > nav summary { font-size: 0.72em; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
 body > nav a { border-radius: 0; padding: 4px 0 4px 12px; color: var(--muted); }
 body > nav a:hover { background: none; color: var(--fg); }
 body > nav a[aria-current="page"] { color: var(--heading); font-weight: 700; box-shadow: inset 2px 0 0 var(--accent); background: none; }
 body > nav ul ul { border-left: 0; }
-.tsuzuri-search input { background: none; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; box-shadow: none; padding: 6px 0; }
-.tsuzuri-search input:focus { outline: 0; border-bottom-color: var(--accent); }
-.tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--fg); background: none; border: 1px solid var(--rule); border-radius: 2px; box-shadow: none; }
+.tzr-search input { background: none; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; box-shadow: none; padding: 6px 0; }
+.tzr-search input:focus { outline: 0; border-bottom-color: var(--accent); }
+.tzr-nav-label, .tzr-theme-toggle { color: var(--fg); background: none; border: 1px solid var(--rule); border-radius: 2px; box-shadow: none; }
 
 /* ---------- 言語の切り替え ここから(ボタンの見た目は「メニュー」「ライト/ダーク」と同じ) ---------- */
-/* .tsuzuri-nav-label, .tsuzuri-theme-toggle(後ろの行での上書きを含む) の最終的な見た目を写したもの。テーマのボタンの見た目を変えるときは、このかたまりも一緒に直す */
-:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch { color: var(--fg); background: none; border: 1px solid var(--rule); border-radius: 2px; box-shadow: none; }
+/* .tzr-nav-label, .tzr-theme-toggle(後ろの行での上書きを含む) の最終的な見た目を写したもの。テーマのボタンの見た目を変えるときは、このかたまりも一緒に直す */
+:is(.tzr-nav-head, .tzr-lang-bar) .tzr-lang-switch { color: var(--fg); background: none; border: 1px solid var(--rule); border-radius: 2px; box-shadow: none; }
 /* ---------- 言語の切り替え ここまで ---------- */

@@ -179,23 +179,23 @@ main th { text-align: left; color: var(--th-fg); background: var(--th-bg); }
 
 /* 注意書き・目次・前後のページ */
 .markdown-alert { border: 0; border-radius: var(--radius); background: color-mix(in srgb, var(--alert-color) 12%, var(--el-bg)); box-shadow: var(--el-shadow); }
-.tsuzuri-toc { background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
-.tsuzuri-toc > p { color: var(--accent); }
-.tsuzuri-pager { border-top: 0; }
-main .tsuzuri-pager a { color: var(--heading); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--el-shadow); transition: transform 0.15s; }
-main .tsuzuri-pager a:hover { transform: translateY(-2px); color: var(--accent); }
-.tsuzuri-pager span { color: var(--accent); opacity: 1; }
-.tsuzuri-updated { opacity: 1; color: var(--muted); }
+.tzr-toc { background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
+.tzr-toc > p { color: var(--accent); }
+.tzr-pager { border-top: 0; }
+main .tzr-pager a { color: var(--heading); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--el-shadow); transition: transform 0.15s; }
+main .tzr-pager a:hover { transform: translateY(-2px); color: var(--accent); }
+.tzr-pager span { color: var(--accent); opacity: 1; }
+.tzr-updated { opacity: 1; color: var(--muted); }
 
 /* ナビ */
-.tsuzuri-nav-head > p { font-weight: 800; color: var(--heading); }
+.tzr-nav-head > p { font-weight: 800; color: var(--heading); }
 body > nav a { margin: 2px 0; padding: 6px 12px; color: var(--fg); border-radius: var(--pill); }
 body > nav a:hover { color: var(--accent); background: var(--hover-bg); text-decoration: none; }
 body > nav a[aria-current="page"] { color: var(--current-fg); background: var(--current-bg); box-shadow: var(--current-shadow); font-weight: 700; }
 body > nav ul ul { border-left: 2px solid var(--border); }
-.tsuzuri-search input { padding: 9px 16px; background: var(--el-bg); border: 0; border-radius: var(--pill); box-shadow: var(--inset-shadow); }
-.tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
-.tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
+.tzr-search input { padding: 9px 16px; background: var(--el-bg); border: 0; border-radius: var(--pill); box-shadow: var(--inset-shadow); }
+.tzr-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tzr-nav-label, .tzr-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
 
 /* ---- 本文の左を通る糸 ---- */
 main { position: relative; padding-left: 84px; }
@@ -260,7 +260,7 @@ main h3 { font-size: 1.12em; color: var(--accent); }
 /* ---- 本文 ---- */
 main a { color: var(--accent); font-weight: 600; text-decoration: none; background: linear-gradient(var(--accent-2), var(--accent-2)) 0 100% / 0 2px no-repeat, linear-gradient(color-mix(in srgb, var(--accent) 30%, transparent), color-mix(in srgb, var(--accent) 30%, transparent)) 0 100% / 100% 1px no-repeat; transition: background-size 0.25s, color 0.25s; }
 main a:hover { color: var(--accent-2); background-size: 100% 2px, 100% 1px; }
-main :is(h1, h2, h3, h4) a.tsuzuri-anchor { background: none; }
+main :is(h1, h2, h3, h4) a.tzr-anchor { background: none; }
 main ul > li::marker { color: var(--accent-2); }
 main blockquote { background: none; box-shadow: none; border-left: 2px solid var(--accent-2); border-radius: 0; color: var(--muted); }
 main pre { color: var(--pre-fg); box-shadow: none; }
@@ -276,10 +276,10 @@ body > nav ul ul > li::after { content: ""; position: absolute; left: -14px; top
 body > nav a { border-radius: 8px; }
 body > nav a[aria-current="page"] { font-weight: 700; }
 body > nav a[aria-current="page"]::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--flame); box-shadow: 0 0 0 4px color-mix(in srgb, var(--flame) 22%, transparent); vertical-align: 0.05em; }
-.tsuzuri-nav-head > p { font-weight: 800; letter-spacing: -0.01em; }
-main .tsuzuri-pager a { border: 1px solid var(--border); box-shadow: none; }
-main .tsuzuri-pager a:hover { transform: translateY(-2px); border-color: var(--accent-2); }
-.tsuzuri-pager span { color: var(--accent-2); }
+.tzr-nav-head > p { font-weight: 800; letter-spacing: -0.01em; }
+main .tzr-pager a { border: 1px solid var(--border); box-shadow: none; }
+main .tzr-pager a:hover { transform: translateY(-2px); border-color: var(--accent-2); }
+.tzr-pager span { color: var(--accent-2); }
 
 /* ---------- トップページの部品で使う色(スレッドの配色から作る) ---------- */
 :root {
@@ -316,7 +316,7 @@ main .tsuzuri-pager a:hover { transform: translateY(-2px); border-color: var(--a
 }
 .tsuzuri-hero h1::after { margin: 14px auto 0; }
 /* 入口では目次を出さない(ナビと「ドキュメント」の一覧で足りるため) */
-.tsuzuri-hero .tsuzuri-toc { display: none; }
+.tsuzuri-hero .tzr-toc { display: none; }
 .tsuzuri-hero pre { text-align: left; }
 .tsuzuri-hero-lead {
   margin: 0 0 8px;
@@ -328,7 +328,7 @@ main .tsuzuri-pager a:hover { transform: translateY(-2px); border-color: var(--a
 /* GitHub 上で読みやすくするための区切り(「・」「【】」)。サイトでは表示しない */
 .tsuzuri-sep { display: none; }
 .tsuzuri-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 0 0 20px; }
-main a.tsuzuri-button {
+main a.tzr-button {
   display: inline-block;
   padding: 10px 24px;
   color: var(--accent);
@@ -340,7 +340,7 @@ main a.tsuzuri-button {
   box-shadow: var(--shadow);
   transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
 }
-main a.tsuzuri-button:hover {
+main a.tzr-button:hover {
   color: var(--accent);
   background: var(--surface);
   border-color: var(--accent);
@@ -354,11 +354,11 @@ main a.tsuzuri-button-primary:hover {
   border-color: transparent;
 }
 /* ダウンロードのボタン(ギャラリーの download 属性つきのリンク。トップページのボタンとは別の見た目にする) */
-main a.tsuzuri-button[download] {
+main a.tzr-button[download] {
   border-radius: 10px;
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
 }
-main a.tsuzuri-button[download]::before {
+main a.tzr-button[download]::before {
   content: "";
   display: inline-block;
   width: 1.1em;
@@ -374,8 +374,8 @@ main a.tsuzuri-button[download]::before {
 .tsuzuri-hero p:has(> a > img) img { border-radius: 4px; }
 
 /* ---------- スタイルギャラリーのタイル(flex + gap。タイル全体が押せる。画像・名前・ダウンロードだけ。列数は枠の幅で決める) ---------- */
-.tsuzuri-tiles { container-type: inline-size; display: flex; flex-wrap: wrap; gap: 20px; margin: 0 0 24px; }
-.tsuzuri-tile {
+.tzr-tiles { container-type: inline-size; display: flex; flex-wrap: wrap; gap: 20px; margin: 0 0 24px; }
+.tzr-tile {
   position: relative;               /* 見出しのリンクを広げる基準 */
   display: flex; flex-direction: column; gap: 10px;
   flex: 0 0 100%;                   /* 既定は1列(スマホ・狭い本文) */
@@ -383,23 +383,23 @@ main a.tsuzuri-button[download]::before {
   background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
   box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s, border-color .15s;
 }
-@container (min-width: 540px) { .tsuzuri-tile { flex-basis: calc((100% - 20px) / 2); } }   /* 2列 */
-@container (min-width: 830px) { .tsuzuri-tile { flex-basis: calc((100% - 40px) / 3); } }   /* 3列 */
-.tsuzuri-tile > * { margin: 0; }
-.tsuzuri-tile h3 { margin: auto 0 0; padding: 0; overflow-wrap: anywhere; }   /* 見出しとボタンはタイルの下へ寄せる(画像が1枚でドットが無いタイルでも、横のタイルと位置が揃う) */
-.tsuzuri-tile h3::before, .tsuzuri-tile h3::after { content: none; }    /* 糸と結び目の飾りを消す */
-.tsuzuri-tile .tsuzuri-anchor { display: none; }                         /* ビルドが足す見出しの「#」リンクは、タイルの中では隠す(見出しの id は残る) */
-.tsuzuri-tile h3 a:not(.tsuzuri-anchor) { color: var(--heading); text-decoration: none; background: none; }
-.tsuzuri-tile h3 a:not(.tsuzuri-anchor)::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }  /* 本来のリンクだけをタイル全体に広げる(画像の上も含む) */
-.tsuzuri-tile .tsuzuri-carousel, .tsuzuri-tile .tsuzuri-carousel-nav, .tsuzuri-tile a.tsuzuri-button { position: relative; z-index: 2; }   /* 画像(スワイプ)・ドット・ダウンロードは前面。画像を押すとタイルの見出しのリンクを開くのは tsuzuri-carousel.js */
+@container (min-width: 540px) { .tzr-tile { flex-basis: calc((100% - 20px) / 2); } }   /* 2列 */
+@container (min-width: 830px) { .tzr-tile { flex-basis: calc((100% - 40px) / 3); } }   /* 3列 */
+.tzr-tile > * { margin: 0; }
+.tzr-tile h3 { margin: auto 0 0; padding: 0; overflow-wrap: anywhere; }   /* 見出しとボタンはタイルの下へ寄せる(画像が1枚でドットが無いタイルでも、横のタイルと位置が揃う) */
+.tzr-tile h3::before, .tzr-tile h3::after { content: none; }    /* 糸と結び目の飾りを消す */
+.tzr-tile .tzr-anchor { display: none; }                         /* ビルドが足す見出しの「#」リンクは、タイルの中では隠す(見出しの id は残る) */
+.tzr-tile h3 a:not(.tzr-anchor) { color: var(--heading); text-decoration: none; background: none; }
+.tzr-tile h3 a:not(.tzr-anchor)::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }  /* 本来のリンクだけをタイル全体に広げる(画像の上も含む) */
+.tzr-tile .tzr-carousel, .tzr-tile .tzr-carousel-nav, .tzr-tile a.tzr-button { position: relative; z-index: 2; }   /* 画像(スワイプ)・ドット・ダウンロードは前面。画像を押すとタイルの見出しのリンクを開くのは tzr-carousel.js */
 /* 画像はカードの左右と上の端まで広げる(タイルの padding 14px の分だけはみ出させる。角はカードに合わせる) */
-.tsuzuri-tile .tsuzuri-carousel { cursor: pointer; margin: -14px -14px 0; border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0; }
-.tsuzuri-tile .tsuzuri-carousel > img { border-radius: 0; }
-.tsuzuri-tile .tsuzuri-carousel.tsuzuri-carousel-dragging { cursor: grabbing; }
-.tsuzuri-tile a.tsuzuri-button { align-self: flex-start; padding: 8px 16px; }
-.tsuzuri-tile:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
-@media (hover: hover) { .tsuzuri-tile:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: var(--shadow-lg); } }
-@media (prefers-reduced-motion: reduce) { .tsuzuri-tile { transition: none; } .tsuzuri-tile:hover { transform: none; } }
+.tzr-tile .tzr-carousel { cursor: pointer; margin: -14px -14px 0; border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0; }
+.tzr-tile .tzr-carousel > img { border-radius: 0; }
+.tzr-tile .tzr-carousel.tzr-carousel-dragging { cursor: grabbing; }
+.tzr-tile a.tzr-button { align-self: flex-start; padding: 8px 16px; }
+.tzr-tile:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (hover: hover) { .tzr-tile:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: var(--shadow-lg); } }
+@media (prefers-reduced-motion: reduce) { .tzr-tile { transition: none; } .tzr-tile:hover { transform: none; } }
 
 /* ---------- 特徴のカード(README の <div class="tsuzuri-features">) ---------- */
 .tsuzuri-features {
@@ -438,7 +438,7 @@ main .tsuzuri-feature h3::before { content: none; }
 .tsuzuri-feature p:last-child { margin: 0; color: var(--fg-soft); font-size: 0.93em; line-height: 1.7; }
 
 /* ---------- コードのコピーボタン ---------- */
-.tsuzuri-copy {
+.tzr-copy {
   right: 12px;
   padding: 3px 12px;
   color: var(--pre-fg);
@@ -447,13 +447,13 @@ main .tsuzuri-feature h3::before { content: none; }
   border: 1px solid color-mix(in srgb, var(--pre-fg) 25%, transparent);
   border-radius: 999px;
 }
-@media (hover: hover) { .tsuzuri-copy:hover { color: var(--pre-fg); background: color-mix(in srgb, var(--accent-2) 70%, transparent); border-color: transparent; } }
+@media (hover: hover) { .tzr-copy:hover { color: var(--pre-fg); background: color-mix(in srgb, var(--accent-2) 70%, transparent); border-color: transparent; } }
 
 /* ---------- 404 ページのボタン(トップページの入口と同じ見た目) ---------- */
 main > .tsuzuri-hero-actions { justify-content: flex-start; }
 
 /* ---------- ライト/ダークの切り替えボタン(ナビの見出しの横) ---------- */
-.tsuzuri-theme-toggle {
+.tzr-theme-toggle {
   width: 36px;
   height: 36px;
   padding: 0;
@@ -465,24 +465,10 @@ main > .tsuzuri-hero-actions { justify-content: flex-start; }
   border-radius: 999px;
   transition: background-color 0.15s, color 0.15s;
 }
-.tsuzuri-theme-toggle:hover { color: #fff; background: var(--gradient); }
+.tzr-theme-toggle:hover { color: #fff; background: var(--gradient); }
 
-/* ---------- カルーセルのナビ(矢印・ドット・枚数。tsuzuri-carousel.js が付ける) ---------- */
-.tsuzuri-carousel-nav { color: var(--fg-soft); }
-.tsuzuri-carousel-nav button.tsuzuri-carousel-prev,
-.tsuzuri-carousel-nav button.tsuzuri-carousel-next {
-  padding: 2px 16px;
-  color: var(--accent);
-  font-size: 1.2em;
-  font-weight: 800;
-  background: var(--surface);
-  border: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
-  border-radius: 999px;
-}
-@media (hover: hover) {
-  .tsuzuri-carousel-nav button.tsuzuri-carousel-prev:not(:disabled):hover,
-  .tsuzuri-carousel-nav button.tsuzuri-carousel-next:not(:disabled):hover { color: var(--accent); background: var(--surface); border-color: var(--accent); }
-}
-.tsuzuri-carousel-nav .tsuzuri-carousel-dot::before { background: color-mix(in srgb, var(--accent) 25%, transparent); }
-.tsuzuri-carousel-nav .tsuzuri-carousel-dot[aria-current="true"]::before { background: var(--accent); }
-.tsuzuri-carousel-nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* ---------- カルーセルのナビ(ドット。tzr-carousel.js が付ける) ---------- */
+.tzr-carousel-nav { color: var(--fg-soft); }
+.tzr-carousel-nav .tzr-carousel-dot::before { background: color-mix(in srgb, var(--accent) 25%, transparent); }
+.tzr-carousel-nav .tzr-carousel-dot[aria-current="true"]::before { background: var(--accent); }
+.tzr-carousel-nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

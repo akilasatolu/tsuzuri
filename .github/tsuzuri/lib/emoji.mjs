@@ -15,7 +15,7 @@
 
 import { EMOJI } from "./emoji-data.mjs";
 
-const TYPE = "tsuzuriEmojiText";
+const TYPE = "tzrEmojiText";
 
 // インラインのHTMLのうち、中を変換しないタグ。<code>・<kbd>・<pre>・<script> の中は marked が escaped を付けるので、
 // そちらで除かれる。marked が escaped を付けない <tt>・<samp>・<style> だけ、ここで開閉を見る

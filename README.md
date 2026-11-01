@@ -12,7 +12,7 @@
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-<p class="tsuzuri-hero-actions"><a class="tsuzuri-button tsuzuri-button-primary" href="docs/getting-started.md">Get started</a><span class="tsuzuri-sep"> · </span><a class="tsuzuri-button" href="#documentation">Documentation</a><span class="tsuzuri-sep"> · </span><a class="tsuzuri-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
+<p class="tsuzuri-hero-actions"><a class="tzr-button tsuzuri-button-primary" href="docs/getting-started.md">Get started</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="#documentation">Documentation</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/akilasatolu/tsuzuri/blob/main/LICENSE)
 [![Build Status](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml)
@@ -88,7 +88,7 @@ The workflow runs in the Actions tab, and when it finishes the site is published
 
 The look is a custom style, a CSS file in `.github/tsuzuri/styles/`. `default.css` is included in the package and is used from the start. Download any other style from the [style gallery](gallery/style-gallery.md), put it in `.github/tsuzuri/styles/`, and set `THEME` in `.github/tsuzuri/config` (for example `THEME=glass.css`).
 
-<div class="tsuzuri-carousel">
+<div class="tzr-carousel">
 <img src="assets/gallery/default-light.png" alt="default (light)" width="320">
 <img src="assets/gallery/default-dark.png" alt="default (dark)" width="320">
 <img src="assets/gallery/glass-light.png" alt="glass (light)" width="320">

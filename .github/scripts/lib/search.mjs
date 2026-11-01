@@ -4,7 +4,7 @@
  * サイト内検索(NAV_ENABLED=true のとき、ナビの上部に検索欄を出す)のためのモジュール。
  *
  *   - ビルド時: 各ページのタイトル・本文から検索用の索引(search-index.json)を作る
- *   - 閲覧時:   SEARCH_SCRIPT(tsuzuri-search.js として出力する小さなスクリプト)が、
+ *   - 閲覧時:   SEARCH_SCRIPT(tzr-search.js として出力する小さなスクリプト)が、
  *               検索欄に初めてフォーカスしたときに索引を読み込み、入力に応じて結果を表示する
  *
  * スクリプトをこのモジュール内の文字列として持っているのは、init が利用者リポジトリに
@@ -25,7 +25,7 @@ export const MAX_TEXT_LENGTH = 20000;
 export function htmlToSearchText(html) {
   return html
     .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
-    .replace(/<a class="tsuzuri-anchor"[^>]*>#<\/a>/g, "")
+    .replace(/<a class="tzr-anchor"[^>]*>#<\/a>/g, "")
     .replace(/<[^>]*>/g, " ")
     .replace(/&(amp|lt|gt|quot|#39);/g, (m) => ENTITY_MAP[m])
     .replace(/\s+/g, " ")
@@ -42,16 +42,16 @@ export function buildSearchIndex(pages) {
   return pages.map(({ title, url, html }) => ({ t: title, u: url, x: htmlToSearchText(html) }));
 }
 
-/** 閲覧時に動く検索スクリプト(tsuzuri-search.js として出力する) */
+/** 閲覧時に動く検索スクリプト(tzr-search.js として出力する) */
 export const SEARCH_SCRIPT = `(() => {
-  const root = document.querySelector(".tsuzuri-search");
+  const root = document.querySelector(".tzr-search");
   if (!root) return;
   const input = document.createElement("input");
   input.type = "search";
   input.placeholder = root.dataset.placeholder || "Search";
   input.setAttribute("aria-label", input.placeholder);
   const list = document.createElement("ul");
-  list.className = "tsuzuri-search-results";
+  list.className = "tzr-search-results";
   list.setAttribute("aria-live", "polite");
   root.append(input, list);
 

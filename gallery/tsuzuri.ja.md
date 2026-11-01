@@ -7,7 +7,7 @@ order: 100
 
 # Tsuzuri
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>tsuzuri.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>tsuzuri.css</a>
 
 このサイト自身のカスタムスタイル(`tsuzuri.css`)で作った見た目です。
 このサイト全体がこの見た目になっています。Tsuzuri(綴り)の名前とロゴをそのまま形にした「スレッド」のデザインで、

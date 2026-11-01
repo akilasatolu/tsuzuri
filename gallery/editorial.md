@@ -7,7 +7,7 @@ order: 40
 
 # Editorial
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/editorial.css" download>editorial.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/editorial.css" download>editorial.css</a>
 
 A style that relies on typography and white space, like a magazine or a polished document. Large serif headings with chapter numbers, and a vermilion accent.
 

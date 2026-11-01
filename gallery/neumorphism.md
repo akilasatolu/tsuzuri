@@ -7,7 +7,7 @@ order: 30
 
 # Neumorphism
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/neumorphism.css" download>neumorphism.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/neumorphism.css" download>neumorphism.css</a>
 
 Neumorphism. Parts in the same color as the background, raised or pressed in with light and shadow.
 

@@ -118,7 +118,7 @@ function readOut(dir, ...segs) {
 
 // ページが読み込んでいる共通のCSSファイル(<link rel="stylesheet">)の中身を返す
 function extractStyleBlock(html) {
-  const m = html.match(/<link rel="stylesheet" href="\/(tsuzuri-[0-9a-f]{10}\.css)">/);
+  const m = html.match(/<link rel="stylesheet" href="\/(tzr-[0-9a-f]{10}\.css)">/);
   assert.ok(m, "共通のCSSファイルを読み込んでいること");
   return fs.readFileSync(path.join(lastOutDir, m[1]), "utf-8");
 }
@@ -564,7 +564,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       const indexHtml = readOut(dir, "index.html");
       assert.match(indexHtml, /<meta property="og:site_name" content="My Site">/);
-      assert.match(indexHtml, /<div class="tsuzuri-nav-head"><p>My Site<\/p>/);
+      assert.match(indexHtml, /<div class="tzr-nav-head"><p>My Site<\/p>/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -707,8 +707,8 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       assert.match(readOut(dir, "index.html"), /href="\/docs\/a\.html#テーマ設定"/);
       const aHtml = readOut(dir, "docs", "a.html");
-      assert.match(aHtml, /<h2 id="テーマ設定">テーマ設定<a class="tsuzuri-anchor" href="#テーマ設定"/);
-      assert.match(aHtml, /<h2 id="usage-theme">Usage <code>theme<\/code><a class="tsuzuri-anchor"/);
+      assert.match(aHtml, /<h2 id="テーマ設定">テーマ設定<a class="tzr-anchor" href="#テーマ設定"/);
+      assert.match(aHtml, /<h2 id="usage-theme">Usage <code>theme<\/code><a class="tzr-anchor"/);
       assert.match(aHtml, /<h2 id="usage-theme-1">/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -876,13 +876,13 @@ describe("build-docs.mjs :: main (E2E)", () => {
       let result = runBuild(dir, { NAV_ENABLED: "true" });
       assert.equal(result.status, 0, result.stderr);
       const indexHtml = readOut(dir, "index.html");
-      assert.match(indexHtml, /<a class="tsuzuri-pager-next" rel="next" href="\/docs\/a\.html"><span>次のページ<\/span>ページA<\/a>/);
+      assert.match(indexHtml, /<a class="tzr-pager-next" rel="next" href="\/docs\/a\.html"><span>次のページ<\/span>ページA<\/a>/);
       assert.doesNotMatch(indexHtml, /rel="prev"/);
       assert.match(readOut(dir, "docs", "a.html"), /rel="prev" href="\/README\.html"/);
-      assert.doesNotMatch(readOut(dir, "404.html"), /class="tsuzuri-pager"/);
+      assert.doesNotMatch(readOut(dir, "404.html"), /class="tzr-pager"/);
 
       result = runBuild(dir);
-      assert.doesNotMatch(readOut(dir, "index.html"), /class="tsuzuri-pager"/);
+      assert.doesNotMatch(readOut(dir, "index.html"), /class="tzr-pager"/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -953,13 +953,13 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.equal(a.t, "ページA");
       assert.match(a.x, /検索できる本文です。/);
       assert.doesNotMatch(a.x, /前のページ/, "前後ページリンクは索引に含めない");
-      assert.ok(readOut(dir, "tsuzuri-search.js").includes("tsuzuri-search"));
-      assert.match(readOut(dir, "index.html"), /<div class="tsuzuri-search" data-index="\/repo\/search-index\.json"/);
+      assert.ok(readOut(dir, "tzr-search.js").includes("tzr-search"));
+      assert.match(readOut(dir, "index.html"), /<div class="tzr-search" data-index="\/repo\/search-index\.json"/);
 
       fs.rmSync(path.join(dir, "_site"), { recursive: true });
       result = runBuild(dir);
       assert.ok(!fs.existsSync(path.join(dir, "_site", "search-index.json")));
-      assert.ok(!fs.existsSync(path.join(dir, "_site", "tsuzuri-search.js")));
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "tzr-search.js")));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1018,19 +1018,19 @@ describe("build-docs.mjs :: main (E2E)", () => {
       let html = readOut(dir, "docs", "a.html");
       assert.match(html, /<img src="\/docs\/img\.png" alt="i" loading="lazy" decoding="async">/);
       assert.match(html, /<h1 id="page-a">Page A<\/h1>/, "h1にはリンクを付けない");
-      assert.match(html, /<h2 id="one">One<a class="tsuzuri-anchor" href="#one" aria-label="「One」へのリンク">#<\/a><\/h2>/);
+      assert.match(html, /<h2 id="one">One<a class="tzr-anchor" href="#one" aria-label="「One」へのリンク">#<\/a><\/h2>/);
       assert.match(
         html,
-        /<\/h1>\n<nav class="tsuzuri-toc" aria-label="目次"><p>目次<\/p><ul><li><a href="#one">One<\/a><ul><li><a href="#one-1">One-1<\/a><\/li><\/ul><\/li><li><a href="#two">Two<\/a><\/li><\/ul><\/nav>/
+        /<\/h1>\n<nav class="tzr-toc" aria-label="目次"><p>目次<\/p><ul><li><a href="#one">One<\/a><ul><li><a href="#one-1">One-1<\/a><\/li><\/ul><\/li><li><a href="#two">Two<\/a><\/li><\/ul><\/nav>/
       );
       assert.doesNotMatch(JSON.parse(readOut(dir, "search-index.json"))[1].x, /#/, "見出しリンクの#は索引に入れない");
 
       fs.writeFileSync(path.join(dir, "docs", "a.md"), "---\ntoc: false\n---\n" + body);
       result = runBuild(dir, { NAV_ENABLED: "true" });
-      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /class="tsuzuri-toc"/);
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /class="tzr-toc"/);
 
       result = runBuild(dir);
-      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /class="tsuzuri-toc"/, "NAV_ENABLED=falseなら目次は出さない");
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /class="tzr-toc"/, "NAV_ENABLED=falseなら目次は出さない");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1043,7 +1043,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       copyRealBaseAndDefaultStyle(dir);
       let result = runBuild(dir, { LAST_UPDATED: "true" });
       assert.equal(result.status, 0, result.stderr);
-      assert.doesNotMatch(readOut(dir, "index.html"), /class="tsuzuri-updated"/);
+      assert.doesNotMatch(readOut(dir, "index.html"), /class="tzr-updated"/);
       assert.match(result.stderr, /the last updated dates are not shown/);
 
       const git = (...args) =>
@@ -1058,10 +1058,10 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       result = runBuild(dir, { LAST_UPDATED: "true" });
       assert.equal(result.status, 0, result.stderr);
-      assert.match(readOut(dir, "index.html"), /<p class="tsuzuri-updated">最終更新: <time datetime="2026-01-02">2026-01-02<\/time><\/p>/);
+      assert.match(readOut(dir, "index.html"), /<p class="tzr-updated">最終更新: <time datetime="2026-01-02">2026-01-02<\/time><\/p>/);
 
       result = runBuild(dir);
-      assert.doesNotMatch(readOut(dir, "index.html"), /class="tsuzuri-updated"/, "LAST_UPDATED未設定なら表示しない");
+      assert.doesNotMatch(readOut(dir, "index.html"), /class="tzr-updated"/, "LAST_UPDATED未設定なら表示しない");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1315,8 +1315,8 @@ describe("build-docs.mjs :: main (E2E)", () => {
       let result = runBuild(dir, { NAV_ENABLED: "true" });
       assert.equal(result.status, 0, result.stderr);
       let html = readOut(dir, "index.html");
-      assert.match(html, /<a class="tsuzuri-skip" href="#tsuzuri-main">本文へスキップ<\/a>/);
-      assert.match(html, /<main id="tsuzuri-main">/);
+      assert.match(html, /<a class="tzr-skip" href="#tzr-main">本文へスキップ<\/a>/);
+      assert.match(html, /<main id="tzr-main">/);
       assert.match(html, /<nav aria-label="サイト内ページ">/);
       result = runBuild(dir, { NAV_ENABLED: "true", LANGUAGES: "en" });
       html = readOut(dir, "index.html");
@@ -1342,7 +1342,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.match(html, /<title>MyProj<\/title>/);
       assert.match(html, /aria-current="page">MyProj<\/a>/);
       assert.equal(html.match(/id="main"/g).length, 1, "見出しMainのidだけ");
-      assert.match(html, /<main id="tsuzuri-main">/);
+      assert.match(html, /<main id="tzr-main">/);
 
       fs.writeFileSync(path.join(dir, "README.md"), "本文だけ\n\n[A](docs/a.md)\n");
       result = runBuild(dir, { NAV_ENABLED: "true", SITE_NAME: "Site" });
@@ -1607,13 +1607,13 @@ describe("build-docs.mjs :: main (E2E)", () => {
       writeCustomStyle(dir, "glass.css", "/* GLASS */\n");
       fs.writeFileSync(
         path.join(dir, "README.md"),
-        '# Root\n\n<div class="tsuzuri-carousel">\n<img src="docs/img.png" alt="a">\n</div>\n<a class="tsuzuri-button" href=".github/tsuzuri/styles/glass.css" download>glass.css</a>\n'
+        '# Root\n\n<div class="tzr-carousel">\n<img src="docs/img.png" alt="a">\n</div>\n<a class="tzr-button" href=".github/tsuzuri/styles/glass.css" download>glass.css</a>\n'
       );
       const result = runBuild(dir, { STRICT_LINKS: "true", BASE_PATH: "/repo" });
       assert.equal(result.status, 0, result.stderr);
       const html = readOut(dir, "index.html");
-      assert.match(html, /<a class="tsuzuri-button" href="\/repo\/_\.github\/tsuzuri\/styles\/glass\.css" download>glass\.css<\/a>/);
-      assert.match(html, /<div class="tsuzuri-carousel">/);
+      assert.match(html, /<a class="tzr-button" href="\/repo\/_\.github\/tsuzuri\/styles\/glass\.css" download>glass\.css<\/a>/);
+      assert.match(html, /<div class="tzr-carousel">/);
       assert.equal(readOut(dir, "_.github", "tsuzuri", "styles", "glass.css"), "/* GLASS */\n");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -1632,10 +1632,10 @@ describe("build-docs.mjs :: main (E2E)", () => {
       const result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
       const html = readOut(dir, "index.html");
-      assert.match(html, /<script src="\/tsuzuri-copy\.js" defer><\/script>/);
-      assert.ok(fs.existsSync(path.join(dir, "_site", "tsuzuri-copy.js")));
+      assert.match(html, /<script src="\/tzr-copy\.js" defer><\/script>/);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "tzr-copy.js")));
       assert.match(html, /<meta name="description" content="badge">/, "画像だけの段落は alt を使う");
-      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /<script src="\/tsuzuri-copy\.js"/, "コードの無いページは読み込まない");
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /<script src="\/tzr-copy\.js"/, "コードの無いページは読み込まない");
       fs.writeFileSync(path.join(dir, "README.md"), "---\ndescription: 手書き\n---\n# Root\n\n> [!NOTE]\n> 注意の本文\n\n本文。\n");
       runBuild(dir);
       assert.match(readOut(dir, "index.html"), /<meta name="description" content="手書き">/);
@@ -1643,29 +1643,29 @@ describe("build-docs.mjs :: main (E2E)", () => {
       runBuild(dir);
       const auto = readOut(dir, "index.html").match(/<meta name="description" content="([^"]*)">/)[1];
       assert.equal(auto, "注意の本文", "注意書きの見出し(補足)は飛ばす");
-      assert.ok(!fs.existsSync(path.join(dir, "_site", "tsuzuri-copy.js")), "コードが無くなれば出力しない");
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "tzr-copy.js")), "コードが無くなれば出力しない");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 
-  test("カルーセル(<div class=\"tsuzuri-carousel\">)があるページだけが、ナビのスクリプトを読み込む", () => {
+  test("カルーセル(<div class=\"tzr-carousel\">)があるページだけが、ナビのスクリプトを読み込む", () => {
     const dir = makeTmpDir();
     try {
       copyBasicSite(dir);
       copyRealBaseAndDefaultStyle(dir);
       fs.writeFileSync(
         path.join(dir, "README.md"),
-        '# Root\n\n<div class="tsuzuri-carousel">\n<img src="docs/img.png" alt="a">\n<img src="docs/img.png" alt="b">\n</div>\n\n[A](docs/a.md)\n'
+        '# Root\n\n<div class="tzr-carousel">\n<img src="docs/img.png" alt="a">\n<img src="docs/img.png" alt="b">\n</div>\n\n[A](docs/a.md)\n'
       );
       const result = runBuild(dir);
       assert.equal(result.status, 0, result.stderr);
-      assert.match(readOut(dir, "index.html"), /<script src="\/tsuzuri-carousel\.js" defer><\/script>/);
-      assert.ok(fs.existsSync(path.join(dir, "_site", "tsuzuri-carousel.js")));
-      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /tsuzuri-carousel\.js/, "カルーセルの無いページは読み込まない");
+      assert.match(readOut(dir, "index.html"), /<script src="\/tzr-carousel\.js" defer><\/script>/);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "tzr-carousel.js")));
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /tzr-carousel\.js/, "カルーセルの無いページは読み込まない");
       fs.writeFileSync(path.join(dir, "README.md"), "# Root\n\n[A](docs/a.md)\n");
       runBuild(dir);
-      assert.ok(!fs.existsSync(path.join(dir, "_site", "tsuzuri-carousel.js")), "カルーセルが無くなれば出力しない");
+      assert.ok(!fs.existsSync(path.join(dir, "_site", "tzr-carousel.js")), "カルーセルが無くなれば出力しない");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1684,7 +1684,7 @@ describe("build-docs.mjs :: main (E2E)", () => {
       assert.equal(result.status, 0, result.stderr);
       const hrefOf = (html) => html.match(/<link rel="stylesheet" href="([^"]+)">/)[1];
       const root = hrefOf(readOut(dir, "index.html"));
-      assert.match(root, /^\/repo\/tsuzuri-[0-9a-f]{10}\.css$/);
+      assert.match(root, /^\/repo\/tzr-[0-9a-f]{10}\.css$/);
       assert.equal(hrefOf(readOut(dir, "docs", "b.html")), root, "同じCSSなら同じファイル");
       assert.notEqual(hrefOf(readOut(dir, "docs", "a.html")), root, "theme を変えたページは別のファイル");
       assert.doesNotMatch(readOut(dir, "index.html"), /<style>/);
@@ -1703,13 +1703,13 @@ describe("build-docs.mjs :: main (E2E)", () => {
       let result = runBuild(dir, { NAV_ENABLED: "true" });
       assert.equal(result.status, 0, result.stderr);
       let html = readOut(dir, "index.html");
-      assert.match(html, /<script>try\{const t=localStorage\.getItem\("tsuzuri-theme"\)/);
-      assert.match(html, /<script src="\/tsuzuri-theme\.js" defer><\/script>\n<\/head>/);
-      assert.ok(fs.existsSync(path.join(dir, "_site", "tsuzuri-theme.js")));
+      assert.match(html, /<script>try\{const t=localStorage\.getItem\("tzr-theme"\)/);
+      assert.match(html, /<script src="\/tzr-theme\.js" defer><\/script>\n<\/head>/);
+      assert.ok(fs.existsSync(path.join(dir, "_site", "tzr-theme.js")));
       assert.match(extractStyleBlock(html), /:root\[data-theme="dark"\]/);
       result = runBuild(dir);
       html = readOut(dir, "index.html");
-      assert.doesNotMatch(html, /tsuzuri-theme/);
+      assert.doesNotMatch(html, /tzr-theme/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -1741,11 +1741,11 @@ describe("build-docs.mjs :: 編集リンク(EDIT_LINK)", () => {
       assert.equal(result.status, 0, result.stderr);
       assert.ok(
         readOut(dir, "index.html").includes(
-          '<p class="tsuzuri-updated"><a class="tsuzuri-edit-link" href="https://github.com/o/r/edit/docs/README.md">このページを GitHub で編集</a></p>'
+          '<p class="tzr-updated"><a class="tzr-edit-link" href="https://github.com/o/r/edit/docs/README.md">このページを GitHub で編集</a></p>'
         )
       );
       assert.match(readOut(dir, "docs", "a.html"), /href="https:\/\/github\.com\/o\/r\/edit\/docs\/docs\/a\.md"/);
-      assert.doesNotMatch(readOut(dir, "404.html"), /tsuzuri-edit-link/);
+      assert.doesNotMatch(readOut(dir, "404.html"), /tzr-edit-link/);
     });
   });
 
@@ -1753,7 +1753,7 @@ describe("build-docs.mjs :: 編集リンク(EDIT_LINK)", () => {
     withBasic((dir) => {
       assert.equal(runBuild(dir, gh).status, 0);
       const before = readOut(dir, "docs", "a.html");
-      assert.doesNotMatch(before, /tsuzuri-edit-link/);
+      assert.doesNotMatch(before, /tzr-edit-link/);
       assert.equal(runBuild(dir, { ...gh, EDIT_LINK: "false" }).status, 0);
       assert.equal(readOut(dir, "docs", "a.html"), before);
     });
@@ -1764,7 +1764,7 @@ describe("build-docs.mjs :: 編集リンク(EDIT_LINK)", () => {
       const result = runBuild(dir, { ...gh, GITHUB_REF: "refs/tags/v1", GITHUB_REF_NAME: "v1", EDIT_LINK: "true" });
       assert.equal(result.status, 0, result.stderr);
       assert.match(result.stderr, /EDIT_LINK=true, but/);
-      assert.doesNotMatch(readOut(dir, "index.html"), /tsuzuri-edit-link/);
+      assert.doesNotMatch(readOut(dir, "index.html"), /tzr-edit-link/);
     });
   });
 
@@ -1777,7 +1777,7 @@ describe("build-docs.mjs :: 編集リンク(EDIT_LINK)", () => {
       assert.equal(result.status, 0, result.stderr);
       assert.ok(
         readOut(dir, "docs", "a.html").includes(
-          '<a class="tsuzuri-edit-link" href="https://github.com/owner/repo/edit/work/docs/a.md">Edit this page on GitHub</a>'
+          '<a class="tzr-edit-link" href="https://github.com/owner/repo/edit/work/docs/a.md">Edit this page on GitHub</a>'
         )
       );
     });
@@ -1808,7 +1808,7 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
     withBasic((dir) => {
       assert.equal(runBuild(dir, gh).status, 0);
       const before = readOut(dir, "docs", "a.html");
-      assert.doesNotMatch(before, /tsuzuri-repo-info/);
+      assert.doesNotMatch(before, /tzr-repo-info/);
       assert.equal(runBuild(dir, { ...gh, REPO_LINK: "false", REPO_VERSION: "", REPO_LICENSE: "  " }).status, 0);
       assert.equal(readOut(dir, "docs", "a.html"), before);
     });
@@ -1819,9 +1819,9 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
       const result = runBuild(dir, { ...gh, LANGUAGES: "en", ...ALL });
       assert.equal(result.status, 0, result.stderr);
       const expected =
-        '<p class="tsuzuri-updated tsuzuri-repo-info"><a class="tsuzuri-repo-link" href="https://github.com/o/r">GitHub repository</a>' +
-        ' · <span class="tsuzuri-repo-version">Version: v1.2.3</span>' +
-        ' · <span class="tsuzuri-repo-license">License: MIT</span></p>\n';
+        '<p class="tzr-updated tzr-repo-info"><a class="tzr-repo-link" href="https://github.com/o/r">GitHub repository</a>' +
+        ' · <span class="tzr-repo-version">Version: v1.2.3</span>' +
+        ' · <span class="tzr-repo-license">License: MIT</span></p>\n';
       assert.ok(readOut(dir, "index.html").includes(expected));
       assert.ok(readOut(dir, "docs", "a.html").includes(expected));
       assert.ok(readOut(dir, "404.html").includes(expected));
@@ -1832,23 +1832,23 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
     withBasic((dir) => {
       const only = (env) => {
         assert.equal(runBuild(dir, { ...gh, LANGUAGES: "en", ...env }).status, 0);
-        return readOut(dir, "docs", "a.html").match(/<p class="tsuzuri-updated tsuzuri-repo-info">.*<\/p>/)?.[0];
+        return readOut(dir, "docs", "a.html").match(/<p class="tzr-updated tzr-repo-info">.*<\/p>/)?.[0];
       };
       assert.equal(
         only({ REPO_LINK: "true" }),
-        '<p class="tsuzuri-updated tsuzuri-repo-info"><a class="tsuzuri-repo-link" href="https://github.com/o/r">GitHub repository</a></p>'
+        '<p class="tzr-updated tzr-repo-info"><a class="tzr-repo-link" href="https://github.com/o/r">GitHub repository</a></p>'
       );
       assert.equal(
         only({ REPO_VERSION: "v1.2.3" }),
-        '<p class="tsuzuri-updated tsuzuri-repo-info"><span class="tsuzuri-repo-version">Version: v1.2.3</span></p>'
+        '<p class="tzr-updated tzr-repo-info"><span class="tzr-repo-version">Version: v1.2.3</span></p>'
       );
       assert.equal(
         only({ REPO_LICENSE: "MIT" }),
-        '<p class="tsuzuri-updated tsuzuri-repo-info"><span class="tsuzuri-repo-license">License: MIT</span></p>'
+        '<p class="tzr-updated tzr-repo-info"><span class="tzr-repo-license">License: MIT</span></p>'
       );
       assert.equal(
         only({ REPO_VERSION: "v1", REPO_LICENSE: "MIT" }),
-        '<p class="tsuzuri-updated tsuzuri-repo-info"><span class="tsuzuri-repo-version">Version: v1</span> · <span class="tsuzuri-repo-license">License: MIT</span></p>'
+        '<p class="tzr-updated tzr-repo-info"><span class="tzr-repo-version">Version: v1</span> · <span class="tzr-repo-license">License: MIT</span></p>'
       );
     });
   });
@@ -1858,9 +1858,9 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
       const result = runBuild(dir, { ...gh, EDIT_LINK: "true", ...ALL });
       assert.equal(result.status, 0, result.stderr);
       const html = readOut(dir, "docs", "a.html");
-      assert.ok(html.includes('>GitHub リポジトリ</a> · <span class="tsuzuri-repo-version">バージョン: v1.2.3</span> · <span class="tsuzuri-repo-license">ライセンス: MIT</span></p>'));
-      assert.ok(html.indexOf("tsuzuri-edit-link") < html.indexOf("tsuzuri-repo-info"));
-      assert.equal(html.match(/<p class="tsuzuri-updated/g).length, 2);
+      assert.ok(html.includes('>GitHub リポジトリ</a> · <span class="tzr-repo-version">バージョン: v1.2.3</span> · <span class="tzr-repo-license">ライセンス: MIT</span></p>'));
+      assert.ok(html.indexOf("tzr-edit-link") < html.indexOf("tzr-repo-info"));
+      assert.equal(html.match(/<p class="tzr-updated/g).length, 2);
     });
   });
 
@@ -1881,7 +1881,7 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
       assert.equal(result.status, 0, result.stderr);
       assert.match(result.stderr, /The value of REPO_VERSION contains/);
       assert.match(result.stderr, /The value of REPO_LICENSE is too long/);
-      assert.doesNotMatch(readOut(dir, "index.html"), /tsuzuri-repo-info/);
+      assert.doesNotMatch(readOut(dir, "index.html"), /tzr-repo-info/);
       const tab = runBuild(dir, { ...gh, REPO_VERSION: "v1\tv2", REPO_LICENSE: "a".repeat(64) });
       assert.match(tab.stderr, /The value of REPO_VERSION contains/);
       assert.doesNotMatch(readOut(dir, "index.html"), /repo-version/);
@@ -1897,12 +1897,12 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
       assert.equal(result.status, 0, result.stderr);
       assert.equal(result.stderr.match(/REPO_LINK=true, but/g).length, 1);
       const html = readOut(dir, "docs", "a.html");
-      assert.doesNotMatch(html, /tsuzuri-repo-link/);
-      assert.match(html, /tsuzuri-repo-version/);
-      assert.match(html, /tsuzuri-repo-license/);
+      assert.doesNotMatch(html, /tzr-repo-link/);
+      assert.match(html, /tzr-repo-version/);
+      assert.match(html, /tzr-repo-license/);
       // 3つのうちリンクだけのとき: <p> ごと出さない
       assert.equal(runBuild(dir, { REPO_LINK: "true" }).status, 0);
-      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /tsuzuri-repo-info/);
+      assert.doesNotMatch(readOut(dir, "docs", "a.html"), /tzr-repo-info/);
     });
   });
 
@@ -1914,7 +1914,7 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
       const result = runBuild(dir, { REPO_LINK: "true", LANGUAGES: "en" });
       assert.equal(result.status, 0, result.stderr);
       assert.doesNotMatch(result.stderr, /REPO_LINK/);
-      assert.ok(readOut(dir, "docs", "a.html").includes('<a class="tsuzuri-repo-link" href="https://github.com/owner/repo">GitHub repository</a>'));
+      assert.ok(readOut(dir, "docs", "a.html").includes('<a class="tzr-repo-link" href="https://github.com/owner/repo">GitHub repository</a>'));
     });
   });
 
@@ -1922,10 +1922,10 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
     withBasic((dir) => {
       assert.equal(runBuild(dir, { ...gh, NAV_ENABLED: "true", ...ALL }).status, 0);
       const html = readOut(dir, "index.html");
-      assert.ok(html.includes("tsuzuri-repo-info"));
-      if (html.includes("tsuzuri-pager")) assert.ok(html.indexOf("tsuzuri-pager") < html.indexOf("tsuzuri-repo-info"));
+      assert.ok(html.includes("tzr-repo-info"));
+      if (html.includes("tzr-pager")) assert.ok(html.indexOf("tzr-pager") < html.indexOf("tzr-repo-info"));
       assert.equal(runBuild(dir, { ...gh, NAV_ENABLED: "false", ...ALL }).status, 0);
-      assert.ok(readOut(dir, "index.html").includes("tsuzuri-repo-info"));
+      assert.ok(readOut(dir, "index.html").includes("tzr-repo-info"));
     });
   });
 });

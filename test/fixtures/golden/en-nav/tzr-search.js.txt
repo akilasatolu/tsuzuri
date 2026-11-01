@@ -1,12 +1,12 @@
 (() => {
-  const root = document.querySelector(".tsuzuri-search");
+  const root = document.querySelector(".tzr-search");
   if (!root) return;
   const input = document.createElement("input");
   input.type = "search";
   input.placeholder = root.dataset.placeholder || "Search";
   input.setAttribute("aria-label", input.placeholder);
   const list = document.createElement("ul");
-  list.className = "tsuzuri-search-results";
+  list.className = "tzr-search-results";
   list.setAttribute("aria-live", "polite");
   root.append(input, list);
 

@@ -7,7 +7,7 @@ order: 50
 
 # Minimal
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/minimal.css" download>minimal.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/minimal.css" download>minimal.css</a>
 
 Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青。
 

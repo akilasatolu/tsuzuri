@@ -8,7 +8,7 @@ order: 70
 
 質問や希望は、GitHub の Issue で受け付けます。
 
-<p class="tsuzuri-hero-actions"><a class="tsuzuri-button tsuzuri-button-primary" href="https://github.com/akilasatolu/tsuzuri/issues/new">新しい Issue を作る</a><span class="tsuzuri-sep"> · </span><a class="tsuzuri-button" href="https://github.com/akilasatolu/tsuzuri/issues">Issue の一覧</a></p>
+<p class="tsuzuri-hero-actions"><a class="tzr-button tsuzuri-button-primary" href="https://github.com/akilasatolu/tsuzuri/issues/new">新しい Issue を作る</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="https://github.com/akilasatolu/tsuzuri/issues">Issue の一覧</a></p>
 
 Tsuzuri の運営者は1人です。連絡を受ける場所は Issue だけなので、まずは Issue に書いてください。
 

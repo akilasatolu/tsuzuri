@@ -7,7 +7,7 @@ order: 100
 
 # Tsuzuri
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>tsuzuri.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/tsuzuri.css" download>tsuzuri.css</a>
 
 This look is a custom style of its own (`tsuzuri.css`), made without relying on any other style.
 The whole site looks like this. It's the "thread" design, which gives shape to the name and logo of

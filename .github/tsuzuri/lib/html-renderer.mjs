@@ -81,11 +81,11 @@ export function renderNav(
 
   const heading = siteName ? `<p>${escapeHtml(siteName)}</p>` : "";
   const toggle =
-    `<input type="checkbox" id="tsuzuri-nav-toggle" class="tsuzuri-nav-toggle">` +
-    `<div class="tsuzuri-nav-head">${heading}${langSwitchHtml}` +
-    `<label for="tsuzuri-nav-toggle" class="tsuzuri-nav-label">${escapeHtml(menuLabel)}</label></div>`;
+    `<input type="checkbox" id="tzr-nav-toggle" class="tzr-nav-toggle">` +
+    `<div class="tzr-nav-head">${heading}${langSwitchHtml}` +
+    `<label for="tzr-nav-toggle" class="tzr-nav-label">${escapeHtml(menuLabel)}</label></div>`;
   const searchHtml = search
-    ? `<div class="tsuzuri-search" data-index="${escapeHtml(search.indexUrl)}"` +
+    ? `<div class="tzr-search" data-index="${escapeHtml(search.indexUrl)}"` +
       ` data-placeholder="${escapeHtml(search.placeholder)}" data-empty="${escapeHtml(search.empty)}"></div>` +
       `<script src="${escapeHtml(search.scriptUrl)}" defer></script>`
     : "";
@@ -98,7 +98,7 @@ export function renderNav(
  * - 2つ以上: <details> のメニュー(押すと下に一覧が開く)。一覧は entries の順で、今の言語も含め aria-current を付ける
  * - 0: ""(ボタンを出さない)
  * 翻訳が無くその言語のトップへ飛ぶ項目(untranslated)には data-untranslated と、その旨の title を付ける。
- * placement が "bar"(ナビの無いページの本文の上)なら <div class="tsuzuri-lang-bar"> で包む。
+ * placement が "bar"(ナビの無いページの本文の上)なら <div class="tzr-lang-bar"> で包む。
  * 見た目は base.css の「言語の切り替え」のかたまり。
  *
  * @param {{
@@ -118,7 +118,7 @@ export function renderLangSwitch({ current, entries, strings, placement }) {
   if (targets.length === 1) {
     const e = targets[0];
     html =
-      `<a class="tsuzuri-lang-switch" href="${escapeHtml(e.href)}" hreflang="${escapeHtml(e.tag)}"` +
+      `<a class="tzr-lang-switch" href="${escapeHtml(e.href)}" hreflang="${escapeHtml(e.tag)}"` +
       `${e.untranslated ? " data-untranslated" : ""} title="${escapeHtml(titleOf(e))}">` +
       `<span lang="${escapeHtml(e.tag)}">${escapeHtml(languageName(e.tag))}</span></a>`;
   } else {
@@ -136,10 +136,10 @@ export function renderLangSwitch({ current, entries, strings, placement }) {
       })
       .join("");
     html =
-      `<details class="tsuzuri-lang-menu"><summary class="tsuzuri-lang-switch" title="${escapeHtml(strings.langMenu)}">` +
+      `<details class="tzr-lang-menu"><summary class="tzr-lang-switch" title="${escapeHtml(strings.langMenu)}">` +
       `<span lang="${escapeHtml(current)}">${escapeHtml(languageName(current))}</span></summary><ul>${items}</ul></details>`;
   }
-  return placement === "bar" ? `<div class="tsuzuri-lang-bar">${html}</div>` : html;
+  return placement === "bar" ? `<div class="tzr-lang-bar">${html}</div>` : html;
 }
 
 /**
@@ -160,10 +160,10 @@ export function renderPager(
 ) {
   if (!prev && !next) return "";
   const link = (page, rel, label) =>
-    `<a class="tsuzuri-pager-${rel}" rel="${rel}" href="${escapeHtml(hrefFor(page.rel))}">` +
+    `<a class="tzr-pager-${rel}" rel="${rel}" href="${escapeHtml(hrefFor(page.rel))}">` +
     `<span>${escapeHtml(label)}</span>${escapeHtml(page.title)}</a>`;
   return (
-    `<nav class="tsuzuri-pager" aria-label="${escapeHtml(labels.nav)}">` +
+    `<nav class="tzr-pager" aria-label="${escapeHtml(labels.nav)}">` +
     (prev ? link(prev, "prev", labels.prev) : "") +
     (next ? link(next, "next", labels.next) : "") +
     `</nav>`
@@ -194,7 +194,7 @@ export function renderToc(headings, label = "目次") {
         }</li>`
     )
     .join("");
-  return `<nav class="tsuzuri-toc" aria-label="${escapeHtml(label)}"><p>${escapeHtml(label)}</p><ul>${list}</ul></nav>\n`;
+  return `<nav class="tzr-toc" aria-label="${escapeHtml(label)}"><p>${escapeHtml(label)}</p><ul>${list}</ul></nav>\n`;
 }
 
 /**
@@ -410,8 +410,8 @@ export function pageTemplate({
   // ナビがあるページだけ、先頭に「本文へスキップ」リンクを置き、<main> にその飛び先の id を付ける
   // (ナビが無いページの出力は従来と同じ)
   // (id は本文の見出しの id(例: "## Main" → "main")と重ならない名前にする)
-  const skipLink = navHtml ? `<a class="tsuzuri-skip" href="#tsuzuri-main">${escapeHtml(skipLabel)}</a>\n` : "";
-  const mainTag = navHtml ? `<main id="tsuzuri-main">` : "<main>";
+  const skipLink = navHtml ? `<a class="tzr-skip" href="#tzr-main">${escapeHtml(skipLabel)}</a>\n` : "";
+  const mainTag = navHtml ? `<main id="tzr-main">` : "<main>";
   return `<!DOCTYPE html>
 <html lang="${escapeHtml(lang)}">
 <head>

@@ -7,7 +7,7 @@ order: 10
 
 # Default
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/default.css" download>default.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/default.css" download>default.css</a>
 
 Inspired by Material Design 3. Blue colors, rounded cards with shadows, and a tinted selection in the navigation.
 

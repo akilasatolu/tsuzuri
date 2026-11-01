@@ -161,23 +161,23 @@ main th { text-align: left; color: var(--th-fg); background: var(--th-bg); }
 
 /* 注意書き・目次・前後のページ */
 .markdown-alert { border: 0; border-radius: var(--radius); background: color-mix(in srgb, var(--alert-color) 12%, var(--el-bg)); box-shadow: var(--el-shadow); }
-.tsuzuri-toc { background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
-.tsuzuri-toc > p { color: var(--accent); }
-.tsuzuri-pager { border-top: 0; }
-main .tsuzuri-pager a { color: var(--heading); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--el-shadow); transition: transform 0.15s; }
-main .tsuzuri-pager a:hover { transform: translateY(-2px); color: var(--accent); }
-.tsuzuri-pager span { color: var(--accent); opacity: 1; }
-.tsuzuri-updated { opacity: 1; color: var(--muted); }
+.tzr-toc { background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--inset-shadow); }
+.tzr-toc > p { color: var(--accent); }
+.tzr-pager { border-top: 0; }
+main .tzr-pager a { color: var(--heading); background: var(--el-bg); border: 0; border-radius: var(--radius); box-shadow: var(--el-shadow); transition: transform 0.15s; }
+main .tzr-pager a:hover { transform: translateY(-2px); color: var(--accent); }
+.tzr-pager span { color: var(--accent); opacity: 1; }
+.tzr-updated { opacity: 1; color: var(--muted); }
 
 /* ナビ */
-.tsuzuri-nav-head > p { font-weight: 800; color: var(--heading); }
+.tzr-nav-head > p { font-weight: 800; color: var(--heading); }
 body > nav a { margin: 2px 0; padding: 6px 12px; color: var(--fg); border-radius: var(--pill); }
 body > nav a:hover { color: var(--accent); background: var(--hover-bg); text-decoration: none; }
 body > nav a[aria-current="page"] { color: var(--current-fg); background: var(--current-bg); box-shadow: var(--current-shadow); font-weight: 700; }
 body > nav ul ul { border-left: 2px solid var(--border); }
-.tsuzuri-search input { padding: 9px 16px; background: var(--el-bg); border: 0; border-radius: var(--pill); box-shadow: var(--inset-shadow); }
-.tsuzuri-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
-.tsuzuri-nav-label, .tsuzuri-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
+.tzr-search input { padding: 9px 16px; background: var(--el-bg); border: 0; border-radius: var(--pill); box-shadow: var(--inset-shadow); }
+.tzr-search input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tzr-nav-label, .tzr-theme-toggle { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
 
 /* ---- オーロラ: ページの後ろで、光のカーテンがゆっくり揺れて流れる(動きを減らす設定の人には、基礎CSSが止める) ---- */
 :root {
@@ -213,7 +213,7 @@ body::before {
     radial-gradient(ellipse 18% 55% at 22% 32%, var(--aurora-1), transparent 70%),
     radial-gradient(ellipse 14% 60% at 42% 26%, var(--aurora-2), transparent 70%),
     radial-gradient(ellipse 20% 50% at 66% 30%, var(--aurora-3), transparent 70%);
-  animation: tsuzuri-aurora-a 22s ease-in-out infinite alternate;
+  animation: glass-aurora-a 22s ease-in-out infinite alternate;
 }
 body::after {
   background:
@@ -221,20 +221,20 @@ body::after {
     radial-gradient(ellipse 22% 48% at 78% 28%, var(--aurora-1), transparent 70%),
     radial-gradient(ellipse 12% 55% at 55% 40%, var(--aurora-3), transparent 70%);
   opacity: 0.85;
-  animation: tsuzuri-aurora-b 31s ease-in-out infinite alternate;
+  animation: glass-aurora-b 31s ease-in-out infinite alternate;
 }
-@keyframes tsuzuri-aurora-a {
+@keyframes glass-aurora-a {
   0% { transform: translate3d(-6%, 0, 0) skewX(-10deg) scaleY(1); }
   50% { transform: translate3d(2%, -4%, 0) skewX(8deg) scaleY(1.18); }
   100% { transform: translate3d(7%, 2%, 0) skewX(-4deg) scaleY(0.92); }
 }
-@keyframes tsuzuri-aurora-b {
+@keyframes glass-aurora-b {
   0% { transform: translate3d(6%, 2%, 0) skewX(8deg) scaleY(1.05); }
   50% { transform: translate3d(-3%, -3%, 0) skewX(-12deg) scaleY(0.9); }
   100% { transform: translate3d(-8%, 1%, 0) skewX(5deg) scaleY(1.2); }
 }
 
 /* ---------- 言語の切り替え ここから(ボタンの見た目は「メニュー」「ライト/ダーク」と同じ) ---------- */
-/* .tsuzuri-nav-label, .tsuzuri-theme-toggle の最終的な見た目を写したもの。テーマのボタンの見た目を変えるときは、このかたまりも一緒に直す */
-:is(.tsuzuri-nav-head, .tsuzuri-lang-bar) .tsuzuri-lang-switch { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
+/* .tzr-nav-label, .tzr-theme-toggle の最終的な見た目を写したもの。テーマのボタンの見た目を変えるときは、このかたまりも一緒に直す */
+:is(.tzr-nav-head, .tzr-lang-bar) .tzr-lang-switch { color: var(--current-fg); background: var(--current-bg); border: 0; border-radius: var(--pill); box-shadow: var(--current-shadow); }
 /* ---------- 言語の切り替え ここまで ---------- */

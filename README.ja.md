@@ -12,7 +12,7 @@
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-<p class="tsuzuri-hero-actions"><a class="tsuzuri-button tsuzuri-button-primary" href="docs/getting-started.ja.md">はじめる</a><span class="tsuzuri-sep"> ・ </span><a class="tsuzuri-button" href="#ドキュメント">ドキュメント</a><span class="tsuzuri-sep"> ・ </span><a class="tsuzuri-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
+<p class="tsuzuri-hero-actions"><a class="tzr-button tsuzuri-button-primary" href="docs/getting-started.ja.md">はじめる</a><span class="tsuzuri-sep"> ・ </span><a class="tzr-button" href="#ドキュメント">ドキュメント</a><span class="tsuzuri-sep"> ・ </span><a class="tzr-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/akilasatolu/tsuzuri/blob/main/LICENSE)
 [![Build Status](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml)
@@ -88,7 +88,7 @@ READMEを起点にリンクをたどり、つながったMarkdownと画像を静
 
 見た目は、`.github/tsuzuri/styles/`にあるCSSファイル(カスタムスタイル)で決まります。パッケージに入っている`default.css`が最初から使われます。ほかのスタイルは、[スタイルギャラリー](gallery/style-gallery.ja.md)でダウンロードして`.github/tsuzuri/styles/`に置き、`.github/tsuzuri/config`の`THEME`に指定します(例: `THEME=glass.css`)。
 
-<div class="tsuzuri-carousel">
+<div class="tzr-carousel">
 <img src="assets/gallery/default-light.png" alt="default(ライト)" width="320">
 <img src="assets/gallery/default-dark.png" alt="default(ダーク)" width="320">
 <img src="assets/gallery/glass-light.png" alt="glass(ライト)" width="320">

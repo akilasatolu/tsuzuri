@@ -8,7 +8,7 @@ order: 70
 
 Questions and wishes are received as GitHub issues.
 
-<p class="tsuzuri-hero-actions"><a class="tsuzuri-button tsuzuri-button-primary" href="https://github.com/akilasatolu/tsuzuri/issues/new">New issue</a><span class="tsuzuri-sep"> · </span><a class="tsuzuri-button" href="https://github.com/akilasatolu/tsuzuri/issues">All issues</a></p>
+<p class="tsuzuri-hero-actions"><a class="tzr-button tsuzuri-button-primary" href="https://github.com/akilasatolu/tsuzuri/issues/new">New issue</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="https://github.com/akilasatolu/tsuzuri/issues">All issues</a></p>
 
 Tsuzuri is maintained by one person. Issues are the one place where requests are received, so please start there.
 

@@ -1,6 +1,6 @@
 (() => {
   const root = document.documentElement;
-  const head = document.querySelector(".tsuzuri-nav-head");
+  const head = document.querySelector(".tzr-nav-head");
   if (!head) return;
   const S = {"en":{"toLight":"Switch to light mode","toDark":"Switch to dark mode"},"ja":{"toLight":"ライト表示に切り替える","toDark":"ダーク表示に切り替える"}};
   const s = S[((table, tag) => {
@@ -27,7 +27,7 @@
 
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "tsuzuri-theme-toggle";
+  button.className = "tzr-theme-toggle";
   const render = () => {
     const dark = current() === "dark";
     button.textContent = dark ? "☀" : "☾";
@@ -39,7 +39,7 @@
     const next = current() === "dark" ? "light" : "dark";
     root.dataset.theme = next;
     try {
-      localStorage.setItem("tsuzuri-theme", next);
+      localStorage.setItem("tzr-theme", next);
     } catch {
       // 保存できなくても、このページでは切り替わる
     }
@@ -47,6 +47,6 @@
   });
   media.addEventListener("change", render);
   render();
-  const label = head.querySelector(".tsuzuri-nav-label");
+  const label = head.querySelector(".tzr-nav-label");
   head.insertBefore(button, label);
 })();

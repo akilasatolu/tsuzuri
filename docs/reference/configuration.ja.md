@@ -242,15 +242,15 @@ REPO_VERSION=v1.2.3
 REPO_LICENSE=MIT
 ```
 
-この行は`<p class="tsuzuri-updated tsuzuri-repo-info">`なので、見た目は最終更新日と同じになります。
+この行は`<p class="tzr-updated tzr-repo-info">`なので、見た目は最終更新日と同じになります。
 カスタムスタイルから見た目を変えるときは、次のクラス名を使います。
 
 | クラス名 | 場所 |
 |---|---|
-| `tsuzuri-repo-info` | 行全体(同じ`<p>`に`tsuzuri-updated`も付いています) |
-| `tsuzuri-repo-link` | リポジトリへのリンク |
-| `tsuzuri-repo-version` | バージョン |
-| `tsuzuri-repo-license` | ライセンス |
+| `tzr-repo-info` | 行全体(同じ`<p>`に`tzr-updated`も付いています) |
+| `tzr-repo-link` | リポジトリへのリンク |
+| `tzr-repo-version` | バージョン |
+| `tzr-repo-license` | ライセンス |
 
 ### LLMS_TXT
 サイトのページの一覧を書いた`llms.txt`を出力するかどうかです。`true`または`false`で、

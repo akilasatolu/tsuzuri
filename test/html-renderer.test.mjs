@@ -87,12 +87,12 @@ describe("renderNav", () => {
 
   test("siteNameが設定されていればnav先頭に見出しとして表示する", () => {
     const html = nav(tree, "README.md", "", "My Site");
-    assert.match(html, /<div class="tsuzuri-nav-head"><p>My Site<\/p><label/);
+    assert.match(html, /<div class="tzr-nav-head"><p>My Site<\/p><label/);
   });
 
   test("siteName未設定なら見出しは出力されない", () => {
     const html = nav(tree, "README.md", "", "");
-    assert.match(html, /<div class="tsuzuri-nav-head"><label/);
+    assert.match(html, /<div class="tzr-nav-head"><label/);
     assert.doesNotMatch(html, /<p>/);
   });
 
@@ -100,18 +100,18 @@ describe("renderNav", () => {
     const html = nav(tree, "README.md", "", "");
     assert.match(
       html,
-      /^<nav aria-label="サイト内ページ"><input type="checkbox" id="tsuzuri-nav-toggle" class="tsuzuri-nav-toggle"><div class="tsuzuri-nav-head"><label for="tsuzuri-nav-toggle" class="tsuzuri-nav-label">メニュー<\/label><\/div><ul>/
+      /^<nav aria-label="サイト内ページ"><input type="checkbox" id="tzr-nav-toggle" class="tzr-nav-toggle"><div class="tzr-nav-head"><label for="tzr-nav-toggle" class="tzr-nav-label">メニュー<\/label><\/div><ul>/
     );
   });
 
   test("searchを指定すると検索欄の置き場所とスクリプトの読み込みを出力する(未指定なら出力しない)", () => {
-    const search = { indexUrl: "/r/search-index.json", scriptUrl: "/r/tsuzuri-search.js", placeholder: "検索", empty: "なし" };
+    const search = { indexUrl: "/r/search-index.json", scriptUrl: "/r/tzr-search.js", placeholder: "検索", empty: "なし" };
     const html = nav(tree, "README.md", "/r", "", "メニュー", search);
     assert.match(
       html,
-      /<div class="tsuzuri-search" data-index="\/r\/search-index\.json" data-placeholder="検索" data-empty="なし"><\/div><script src="\/r\/tsuzuri-search\.js" defer><\/script><ul>/
+      /<div class="tzr-search" data-index="\/r\/search-index\.json" data-placeholder="検索" data-empty="なし"><\/div><script src="\/r\/tzr-search\.js" defer><\/script><ul>/
     );
-    assert.doesNotMatch(nav(tree, "README.md", "/r", ""), /tsuzuri-search/);
+    assert.doesNotMatch(nav(tree, "README.md", "/r", ""), /tzr-search/);
   });
 
   test("開閉ボタンの文言は指定でき、エスケープされる", () => {
@@ -137,7 +137,7 @@ describe("renderNav の組み立て用の引数", () => {
       hrefFor: (rel) => pageHref(rel, "/repo"),
     });
     assert.equal(html, nav(...args));
-    assert.match(html, /<div class="tsuzuri-nav-head"><p>サイト<\/p><label /);
+    assert.match(html, /<div class="tzr-nav-head"><p>サイト<\/p><label /);
     assert.throws(() => renderNav(tree, "docs/a.md", "サイト"), TypeError);
   });
 
@@ -153,13 +153,13 @@ describe("renderNav の組み立て用の引数", () => {
   });
 
   test("langSwitchHtml はサイト名と「メニュー」ラベルの間に入る(サイト名が無ければ先頭)", () => {
-    const sw = '<a class="tsuzuri-lang-switch" href="/en/">English</a>';
+    const sw = '<a class="tzr-lang-switch" href="/en/">English</a>';
     const html = nav(...args, { langSwitchHtml: sw });
     assert.ok(
-      html.includes(`<div class="tsuzuri-nav-head"><p>サイト</p>${sw}<label for="tsuzuri-nav-toggle" class="tsuzuri-nav-label">メニュー</label></div>`),
+      html.includes(`<div class="tzr-nav-head"><p>サイト</p>${sw}<label for="tzr-nav-toggle" class="tzr-nav-label">メニュー</label></div>`),
     );
     const noName = nav(tree, "", "", undefined, "Menu", null, "Site pages", { langSwitchHtml: sw });
-    assert.ok(noName.includes(`<div class="tsuzuri-nav-head">${sw}<label `));
+    assert.ok(noName.includes(`<div class="tzr-nav-head">${sw}<label `));
   });
 });
 
@@ -262,7 +262,7 @@ describe("renderMetaTags", () => {
 });
 
 describe("pageTemplate", () => {
-  const SHEET = "/tsuzuri-abc.css";
+  const SHEET = "/tzr-abc.css";
   const LINK = `<link rel="stylesheet" href="${SHEET}">`;
 
   test("navHtml=''・metaTagsHtml=''・lang='ja'時の構造(タグの並び・空行の有無)を保つ(回帰テスト)", () => {
@@ -315,13 +315,13 @@ describe("pageTemplate", () => {
       lang: "ja",
       navHtml: "<nav>NAV</nav>",
     });
-    assert.match(html, /<body>\n<a class="tsuzuri-skip" href="#tsuzuri-main">本文へスキップ<\/a>\n<nav>NAV<\/nav>\n<main id="tsuzuri-main">/);
+    assert.match(html, /<body>\n<a class="tzr-skip" href="#tzr-main">本文へスキップ<\/a>\n<nav>NAV<\/nav>\n<main id="tzr-main">/);
   });
 
   test("skipLabel を省略すると lang の文言になる(既定の lang は en)", () => {
     const en = pageTemplate({ title: "t", body: "b", stylesheetHref: SHEET, navHtml: "<nav>NAV</nav>" });
     assert.match(en, /^<!DOCTYPE html>\n<html lang="en">/);
-    assert.match(en, /<a class="tsuzuri-skip" href="#tsuzuri-main">Skip to content<\/a>/);
+    assert.match(en, /<a class="tzr-skip" href="#tzr-main">Skip to content<\/a>/);
     const custom = pageTemplate({ title: "t", body: "b", stylesheetHref: SHEET, lang: "ja", navHtml: "<nav>NAV</nav>", skipLabel: "<飛ぶ>" });
     assert.match(custom, />&lt;飛ぶ&gt;<\/a>/);
   });
@@ -334,11 +334,11 @@ describe("pageTemplate", () => {
   });
 
   test("langBarHtml を指定すると <main…> の直後(本文の前)に入る", () => {
-    const bar = '<div class="tsuzuri-lang-bar">LANG</div>';
+    const bar = '<div class="tzr-lang-bar">LANG</div>';
     const withNav = pageTemplate({ title: "t", body: "<p>b</p>", stylesheetHref: SHEET, navHtml: "<nav>NAV</nav>", langBarHtml: bar });
-    assert.match(withNav, /<main id="tsuzuri-main">\n<div class="tsuzuri-lang-bar">LANG<\/div>\n<p>b<\/p>\n<\/main>/);
+    assert.match(withNav, /<main id="tzr-main">\n<div class="tzr-lang-bar">LANG<\/div>\n<p>b<\/p>\n<\/main>/);
     const noNav = pageTemplate({ title: "t", body: "<p>b</p>", stylesheetHref: SHEET, langBarHtml: bar });
-    assert.match(noNav, /<body>\n<main>\n<div class="tsuzuri-lang-bar">LANG<\/div>\n<p>b<\/p>/);
+    assert.match(noNav, /<body>\n<main>\n<div class="tzr-lang-bar">LANG<\/div>\n<p>b<\/p>/);
     assert.equal(withNav.split(bar).length, 2); // 1回だけ
   });
 
@@ -565,9 +565,9 @@ describe("renderPager", () => {
 
   test("前後のページへのリンクを rel=prev/next 付きで出力し、タイトルはエスケープする", () => {
     const html = pager(a, b, "/repo");
-    assert.match(html, /^<nav class="tsuzuri-pager" aria-label="前後のページ">/);
-    assert.match(html, /<a class="tsuzuri-pager-prev" rel="prev" href="\/repo\/docs\/a\.html"><span>前のページ<\/span>ページA<\/a>/);
-    assert.match(html, /<a class="tsuzuri-pager-next" rel="next" href="\/repo\/docs\/b\.html"><span>次のページ<\/span>&lt;B&gt;<\/a>/);
+    assert.match(html, /^<nav class="tzr-pager" aria-label="前後のページ">/);
+    assert.match(html, /<a class="tzr-pager-prev" rel="prev" href="\/repo\/docs\/a\.html"><span>前のページ<\/span>ページA<\/a>/);
+    assert.match(html, /<a class="tzr-pager-next" rel="next" href="\/repo\/docs\/b\.html"><span>次のページ<\/span>&lt;B&gt;<\/a>/);
   });
   test("片方だけのときはその片方だけ、どちらも無ければ空文字", () => {
     assert.doesNotMatch(pager(null, b, ""), /rel="prev"/);
@@ -643,13 +643,13 @@ describe("renderLangSwitch", () => {
     });
     assert.equal(
       html,
-      '<a class="tsuzuri-lang-switch" href="/repo/en/docs/cli.html" hreflang="en" title="Englishに切り替える"><span lang="en">English</span></a>',
+      '<a class="tzr-lang-switch" href="/repo/en/docs/cli.html" hreflang="en" title="Englishに切り替える"><span lang="en">English</span></a>',
     );
     // 英語のページからは英語の文言で日本語へ
     const fromEn = renderLangSwitch({ current: "en", entries: [e("ja", "/a.html"), e("en", "/en/a.html")], strings: en, placement: "nav" });
     assert.equal(
       fromEn,
-      '<a class="tsuzuri-lang-switch" href="/a.html" hreflang="ja" title="Switch language to 日本語"><span lang="ja">日本語</span></a>',
+      '<a class="tzr-lang-switch" href="/a.html" hreflang="ja" title="Switch language to 日本語"><span lang="ja">日本語</span></a>',
     );
   });
 
@@ -657,7 +657,7 @@ describe("renderLangSwitch", () => {
     const html = renderLangSwitch({ current: "ja", entries: [e("ja", "/docs/b.html"), e("en", "/en/", true)], strings: ja, placement: "nav" });
     assert.equal(
       html,
-      '<a class="tsuzuri-lang-switch" href="/en/" hreflang="en" data-untranslated' +
+      '<a class="tzr-lang-switch" href="/en/" hreflang="en" data-untranslated' +
         ' title="このページのEnglish版はありません。Englishのトップページを開きます。"><span lang="en">English</span></a>',
     );
   });
@@ -671,7 +671,7 @@ describe("renderLangSwitch", () => {
     });
     assert.equal(
       html,
-      '<details class="tsuzuri-lang-menu"><summary class="tsuzuri-lang-switch" title="Language"><span lang="en">English</span></summary><ul>' +
+      '<details class="tzr-lang-menu"><summary class="tzr-lang-switch" title="Language"><span lang="en">English</span></summary><ul>' +
         '<li><a href="/a.html" hreflang="ja" lang="ja">日本語</a></li>' +
         '<li><a href="/en/a.html" hreflang="en" lang="en" aria-current="true">English</a></li>' +
         '<li><a href="/fr/" hreflang="fr" lang="fr" data-untranslated title="This page is not available in Français. Opens the Français top page.">Français</a></li>' +
@@ -685,7 +685,7 @@ describe("renderLangSwitch", () => {
     const one = renderLangSwitch({ current: "ja", entries: [e("ja", "/a.html"), e("en", ""), e("fr", "/fr/a.html")], strings: ja, placement: "nav" });
     assert.equal(
       one,
-      '<a class="tsuzuri-lang-switch" href="/fr/a.html" hreflang="fr" title="Françaisに切り替える"><span lang="fr">Français</span></a>',
+      '<a class="tzr-lang-switch" href="/fr/a.html" hreflang="fr" title="Françaisに切り替える"><span lang="fr">Français</span></a>',
     );
     // 4言語で1つが空 → 残り2つでメニュー。空の言語は一覧に出ない
     const menu = renderLangSwitch({
@@ -694,18 +694,18 @@ describe("renderLangSwitch", () => {
       strings: ja,
       placement: "nav",
     });
-    assert.match(menu, /^<details class="tsuzuri-lang-menu">/);
+    assert.match(menu, /^<details class="tzr-lang-menu">/);
     assert.doesNotMatch(menu, /hreflang="en"/);
     assert.equal(menu.match(/<li>/g).length, 3);
   });
 
-  test("placement が bar なら <div class=\"tsuzuri-lang-bar\"> で包む(リンク・メニューとも)", () => {
+  test("placement が bar なら <div class=\"tzr-lang-bar\"> で包む(リンク・メニューとも)", () => {
     const entries = [e("ja", "/a.html"), e("en", "/en/a.html")];
     const nav = renderLangSwitch({ current: "ja", entries, strings: ja, placement: "nav" });
-    assert.equal(renderLangSwitch({ current: "ja", entries, strings: ja, placement: "bar" }), `<div class="tsuzuri-lang-bar">${nav}</div>`);
+    assert.equal(renderLangSwitch({ current: "ja", entries, strings: ja, placement: "bar" }), `<div class="tzr-lang-bar">${nav}</div>`);
     const three = [...entries, e("fr", "/fr/a.html")];
     const menuNav = renderLangSwitch({ current: "ja", entries: three, strings: ja, placement: "nav" });
-    assert.equal(renderLangSwitch({ current: "ja", entries: three, strings: ja, placement: "bar" }), `<div class="tsuzuri-lang-bar">${menuNav}</div>`);
+    assert.equal(renderLangSwitch({ current: "ja", entries: three, strings: ja, placement: "bar" }), `<div class="tzr-lang-bar">${menuNav}</div>`);
   });
 
   test("切り替え先が0 → \"\"(1言語・ほかの言語の href がすべて空。bar でも包まない)", () => {

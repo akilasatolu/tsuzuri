@@ -1,10 +1,10 @@
 /**
  * carousel.mjs
  *
- * 画像のカルーセル(<div class="tsuzuri-carousel"> の中に <img> を並べたもの)に、ドット(今の画像の
- * 表示と、押すと切り替わるボタン)を付けるための小さなスクリプト(tsuzuri-carousel.js として出力する)。
+ * 画像のカルーセル(<div class="tzr-carousel"> の中に <img> を並べたもの)に、ドット(今の画像の
+ * 表示と、押すと切り替わるボタン)を付けるための小さなスクリプト(tzr-carousel.js として出力する)。
  * 矢印や「1 / 2」の枚数は出さない。画像は横にスワイプ・スクロールしても切り替えられる。
- * カルーセルがタイル(<div class="tsuzuri-tile">)の中にあるときは、画像を押すとそのタイルの見出しのリンクを開く
+ * カルーセルがタイル(<div class="tzr-tile">)の中にあるときは、画像を押すとそのタイルの見出しのリンクを開く
  * (スワイプやドットの操作では開かない)。
  * マウスでは画像をドラッグして切り替えられる(タッチはブラウザのスワイプのまま)。ドラッグしたあとの click では
  * タイルのリンクを開かない。
@@ -18,7 +18,7 @@
 
 import { runtimeStrings, RUNTIME_PICK_SOURCE } from "./i18n.mjs";
 
-export const CAROUSEL_SCRIPT_NAME = "tsuzuri-carousel.js";
+export const CAROUSEL_SCRIPT_NAME = "tzr-carousel.js";
 
 // スクリプトに埋め込む文言の表(言語ごとに carouselDot だけ)
 const STRINGS = JSON.stringify(runtimeStrings(["carouselDot"]));
@@ -37,7 +37,7 @@ export const CAROUSEL_SCRIPT = `(() => {
     b.setAttribute("aria-label", label);
     return b;
   };
-  for (const carousel of document.querySelectorAll("main .tsuzuri-carousel")) {
+  for (const carousel of document.querySelectorAll("main .tzr-carousel")) {
     const imgs = Array.from(carousel.querySelectorAll("img"));
     if (imgs.length === 0) continue;
     carousel.setAttribute("tabindex", "0");
@@ -52,10 +52,10 @@ export const CAROUSEL_SCRIPT = `(() => {
     };
     const go = (i) => carousel.scrollTo({ left: left(Math.max(0, Math.min(imgs.length - 1, i))) });
 
-    const nav = el("div", "tsuzuri-carousel-nav");
-    const dots = el("span", "tsuzuri-carousel-dots");
+    const nav = el("div", "tzr-carousel-nav");
+    const dots = el("span", "tzr-carousel-dots");
     const dotButtons = imgs.map((_, i) => {
-      const d = button("tsuzuri-carousel-dot", s.carouselDot.replace("{n}", String(i + 1)));
+      const d = button("tzr-carousel-dot", s.carouselDot.replace("{n}", String(i + 1)));
       d.addEventListener("click", () => go(i));
       dots.append(d);
       return d;
@@ -95,7 +95,7 @@ export const CAROUSEL_SCRIPT = `(() => {
         if (!dragged) {
           dragged = true;
           carousel.setPointerCapture(e.pointerId);
-          carousel.classList.add("tsuzuri-carousel-dragging");
+          carousel.classList.add("tzr-carousel-dragging");
           // 指の位置にそのまま付いてくるよう、ドラッグ中は吸着とスムーズスクロールを止める
           carousel.style.scrollSnapType = "none";
           carousel.style.scrollBehavior = "auto";
@@ -107,7 +107,7 @@ export const CAROUSEL_SCRIPT = `(() => {
         const { x, from } = drag;
         drag = null;
         if (!dragged) return;
-        carousel.classList.remove("tsuzuri-carousel-dragging");
+        carousel.classList.remove("tzr-carousel-dragging");
         carousel.style.scrollBehavior = "";
         const dx = e.clientX - x;
         // 画像の幅の 1/5 以上動かしたら、その向きの隣へ。足りなければ元の画像へ戻す
@@ -124,7 +124,7 @@ export const CAROUSEL_SCRIPT = `(() => {
       carousel.addEventListener("pointercancel", endDrag);
     }
     // タイルの中の画像を押したら、タイルの見出しのリンクを開く(スワイプは click にならない)
-    const tileLink = carousel.closest(".tsuzuri-tile")?.querySelector("h3 a:not(.tsuzuri-anchor)");
+    const tileLink = carousel.closest(".tzr-tile")?.querySelector("h3 a:not(.tzr-anchor)");
     if (tileLink) carousel.addEventListener("click", () => { if (!dragged) tileLink.click(); });
     if (imgs.length > 1) {
       carousel.after(nav);

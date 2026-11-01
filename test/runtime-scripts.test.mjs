@@ -1,4 +1,4 @@
-// 閲覧時に動くスクリプト(tsuzuri-copy.js・tsuzuri-theme.js)を、簡単な偽の document などの上で
+// 閲覧時に動くスクリプト(tzr-copy.js・tzr-theme.js)を、簡単な偽の document などの上で
 // 実際に動かし、<html lang> に合わせた文言になること・振る舞いが変わっていないことを確かめる。
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
@@ -96,7 +96,7 @@ function runThemeScript(lang, { head = true, differs = true, osDark = false, sav
   const navLabel = fakeElement("span");
   if (navHead) {
     navHead.append(navLabel);
-    navHead.querySelector = (sel) => (sel === ".tsuzuri-nav-label" ? navLabel : null);
+    navHead.querySelector = (sel) => (sel === ".tzr-nav-label" ? navLabel : null);
   }
   const stored = {};
   const mediaListeners = [];
@@ -105,7 +105,7 @@ function runThemeScript(lang, { head = true, differs = true, osDark = false, sav
     document: {
       documentElement: root,
       body,
-      querySelector: (sel) => (sel === ".tsuzuri-nav-head" ? navHead : null),
+      querySelector: (sel) => (sel === ".tzr-nav-head" ? navHead : null),
       createElement: fakeElement,
     },
     window: {
@@ -125,9 +125,9 @@ function runThemeScript(lang, { head = true, differs = true, osDark = false, sav
   return { root, navHead, navLabel, button, stored };
 }
 
-// ---------- tsuzuri-copy.js ----------
+// ---------- tzr-copy.js ----------
 
-describe("COPY_SCRIPT(tsuzuri-copy.js)", () => {
+describe("COPY_SCRIPT(tzr-copy.js)", () => {
   for (const lang of JA_LANGS) {
     test(`<html lang="${lang}"> は日本語の文言`, async () => {
       const { button, timers, written } = runCopyScript(lang);
@@ -167,16 +167,16 @@ describe("COPY_SCRIPT(tsuzuri-copy.js)", () => {
 
   test("コードブロックを枠で包み、その中にボタンを置く(今までと同じ形)", () => {
     const { pre, box, button } = runCopyScript("ja");
-    assert.equal(box.className, "tsuzuri-code");
+    assert.equal(box.className, "tzr-code");
     assert.deepEqual(pre.beforeNodes, [box]);
     assert.deepEqual(box.children, [pre, button]);
     assert.equal(button.type, "button");
-    assert.equal(button.className, "tsuzuri-copy");
+    assert.equal(button.className, "tzr-copy");
     assert.equal(button.attrs["aria-live"], "polite");
   });
 });
 
-// ---------- tsuzuri-carousel.js ----------
+// ---------- tzr-carousel.js ----------
 
 /**
  * CAROUSEL_SCRIPT を動かす。画像は count 枚(幅 100、間隔 10 で並ぶ)。
@@ -193,7 +193,7 @@ function runCarouselScript(lang, count, { tileLink } = {}) {
   carousel.setPointerCapture = () => {};
   const imgs = Array.from({ length: count }, (_, i) => ({ offsetLeft: 50 + i * 110, offsetWidth: 100 }));
   carousel.querySelectorAll = (sel) => (sel === "img" ? imgs : []);
-  carousel.closest = (sel) => (tileLink && sel === ".tsuzuri-tile" ? { querySelector: () => tileLink } : null);
+  carousel.closest = (sel) => (tileLink && sel === ".tzr-tile" ? { querySelector: () => tileLink } : null);
   carousel.scrolledTo = [];
   carousel.scrollTo = ({ left }) => {
     carousel.scrolledTo.push(left);
@@ -204,7 +204,7 @@ function runCarouselScript(lang, count, { tileLink } = {}) {
   const context = {
     document: {
       documentElement: { lang: lang ?? "" },
-      querySelectorAll: (sel) => (sel === "main .tsuzuri-carousel" ? [carousel] : []),
+      querySelectorAll: (sel) => (sel === "main .tzr-carousel" ? [carousel] : []),
       createElement: fakeElement,
     },
     window: { addEventListener: (_t, fn) => resizeListeners.push(fn), onscrollend: null },
@@ -219,10 +219,10 @@ function runCarouselScript(lang, count, { tileLink } = {}) {
   return { carousel, nav, dots, scrollTo, resizeListeners };
 }
 
-describe("CAROUSEL_SCRIPT(tsuzuri-carousel.js)", () => {
+describe("CAROUSEL_SCRIPT(tzr-carousel.js)", () => {
   test("画像が2枚: ドット2つだけを、カルーセルの次に置く(矢印と枚数は出さない)", () => {
     const { carousel, nav, dots } = runCarouselScript("en", 2);
-    assert.equal(nav.className, "tsuzuri-carousel-nav");
+    assert.equal(nav.className, "tzr-carousel-nav");
     assert.equal(nav.children.length, 1);
     assert.equal(carousel.attrs.tabindex, "0");
     assert.equal(dots.children.length, 2);
@@ -274,7 +274,7 @@ describe("CAROUSEL_SCRIPT(tsuzuri-carousel.js)", () => {
   test("タイルの外のカルーセルは、押しても何も開かない", async () => {
     const { carousel } = runCarouselScript("en", 2);
     await carousel.dispatch("click");
-    assert.equal(carousel.afterNode.className, "tsuzuri-carousel-nav");
+    assert.equal(carousel.afterNode.className, "tzr-carousel-nav");
   });
 
   /** マウスで x=from から x=to までドラッグする(離すかどうかは release で決める) */
@@ -290,10 +290,10 @@ describe("CAROUSEL_SCRIPT(tsuzuri-carousel.js)", () => {
     await mouseDrag(carousel, 200, 170, { release: false });
     assert.equal(carousel.scrollLeft, 30, "ドラッグ中はマウスに付いてくる");
     assert.equal(carousel.style.scrollSnapType, "none");
-    assert.ok(carousel.classes.has("tsuzuri-carousel-dragging"));
+    assert.ok(carousel.classes.has("tzr-carousel-dragging"));
     await carousel.dispatch("pointerup", { pointerType: "mouse", clientX: 170 });
     assert.deepEqual(carousel.scrolledTo, [110]);
-    assert.ok(!carousel.classes.has("tsuzuri-carousel-dragging"));
+    assert.ok(!carousel.classes.has("tzr-carousel-dragging"));
     await carousel.dispatch("click");
     assert.equal(clicked, 0);
     await carousel.dispatch("scrollend");
@@ -356,9 +356,9 @@ describe("CAROUSEL_SCRIPT(tsuzuri-carousel.js)", () => {
   });
 });
 
-// ---------- tsuzuri-theme.js ----------
+// ---------- tzr-theme.js ----------
 
-describe("THEME_SCRIPT(tsuzuri-theme.js)", () => {
+describe("THEME_SCRIPT(tzr-theme.js)", () => {
   for (const lang of JA_LANGS) {
     test(`<html lang="${lang}"> は日本語の文言`, async () => {
       const { button, root, stored } = runThemeScript(lang);
@@ -367,7 +367,7 @@ describe("THEME_SCRIPT(tsuzuri-theme.js)", () => {
       assert.equal(button.title, "ダーク表示に切り替える");
       await button.dispatch("click");
       assert.equal(root.dataset.theme, "dark");
-      assert.equal(stored["tsuzuri-theme"], "dark");
+      assert.equal(stored["tzr-theme"], "dark");
       assert.equal(button.textContent, "☀");
       assert.equal(button.attrs["aria-label"], "ライト表示に切り替える");
       assert.equal(button.title, "ライト表示に切り替える");
@@ -393,7 +393,7 @@ describe("THEME_SCRIPT(tsuzuri-theme.js)", () => {
   test("ボタンはナビの見出しのラベルの前に置き、選んでいた表示を元に戻す", () => {
     const { navHead, navLabel, button, root } = runThemeScript("ja", { saved: "dark" });
     assert.deepEqual(navHead.children, [button, navLabel]);
-    assert.equal(button.className, "tsuzuri-theme-toggle");
+    assert.equal(button.className, "tzr-theme-toggle");
     assert.equal(root.dataset.theme, "dark");
     assert.equal(button.attrs["aria-label"], "ライト表示に切り替える");
   });

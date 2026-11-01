@@ -263,15 +263,15 @@ for `REPO_VERSION`. This site uses `REPO_LICENSE=MIT`.
 REPO_LICENSE=MIT
 ```
 
-The line is `<p class="tsuzuri-updated tsuzuri-repo-info">`, so it looks the same as the last updated
+The line is `<p class="tzr-updated tzr-repo-info">`, so it looks the same as the last updated
 date. To change its look from your custom style, use these class names.
 
 | Class name | Where |
 |---|---|
-| `tsuzuri-repo-info` | The whole line (the same `<p>` also has `tsuzuri-updated`) |
-| `tsuzuri-repo-link` | The link to the repository |
-| `tsuzuri-repo-version` | The version |
-| `tsuzuri-repo-license` | The license |
+| `tzr-repo-info` | The whole line (the same `<p>` also has `tzr-updated`) |
+| `tzr-repo-link` | The link to the repository |
+| `tzr-repo-version` | The version |
+| `tzr-repo-license` | The license |
 
 ### LLMS_TXT
 Whether to output `llms.txt`, a file that lists the pages of the site. `true` or

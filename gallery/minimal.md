@@ -7,7 +7,7 @@ order: 50
 
 # Minimal
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/minimal.css" download>minimal.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/minimal.css" download>minimal.css</a>
 
 A calm look in only white, black and gray, like the Vercel or Linear docs. Only links are blue.
 

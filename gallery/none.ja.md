@@ -7,7 +7,7 @@ order: 90
 
 # None
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/none.css" download>none.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/none.css" download>none.css</a>
 
 ベースだけを適用し、ブラウザ既定の見た目で表示します。`none.css`はコメントだけのCSSファイルです。
 

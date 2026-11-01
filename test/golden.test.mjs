@@ -15,7 +15,7 @@ import { spawnSync } from "node:child_process";
  *   - 保存し直す: UPDATE_GOLDEN=1 node --test test/golden.test.mjs
  *       出力を「意図して」変えたとき(新しい機能・見た目の変更など)だけ行う。保存し直したら、
  *       git diff test/fixtures/golden/ で差分が意図した変更だけであることを確かめ、
- *       CSS が変わると、CSS のファイル名(tsuzuri-<ハッシュ>.css)が変わり、すべてのページの <link> の行も変わる。これは想定どおり。
+ *       CSS が変わると、CSS のファイル名(tzr-<ハッシュ>.css)が変わり、すべてのページの <link> の行も変わる。これは想定どおり。
  *       その差分をコードの変更と同じコミットに入れる。
  *       テストを通すためだけに保存し直さないこと(意図しない変化を見逃すことになる)。
  *
@@ -70,7 +70,7 @@ const CONFIG_ENV_KEYS = [
   "LLMS_TXT",
 ];
 
-const CSS_HASH_RE = /tsuzuri-[0-9a-f]{10}\.css/g;
+const CSS_HASH_RE = /tzr-[0-9a-f]{10}\.css/g;
 const BINARY_EXT = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico"]);
 
 // .js のファイルは保存するときに名前の後ろに .txt を足す(node --test と ESLint の対象にしないため)
@@ -78,7 +78,7 @@ function toSavedName(rel) {
   return /\.[cm]?js$/.test(rel) ? `${rel}.txt` : rel;
 }
 function normalizeName(rel) {
-  return toSavedName(rel).replace(CSS_HASH_RE, "tsuzuri-HASH.css");
+  return toSavedName(rel).replace(CSS_HASH_RE, "tzr-HASH.css");
 }
 
 // ディレクトリの下の全ファイルを、"/" 区切りの相対パスで並べて返す
@@ -121,7 +121,7 @@ function describeFirstDiff(expected, actual) {
 /**
  * 保存した出力(expectedDir)と今回の出力(actualDir)を比べ、違いの一覧(文字列の配列)を返す。
  * 空の配列なら一致。
- *   - CSS ファイル名のハッシュ部分は tsuzuri-HASH.css に置き換えてから、ファイル名と中身を比べる
+ *   - CSS ファイル名のハッシュ部分は tzr-HASH.css に置き換えてから、ファイル名と中身を比べる
  */
 function compareOutputDirs(expectedDir, actualDir) {
   const problems = [];
@@ -143,8 +143,8 @@ function compareOutputDirs(expectedDir, actualDir) {
       if (!expBuf.equals(actBuf)) problems.push(`中身が違うファイル: ${name}(バイナリ)`);
       continue;
     }
-    const exp = expBuf.toString("utf-8").replace(CSS_HASH_RE, "tsuzuri-HASH.css");
-    const act = actBuf.toString("utf-8").replace(CSS_HASH_RE, "tsuzuri-HASH.css");
+    const exp = expBuf.toString("utf-8").replace(CSS_HASH_RE, "tzr-HASH.css");
+    const act = actBuf.toString("utf-8").replace(CSS_HASH_RE, "tzr-HASH.css");
     if (exp !== act) problems.push(`中身が違うファイル: ${name}: ${describeFirstDiff(exp, act)}`);
   }
   return problems;
@@ -253,13 +253,13 @@ describe("ゴールデン: 比べ方の部品", () => {
       const act = path.join(root, "act");
       for (const d of [exp, act]) {
         fs.mkdirSync(path.join(d, "docs"), { recursive: true });
-        fs.writeFileSync(path.join(d, "index.html"), '<link href="/tsuzuri-0123456789.css">\n<p>hello</p>\n');
+        fs.writeFileSync(path.join(d, "index.html"), '<link href="/tzr-0123456789.css">\n<p>hello</p>\n');
         fs.writeFileSync(path.join(d, "docs", "a.html"), "<p>a</p>\n");
       }
-      fs.writeFileSync(path.join(exp, "tsuzuri-search.js.txt"), "search();\n");
-      fs.writeFileSync(path.join(act, "tsuzuri-search.js"), "search();\n");
-      fs.writeFileSync(path.join(exp, "tsuzuri-0123456789.css"), "body{}\n");
-      fs.writeFileSync(path.join(act, "tsuzuri-abcdefabcd.css"), "body{}\n");
+      fs.writeFileSync(path.join(exp, "tzr-search.js.txt"), "search();\n");
+      fs.writeFileSync(path.join(act, "tzr-search.js"), "search();\n");
+      fs.writeFileSync(path.join(exp, "tzr-0123456789.css"), "body{}\n");
+      fs.writeFileSync(path.join(act, "tzr-abcdefabcd.css"), "body{}\n");
       return { root, exp, act };
     };
 
@@ -267,7 +267,7 @@ describe("ゴールデン: 比べ方の部品", () => {
       const { root, exp, act } = setup();
       try {
         // 今回の出力の HTML 側のハッシュも変える
-        fs.writeFileSync(path.join(act, "index.html"), '<link href="/tsuzuri-abcdefabcd.css">\n<p>hello</p>\n');
+        fs.writeFileSync(path.join(act, "index.html"), '<link href="/tzr-abcdefabcd.css">\n<p>hello</p>\n');
         assert.deepEqual(compareOutputDirs(exp, act), []);
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
@@ -311,12 +311,12 @@ describe("ゴールデン: 比べ方の部品", () => {
     test("CSS が2つできて比べるときの名前が重なると、両方のファイル名が違いとして出る", () => {
       const { root, exp, act } = setup();
       try {
-        fs.writeFileSync(path.join(act, "tsuzuri-ffffffffff.css"), "extra{}\n");
+        fs.writeFileSync(path.join(act, "tzr-ffffffffff.css"), "extra{}\n");
         const problems = compareOutputDirs(exp, act);
         assert.deepEqual(problems, [
-          "今回の出力で比べるときの名前が重なるファイル: tsuzuri-abcdefabcd.css と tsuzuri-ffffffffff.css(どちらも tsuzuri-HASH.css)",
+          "今回の出力で比べるときの名前が重なるファイル: tzr-abcdefabcd.css と tzr-ffffffffff.css(どちらも tzr-HASH.css)",
         ]);
-        assert.throws(() => assertSameOutput(exp, act, "t"), /tsuzuri-ffffffffff\.css/);
+        assert.throws(() => assertSameOutput(exp, act, "t"), /tzr-ffffffffff\.css/);
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
       }
@@ -325,10 +325,10 @@ describe("ゴールデン: 比べ方の部品", () => {
     test("CSS が違うと、CSS のファイル名が出る", () => {
       const { root, exp, act } = setup();
       try {
-        fs.writeFileSync(path.join(act, "tsuzuri-abcdefabcd.css"), "body{ }\n");
+        fs.writeFileSync(path.join(act, "tzr-abcdefabcd.css"), "body{ }\n");
         const problems = compareOutputDirs(exp, act);
         assert.equal(problems.length, 1);
-        assert.match(problems[0], /^中身が違うファイル: tsuzuri-HASH\.css:/);
+        assert.match(problems[0], /^中身が違うファイル: tzr-HASH\.css:/);
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
       }

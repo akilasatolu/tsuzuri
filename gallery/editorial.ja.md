@@ -7,7 +7,7 @@ order: 40
 
 # Editorial
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/editorial.css" download>editorial.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/editorial.css" download>editorial.css</a>
 
 雑誌や上質なドキュメントのような、文字組と余白で見せるスタイル。大きな明朝体の見出しと章の番号、朱色の差し色。
 

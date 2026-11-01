@@ -7,7 +7,7 @@ order: 60
 
 # Kintsugi
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/kintsugi.css" download>kintsugi.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/kintsugi.css" download>kintsugi.css</a>
 
 割れた器を漆と金で継ぐ「金継ぎ」のスタイル。白磁のようなカードに金の継ぎ目が走り、コードブロックは漆の黒。ライト表示は白磁、ダーク表示は黒漆。
 

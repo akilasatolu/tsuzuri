@@ -7,7 +7,7 @@ order: 80
 
 # 90s
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/nineties.css" download>nineties.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/nineties.css" download>nineties.css</a>
 
 90s nostalgia. A Windows 95-style teal desktop with gray windows and raised buttons. Light only.
 

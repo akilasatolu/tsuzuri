@@ -7,7 +7,7 @@ order: 20
 
 # Glass
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/glass.css" download>glass.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/glass.css" download>glass.css</a>
 
 Glassmorphism. Thin, clear glass cards that let the colors show through, over a slowly swaying, flowing aurora.
 

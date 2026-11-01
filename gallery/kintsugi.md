@@ -7,7 +7,7 @@ order: 60
 
 # Kintsugi
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/kintsugi.css" download>kintsugi.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/kintsugi.css" download>kintsugi.css</a>
 
 A style after kintsugi, the craft of mending broken pottery with lacquer and gold. Gold seams run across porcelain-like cards, and code blocks are lacquer black. Porcelain in light mode, black lacquer in dark mode.
 

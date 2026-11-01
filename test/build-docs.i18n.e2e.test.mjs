@@ -111,13 +111,13 @@ const navOf = (html) => {
  */
 const stripLangParts = (html) =>
   html
-    .replace(/<div class="tsuzuri-lang-bar">[\s\S]*?<\/div>\n?/g, "")
-    .replace(/<details class="tsuzuri-lang-menu">[\s\S]*?<\/details>/g, "")
-    .replace(/<a class="tsuzuri-lang-switch"[^>]*>[\s\S]*?<\/a>/g, "")
+    .replace(/<div class="tzr-lang-bar">[\s\S]*?<\/div>\n?/g, "")
+    .replace(/<details class="tzr-lang-menu">[\s\S]*?<\/details>/g, "")
+    .replace(/<a class="tzr-lang-switch"[^>]*>[\s\S]*?<\/a>/g, "")
     .replace(/<link rel="alternate" hreflang="[^"]*" href="[^"]*">\n?/g, "");
 /** ページの言語切り替えボタンの部分(無ければ "") */
 const langSwitchOf = (html) =>
-  html.match(/<details class="tsuzuri-lang-menu">[\s\S]*?<\/details>|<a class="tsuzuri-lang-switch"[^>]*>[\s\S]*?<\/a>/)?.[0] ?? "";
+  html.match(/<details class="tzr-lang-menu">[\s\S]*?<\/details>|<a class="tzr-lang-switch"[^>]*>[\s\S]*?<\/a>/)?.[0] ?? "";
 const htmlLang = (html) => html.match(/<html lang="([^"]*)"/)[1];
 const logOf = (result) => `${result.stdout}\n${result.stderr}`;
 
@@ -288,7 +288,7 @@ describe("build-docs.mjs :: 多言語 A(LANGUAGES=ja,en)", () => {
       const en = readOut(dir, "en/docs/a.html");
       assert.match(en, /data-index="\/en\/search-index\.json"/);
       assert.match(readOut(dir, "docs/a.html"), /data-index="\/search-index\.json"/);
-      const pager = en.match(/<nav class="tsuzuri-pager"[\s\S]*?<\/nav>/)[0];
+      const pager = en.match(/<nav class="tzr-pager"[\s\S]*?<\/nav>/)[0];
       assert.deepEqual(hrefsOf(pager), ["/en/README.html", "/en/docs/en-only.html"]);
       const enUrls = JSON.parse(readOut(dir, "en/search-index.json")).map((p) => p.u);
       // index 型の入口(ref/index.en.md)は1言語のときと同じく自分の URL(/en/ref/index.html)
@@ -586,13 +586,13 @@ describe("build-docs.mjs :: 言語切り替えボタンと hreflang", () => {
   test("ボタンはナビの見出しの中で、サイト名の後・「メニュー」の前", () => {
     withSite(FIXTURE_A, {}, (dir) => {
       assert.equal(runBuild(dir, { ...A_ENV, SITE_NAME: "Tsuzuri" }).status, 0);
-      const head = readOut(dir, "docs/a.html").match(/<div class="tsuzuri-nav-head">[\s\S]*?<\/div>/)[0];
+      const head = readOut(dir, "docs/a.html").match(/<div class="tzr-nav-head">[\s\S]*?<\/div>/)[0];
       const name = head.indexOf("<p>Tsuzuri</p>");
-      const sw = head.indexOf('<a class="tsuzuri-lang-switch"');
-      const menu = head.indexOf('<label for="tsuzuri-nav-toggle"');
+      const sw = head.indexOf('<a class="tzr-lang-switch"');
+      const menu = head.indexOf('<label for="tzr-nav-toggle"');
       assert.ok(name >= 0 && sw > name && menu > sw, head);
       // ナビがあるときは本文の上の欄を使わない
-      assert.doesNotMatch(readOut(dir, "docs/a.html"), /tsuzuri-lang-bar/);
+      assert.doesNotMatch(readOut(dir, "docs/a.html"), /tzr-lang-bar/);
     });
   });
 
@@ -600,7 +600,7 @@ describe("build-docs.mjs :: 言語切り替えボタンと hreflang", () => {
     withSite(FIXTURE_A, {}, (dir) => {
       assert.equal(runBuild(dir, { LANGUAGES: "ja,en" }).status, 0);
       const html = readOut(dir, "docs/a.html");
-      assert.match(html, /<main[^>]*>\n<div class="tsuzuri-lang-bar"><a class="tsuzuri-lang-switch" href="\/en\/docs\/a\.html"/);
+      assert.match(html, /<main[^>]*>\n<div class="tzr-lang-bar"><a class="tzr-lang-switch" href="\/en\/docs\/a\.html"/);
       assert.doesNotMatch(html, /<nav aria-label/);
     });
   });
@@ -619,7 +619,7 @@ describe("build-docs.mjs :: 言語切り替えボタンと hreflang", () => {
       const result = runBuild(dir, { LANGUAGES: "ja,en,pt-BR", NAV_ENABLED: "true", STRICT_LINKS: "true" });
       assert.equal(result.status, 0, result.stderr);
       const menu = langSwitchOf(readOut(dir, "docs/a.html"));
-      assert.match(menu, /^<details class="tsuzuri-lang-menu"><summary class="tsuzuri-lang-switch"/);
+      assert.match(menu, /^<details class="tzr-lang-menu"><summary class="tzr-lang-switch"/);
       const links = [...menu.matchAll(/<a href="([^"]*)" hreflang="([^"]*)"([^>]*)>/g)].map((m) => [m[1], m[2], m[3]]);
       assert.deepEqual(
         links.map(([href, tag]) => [href, tag]),
@@ -682,14 +682,14 @@ describe("build-docs.mjs :: 言語切り替えボタンと hreflang", () => {
   test("404 と1言語のサイトにはボタンも hreflang も無い", () => {
     withSite(FIXTURE_A, {}, (dir) => {
       assert.equal(runBuild(dir, { ...A_ENV, SITE_ORIGIN: "https://example.com" }).status, 0);
-      assert.doesNotMatch(readOut(dir, "404.html"), /tsuzuri-lang-(switch|menu|bar)/);
+      assert.doesNotMatch(readOut(dir, "404.html"), /tzr-lang-(switch|menu|bar)/);
     });
     withSite(FIXTURE_A, {}, (dir) => {
       const result = runBuild(dir, { LANGUAGES: "ja", NAV_ENABLED: "true", SITE_ORIGIN: "https://example.com" });
       assert.equal(result.status, 0, result.stderr);
       for (const rel of listFiles(path.join(dir, "_site")).filter((f) => f.endsWith(".html"))) {
         const html = readOut(dir, rel);
-        assert.doesNotMatch(html, /tsuzuri-lang-(switch|menu|bar)|rel="alternate"/, rel);
+        assert.doesNotMatch(html, /tzr-lang-(switch|menu|bar)|rel="alternate"/, rel);
       }
     });
   });
@@ -744,8 +744,8 @@ describe("build-docs.mjs :: リポジトリ情報(多言語)", () => {
     withSite(FIXTURE_A, {}, (dir) => {
       const gh = { GITHUB_SERVER_URL: "https://github.com", GITHUB_REPOSITORY: "o/r", GITHUB_SHA: "abc" };
       assert.equal(runBuild(dir, { ...A_ENV, ...gh, REPO_LINK: "true", REPO_VERSION: "v1", REPO_LICENSE: "MIT" }).status, 0);
-      assert.ok(readOut(dir, "en/index.html").includes('>GitHub repository</a> · <span class="tsuzuri-repo-version">Version: v1</span> · <span class="tsuzuri-repo-license">License: MIT</span>'));
-      assert.ok(readOut(dir, "index.html").includes('>GitHub リポジトリ</a> · <span class="tsuzuri-repo-version">バージョン: v1</span> · <span class="tsuzuri-repo-license">ライセンス: MIT</span>'));
+      assert.ok(readOut(dir, "en/index.html").includes('>GitHub repository</a> · <span class="tzr-repo-version">Version: v1</span> · <span class="tzr-repo-license">License: MIT</span>'));
+      assert.ok(readOut(dir, "index.html").includes('>GitHub リポジトリ</a> · <span class="tzr-repo-version">バージョン: v1</span> · <span class="tzr-repo-license">ライセンス: MIT</span>'));
     });
   });
 });

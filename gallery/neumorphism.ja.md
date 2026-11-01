@@ -7,7 +7,7 @@ order: 30
 
 # Neumorphism
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/neumorphism.css" download>neumorphism.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/neumorphism.css" download>neumorphism.css</a>
 
 Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。
 

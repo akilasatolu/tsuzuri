@@ -7,7 +7,7 @@ order: 10
 
 # Default
 
-<a class="tsuzuri-button" href="../.github/tsuzuri/styles/default.css" download>default.css</a>
+<a class="tzr-button" href="../.github/tsuzuri/styles/default.css" download>default.css</a>
 
 Material Design 3 風。青系の配色、角丸のカードと影、トーンのついたナビの選択。
 

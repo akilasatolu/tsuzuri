@@ -5,7 +5,7 @@
  *
  *   - THEME_HEAD_SCRIPT: <head> に入れる短いスクリプト。前に選んだ表示(localStorage)を、ページが
  *     表示される前に <html data-theme="light|dark"> として反映する(一瞬だけ違う色で表示されるのを防ぐ)。
- *   - THEME_SCRIPT: tsuzuri-theme.js として出力する。ボタンを作り、押すと表示を切り替えて覚えておく。
+ *   - THEME_SCRIPT: tzr-theme.js として出力する。ボタンを作り、押すと表示を切り替えて覚えておく。
  *     テーマにライト/ダークの違いが無い場合(90年代・none など)は、ボタンを出さない。
  *
  * 選んでいないときは、これまでどおり OS の設定(prefers-color-scheme)に従う。
@@ -15,8 +15,8 @@
 
 import { runtimeStrings, RUNTIME_PICK_SOURCE } from "./i18n.mjs";
 
-export const THEME_SCRIPT_NAME = "tsuzuri-theme.js";
-const STORAGE_KEY = "tsuzuri-theme";
+export const THEME_SCRIPT_NAME = "tzr-theme.js";
+const STORAGE_KEY = "tzr-theme";
 // スクリプトに埋め込む文言の表(言語ごとに toLight・toDark だけ。表に無い言語は英語)
 const STRINGS = JSON.stringify(runtimeStrings(["toLight", "toDark"]));
 
@@ -24,7 +24,7 @@ export const THEME_HEAD_SCRIPT = `<script>try{const t=localStorage.getItem("${ST
 
 export const THEME_SCRIPT = `(() => {
   const root = document.documentElement;
-  const head = document.querySelector(".tsuzuri-nav-head");
+  const head = document.querySelector(".tzr-nav-head");
   if (!head) return;
   const S = ${STRINGS};
   const s = S[(${RUNTIME_PICK_SOURCE})(S, root.lang)];
@@ -45,7 +45,7 @@ export const THEME_SCRIPT = `(() => {
 
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "tsuzuri-theme-toggle";
+  button.className = "tzr-theme-toggle";
   const render = () => {
     const dark = current() === "dark";
     button.textContent = dark ? "☀" : "☾";
@@ -65,7 +65,7 @@ export const THEME_SCRIPT = `(() => {
   });
   media.addEventListener("change", render);
   render();
-  const label = head.querySelector(".tsuzuri-nav-label");
+  const label = head.querySelector(".tzr-nav-label");
   head.insertBefore(button, label);
 })();
 `;
