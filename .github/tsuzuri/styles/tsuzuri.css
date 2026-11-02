@@ -327,6 +327,8 @@ main .tzr-pager a:hover { transform: translateY(-2px); border-color: var(--accen
 .tsuzuri-hero-sub { margin: 0 auto 24px; max-width: 34em; color: var(--fg-soft); }
 /* GitHub 上で読みやすくするための区切り(「・」「【】」)。サイトでは表示しない */
 .tsuzuri-sep { display: none; }
+/* GitHub で読む人だけに見せるもの(README のヒーローのサイトへのリンクなど)。サイトでは表示しない */
+.tsuzuri-site-hidden { display: none; }
 .tsuzuri-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 0 0 20px; }
 main a.tzr-button {
   display: inline-block;

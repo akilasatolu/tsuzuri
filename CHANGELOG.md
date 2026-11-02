@@ -46,6 +46,7 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - Class names, ids and generated files that are shared by all styles were renamed from `tsuzuri-` to `tzr-` (for example `tsuzuri-carousel` → `tzr-carousel`, `tsuzuri-button` → `tzr-button`, `tsuzuri-toc` → `tzr-toc`, `tsuzuri-carousel.js` → `tzr-carousel.js`, `tsuzuri-<hash>.css` → `tzr-<hash>.css`). The `tsuzuri-` prefix is now used only for names that only `tsuzuri.css` uses (such as `tsuzuri-hero` and `tsuzuri-button-primary`), and names used by only one style are named after that style (`editorial-chapter`, `glass-aurora-a`, `glass-aurora-b`). The old names are not kept: replace them in your Markdown (for example `<div class="tsuzuri-carousel">`) and in your custom styles. The light/dark choice saved in the browser is reset once, and the CSS file name changes. The unused styles for the old carousel arrows were removed from `tsuzuri.css`.
 - This site's top page was reorganized for people who want good-looking docs on GitHub Pages with little effort: a screenshot of a finished site in the hero, a section on who it is for right after it, three steps to publish, and shorter sections on the look and the features. The feature cards no longer show a one-character mark (the styles for it were removed from `tsuzuri.css`), and the taglines were renewed too. On wide screens, the style carousel of the top page is now at most 720px wide and centered.
 - The hero of this site's top page now shows an animation of a README on GitHub turning into a site with the default style (a still image of the two side by side for readers who prefer reduced motion). `scripts/make-hero-gif.mjs` makes it again.
+- On GitHub, the hero of this site's README now shows a link to the site (it is hidden on the site itself), and the CI status badge was removed from it.
 
 ### Fixed
 
@@ -67,6 +68,7 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - すべてのスタイルで共通に使うクラス名・id・出力ファイルの名前を、`tsuzuri-` から `tzr-` に変えた(例: `tsuzuri-carousel` → `tzr-carousel`、`tsuzuri-button` → `tzr-button`、`tsuzuri-toc` → `tzr-toc`、`tsuzuri-carousel.js` → `tzr-carousel.js`、`tsuzuri-<ハッシュ>.css` → `tzr-<ハッシュ>.css`)。`tsuzuri-` は `tsuzuri.css` だけが使う名前(`tsuzuri-hero`、`tsuzuri-button-primary` など)にだけ使い、1つのスタイルだけが使う名前はそのスタイルの名前にした(`editorial-chapter`、`glass-aurora-a`、`glass-aurora-b`)。古い名前は残さないので、Markdown(例: `<div class="tsuzuri-carousel">`)とカスタムスタイルの名前を置き換えてほしい。ブラウザに保存したライト/ダークの選択は一度だけ元に戻り、CSS のファイル名も変わる。`tsuzuri.css` から、使われていない昔のカルーセルの矢印の指定を削除した。
 - このサイトのトップページを、手間をかけずにGitHub Pagesできれいなドキュメントを公開したい人に向けて組み直した。ヒーローに完成したサイトの画像を置き、そのすぐ下に誰のためのツールかを書き、公開の手順を3ステップにまとめ、見た目と特徴の節を短くした。特徴のカードの一文字のマークをやめ(`tsuzuri.css` からその指定を削除)、あわせてキャッチコピーを改めた。広い画面では、トップページのスタイルのカルーセルを最大720pxの幅にし、中央に置くようにした。
 - このサイトのトップページのヒーローに、GitHubのREADMEがdefaultのスタイルのサイトに変わるアニメーションを置いた(動きを減らす設定の人には、2つを並べた止まった画像)。`scripts/make-hero-gif.mjs`で作り直せる。
+- このサイトのREADMEのヒーローに、GitHubで読む人のためのサイトへのリンクを置き(サイトの上では表示しない)、CIの状態のバッジを外した。
 
 ### 修正
 
