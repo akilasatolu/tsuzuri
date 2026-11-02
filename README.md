@@ -18,8 +18,10 @@ npx github:akilasatolu/tsuzuri#v1 init
 [![Build Status](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml)
 
 <picture>
-<source media="(prefers-color-scheme: dark)" srcset="assets/gallery/tsuzuri-dark.png">
-<img src="assets/gallery/tsuzuri-light.png" alt="A page built with Tsuzuri" width="640">
+<source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="assets/hero/readme-to-site-dark.png">
+<source media="(prefers-reduced-motion: reduce)" srcset="assets/hero/readme-to-site-light.png">
+<source media="(prefers-color-scheme: dark)" srcset="assets/hero/readme-to-site-dark.gif">
+<img src="assets/hero/readme-to-site-light.gif" alt="A README on GitHub turning into a Tsuzuri site" width="640">
 </picture>
 
 </div>
