@@ -417,24 +417,10 @@ main a.tzr-button[download]::before {
   transition: transform 0.15s, box-shadow 0.15s;
 }
 .tsuzuri-feature:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-/* 見出しの先頭の一文字(見出しの上に、ロゴの中心のような灯った丸として表示する) */
-.tsuzuri-feature-mark {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin: 0 0 12px;
-  color: #fff;
-  font-size: 1.3rem;
-  line-height: 1;
-  font-weight: 800;
-  background: var(--gradient-flame);
-  border-radius: 50%;
-  box-shadow: 0 0 0 6px color-mix(in srgb, #f97316 18%, transparent);
-}
-.tsuzuri-feature:nth-child(even) .tsuzuri-feature-mark { background: var(--gradient); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 14%, transparent); }
 main .tsuzuri-feature h3 { margin: 0 0 6px; font-size: 1.05rem; }
 main .tsuzuri-feature h3::before { content: none; }
+/* 見出しの下の短い線(ロゴの炎の色) */
+main .tsuzuri-feature h3::after { content: ""; display: block; width: 28px; height: 3px; margin-top: 10px; background: var(--gradient-flame); border-radius: 2px; }
 .tsuzuri-feature p:last-child { margin: 0; color: var(--fg-soft); font-size: 0.93em; line-height: 1.7; }
 
 /* ---------- コードのコピーボタン ---------- */

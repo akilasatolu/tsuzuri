@@ -4,103 +4,98 @@
 
 # Tsuzuri
 
-<p class="tsuzuri-hero-lead">From your README, in just three steps. Your own site, simple and beautiful.</p>
+<p class="tsuzuri-hero-lead">Focus on your product. Your README becomes a beautiful docs site.</p>
 
-<p class="tsuzuri-hero-sub">Run one command, and your README and the pages it links to become a polished GitHub Pages site. No heavy tools to learn, no design to set up. Your words, in their best form.</p>
+<p class="tsuzuri-hero-sub">One command sets it up, and every push to your branch publishes it to GitHub Pages. No docs framework to learn, no theme to design, no second copy of your docs to keep in sync.</p>
 
 ```sh
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-<p class="tsuzuri-hero-actions"><a class="tzr-button tsuzuri-button-primary" href="docs/getting-started.md">Get started</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="#documentation">Documentation</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
+<p class="tsuzuri-hero-actions"><a class="tzr-button tsuzuri-button-primary" href="docs/getting-started.md">Get started</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="gallery/style-gallery.md">Style gallery</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/akilasatolu/tsuzuri/blob/main/LICENSE)
 [![Build Status](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/akilasatolu/tsuzuri/actions/workflows/ci.yml)
 
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="assets/gallery/tsuzuri-dark.png">
+<img src="assets/gallery/tsuzuri-light.png" alt="A page built with Tsuzuri" width="640">
+</picture>
+
 </div>
+
+## Made for product builders
+
+Tsuzuri is for you if:
+
+- You'd rather spend your time on the product than on building a docs site.
+- You want docs that look finished, without designing a theme.
+- You want to publish how-to guides on GitHub Pages, without learning a docs tool.
+
+If your README (and a few pages it links to) already explains your product, that's all Tsuzuri needs.
+
+## Live in three steps
+
+1. Run `npx github:akilasatolu/tsuzuri#v1 init` at the root of your repository, and press Enter to accept the defaults for its two questions.
+2. In your GitHub repository, open **Settings → Pages** and set Source to **GitHub Actions** (first time only).
+3. Push to your default branch (usually `main`). From then on, every push to it updates the site.
+
+There is nothing to keep installed on your machine: the build runs on GitHub Actions (only running `init` needs Node.js 20 or later). [Get started](docs/getting-started.md) explains each step in detail.
 
 Prefer to let an AI agent set it up? Paste the [reference for AI agents](docs/ai-reference.md) into it.
 
-## What you get
+## Your time goes to the product
 
-This documentation is itself built with Tsuzuri from the README and the Markdown files it links, and published on GitHub Pages: https://akilasatolu.github.io/tsuzuri/
-
-## Why Tsuzuri
-
-Write your README, and that is your site. Here is what it answers.
+Docs matter, but they shouldn't eat into your product time. Tsuzuri takes these off your plate.
 
 | Your trouble | Tsuzuri's answer | Details |
 |---|---|---|
+| Docs tools take days to learn and configure, so the site never gets made. | One `init` and one settings file. No workflow YAML to write. | [Get started](docs/getting-started.md) |
+| A plain site looks unfinished and loses readers in the first few seconds. | A themed site from the first build, with light and dark. Pick another look from the style gallery. | [Style gallery](gallery/style-gallery.md) |
 | You write the same content twice, in the README and on a docs site, and one of them goes stale. | The README is the site: Tsuzuri follows its links, so there is no second copy. | [Write pages](docs/guides/write-pages.md) |
-| Docs tools are heavy to learn and set up, so the site never gets made. | One `init` and one settings file. | [Get started](docs/getting-started.md) |
 | Even after the site is up, tools and dependencies need upkeep. | Updating is one command: `init --update`. | [Update](docs/guides/update.md) |
-| A plain site loses visitors in the first few seconds. | `init` once and you get a themed site. Pick another look from the style gallery. | [Style gallery](gallery/style-gallery.md) |
 
 So all you have to write is the README.
 
-## How it works
+## Looks good from day one
 
-```mermaid
-flowchart LR
-    A[README.md] -->|follow the links| B[Static site]
-    B -->|GitHub Actions| C[GitHub Pages]
-```
-
-Starting from your README, Tsuzuri follows the links, turns the connected Markdown files and images into a static site, and publishes it on GitHub Pages. To add a page, link it from the README or from another page.
-
-## Quick start
-
-1. Run the following command at the root of your repository. It asks two questions (the trigger branch and the starting Markdown file); press Enter to accept the defaults.
-
-   ```sh
-   npx github:akilasatolu/tsuzuri#v1 init
-   ```
-
-   It creates the workflow (`.github/workflows/tsuzuri-pages.yml`) and the settings file (`.github/tsuzuri/config`), and copies the build script into `.github/tsuzuri/`. After that, builds and deployments run entirely inside your repository.
-
-2. In your GitHub repository, open **Settings → Pages** and set Source to **GitHub Actions** (first time only).
-3. Push or merge to the branch set in `TRIGGER_BRANCH` of `.github/tsuzuri/config` (the repository's default branch, usually `main`, if left out).
-
-The workflow runs in the Actions tab, and when it finishes the site is published. The URL is shown under Settings → Pages. [Get started](docs/getting-started.md) explains each step in detail.
-
-## Features
-
-<div class="tsuzuri-features">
-<div class="tsuzuri-feature">
-<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">綴</span><span class="tsuzuri-sep">】</span>Follow the links, get one site</h3>
-<p>Pages and images linked from the README are collected automatically. To add a page, just add one link. No sitemap to maintain.</p>
-</div>
-<div class="tsuzuri-feature">
-<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">設</span><span class="tsuzuri-sep">】</span>Just one settings file</h3>
-<p>Change the behavior by editing .github/tsuzuri/config. You never need to edit the workflow YAML.</p>
-</div>
-<div class="tsuzuri-feature">
-<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">彩</span><span class="tsuzuri-sep">】</span>Custom styles</h3>
-<p>Start with the default look, or download a custom style such as Glass, Editorial or Minimal from the style gallery, then fine-tune it as your own. This site is built with a custom style of its own too.</p>
-</div>
-<div class="tsuzuri-feature">
-<h3><span class="tsuzuri-sep">【</span><span class="tsuzuri-feature-mark">探</span><span class="tsuzuri-sep">】</span>Navigation, search and table of contents</h3>
-<p>A sidebar, site search and an in-page table of contents are generated for you. OGP, favicons, sitemap.xml and multilingual sites are supported.</p>
-</div>
-</div>
-
-## Pick a look
-
-The look is a custom style, a CSS file in `.github/tsuzuri/styles/`. `default.css` is included in the package and is used from the start. Download any other style from the [style gallery](gallery/style-gallery.md), put it in `.github/tsuzuri/styles/`, and set `THEME` in `.github/tsuzuri/config` (for example `THEME=glass.css`).
+Your site starts with a finished look. To change it, pick a style from the style gallery, put its CSS file in `.github/tsuzuri/styles/` and set `THEME` in `.github/tsuzuri/config` (for example `THEME=glass.css`). This site uses a style of its own, `tsuzuri.css`.
 
 <div class="tzr-carousel">
 <img src="assets/gallery/default-light.png" alt="default (light)" width="320">
-<img src="assets/gallery/default-dark.png" alt="default (dark)" width="320">
-<img src="assets/gallery/glass-light.png" alt="glass (light)" width="320">
+<img src="assets/gallery/glass-dark.png" alt="glass (dark)" width="320">
+<img src="assets/gallery/editorial-light.png" alt="editorial (light)" width="320">
+<img src="assets/gallery/minimal-dark.png" alt="minimal (dark)" width="320">
 <img src="assets/gallery/kintsugi-dark.png" alt="kintsugi (dark)" width="320">
+<img src="assets/gallery/blueprint-light.png" alt="blueprint (light)" width="320">
 </div>
 
 [See all the styles in the style gallery](gallery/style-gallery.md).
 
-## Is it for you?
+## Everything a docs site needs, already on
 
-- **A good fit**: a project whose README (and a few linked pages) is its documentation, which you want to publish on GitHub Pages with a good look and little upkeep.
-- **Not a fit**: sites that are published somewhere other than GitHub Pages (Tsuzuri is for GitHub Pages only), and documentation that keeps a separate copy for each version (there is one version of the site: the branch you publish).
+<div class="tsuzuri-features">
+<div class="tsuzuri-feature">
+<h3>One site, from your links</h3>
+<p>Pages and images linked from the README are collected automatically. To add a page, add one link. No sitemap or sidebar settings to maintain.</p>
+</div>
+<div class="tsuzuri-feature">
+<h3>Easy to find your way</h3>
+<p>A sidebar, site search, an in-page table of contents and copy buttons on code. GitHub alerts, footnotes and mermaid diagrams work as they do on GitHub.</p>
+</div>
+<div class="tsuzuri-feature">
+<h3>Ready to share</h3>
+<p>OGP images, a favicon, sitemap.xml, llms.txt for AI tools, and multilingual sites.</p>
+</div>
+<div class="tsuzuri-feature">
+<h3>Safe to publish</h3>
+<p>Broken links can stop the build before they go live, and the build dependencies are pinned by hash and checked for npm signatures.</p>
+</div>
+</div>
+
+## When it's not a fit
+
+Tsuzuri is not a fit for sites that are published somewhere other than GitHub Pages (Tsuzuri is for GitHub Pages only), or for documentation that keeps a separate copy for each version (there is one version of the site: the branch you publish).
 
 ## Documentation
 
