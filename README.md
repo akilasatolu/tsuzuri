@@ -61,7 +61,7 @@ So all you have to write is the README.
 
 Your site starts with a finished look. To change it, pick a style from the style gallery, put its CSS file in `.github/tsuzuri/styles/` and set `THEME` in `.github/tsuzuri/config` (for example `THEME=glass.css`). This site uses a style of its own, `tsuzuri.css`.
 
-<div class="tzr-carousel">
+<div class="tzr-carousel tsuzuri-showcase">
 <img src="assets/gallery/default-light.png" alt="default (light)" width="320">
 <img src="assets/gallery/glass-dark.png" alt="glass (dark)" width="320">
 <img src="assets/gallery/editorial-light.png" alt="editorial (light)" width="320">

@@ -453,6 +453,9 @@ main > .tsuzuri-hero-actions { justify-content: flex-start; }
 }
 .tzr-theme-toggle:hover { color: #fff; background: var(--gradient); }
 
+/* トップの「見た目」の節のカルーセル(README の <div class="tzr-carousel tsuzuri-showcase">)。広い画面で画像が大きくなりすぎないよう、幅の上限を決めて中央に置く */
+.tsuzuri-showcase { max-width: 720px; margin-inline: auto; }
+
 /* ---------- カルーセルのナビ(ドット。tzr-carousel.js が付ける) ---------- */
 .tzr-carousel-nav { color: var(--fg-soft); }
 .tzr-carousel-nav .tzr-carousel-dot::before { background: color-mix(in srgb, var(--accent) 25%, transparent); }

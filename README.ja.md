@@ -61,7 +61,7 @@ AIエージェントに導入を任せたいときは、[AIエージェント向
 
 サイトは最初から、仕上がった見た目で公開されます。変えたいときは、スタイルギャラリーでスタイルを選び、そのCSSファイルを`.github/tsuzuri/styles/`に置いて、`.github/tsuzuri/config`の`THEME`に書きます(例: `THEME=glass.css`)。このサイトは、独自のスタイル(`tsuzuri.css`)を使っています。
 
-<div class="tzr-carousel">
+<div class="tzr-carousel tsuzuri-showcase">
 <img src="assets/gallery/default-light.png" alt="default(ライト)" width="320">
 <img src="assets/gallery/glass-dark.png" alt="glass(ダーク)" width="320">
 <img src="assets/gallery/editorial-light.png" alt="editorial(ライト)" width="320">
