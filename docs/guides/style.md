@@ -1,14 +1,14 @@
 ---
 title: Change the look
-description: Pick a style in the style gallery and set THEME, or change only the colors with a few CSS variables
+description: Pick a style in the gallery and set THEME, or change only the colors with a few CSS variables
 order: 20
 ---
 
 # Change the look
 
-To change the look, pick a style in the [style gallery](../../gallery/style-gallery.md) and set `THEME`. To change only the colors, override a few CSS variables.
+To change the look, pick a style in the [gallery](../../gallery/) and set `THEME`. To change only the colors, override a few CSS variables.
 
-## Pick a style from the style gallery
+## Pick a style from the gallery
 
 1. Download the CSS file with the button on the tile of the style you like.
 2. Put it in `.github/tsuzuri/styles/`.
@@ -19,7 +19,7 @@ The colors, link underlines and the rest of the look switch together. `default.c
 ## Custom styles
 
 Every `.css` file you put in `.github/tsuzuri/styles/` is called a **custom style**: `default.css`,
-the ones you download from the style gallery, and the ones you write yourself are all treated the same
+the ones you download from the gallery, and the ones you write yourself are all treated the same
 way. Choose one for the whole site with the `THEME` key in `.github/tsuzuri/config`, and write
 **only the file name** (no folders):
 
@@ -46,10 +46,10 @@ dark automatically. It is included in the package: `init` puts it (and the base 
 download it. `init --update` overwrites it with the latest version; to edit it, copy it under another name
 and set that name in `THEME`.
 
-### Custom styles in the style gallery
+### Custom styles in the gallery
 
 The other custom styles are not distributed with the package. They're in the
-[style gallery](../../gallery/style-gallery.md), where you can see what each looks like on real pages and download its CSS file.
+[gallery](../../gallery/), where you can see what each looks like on real pages and download its CSS file.
 Download one, put it in `.github/tsuzuri/styles/`, and set `THEME=<file name>.css`.
 
 - **Glass (`glass.css`)**: Glassmorphism. Thin, clear glass cards that let the colors show through,
@@ -107,7 +107,7 @@ site-wide custom style is not mixed in. To show a page with no decoration, use `
 (the file `none.css`, which contains only comments, has to be in `.github/tsuzuri/styles/`). See
 the [frontmatter reference](../reference/frontmatter.md#theme) for details.
 
-To compare custom styles on your own site, give several Markdown files different `theme` values (file names in `.github/tsuzuri/styles/`) and build with the regular `tsuzuri-pages.yml`. You can also compare them as real pages in the [style gallery](../../gallery/style-gallery.md).
+To compare custom styles on your own site, give several Markdown files different `theme` values (file names in `.github/tsuzuri/styles/`) and build with the regular `tsuzuri-pages.yml`. You can also compare them as real pages in the [gallery](../../gallery/).
 
 ## Writing your own custom style
 
@@ -123,7 +123,7 @@ The variables you can override are listed in [Change only the colors](#change-on
 > ([tsuzuri.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/tsuzuri.css)). See it as an example of how to write
 > one (you can see the result in the [custom style example](../../gallery/tsuzuri.md)).
 >
-> This site's [style gallery](../../gallery/style-gallery.md) shows each custom style on its own page by writing
+> This site's [gallery](../../gallery/) shows each custom style on its own page by writing
 > [`theme`](../reference/frontmatter.md#theme) in the frontmatter of the sample pages.
 
 Besides overriding variables, you can also add ordinary CSS rules such as `main h1 { ... }` to a
@@ -138,7 +138,7 @@ navigation. The chosen mode is added as `<html data-theme="light">` or
 followed).
 
 To write dark colors in your custom style, write the same colors for both "when the OS is in dark
-mode (unless light was chosen)" and "when dark was chosen". `default.css` and the other custom styles in the style gallery are written
+mode (unless light was chosen)" and "when dark was chosen". `default.css` and the other custom styles in the gallery are written
 this way too.
 
 ```css

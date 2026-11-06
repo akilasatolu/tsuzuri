@@ -11,12 +11,12 @@ order: 80
 
 90s Nostalgia。Windows 95 風の青緑のデスクトップと灰色のウィンドウ、立体のボタン。ライト表示のみ。
 
-使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`nineties.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([ギャラリー](./)でも可)で`nineties.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=nineties.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: nineties.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← Blueprint](blueprint.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [None →](none.ja.md)
+[← Blueprint](blueprint.ja.md) ・ [ギャラリー](./) ・ [None →](none.ja.md)
 
 ## 見出しレベル2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← Blueprint](blueprint.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [None →](none.ja.md)
+[← Blueprint](blueprint.ja.md) ・ [ギャラリー](./) ・ [None →](none.ja.md)

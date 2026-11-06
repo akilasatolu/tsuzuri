@@ -109,7 +109,7 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 `THEME=default.css`(パッケージに入っている標準のカスタムスタイル)で始めます。変えたいときは、`init`の後に
 `.github/tsuzuri/config`を編集します。READMEが日本語なら`LANGUAGES=ja`([多言語サイト](../guides/multilingual.ja.md)参照)、
 サイト名を決めるなら`SITE_NAME`、ナビを出さないなら`NAV_ENABLED=false`です。ほかのカスタムスタイルを使うときは、
-[スタイルギャラリー](../../gallery/style-gallery.ja.md)でダウンロードして、そのファイル名を`THEME`に書きます([見た目を変える](../guides/style.ja.md)参照)。
+[ギャラリー](../../gallery/)でダウンロードして、そのファイル名を`THEME`に書きます([見た目を変える](../guides/style.ja.md)参照)。
 
 ## 生成されるファイル
 
@@ -121,7 +121,7 @@ gitリポジトリではない場所で実行すると、警告を表示しま�
 | `.github/tsuzuri/config` | 常に生成 | `TRIGGER_BRANCH`/`ROOT_MD`は回答内容を反映し、それ以外のキー(`THEME=default.css`を含む)は既定値で出力される設定ファイル。利用者が編集するファイル |
 | `.github/tsuzuri/build-docs.mjs` | 常に生成 | ビルド本体のスクリプト(OSS本体リポジトリの`.github/scripts/build-docs.mjs`と同一内容) |
 | `.github/tsuzuri/lib/*.mjs` | 常に生成 | ビルド本体が依存するモジュール一式(config/copy-button/crawler/emoji/emoji-data/frontmatter/html-renderer/i18n/image-size/link-extractor/llms-txt/path-utils/search/site-tree/sitemap/slugger/theme-toggle の17ファイル) |
-| `.github/tsuzuri/styles/base.css`・`default.css` | 常に生成 | ベースCSS(`base.css`)と、標準のカスタムスタイル(`default.css`)。置かれるのはこの2つだけで、ほかのカスタムスタイルは配布せず、[スタイルギャラリー](../../gallery/style-gallery.ja.md)でダウンロードして使う |
+| `.github/tsuzuri/styles/base.css`・`default.css` | 常に生成 | ベースCSS(`base.css`)と、標準のカスタムスタイル(`default.css`)。置かれるのはこの2つだけで、ほかのカスタムスタイルは配布せず、[ギャラリー](../../gallery/)でダウンロードして使う |
 | `.github/tsuzuri/package.json`・`package-lock.json` | 常に生成 | ビルド用の依存(marked など)の版と、ダウンロードした中身を確かめるハッシュ。ワークフローと`preview`はこのとおりに`npm ci`でインストールする |
 | `.github/tsuzuri/.gitignore` | 常に生成 | 手元でプレビューするときにインストールする依存(`node_modules/`)をコミットしないための設定 |
 

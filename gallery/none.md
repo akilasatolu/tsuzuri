@@ -11,12 +11,12 @@ order: 90
 
 Only the base CSS is applied, and the page is shown with the browser's default look. `none.css` is a CSS file that contains only comments.
 
-To use it, download `none.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
+To use it, download `none.css` with the button above (or from the [gallery](./)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=none.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: none.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← 90s](nineties.md) · [Style gallery](style-gallery.md) · [Tsuzuri →](tsuzuri.md)
+[← 90s](nineties.md) · [Gallery](./) · [Tsuzuri →](tsuzuri.md)
 
 ## Heading level 2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← 90s](nineties.md) · [Style gallery](style-gallery.md) · [Tsuzuri →](tsuzuri.md)
+[← 90s](nineties.md) · [Gallery](./) · [Tsuzuri →](tsuzuri.md)

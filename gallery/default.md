@@ -16,7 +16,7 @@ Inspired by Material Design 3. Blue colors, rounded cards with shadows, and a ti
 To use it for a single page only, write `theme: default.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[Style gallery](style-gallery.md) · [Glass →](glass.md)
+[Gallery](./) · [Glass →](glass.md)
 
 ## Heading level 2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[Style gallery](style-gallery.md) · [Glass →](glass.md)
+[Gallery](./) · [Glass →](glass.md)

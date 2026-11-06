@@ -375,7 +375,7 @@ main a.tzr-button[download]::before {
 .tsuzuri-hero p:has(> a > img) a { background: none; }
 .tsuzuri-hero p:has(> a > img) img { border-radius: 4px; }
 
-/* ---------- スタイルギャラリーのタイル(flex + gap。タイル全体が押せる。画像・名前・ダウンロードだけ。列数は枠の幅で決める) ---------- */
+/* ---------- ギャラリーのタイル(flex + gap。タイル全体が押せる。画像・名前・ダウンロードだけ。列数は枠の幅で決める) ---------- */
 .tzr-tiles { container-type: inline-size; display: flex; flex-wrap: wrap; gap: 20px; margin: 0 0 24px; }
 .tzr-tile {
   position: relative;               /* 見出しのリンクを広げる基準 */

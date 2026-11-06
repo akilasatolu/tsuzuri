@@ -11,12 +11,12 @@ order: 60
 
 A style after kintsugi, the craft of mending broken pottery with lacquer and gold. Gold seams run across porcelain-like cards, and code blocks are lacquer black. Porcelain in light mode, black lacquer in dark mode.
 
-To use it, download `kintsugi.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
+To use it, download `kintsugi.css` with the button above (or from the [gallery](./)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=kintsugi.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: kintsugi.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← Minimal](minimal.md) · [Style gallery](style-gallery.md) · [Blueprint →](blueprint.md)
+[← Minimal](minimal.md) · [Gallery](./) · [Blueprint →](blueprint.md)
 
 ## Heading level 2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← Minimal](minimal.md) · [Style gallery](style-gallery.md) · [Blueprint →](blueprint.md)
+[← Minimal](minimal.md) · [Gallery](./) · [Blueprint →](blueprint.md)

@@ -11,12 +11,12 @@ order: 30
 
 Neumorphism。地と同じ色の部品が、光と影で浮き出したりへこんだりする。
 
-使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`neumorphism.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([ギャラリー](./)でも可)で`neumorphism.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=neumorphism.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: neumorphism.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← Glass](glass.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Editorial →](editorial.ja.md)
+[← Glass](glass.ja.md) ・ [ギャラリー](./) ・ [Editorial →](editorial.ja.md)
 
 ## 見出しレベル2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← Glass](glass.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Editorial →](editorial.ja.md)
+[← Glass](glass.ja.md) ・ [ギャラリー](./) ・ [Editorial →](editorial.ja.md)

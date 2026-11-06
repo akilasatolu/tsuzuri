@@ -23,7 +23,7 @@ It asks nothing and works as follows.
 | `.github/workflows/tsuzuri-pages.yml` | Overwritten with the latest version |
 | Build script, `base.css` and `default.css` under `.github/tsuzuri/` | Overwritten with the latest version (new files are added; scripts under `lib/` no longer used by the latest version are deleted). `default.css` is overwritten, so copy it under another name if you want to edit it; CSS files in `styles/` are never deleted |
 | `.github/tsuzuri/config` | **Not changed** |
-| Custom styles you put in `.github/tsuzuri/styles/` (the ones downloaded from the style gallery, and your own) | **Not changed** (and not deleted) |
+| Custom styles you put in `.github/tsuzuri/styles/` (the ones downloaded from the gallery, and your own) | **Not changed** (and not deleted) |
 
 `--lang` does not change what `--update` writes, except for one case: with `init --update --lang ja`,
 the messages are in Japanese. The workflow, `.gitignore`, `package.json` and CSS files it overwrites are the

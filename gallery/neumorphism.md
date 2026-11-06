@@ -11,12 +11,12 @@ order: 30
 
 Neumorphism. Parts in the same color as the background, raised or pressed in with light and shadow.
 
-To use it, download `neumorphism.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
+To use it, download `neumorphism.css` with the button above (or from the [gallery](./)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=neumorphism.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: neumorphism.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← Glass](glass.md) · [Style gallery](style-gallery.md) · [Editorial →](editorial.md)
+[← Glass](glass.md) · [Gallery](./) · [Editorial →](editorial.md)
 
 ## Heading level 2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← Glass](glass.md) · [Style gallery](style-gallery.md) · [Editorial →](editorial.md)
+[← Glass](glass.md) · [Gallery](./) · [Editorial →](editorial.md)

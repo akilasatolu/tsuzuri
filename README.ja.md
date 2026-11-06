@@ -12,7 +12,7 @@
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-<p class="tsuzuri-hero-actions"><a class="tzr-button tsuzuri-button-primary" href="docs/getting-started.ja.md">はじめる</a><span class="tsuzuri-sep"> ・ </span><a class="tzr-button" href="gallery/style-gallery.ja.md">スタイルギャラリー</a><span class="tsuzuri-sep"> ・ </span><a class="tzr-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
+<p class="tsuzuri-hero-actions"><a class="tzr-button tsuzuri-button-primary" href="docs/getting-started.ja.md">はじめる</a><span class="tsuzuri-sep"> ・ </span><a class="tzr-button" href="gallery/">ギャラリー</a><span class="tsuzuri-sep"> ・ </span><a class="tzr-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
 
 <p class="tsuzuri-site-hidden">サイト: <a href="https://akilasatolu.github.io/tsuzuri/ja/">akilasatolu.github.io/tsuzuri/ja</a></p>
 
@@ -54,7 +54,7 @@ AIエージェントに導入を任せたいときは、[AIエージェント向
 | こんな悩み | Tsuzuriの答え | 詳しく見る |
 |---|---|---|
 | ドキュメントツールの学習と設定が重くて、サイトを作らないままになる。 | `init`を1回と、設定ファイル1つだけ。ワークフローのYAMLは書かなくてよい。 | [はじめる](docs/getting-started.ja.md) |
-| 飾りのないサイトは、未完成に見えて、最初の数秒で離脱される。 | 最初のビルドからテーマ付きで、ライトとダークにも対応。ほかの見た目は、スタイルギャラリーから選べる。 | [スタイルギャラリー](gallery/style-gallery.ja.md) |
+| 飾りのないサイトは、未完成に見えて、最初の数秒で離脱される。 | 最初のビルドからテーマ付きで、ライトとダークにも対応。ほかの見た目は、ギャラリーから選べる。 | [ギャラリー](gallery/) |
 | READMEとドキュメントサイトに同じ内容を二度書いて、片方が古くなる。 | READMEがそのままサイトになる。リンクをたどるので、二重の管理がない。 | [ページを書く](docs/guides/write-pages.ja.md) |
 | サイトを作っても、ツールや依存の更新への追従が続く。 | 更新はコマンド1つ(`init --update`)。 | [更新する](docs/guides/update.ja.md) |
 
@@ -62,7 +62,7 @@ AIエージェントに導入を任せたいときは、[AIエージェント向
 
 ## 最初から、見栄えのするサイトに
 
-サイトは最初から、仕上がった見た目で公開されます。変えたいときは、スタイルギャラリーでスタイルを選び、そのCSSファイルを`.github/tsuzuri/styles/`に置いて、`.github/tsuzuri/config`の`THEME`に書きます(例: `THEME=glass.css`)。このサイトは、独自のスタイル(`tsuzuri.css`)を使っています。
+サイトは最初から、仕上がった見た目で公開されます。変えたいときは、ギャラリーでスタイルを選び、そのCSSファイルを`.github/tsuzuri/styles/`に置いて、`.github/tsuzuri/config`の`THEME`に書きます(例: `THEME=glass.css`)。このサイトは、独自のスタイル(`tsuzuri.css`)を使っています。
 
 <div class="tzr-carousel tsuzuri-showcase">
 <img src="assets/gallery/default-light.png" alt="default(ライト)" width="320">
@@ -73,7 +73,7 @@ AIエージェントに導入を任せたいときは、[AIエージェント向
 <img src="assets/gallery/blueprint-light.png" alt="blueprint(ライト)" width="320">
 </div>
 
-[スタイルギャラリーですべてのスタイルを見る](gallery/style-gallery.ja.md)。
+[ギャラリーですべてのスタイルを見る](gallery/)。
 
 ## ドキュメントサイトに要るものは、最初から
 
@@ -103,7 +103,7 @@ GitHub Pages以外で公開したいサイト(TsuzuriはGitHub Pages専用です
 ## ドキュメント
 
 - [はじめる](docs/getting-started.ja.md): READMEをサイトとして公開する、3つの手順。
-- [スタイルギャラリー](gallery/style-gallery.ja.md): 見た目を選ぶ。
+- [ギャラリー](gallery/): 見た目を選ぶ。
 - [ガイド](docs/guides/README.ja.md): ページを足す、見た目を変える、多言語にする、など。
 - [リファレンス](docs/reference/README.ja.md): 設定・frontmatter・コマンド・ビルドの仕組み。
 - [FAQ](docs/faq.ja.md): よくある困りごとへの答え。

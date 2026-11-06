@@ -114,7 +114,7 @@ GitHub で動きます。git のリポジトリの外、またはリポジトリ
 `init` は、テーマやカスタムスタイルについても質問しません。設定ファイルは
 常に `THEME=default.css` で始まり、`init` が `.github/tsuzuri/styles/` に置くのは
 `base.css` と `default.css` だけです(3.5 を参照)。ほかのカスタムスタイルを使うには、
-利用者がスタイルギャラリーでダウンロードして、そのファイル名を `THEME` に書きます。
+利用者がギャラリーでダウンロードして、そのファイル名を `THEME` に書きます。
 
 ### 3.4 対話なしの実行
 
@@ -158,7 +158,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main
 - `.github/tsuzuri/lib/*.mjs`: ビルドスクリプトが使うモジュール(17 個)
 - `.github/tsuzuri/styles/base.css`、`.github/tsuzuri/styles/default.css`: 基礎の CSS と、
   標準のカスタムスタイルです。置かれるのはこの 2 つだけです。ほかのカスタムスタイルは
-  パッケージには含めて配らず、スタイルギャラリーに載せています。
+  パッケージには含めて配らず、ギャラリーに載せています。
 - `.github/tsuzuri/package.json`、`.github/tsuzuri/package-lock.json`:
   ビルドに使う依存(marked、highlight.js、marked-footnote)のバージョンと
   ハッシュ
@@ -249,7 +249,7 @@ npx github:akilasatolu/tsuzuri#v1 init --yes --branch main
   CSS のファイル名でない値(`none`、フォルダを
   含むパス、`.css` で終わらない名前)は、警告のうえで `default.css` になります。
   ファイルが無い場合は、警告のうえで、基礎の CSS だけでビルドされます。
-  `THEME=none` というキーワードはありません(装飾なしにするには、スタイルギャラリーの
+  `THEME=none` というキーワードはありません(装飾なしにするには、ギャラリーの
   `none.css` のような、コメントだけの CSS ファイルを使います)。
   省略時: `default.css`
   init の値: `default.css`
@@ -533,7 +533,7 @@ order: 1
   `default.css` はパッケージに入っています。ほかのカスタムスタイル(`glass.css`、
   `neumorphism.css`、`editorial.css`、`minimal.css`、`kintsugi.css`、`blueprint.css`、
   `nineties.css`、`none.css`、このサイト自身の見た目)はパッケージには含めて配りません。
-  利用者がスタイルギャラリーでダウンロードして、`.github/tsuzuri/styles/` に置き、`THEME` に
+  利用者がギャラリーでダウンロードして、`.github/tsuzuri/styles/` に置き、`THEME` に
   指定します。
 - カスタムスタイルでは、`--fg`、`--bg`、`--border`、`--accent`、`--code-bg`、`--font`、
   `--content-width` などの CSS 変数を定義・上書きできます。`default.css` を少し変えたいときは、
@@ -767,7 +767,7 @@ npx github:akilasatolu/tsuzuri#v1 init --update
   書かれています(例: `THEME=glass.css`)。
 - 症状: ビルドのログに `THEME` のファイルが見つからないという警告が出て、ページに
   装飾がありません。
-  原因: CSS ファイルが `.github/tsuzuri/styles/` にありません(スタイルギャラリーからダウンロード
+  原因: CSS ファイルが `.github/tsuzuri/styles/` にありません(ギャラリーからダウンロード
   していない、または別のフォルダに置いている)。
   症状が出ない条件: ファイルが `.github/tsuzuri/styles/` に置かれています。
 - 症状: リリースされていない動きをするバージョンが実行されます。
@@ -789,7 +789,7 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 - ページの機能: https://akilasatolu.github.io/tsuzuri/ja/docs/reference/features.html
 - 設定キー: https://akilasatolu.github.io/tsuzuri/ja/docs/reference/configuration.html
 - 見た目を変える(カスタムスタイル): https://akilasatolu.github.io/tsuzuri/ja/docs/guides/style.html
-- スタイルギャラリー(見本とダウンロード): https://akilasatolu.github.io/tsuzuri/ja/gallery/style-gallery.html
+- ギャラリー(見本とダウンロード): https://akilasatolu.github.io/tsuzuri/ja/gallery/
 - frontmatter: https://akilasatolu.github.io/tsuzuri/ja/docs/reference/frontmatter.html
 - 多言語のサイト: https://akilasatolu.github.io/tsuzuri/ja/docs/guides/multilingual.html
 - コマンド: https://akilasatolu.github.io/tsuzuri/ja/docs/reference/cli.html

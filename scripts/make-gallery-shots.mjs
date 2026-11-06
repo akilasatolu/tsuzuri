@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// スタイルギャラリーのスクリーンショット(assets/gallery/<スタイル>-<light|dark>.png)を撮り直す。
+// ギャラリーのスクリーンショット(assets/gallery/<スタイル>-<light|dark>.png)を撮り直す。
 //   node scripts/make-gallery-shots.mjs
 //
 // 作るもの(どれも 1280×800。assets/gallery/ に上書きする):

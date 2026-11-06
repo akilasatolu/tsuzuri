@@ -25,4 +25,4 @@ Before you write, a look at the [FAQ](faq.md) and the existing [issues](https://
 ## Read next
 
 - [FAQ](./faq.md): answers to the common problems.
-- [Style gallery](../gallery/style-gallery.md): compare the styles and download one.
+- [Gallery](../gallery/): compare the styles and download one.

@@ -12,7 +12,7 @@
 npx github:akilasatolu/tsuzuri#v1 init
 ```
 
-<p class="tsuzuri-hero-actions"><a class="tzr-button tsuzuri-button-primary" href="docs/getting-started.md">Get started</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="gallery/style-gallery.md">Style gallery</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
+<p class="tsuzuri-hero-actions"><a class="tzr-button tsuzuri-button-primary" href="docs/getting-started.md">Get started</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="gallery/">Gallery</a><span class="tsuzuri-sep"> · </span><a class="tzr-button" href="https://github.com/akilasatolu/tsuzuri">GitHub</a></p>
 
 <p class="tsuzuri-site-hidden">Website: <a href="https://akilasatolu.github.io/tsuzuri/">akilasatolu.github.io/tsuzuri</a></p>
 
@@ -54,7 +54,7 @@ Docs matter, but they shouldn't eat into your product time. Tsuzuri takes these 
 | Your trouble | Tsuzuri's answer | Details |
 |---|---|---|
 | Docs tools take days to learn and configure, so the site never gets made. | One `init` and one settings file. No workflow YAML to write. | [Get started](docs/getting-started.md) |
-| A plain site looks unfinished and loses readers in the first few seconds. | A themed site from the first build, with light and dark. Pick another look from the style gallery. | [Style gallery](gallery/style-gallery.md) |
+| A plain site looks unfinished and loses readers in the first few seconds. | A themed site from the first build, with light and dark. Pick another look from the gallery. | [Gallery](gallery/) |
 | You write the same content twice, in the README and on a docs site, and one of them goes stale. | The README is the site: Tsuzuri follows its links, so there is no second copy. | [Write pages](docs/guides/write-pages.md) |
 | Even after the site is up, tools and dependencies need upkeep. | Updating is one command: `init --update`. | [Update](docs/guides/update.md) |
 
@@ -62,7 +62,7 @@ So all you have to write is the README.
 
 ## Looks good from day one
 
-Your site starts with a finished look. To change it, pick a style from the style gallery, put its CSS file in `.github/tsuzuri/styles/` and set `THEME` in `.github/tsuzuri/config` (for example `THEME=glass.css`). This site uses a style of its own, `tsuzuri.css`.
+Your site starts with a finished look. To change it, pick a style from the gallery, put its CSS file in `.github/tsuzuri/styles/` and set `THEME` in `.github/tsuzuri/config` (for example `THEME=glass.css`). This site uses a style of its own, `tsuzuri.css`.
 
 <div class="tzr-carousel tsuzuri-showcase">
 <img src="assets/gallery/default-light.png" alt="default (light)" width="320">
@@ -73,7 +73,7 @@ Your site starts with a finished look. To change it, pick a style from the style
 <img src="assets/gallery/blueprint-light.png" alt="blueprint (light)" width="320">
 </div>
 
-[See all the styles in the style gallery](gallery/style-gallery.md).
+[See all the styles in the gallery](gallery/).
 
 ## Everything a docs site needs, already on
 
@@ -103,7 +103,7 @@ Tsuzuri is not a fit for sites that are published somewhere other than GitHub Pa
 ## Documentation
 
 - [Get started](docs/getting-started.md): publish your README as a site in three steps.
-- [Style gallery](gallery/style-gallery.md): choose a look.
+- [Gallery](gallery/): choose a look.
 - [Guides](docs/guides/README.md): add pages, change the look, support more than one language, and more.
 - [Reference](docs/reference/README.md): settings, frontmatter, commands and how the build works.
 - [FAQ](docs/faq.md): answers to the common problems.

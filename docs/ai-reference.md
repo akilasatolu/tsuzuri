@@ -121,7 +121,7 @@ the settings file. To change them, edit `.github/tsuzuri/config` after `init`
 `init` does not ask about the theme or the custom style either. The settings file
 always starts with `THEME=default.css`, and `init` places only `base.css` and
 `default.css` in `.github/tsuzuri/styles/` (see section 3.5). To use another
-custom style, the user downloads it from the style gallery and writes its file name
+custom style, the user downloads it from the gallery and writes its file name
 in `THEME`.
 
 ### 3.4 Non-interactive runs
@@ -170,7 +170,7 @@ The other options are as follows.
 - `.github/tsuzuri/lib/*.mjs`: the modules the build script uses (17 files)
 - `.github/tsuzuri/styles/base.css`, `.github/tsuzuri/styles/default.css`: the
   base CSS and the default custom style. Only these two are placed. The other
-  custom styles are not distributed with the package; they are in the style gallery.
+  custom styles are not distributed with the package; they are in the gallery.
 - `.github/tsuzuri/package.json`, `.github/tsuzuri/package-lock.json`:
   the versions and hashes of the build dependencies (marked, highlight.js,
   marked-footnote)
@@ -270,7 +270,7 @@ written in the settings file that `init` generates.
   folders, a name that does not end with `.css`) becomes `default.css` with a
   warning. When the file is missing, the build shows a warning and uses the
   base CSS only. There is no `THEME=none` keyword (for no decoration, use a
-  CSS file that contains only comments, such as `none.css` from the style gallery).
+  CSS file that contains only comments, such as `none.css` from the gallery).
   When omitted: `default.css`
   Value from init: `default.css`
 - `LANGUAGES`: the site languages. The value is a comma-separated list of
@@ -579,7 +579,7 @@ generated.
   styles (`glass.css`, `neumorphism.css`, `editorial.css`, `minimal.css`,
   `kintsugi.css`, `blueprint.css`, `nineties.css`, `none.css` and the look of
   this site) are not distributed with the package. The user downloads one from
-  the style gallery, puts it in `.github/tsuzuri/styles/`, and sets `THEME`.
+  the gallery, puts it in `.github/tsuzuri/styles/`, and sets `THEME`.
 - A custom style can define and override CSS variables such as `--fg`, `--bg`,
   `--border`, `--accent`, `--code-bg`, `--font` and `--content-width`. To make
   a variation of `default.css`, copy it under another name, rewrite the
@@ -843,7 +843,7 @@ version inside the repository stays the same until an update.
 - Symptom: the build log shows a warning that the file of `THEME` was not
   found, and the page has no decoration.
   Cause: the CSS file is not in `.github/tsuzuri/styles/` (it was not
-  downloaded from the style gallery, or it was put in another folder).
+  downloaded from the gallery, or it was put in another folder).
   The symptom does not occur when: the file is in `.github/tsuzuri/styles/`.
 - Symptom: a version with unreleased behavior runs.
   Cause: the command has no `#v1`, and the content of the `main` branch
@@ -866,7 +866,7 @@ The detailed description of each topic is at the following URLs.
 - Page features: https://akilasatolu.github.io/tsuzuri/docs/reference/features.html
 - Settings keys: https://akilasatolu.github.io/tsuzuri/docs/reference/configuration.html
 - Changing the look (custom styles): https://akilasatolu.github.io/tsuzuri/docs/guides/style.html
-- Style gallery (samples and downloads): https://akilasatolu.github.io/tsuzuri/gallery/style-gallery.html
+- Gallery (samples and downloads): https://akilasatolu.github.io/tsuzuri/gallery/
 - Frontmatter: https://akilasatolu.github.io/tsuzuri/docs/reference/frontmatter.html
 - Multilingual sites: https://akilasatolu.github.io/tsuzuri/docs/guides/multilingual.html
 - Commands: https://akilasatolu.github.io/tsuzuri/docs/reference/cli.html

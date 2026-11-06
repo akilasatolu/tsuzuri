@@ -11,12 +11,12 @@ order: 20
 
 Glassmorphism。ゆっくり揺れて流れるオーロラの地に、色がそのまま透ける薄い透明なガラスのカード。
 
-使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`glass.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([ギャラリー](./)でも可)で`glass.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=glass.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: glass.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← Default](default.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Neumorphism →](neumorphism.ja.md)
+[← Default](default.ja.md) ・ [ギャラリー](./) ・ [Neumorphism →](neumorphism.ja.md)
 
 ## 見出しレベル2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← Default](default.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Neumorphism →](neumorphism.ja.md)
+[← Default](default.ja.md) ・ [ギャラリー](./) ・ [Neumorphism →](neumorphism.ja.md)

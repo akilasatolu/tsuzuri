@@ -11,12 +11,12 @@ order: 20
 
 Glassmorphism. Thin, clear glass cards that let the colors show through, over a slowly swaying, flowing aurora.
 
-To use it, download `glass.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
+To use it, download `glass.css` with the button above (or from the [gallery](./)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=glass.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: glass.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← Default](default.md) · [Style gallery](style-gallery.md) · [Neumorphism →](neumorphism.md)
+[← Default](default.md) · [Gallery](./) · [Neumorphism →](neumorphism.md)
 
 ## Heading level 2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← Default](default.md) · [Style gallery](style-gallery.md) · [Neumorphism →](neumorphism.md)
+[← Default](default.md) · [Gallery](./) · [Neumorphism →](neumorphism.md)

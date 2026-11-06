@@ -11,12 +11,12 @@ order: 90
 
 ベースだけを適用し、ブラウザ既定の見た目で表示します。`none.css`はコメントだけのCSSファイルです。
 
-使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`none.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([ギャラリー](./)でも可)で`none.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=none.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: none.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← 90s](nineties.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Tsuzuri →](tsuzuri.ja.md)
+[← 90s](nineties.ja.md) ・ [ギャラリー](./) ・ [Tsuzuri →](tsuzuri.ja.md)
 
 ## 見出しレベル2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← 90s](nineties.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Tsuzuri →](tsuzuri.ja.md)
+[← 90s](nineties.ja.md) ・ [ギャラリー](./) ・ [Tsuzuri →](tsuzuri.ja.md)

@@ -1,11 +1,11 @@
 ---
-title: Style gallery
+title: Gallery
 description: Compare the look of Tsuzuri's styles on real pages, and download them
 order: 0
 toc: false
 ---
 
-# Style gallery
+# Gallery
 
 ## How to use a custom style
 

@@ -54,7 +54,7 @@ push(マージ含む)があったときだけ、GitHub Pagesへのデプロイ�
 フォルダは書かず、ファイル名だけで指定します(`.css`で終わる名前)。ページの見た目は、ベース(`base.css`)+
 このカスタムスタイル1つで決まります。`npx github:akilasatolu/tsuzuri#v1 init`が生成する`.github/tsuzuri/config`は
 `THEME=default.css`で始まります。`default.css`はパッケージに入っていて、`init`(と`init --update`)が
-`.github/tsuzuri/styles/`に置きます。ほかのものは、[スタイルギャラリー](../../gallery/style-gallery.ja.md)でダウンロードして`.github/tsuzuri/styles/`に置き、
+`.github/tsuzuri/styles/`に置きます。ほかのものは、[ギャラリー](../../gallery/)でダウンロードして`.github/tsuzuri/styles/`に置き、
 そのファイル名を書きます(例: `THEME=glass.css`)。
 
 - 省略した場合(キーが無い、または値が空)は、警告なしで`default.css`になります。
@@ -63,7 +63,7 @@ push(マージ含む)があったときだけ、GitHub Pagesへのデプロイ�
 - ファイルが存在しない場合や、リポジトリの外を指すシンボリックリンクの場合は、警告を出して、ベースだけでビルドします。
 - ファイルは常に`.github/tsuzuri/styles/`の中から読まれます。`STYLE_DIR`の影響は受けません。
 
-`THEME=none`というキーワードはありません。装飾なしで表示したいときは、スタイルギャラリーの`none.css`のような、
+`THEME=none`というキーワードはありません。装飾なしで表示したいときは、ギャラリーの`none.css`のような、
 コメントだけのカスタムスタイルを使います。詳細は[見た目を変える](../guides/style.ja.md)を参照してください。
 
 ### LANGUAGES

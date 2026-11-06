@@ -56,4 +56,4 @@ npx github:akilasatolu/tsuzuri#v1 preview
 ## 次に読む
 
 - [公開の設定](./publish.ja.md): サイトを公開するブランチを決める。
-- [見た目を変える](./style.ja.md): スタイルギャラリーでスタイルを選ぶ。
+- [見た目を変える](./style.ja.md): ギャラリーでスタイルを選ぶ。

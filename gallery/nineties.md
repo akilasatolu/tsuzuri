@@ -11,12 +11,12 @@ order: 80
 
 90s nostalgia. A Windows 95-style teal desktop with gray windows and raised buttons. Light only.
 
-To use it, download `nineties.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
+To use it, download `nineties.css` with the button above (or from the [gallery](./)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=nineties.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: nineties.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← Blueprint](blueprint.md) · [Style gallery](style-gallery.md) · [None →](none.md)
+[← Blueprint](blueprint.md) · [Gallery](./) · [None →](none.md)
 
 ## Heading level 2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← Blueprint](blueprint.md) · [Style gallery](style-gallery.md) · [None →](none.md)
+[← Blueprint](blueprint.md) · [Gallery](./) · [None →](none.md)

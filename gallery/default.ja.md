@@ -16,7 +16,7 @@ Material Design 3 風。青系の配色、角丸のカードと影、トーン�
 1ページだけ使う場合は、そのページのfrontmatterに`theme: default.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[スタイルギャラリー](style-gallery.ja.md) ・ [Glass →](glass.ja.md)
+[ギャラリー](./) ・ [Glass →](glass.ja.md)
 
 ## 見出しレベル2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[スタイルギャラリー](style-gallery.ja.md) ・ [Glass →](glass.ja.md)
+[ギャラリー](./) ・ [Glass →](glass.ja.md)

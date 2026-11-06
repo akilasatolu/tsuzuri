@@ -141,7 +141,7 @@ current one marked; press a dot to jump to that image). They are not shown when 
 Inside a gallery tile (`<div class="tzr-tile">`), pressing an image opens the link in the tile's heading. Only pages with a
 carousel load the small script (`tzr-carousel.js`). The
 labels of the dots are in Japanese if the page language is Japanese, and in English otherwise. Where JavaScript
-doesn't run, nothing is added and the images can still be scrolled sideways. [The style gallery](../../gallery/style-gallery.md) uses it.
+doesn't run, nothing is added and the images can still be scrolled sideways. [The gallery](../../gallery/) uses it.
 
 ## Syntax highlighting
 

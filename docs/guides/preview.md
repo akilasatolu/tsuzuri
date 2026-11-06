@@ -60,4 +60,4 @@ To do the same thing by hand without `preview`, run the following steps in order
 ## Read next
 
 - [Publish settings](./publish.md): choose the branch that publishes the site.
-- [Change the look](./style.md): pick a style in the style gallery.
+- [Change the look](./style.md): pick a style in the gallery.

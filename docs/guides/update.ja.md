@@ -23,7 +23,7 @@ npx github:akilasatolu/tsuzuri#v1 init --update
 | `.github/workflows/tsuzuri-pages.yml` | 最新版で上書き |
 | `.github/tsuzuri/`配下のビルドスクリプト・`base.css`・`default.css` | 最新版で上書き(新しく増えたファイルは追加。最新版で使われなくなった`lib/`配下のスクリプトは削除)。`default.css`は上書きされるので、編集したいときは別の名前にコピーする。`styles/`のCSSは削除されない |
 | `.github/tsuzuri/config` | **変更しない** |
-| `styles/`に自分で置いたカスタムスタイル(スタイルギャラリーからダウンロードしたものや、自作のもの) | **変更しない**(削除もしない) |
+| `styles/`に自分で置いたカスタムスタイル(ギャラリーからダウンロードしたものや、自作のもの) | **変更しない**(削除もしない) |
 
 `--lang`は`--update`が書く内容を変えません。例外は1つで、`init --update --lang ja`のときは、メッセージが日本語になります。
 上書きされるワークフロー・`.gitignore`・`package.json`・CSSは、`--lang`の有無で変わりません。

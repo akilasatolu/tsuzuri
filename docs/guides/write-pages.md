@@ -48,5 +48,5 @@ Alerts, footnotes, diagrams, task lists and emoji codes work as they do on GitHu
 
 ## Read next
 
-- [Change the look](./style.md): pick a style in the style gallery.
+- [Change the look](./style.md): pick a style in the gallery.
 - [Publish settings](./publish.md): the branch, a custom domain and manual runs.

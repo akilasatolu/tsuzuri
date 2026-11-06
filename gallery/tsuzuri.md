@@ -19,10 +19,10 @@ are connected by lines.
 
 The CSS is [tsuzuri.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/tsuzuri.css).
 See [Change the look](../docs/guides/style.md#writing-your-own-custom-style) for how to write one. To use it on your own
-site, download `tsuzuri.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
+site, download `tsuzuri.css` with the button above (or from the [gallery](./)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=tsuzuri.css`.
 
-[← None](none.md) · [Style gallery](style-gallery.md)
+[← None](none.md) · [Gallery](./)
 
 ## Heading level 2
 
@@ -59,4 +59,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← None](none.md) · [Style gallery](style-gallery.md)
+[← None](none.md) · [Gallery](./)

@@ -77,7 +77,7 @@ OGPの`og:type`に使う値です。省略した場合のデフォルトは`webs
 `.github/tsuzuri/config`の`THEME`で、このキーはそのページだけ別のものにします。
 
 **カスタムスタイルのファイル名**を書きます。`.github/tsuzuri/styles/`の中の`.css`ファイル(例: `glass.css`)です
-(カスタムスタイルについては[見た目を変える](../guides/style.ja.md)、ダウンロードできるものは[スタイルギャラリー](../../gallery/style-gallery.ja.md)を参照)。
+(カスタムスタイルについては[見た目を変える](../guides/style.ja.md)、ダウンロードできるものは[ギャラリー](../../gallery/)を参照)。
 書くのは**ファイル名だけ**です(フォルダは書きません)。`/`・`\`・`:`を含む値、`.`で始まる値、`.css`で終わらない値は
 使えません(`../x.css`・`assets/x.css`など)。`none`も使えません。
 装飾なしで表示したいページは、`none.css`(コメントだけのファイル。`.github/tsuzuri/styles/`に置きます)を指定します。

@@ -11,12 +11,12 @@ order: 40
 
 A style that relies on typography and white space, like a magazine or a polished document. Large serif headings with chapter numbers, and a vermilion accent.
 
-To use it, download `editorial.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
+To use it, download `editorial.css` with the button above (or from the [gallery](./)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=editorial.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: editorial.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← Neumorphism](neumorphism.md) · [Style gallery](style-gallery.md) · [Minimal →](minimal.md)
+[← Neumorphism](neumorphism.md) · [Gallery](./) · [Minimal →](minimal.md)
 
 ## Heading level 2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← Neumorphism](neumorphism.md) · [Style gallery](style-gallery.md) · [Minimal →](minimal.md)
+[← Neumorphism](neumorphism.md) · [Gallery](./) · [Minimal →](minimal.md)

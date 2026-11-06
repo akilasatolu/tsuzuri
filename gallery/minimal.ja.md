@@ -11,12 +11,12 @@ order: 50
 
 Vercel や Linear のドキュメントのような、白・黒・グレーだけの落ち着いた見た目。リンクだけ青。
 
-使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`minimal.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
+使うには、上のボタン([ギャラリー](./)でも可)で`minimal.css`をダウンロードし、`.github/tsuzuri/styles/`に置いて、
 `.github/tsuzuri/config`で`THEME=minimal.css`を指定します。
 1ページだけ使う場合は、そのページのfrontmatterに`theme: minimal.css`と書きます
 ([見た目を変える](../docs/guides/style.ja.md)参照)。
 
-[← Editorial](editorial.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Kintsugi →](kintsugi.ja.md)
+[← Editorial](editorial.ja.md) ・ [ギャラリー](./) ・ [Kintsugi →](kintsugi.ja.md)
 
 ## 見出しレベル2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← Editorial](editorial.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md) ・ [Kintsugi →](kintsugi.ja.md)
+[← Editorial](editorial.ja.md) ・ [ギャラリー](./) ・ [Kintsugi →](kintsugi.ja.md)

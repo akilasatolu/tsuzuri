@@ -42,7 +42,7 @@ npx github:akilasatolu/tsuzuri#v1 init
 
 `.github/tsuzuri/`配下で編集してよいのは、設定ファイル`config`と、`styles/`に置く自分のカスタムスタイル
 だけです。`base.css`・`default.css`・スクリプトは編集しないでください。ほかの見た目にしたいときは、
-[スタイルギャラリー](../gallery/style-gallery.ja.md)でカスタムスタイルをダウンロードして`styles/`に置き、`THEME`に指定します
+[ギャラリー](../gallery/)でカスタムスタイルをダウンロードして`styles/`に置き、`THEME`に指定します
 ([見た目を変える](./guides/style.ja.md)参照)。
 
 ビルドスクリプト本体もリポジトリにコピーされるため、生成後のワークフローは実行のたびに
@@ -82,6 +82,6 @@ pushする前に、自分のパソコンでサイトを確認することもで�
 
 ## 次のステップ
 
-- [スタイルギャラリー](../gallery/style-gallery.ja.md)で見た目を選び、`THEME`に指定します([見た目を変える](./guides/style.ja.md)参照)。
+- [ギャラリー](../gallery/)で見た目を選び、`THEME`に指定します([見た目を変える](./guides/style.ja.md)参照)。
 - READMEからリンクを足して、ページを増やします([ページを書く](./guides/write-pages.ja.md)参照)。
 - AIエージェントに任せるなら、[AIエージェント向けの参考情報](./ai-reference.ja.md)を貼り付けます。

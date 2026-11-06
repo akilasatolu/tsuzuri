@@ -17,10 +17,10 @@ order: 100
 
 使っているCSSは[tsuzuri.css](https://github.com/akilasatolu/tsuzuri/blob/main/.github/tsuzuri/styles/tsuzuri.css)です。
 書き方は[見た目を変える](../docs/guides/style.ja.md#自分でカスタムスタイルを作る)を参照してください。
-自分のサイトで使うには、上のボタン([スタイルギャラリー](style-gallery.ja.md)でも可)で`tsuzuri.css`をダウンロードし、
+自分のサイトで使うには、上のボタン([ギャラリー](./)でも可)で`tsuzuri.css`をダウンロードし、
 `.github/tsuzuri/styles/`に置いて、`THEME=tsuzuri.css`にします。
 
-[← None](none.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md)
+[← None](none.ja.md) ・ [ギャラリー](./)
 
 ## 見出しレベル2
 
@@ -57,4 +57,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![Tsuzuriのロゴ](../assets/favicon.svg)
 
-[← None](none.ja.md) ・ [スタイルギャラリー](style-gallery.ja.md)
+[← None](none.ja.md) ・ [ギャラリー](./)

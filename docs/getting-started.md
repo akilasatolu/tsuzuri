@@ -42,7 +42,7 @@ repository.
 
 Under `.github/tsuzuri/`, you edit only the settings file `config` and your own custom styles in
 `styles/`. Do not edit `base.css`, `default.css` or the scripts. To use another look, download a
-custom style from the [style gallery](../gallery/style-gallery.md), put it in `styles/`, and set `THEME` (see [Change the look](./guides/style.md)).
+custom style from the [gallery](../gallery/), put it in `styles/`, and set `THEME` (see [Change the look](./guides/style.md)).
 
 Because the build script is copied into your repository too, the generated workflow builds
 and deploys entirely inside your repository, without fetching the Tsuzuri repository each
@@ -79,6 +79,6 @@ Before you push, you can check the site on your own computer: see [Preview local
 
 ## Next steps
 
-- Choose a look in the [style gallery](../gallery/style-gallery.md), then set `THEME` (see [Change the look](./guides/style.md)).
+- Choose a look in the [gallery](../gallery/), then set `THEME` (see [Change the look](./guides/style.md)).
 - Add more pages by linking them from your README (see [Write pages](./guides/write-pages.md)).
 - Let an AI agent do it for you: paste [Reference for AI agents](./ai-reference.md).

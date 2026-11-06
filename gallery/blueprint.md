@@ -11,12 +11,12 @@ order: 70
 
 Like a blueprint, with a white grid and fine lines on blue, and headings with dimension lines. Always looks the same.
 
-To use it, download `blueprint.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
+To use it, download `blueprint.css` with the button above (or from the [gallery](./)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=blueprint.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: blueprint.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← Kintsugi](kintsugi.md) · [Style gallery](style-gallery.md) · [90s →](nineties.md)
+[← Kintsugi](kintsugi.md) · [Gallery](./) · [90s →](nineties.md)
 
 ## Heading level 2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← Kintsugi](kintsugi.md) · [Style gallery](style-gallery.md) · [90s →](nineties.md)
+[← Kintsugi](kintsugi.md) · [Gallery](./) · [90s →](nineties.md)

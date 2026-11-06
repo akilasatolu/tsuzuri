@@ -11,12 +11,12 @@ order: 50
 
 A calm look in only white, black and gray, like the Vercel or Linear docs. Only links are blue.
 
-To use it, download `minimal.css` with the button above (or from the [style gallery](style-gallery.md)), put it in `.github/tsuzuri/styles/`,
+To use it, download `minimal.css` with the button above (or from the [gallery](./)), put it in `.github/tsuzuri/styles/`,
 and set `THEME=minimal.css` in `.github/tsuzuri/config`.
 To use it for a single page only, write `theme: minimal.css` in that page's frontmatter
 (see [Change the look](../docs/guides/style.md)).
 
-[← Editorial](editorial.md) · [Style gallery](style-gallery.md) · [Kintsugi →](kintsugi.md)
+[← Editorial](editorial.md) · [Gallery](./) · [Kintsugi →](kintsugi.md)
 
 ## Heading level 2
 
@@ -53,4 +53,4 @@ console.log(marked.parse("# Hello Tsuzuri"));
 
 ![The Tsuzuri logo](../assets/favicon.svg)
 
-[← Editorial](editorial.md) · [Style gallery](style-gallery.md) · [Kintsugi →](kintsugi.md)
+[← Editorial](editorial.md) · [Gallery](./) · [Kintsugi →](kintsugi.md)
