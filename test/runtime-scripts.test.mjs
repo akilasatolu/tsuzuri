@@ -81,8 +81,8 @@ function runCopyScript(lang, { clipboardFails = false } = {}) {
   };
   vm.runInNewContext(COPY_SCRIPT, context);
   const box = pre.parentElement;
-  const button = box?.children.find((c) => c.tag === "button");
-  return { pre, box, button, timers, written };
+  const button = pre.children.find((c) => c.tag === "button");
+  return { pre, code, box, button, timers, written };
 }
 
 /**
@@ -135,10 +135,12 @@ describe("COPY_SCRIPT(tzr-copy.js)", () => {
       await button.dispatch("click");
       assert.deepEqual(written, ["echo hi"]); // 最後の改行は除いてコピーする
       assert.equal(button.textContent, "コピーしました");
+      assert.equal(button.attrs["data-state"], "copied");
       assert.equal(timers.length, 1);
       assert.equal(timers[0].ms, 2000);
       timers[0].fn();
       assert.equal(button.textContent, "コピー");
+      assert.equal(button.attrs["data-state"], undefined);
     });
   }
 
@@ -148,8 +150,10 @@ describe("COPY_SCRIPT(tzr-copy.js)", () => {
       assert.equal(button.textContent, "Copy");
       await button.dispatch("click");
       assert.equal(button.textContent, "Copied");
+      assert.equal(button.attrs["data-state"], "copied");
       timers[0].fn();
       assert.equal(button.textContent, "Copy");
+      assert.equal(button.attrs["data-state"], undefined);
     });
   }
 
@@ -157,19 +161,23 @@ describe("COPY_SCRIPT(tzr-copy.js)", () => {
     const ja = runCopyScript("ja", { clipboardFails: true });
     await ja.button.dispatch("click");
     assert.equal(ja.button.textContent, "コピーできませんでした");
+    assert.equal(ja.button.attrs["data-state"], "failed");
     ja.timers[0].fn();
     assert.equal(ja.button.textContent, "コピー");
+    assert.equal(ja.button.attrs["data-state"], undefined);
 
     const en = runCopyScript("fr", { clipboardFails: true });
     await en.button.dispatch("click");
     assert.equal(en.button.textContent, "Copy failed");
+    assert.equal(en.button.attrs["data-state"], "failed");
   });
 
-  test("コードブロックを枠で包み、その中にボタンを置く(今までと同じ形)", () => {
-    const { pre, box, button } = runCopyScript("ja");
+  test("コードブロックを枠で包み、ボタンは pre の中に置く", () => {
+    const { pre, code, box, button } = runCopyScript("ja");
     assert.equal(box.className, "tzr-code");
     assert.deepEqual(pre.beforeNodes, [box]);
-    assert.deepEqual(box.children, [pre, button]);
+    assert.deepEqual(box.children, [pre]);
+    assert.deepEqual(pre.children, [code, button]);
     assert.equal(button.type, "button");
     assert.equal(button.className, "tzr-copy");
     assert.equal(button.attrs["aria-live"], "polite");

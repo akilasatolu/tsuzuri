@@ -47,6 +47,8 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - This site's top page was reorganized for people who want good-looking docs on GitHub Pages with little effort: a screenshot of a finished site in the hero, a section on who it is for right after it, three steps to publish, and shorter sections on the look and the features. The feature cards no longer show a one-character mark (the styles for it were removed from `tsuzuri.css`), and the taglines were renewed too. On wide screens, the style carousel of the top page is now at most 720px wide and centered.
 - The hero of this site's top page now shows an animation of a README on GitHub turning into a site with the default style (a still image of the two side by side for readers who prefer reduced motion). `scripts/make-hero-gif.mjs` makes it again.
 - On GitHub, the hero of this site's README now shows a link to the site (it is hidden on the site itself), and the CI status badge was removed from it.
+- The copy button of code blocks now looks like GitHub's: an icon without text, always shown in a column to the right of the code, so it never covers the code, and it turns into a check mark for two seconds after copying. Long lines now scroll sideways inside the code block, and code blocks no longer get extra space at the top. This is set in `base.css` and `tzr-copy.js`, so it applies to every style, including `none` and your own custom styles; the color comes from the text color of the code block. The button is now placed inside the `pre` (it was next to the `pre` inside `.tzr-code`), and it gets `data-state="copied"` or `data-state="failed"` for two seconds. Because the shared CSS changed, the CSS file name (the hash at the end) changes. `tsuzuri.css` no longer styles the button.
+- The animation in the hero of this site's top page now scrolls through the whole README on GitHub and then through the whole site built from it, using a larger sample site (ten pages) and the new copy button. The screenshots of the style gallery were taken again; `scripts/make-gallery-shots.mjs` makes them again.
 
 ### Fixed
 
@@ -69,6 +71,8 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 - このサイトのトップページを、手間をかけずにGitHub Pagesできれいなドキュメントを公開したい人に向けて組み直した。ヒーローに完成したサイトの画像を置き、そのすぐ下に誰のためのツールかを書き、公開の手順を3ステップにまとめ、見た目と特徴の節を短くした。特徴のカードの一文字のマークをやめ(`tsuzuri.css` からその指定を削除)、あわせてキャッチコピーを改めた。広い画面では、トップページのスタイルのカルーセルを最大720pxの幅にし、中央に置くようにした。
 - このサイトのトップページのヒーローに、GitHubのREADMEがdefaultのスタイルのサイトに変わるアニメーションを置いた(動きを減らす設定の人には、2つを並べた止まった画像)。`scripts/make-hero-gif.mjs`で作り直せる。
 - このサイトのREADMEのヒーローに、GitHubで読む人のためのサイトへのリンクを置き(サイトの上では表示しない)、CIの状態のバッジを外した。
+- コードブロックのコピーボタンを、GitHub のような見た目にした。文字のないアイコンのボタンで、コードの右の列に常に表示するので、コードに重ならない。コピーすると、2秒だけチェックの印になる。長い行はコードブロックの中で横にスクロールするようになり、コードブロックの上の余白はなくなった。`base.css` と `tzr-copy.js` で行うので、`none` と自分のカスタムスタイルを含むすべてのスタイルに効く。色はコードブロックの文字色から作る。ボタンは `pre` の中に置くようにした(これまでは `.tzr-code` の中で `pre` の隣)。コピーのあと2秒だけ `data-state="copied"` か `data-state="failed"` が付く。共通の CSS を変えたため、CSS のファイル名(後ろのハッシュ)が変わる。`tsuzuri.css` からボタンの指定を削除した。
+- このサイトのトップページのヒーローのアニメーションを、GitHub の README 全体をスクロールしてから、それを元にしたサイト全体をスクロールして見せる形にした。見本は10ページに増やし、新しいコピーボタンで作った。スタイルギャラリーのスクリーンショットも撮り直した。`scripts/make-gallery-shots.mjs` で作り直せる。
 
 ### 修正
 

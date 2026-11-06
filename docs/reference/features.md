@@ -127,10 +127,11 @@ installation.
 
 ## Copy button for code
 
-A "Copy" button appears at the top right of code blocks; click it to copy the code. The button is always shown. Only pages with code blocks load
-the small script (`tzr-copy.js`). The label is "コピー" if the page language is Japanese,
-and "Copy" otherwise. So that the button never covers the code, code blocks with the button get
-extra space at the top.
+A copy button (an icon, like GitHub's) appears at the top right of code blocks; click it to copy the code.
+After copying, the icon turns into a check mark for two seconds. The button is always shown. Only pages with code blocks load
+the small script (`tzr-copy.js`). The button sits in a column to the right of the code, and long lines scroll sideways
+inside the code block, so the button never covers the code. For screen readers, the button is labeled "コピー" if the
+page language is Japanese, and "Copy" otherwise.
 
 ## Image carousel
 

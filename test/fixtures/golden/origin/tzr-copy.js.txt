@@ -12,7 +12,8 @@
   const failed = s.copyFailed;
   for (const code of document.querySelectorAll("main pre > code")) {
     const pre = code.parentElement;
-    // ボタンが横スクロールで一緒に流れないよう、コードブロックを枠で包んでその右上に置く
+    // コードブロックを枠(tzr-code)で包み、ボタンは pre の中(右の余白の列)に置く。コードは code の中で横にスクロールするので、
+    // ボタンは流れず、コードにも重ならない(見た目は base.css)
     const box = document.createElement("div");
     box.className = "tzr-code";
     pre.before(box);
@@ -26,11 +27,16 @@
       try {
         await navigator.clipboard.writeText(code.innerText.replace(/\n$/, ""));
         button.textContent = done;
+        button.setAttribute("data-state", "copied");
       } catch {
         button.textContent = failed;
+        button.setAttribute("data-state", "failed");
       }
-      setTimeout(() => (button.textContent = label), 2000);
+      setTimeout(() => {
+        button.textContent = label;
+        button.removeAttribute("data-state");
+      }, 2000);
     });
-    box.append(button);
+    pre.append(button);
   }
 })();

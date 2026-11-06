@@ -425,18 +425,6 @@ main .tsuzuri-feature h3::before { content: none; }
 main .tsuzuri-feature h3::after { content: ""; display: block; width: 28px; height: 3px; margin-top: 10px; background: var(--gradient-flame); border-radius: 2px; }
 .tsuzuri-feature p:last-child { margin: 0; color: var(--fg-soft); font-size: 0.93em; line-height: 1.7; }
 
-/* ---------- コードのコピーボタン ---------- */
-.tzr-copy {
-  right: 12px;
-  padding: 3px 12px;
-  color: var(--pre-fg);
-  font-weight: 700;
-  background: color-mix(in srgb, var(--pre-fg) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--pre-fg) 25%, transparent);
-  border-radius: 999px;
-}
-@media (hover: hover) { .tzr-copy:hover { color: var(--pre-fg); background: color-mix(in srgb, var(--accent-2) 70%, transparent); border-color: transparent; } }
-
 /* ---------- 404 ページのボタン(トップページの入口と同じ見た目) ---------- */
 main > .tsuzuri-hero-actions { justify-content: flex-start; }
 

@@ -7,7 +7,7 @@ order: 50
 # Reference for AI agents
 
 The box on this page holds a single text that gathers the facts about Tsuzuri,
-from installation to publishing on GitHub Pages. The "Copy" button at its top
+from installation to publishing on GitHub Pages. The copy button (an icon) at its top
 right copies the whole text, which can then be pasted into the AI agent of
 your choice.
 
