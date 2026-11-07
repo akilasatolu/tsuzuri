@@ -33,6 +33,8 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+## [1.41.0] - 2026-11-07
+
 ### Changed
 
 - In the navigation, the entrance page of a folder (`README.md` or `index.md`) is now always the first page in its folder, whatever its `order` is. The `order` of that page still sets the position of the folder. As a result the top page comes first in the navigation, and the entrance pages of folders no longer sit in the middle of their folder.
