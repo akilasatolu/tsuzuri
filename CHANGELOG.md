@@ -33,6 +33,16 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+### Changed
+
+- The site name at the top of the navigation is now a link to the top page of the site (the top page of the page's language on a multilingual site). It keeps the look of the site name, and it is underlined when the pointer is over it. This is set in `base.css`, so it applies to every style, including `none` and your own custom styles. Because the shared CSS changed, the CSS file name (the hash at the end) changes.
+
+<!-- ja -->
+
+### 変更
+
+- ナビの先頭のサイト名を、サイトのトップへのリンクにした(多言語のサイトでは、そのページの言語のトップ)。見た目はサイト名のままで、カーソルを当てると下線が付く。`base.css` で指定しているので、`none` や自作のカスタムスタイルを含むすべてのスタイルに効く。共通の CSS が変わったので、CSS のファイル名(末尾のハッシュ)が変わる。
+
 ## [1.41.0] - 2026-11-07
 
 ### Changed

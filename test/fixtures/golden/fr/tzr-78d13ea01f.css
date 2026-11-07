@@ -107,6 +107,10 @@
   .tzr-theme-toggle:focus-visible { outline: 2px solid var(--accent); }
   .tzr-theme-toggle + .tzr-nav-label { margin-left: 0; }
   .tzr-nav-head > p { margin: 0; font-weight: 700; }
+  /* サイト名(サイトのトップへのリンク)。見た目は <p> のままにし、ページへのリンクの見た目(body > nav a)を付けない */
+  .tzr-nav-head > p > a { display: inline; margin: 0; padding: 0; color: inherit; background: none; border-radius: 0; box-shadow: none; text-decoration: none; }
+  .tzr-nav-head > p > a:hover { color: inherit; background: none; text-decoration: underline; }
+  .tzr-nav-head > p > a:focus-visible { outline: 2px solid var(--accent); }
   .tzr-nav-label {
     margin-left: auto;
     padding: 4px 12px;

@@ -564,7 +564,23 @@ describe("build-docs.mjs :: main (E2E)", () => {
 
       const indexHtml = readOut(dir, "index.html");
       assert.match(indexHtml, /<meta property="og:site_name" content="My Site">/);
-      assert.match(indexHtml, /<div class="tzr-nav-head"><p>My Site<\/p>/);
+      assert.match(indexHtml, /<div class="tzr-nav-head"><p><a href="\/">My Site<\/a><\/p>/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("ナビの見出しのサイト名は、BASE_PATH を含むサイトのトップへのリンクになる", () => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndDefaultStyle(dir);
+
+      const result = runBuild(dir, { SITE_NAME: "My Site", NAV_ENABLED: "true", BASE_PATH: "/my-repo" });
+      assert.equal(result.status, 0, result.stderr);
+
+      assert.match(readOut(dir, "index.html"), /<div class="tzr-nav-head"><p><a href="\/my-repo\/">My Site<\/a><\/p>/);
+      assert.match(readOut(dir, "docs/a.html"), /<div class="tzr-nav-head"><p><a href="\/my-repo\/">My Site<\/a><\/p>/);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

@@ -587,12 +587,21 @@ describe("build-docs.mjs :: 言語切り替えボタンと hreflang", () => {
     withSite(FIXTURE_A, {}, (dir) => {
       assert.equal(runBuild(dir, { ...A_ENV, SITE_NAME: "Tsuzuri" }).status, 0);
       const head = readOut(dir, "docs/a.html").match(/<div class="tzr-nav-head">[\s\S]*?<\/div>/)[0];
-      const name = head.indexOf("<p>Tsuzuri</p>");
+      const name = head.indexOf('<p><a href="/">Tsuzuri</a></p>');
       const sw = head.indexOf('<a class="tzr-lang-switch"');
       const menu = head.indexOf('<label for="tzr-nav-toggle"');
       assert.ok(name >= 0 && sw > name && menu > sw, head);
       // ナビがあるときは本文の上の欄を使わない
       assert.doesNotMatch(readOut(dir, "docs/a.html"), /tzr-lang-bar/);
+    });
+  });
+
+  test("ナビの見出しのサイト名は、ページの言語のトップへのリンク(404 は基本言語のトップ)", () => {
+    withSite(FIXTURE_A, {}, (dir) => {
+      assert.equal(runBuild(dir, { ...A_ENV, SITE_NAME: "Tsuzuri" }).status, 0);
+      assert.ok(readOut(dir, "docs/a.html").includes('<p><a href="/">Tsuzuri</a></p>'));
+      assert.ok(readOut(dir, "en/docs/en-only.html").includes('<p><a href="/en/">Tsuzuri</a></p>'));
+      assert.ok(readOut(dir, "404.html").includes('<p><a href="/">Tsuzuri</a></p>'));
     });
   });
 

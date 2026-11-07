@@ -135,7 +135,7 @@ docs                  … ディレクトリ(見出し)
 
 ### SITE_NAME
 全ページの`<meta property="og:site_name">`と、ナビゲーション有効時のナビ先頭の
-サイトタイトルとして使われるサイト名です。また、起点のページ(`ROOT_MD`)にfrontmatterの`title`も
+サイトタイトル(サイトのトップへのリンク)として使われるサイト名です。また、起点のページ(`ROOT_MD`)にfrontmatterの`title`も
 本文の最初の`# 見出し`(h1)も無い場合は、そのページのタイトルとナビでの表示名にも使われます(`README.md`にfrontmatterを書くと
 GitHub上で表として表示されるため、書かずに済むようにしています)。省略した場合は、ビルド実行時の環境変数`GITHUB_REPOSITORY`
 (`"owner/repo"`形式。GitHub Actions実行時は常に自動設定される既定の環境変数です)から、

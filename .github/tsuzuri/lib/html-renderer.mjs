@@ -49,10 +49,11 @@ export function escapeHtml(s) {
  *   - サイト内検索の設定。指定すると検索欄の置き場所と検索スクリプトの読み込みを出力する
  *     (検索欄そのものはスクリプトが作るため、JavaScriptが動かない環境では何も表示されない)
  * @param {string} [navLabel] - <nav> の aria-label
- * @param {{ hrefFor: (rel: string) => string, langSwitchHtml?: string }} opts
+ * @param {{ hrefFor: (rel: string) => string, langSwitchHtml?: string, homeHref?: string }} opts
  *   - hrefFor: ページへのリンク先の組み立て(必須。言語ごとの URL の決まりを知っている呼び出し側が渡す)
  *   - langSwitchHtml: 言語切り替えボタンのHTML。見出し(サイト名)と「メニュー」ラベルの間に入れる
  *     (ライト/ダーク切り替えは「メニュー」ラベルの手前に差し込まれるので、並びは サイト名・言語・☾・メニュー)
+ *   - homeHref: サイト名のリンク先(サイトのトップ)。空ならリンクにしない。siteName が空なら使わない
  * @returns {string}
  */
 export function renderNav(
@@ -62,7 +63,7 @@ export function renderNav(
   menuLabel = "メニュー",
   search = null,
   navLabel = "サイト内ページ",
-  { hrefFor, langSwitchHtml = "" },
+  { hrefFor, langSwitchHtml = "", homeHref = "" },
 ) {
   // ディレクトリは <details> で折りたためるようにする(JavaScript は不要)。
   // どのページを見ていても全ページへのリンクが見えるよう、最初はすべて開いておく。
@@ -79,7 +80,11 @@ export function renderNav(
     return `<ul>${nodes.map((n) => renderNode(n, depth)).join("")}</ul>`;
   }
 
-  const heading = siteName ? `<p>${escapeHtml(siteName)}</p>` : "";
+  let heading = "";
+  if (siteName) {
+    const name = escapeHtml(siteName);
+    heading = `<p>${homeHref ? `<a href="${escapeHtml(homeHref)}">${name}</a>` : name}</p>`;
+  }
   const toggle =
     `<input type="checkbox" id="tzr-nav-toggle" class="tzr-nav-toggle">` +
     `<div class="tzr-nav-head">${heading}${langSwitchHtml}` +

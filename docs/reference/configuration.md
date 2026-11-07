@@ -145,7 +145,7 @@ to do with Tsuzuri's own logo and favicon (under `assets/`).
 
 ### SITE_NAME
 The site name used in `<meta property="og:site_name">` on every page and as the site title at
-the top of the navigation when the navigation is enabled. If the starting page (`ROOT_MD`) has
+the top of the navigation when the navigation is enabled (it links to the top page of the site). If the starting page (`ROOT_MD`) has
 neither a frontmatter `title` nor a first `# heading` (h1), it's also used as that page's title
 and its name in the navigation (frontmatter in `README.md` is shown as a table on GitHub, so
 this lets you avoid writing it). If left out, the repository name, the part after `/` in the

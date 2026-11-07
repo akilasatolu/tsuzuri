@@ -161,6 +161,26 @@ describe("renderNav の組み立て用の引数", () => {
     const noName = nav(tree, "", "", undefined, "Menu", null, "Site pages", { langSwitchHtml: sw });
     assert.ok(noName.includes(`<div class="tzr-nav-head">${sw}<label `));
   });
+
+  test("homeHref を渡すと、サイト名がそのリンクになる", () => {
+    const html = nav(...args, { homeHref: "/repo/" });
+    assert.ok(html.includes('<div class="tzr-nav-head"><p><a href="/repo/">サイト</a></p><label '), html);
+  });
+
+  test("homeHref とサイト名はエスケープされる", () => {
+    const html = nav(tree, "docs/a.md", "/repo", "<S>", "メニュー", null, "サイト内ページ", { homeHref: "/r/?a&b" });
+    assert.ok(html.includes('<p><a href="/r/?a&amp;b">&lt;S&gt;</a></p>'), html);
+  });
+
+  test("サイト名が空なら、homeHref があっても見出しを出さない", () => {
+    const html = nav(tree, "docs/a.md", "/repo", "", "メニュー", null, "サイト内ページ", { homeHref: "/repo/" });
+    assert.match(html, /<div class="tzr-nav-head"><label/);
+    assert.doesNotMatch(html, /<p>/);
+  });
+
+  test("homeHref が空の文字列なら、指定しないときと同じ文字列", () => {
+    assert.equal(nav(...args, { homeHref: "" }), nav(...args));
+  });
 });
 
 describe("renderMetaTags", () => {

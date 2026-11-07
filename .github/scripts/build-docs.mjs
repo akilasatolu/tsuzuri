@@ -986,6 +986,8 @@ async function main() {
       ? renderNav(site.tree, rel, config.siteName, S.menu, site.search, S.navLabel, {
           hrefFor,
           langSwitchHtml: langSwitch,
+          // ナビの見出しのサイト名は、ページの言語のトップへのリンクにする(その言語のトップが無ければ基本言語のトップ)
+          homeHref: `${config.basePath}/${urlPathOf(rootOfLang(pageLang) ?? siteRootRel)}`,
         })
       : "";
 
