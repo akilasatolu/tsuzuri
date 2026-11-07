@@ -55,6 +55,7 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 - In the custom styles of the gallery (`default.css`, `glass.css`, `neumorphism.css`, `editorial.css`, `minimal.css`, `kintsugi.css`, `blueprint.css`, `nineties.css`), on narrow screens where the navigation is shown above the content, the left and right edges of the navigation and the content did not line up. They now have the same width and are centered. `base.css` is unchanged.
 - In `default.css`, `glass.css`, `neumorphism.css`, `blueprint.css` and `nineties.css`, on wide screens the bottom margin of the content (48px) did not match the one of the navigation (16px). Both are now 16px.
+- In `tsuzuri.css`, the knots on the left of the `h2` headings did not follow the scrolling: they stayed lit or half lit from the start, depending on where the heading was on the page. The cause was `overflow-x: auto` on `main` in `base.css`, which made `main` a scroll container. `base.css` no longer sets it, so scroll-driven animations in custom styles now follow the page. Instead, long words such as URLs now wrap, so they do not make the page scroll sideways; before, the content scrolled sideways inside `main`. Tables and code blocks still scroll sideways inside themselves, as before. This is set in `base.css`, so it applies to every style, including `none` and your own custom styles. Because the shared CSS changed, the CSS file name (the hash at the end) changes.
 
 <!-- ja -->
 
@@ -80,6 +81,7 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 - ギャラリーのカスタムスタイル(`default.css`、`glass.css`、`neumorphism.css`、`editorial.css`、`minimal.css`、`kintsugi.css`、`blueprint.css`、`nineties.css`)で、ナビが本文の上に出る狭い画面のとき、ナビと本文の左右の端が揃っていなかった。同じ幅にして中央に揃えた。`base.css` は変えていない。
 - `default.css`、`glass.css`、`neumorphism.css`、`blueprint.css`、`nineties.css` で、広い画面のとき、本文の下の余白(48px)がナビの下の余白(16px)と揃っていなかった。どちらも 16px にした。
+- `tsuzuri.css` で、`h2` の見出しの左の結び目の丸が、スクロールに連動していなかった。ページの中での見出しの位置によって、最初から灯ったまま、または途中の色のままだった。原因は、`base.css` で `main` に付けていた `overflow-x: auto` で、`main` がスクロールする箱になっていた。`base.css` でこの指定をやめたので、カスタムスタイルのスクロールに連動するアニメーションが、ページのスクロールに連動するようになった。代わりに、URL などの長い語は折り返すようにし、ページが横に動かないようにした(これまでは `main` の中で横にスクロールした)。表とコードブロックは、今までどおり自分の中で横にスクロールする。`base.css` で指定するので、`none` と自分のカスタムスタイルを含むすべてのスタイルに効く。共通の CSS を変えたため、CSS のファイル名(後ろのハッシュ)が変わる。
 
 ## [1.40.0] - 2026-10-31
 

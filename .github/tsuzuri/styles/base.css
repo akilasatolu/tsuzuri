@@ -5,11 +5,13 @@
     color: var(--fg);
     background: var(--bg);
   }
+  /* main には overflow を付けない(付けると main がスクロールする箱になり、カスタムスタイルの animation-timeline: view() などが
+     ページのスクロールに連動しなくなる)。長い URL などの折り返せない文字列は、ページが横に動かないよう折り返す */
   main {
     max-width: var(--content-width);
     margin: 0 auto;
     padding: 40px 24px;
-    overflow-x: auto;
+    overflow-wrap: break-word;
   }
   main img { max-width: 100%; height: auto; }
 
