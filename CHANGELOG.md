@@ -33,6 +33,8 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+## [1.42.0] - 2026-11-07
+
 ### Changed
 
 - The site name at the top of the navigation is now a link to the top page of the site (the top page of the page's language on a multilingual site). It keeps the look of the site name, and it is underlined when the pointer is over it. This is set in `base.css`, so it applies to every style, including `none` and your own custom styles. Because the shared CSS changed, the CSS file name (the hash at the end) changes.
