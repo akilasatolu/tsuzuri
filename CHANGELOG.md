@@ -33,6 +33,8 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+## [1.43.0] - 2026-11-12
+
 ### Added
 
 - Every page, including the 404 page, now ends with a line "Powered by Tsuzuri". "Tsuzuri" links to the Tsuzuri website. The text is the same in every language. It is a separate line after the repository information (`REPO_LINK` and others), with the classes `tzr-updated tzr-powered`, so it looks like the last updated date in every style. Because the shared CSS changed, the CSS file name (the hash at the end) changes.
