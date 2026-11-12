@@ -113,6 +113,15 @@ committed in git, like "Last updated: 2026-09-27". When building on GitHub Actio
 workflow fetches the full git history before computing the dates (see the
 [configuration reference](./configuration.md#last_updated)).
 
+## Powered by Tsuzuri
+
+Every page, including the 404 page, ends with a line "Powered by Tsuzuri". "Tsuzuri" links to the
+Tsuzuri website (https://akilasatolu.github.io/tsuzuri/). The text is the same on pages in every
+language. It comes after the links to the previous and next pages and after the repository
+information (`REPO_LINK` and others), as a separate line. The line is
+`<p class="tzr-updated tzr-powered">`, so it looks the same as the last updated date. The link has
+the class `tzr-powered-link`.
+
 ## Externally loaded files and dependency safety
 
 Pages with a diagram (mermaid) load mermaid from a CDN (jsDelivr) in the browser. The loaded

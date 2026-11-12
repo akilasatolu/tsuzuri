@@ -223,7 +223,9 @@ shown, in one line at the end of the page body, after the links to the previous 
 With all three set, an English page shows "GitHub repository · Version: v1.2.3 · License: MIT", and
 a Japanese page shows "GitHub リポジトリ · バージョン: v1.2.3 · ライセンス: MIT". The 404 page
 shows it too, and it appears with `NAV_ENABLED=false` as well. It is a separate line from the
-last updated date and the edit link. If none of the three is set, nothing is added to the page.
+last updated date and the edit link. If none of the three is set, this line is not shown. The
+"Powered by Tsuzuri" line comes after it on every page either way (see
+[Features](./features.md#powered-by-tsuzuri)).
 
 The link points to the repository's URL, which is found the same way as for the edit link: on
 GitHub Actions, from the repository the workflow runs in; locally, from git's `origin`. If the URL

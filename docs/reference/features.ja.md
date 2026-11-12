@@ -104,6 +104,14 @@ Markdownで書いた画像(`![説明](../画像.png)`)には`loading="lazy"`が�
 「最終更新: 2026-09-27」のように表示されます。GitHub Actionsでビルドするときは、ワークフローが
 gitの全履歴を取得してから日付を求めます([設定リファレンス](./configuration.ja.md#last_updated)参照)。
 
+## Powered by Tsuzuri
+
+404ページを含むすべてのページの末尾に、「Powered by Tsuzuri」の1行が表示されます。
+「Tsuzuri」はTsuzuriのサイト(https://akilasatolu.github.io/tsuzuri/)へのリンクです。どの言語のページでも同じ文言です。
+前後のページへのリンクとリポジトリ情報(`REPO_LINK`など)の後ろに、別の行で表示されます。
+この行は`<p class="tzr-updated tzr-powered">`なので、見た目は最終更新日と同じになります。
+リンクには`tzr-powered-link`のクラスが付いています。
+
 ## 外部から読み込むファイルと依存の安全性
 
 図(mermaid)のあるページは、閲覧時にmermaidをCDN(jsDelivr)から読み込みます。読み込むファイルには

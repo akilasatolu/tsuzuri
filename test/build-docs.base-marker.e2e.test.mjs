@@ -234,7 +234,9 @@ describe("build-docs.mjs :: 基本言語の印付きの優先(1言語)", () => {
         assert.match(readOut(dir, "guide/README.html"), /marker-guide-en/);
         const hrefs = hrefsOf(readOut(dir, "index.html"));
         assert.ok(hrefs.includes("/guide/"), hrefs.join(", "));
-        assert.ok(!hrefs.some((h) => h.startsWith("http")), "GitHub へのリンクにならない");
+        // 全ページの末尾の「Powered by Tsuzuri」のリンク(Tsuzuri のサイト)は除いて見る
+        const external = hrefs.filter((h) => h.startsWith("http") && h !== "https://akilasatolu.github.io/tsuzuri/");
+        assert.ok(external.length === 0, "GitHub へのリンクにならない");
       }
     );
   });

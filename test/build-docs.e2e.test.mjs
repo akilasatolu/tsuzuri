@@ -1876,7 +1876,7 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
       const html = readOut(dir, "docs", "a.html");
       assert.ok(html.includes('>GitHub リポジトリ</a> · <span class="tzr-repo-version">バージョン: v1.2.3</span> · <span class="tzr-repo-license">ライセンス: MIT</span></p>'));
       assert.ok(html.indexOf("tzr-edit-link") < html.indexOf("tzr-repo-info"));
-      assert.equal(html.match(/<p class="tzr-updated/g).length, 2);
+      assert.equal(html.match(/<p class="tzr-updated/g).length, 3);
     });
   });
 
@@ -1942,6 +1942,74 @@ describe("build-docs.mjs :: リポジトリ情報(REPO_LINK・REPO_VERSION・REP
       if (html.includes("tzr-pager")) assert.ok(html.indexOf("tzr-pager") < html.indexOf("tzr-repo-info"));
       assert.equal(runBuild(dir, { ...gh, NAV_ENABLED: "false", ...ALL }).status, 0);
       assert.ok(readOut(dir, "index.html").includes("tzr-repo-info"));
+    });
+  });
+});
+
+describe("build-docs.mjs :: Powered by Tsuzuri", () => {
+  const gh = {
+    GITHUB_SERVER_URL: "https://github.com",
+    GITHUB_REPOSITORY: "o/r",
+    GITHUB_SHA: "abc123",
+    GITHUB_REF: "refs/heads/docs",
+    GITHUB_REF_NAME: "docs",
+  };
+  const withBasic = (fn) => {
+    const dir = makeTmpDir();
+    try {
+      copyBasicSite(dir);
+      copyRealBaseAndDefaultStyle(dir);
+      fn(dir);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  };
+  const ALL = { REPO_LINK: "true", REPO_VERSION: "v1.2.3", REPO_LICENSE: "MIT" };
+  const POWERED =
+    '<p class="tzr-updated tzr-powered">Powered by <a class="tzr-powered-link" href="https://akilasatolu.github.io/tsuzuri/">Tsuzuri</a></p>\n';
+  const countOf = (html) => html.split(POWERED).length - 1;
+
+  test("404 を含む全ページに1回ずつ出る", () => {
+    withBasic((dir) => {
+      const result = runBuild(dir, gh);
+      assert.equal(result.status, 0, result.stderr);
+      for (const parts of [["index.html"], ["docs", "a.html"], ["404.html"]]) {
+        assert.equal(countOf(readOut(dir, ...parts)), 1, parts.join("/"));
+      }
+    });
+  });
+
+  test("日本語のページでも英語のページでも同じ文言", () => {
+    withBasic((dir) => {
+      assert.equal(runBuild(dir, gh).status, 0);
+      assert.match(readOut(dir, "index.html"), /<html lang="ja">/);
+      assert.equal(countOf(readOut(dir, "docs", "a.html")), 1);
+      assert.equal(runBuild(dir, { ...gh, LANGUAGES: "en" }).status, 0);
+      assert.match(readOut(dir, "index.html"), /<html lang="en">/);
+      assert.equal(countOf(readOut(dir, "docs", "a.html")), 1);
+    });
+  });
+
+  test("リポジトリ情報を設定しなくても出る(リポジトリ情報の行は出ない)", () => {
+    withBasic((dir) => {
+      assert.equal(runBuild(dir, gh).status, 0);
+      const html = readOut(dir, "docs", "a.html");
+      assert.doesNotMatch(html, /tzr-repo-info/);
+      assert.equal(countOf(html), 1);
+    });
+  });
+
+  test("リポジトリ情報の行と、前後のページへのリンクの後ろに付く", () => {
+    withBasic((dir) => {
+      assert.equal(runBuild(dir, { ...gh, ...ALL }).status, 0);
+      const html = readOut(dir, "docs", "a.html");
+      // リポジトリ情報の行のすぐ次の行(base.css の .tzr-repo-info + .tzr-powered が効く並び)
+      assert.ok(html.includes(`<span class="tzr-repo-license">ライセンス: MIT</span></p>\n${POWERED}`));
+      assert.ok(html.indexOf("tzr-repo-info") < html.indexOf("tzr-powered"));
+      assert.equal(runBuild(dir, { ...gh, NAV_ENABLED: "true" }).status, 0);
+      const nav = readOut(dir, "docs", "a.html");
+      assert.ok(nav.includes("tzr-pager"));
+      assert.ok(nav.indexOf("tzr-pager") < nav.indexOf("tzr-powered"));
     });
   });
 });

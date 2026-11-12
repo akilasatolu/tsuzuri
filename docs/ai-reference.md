@@ -590,6 +590,10 @@ generated.
 - `blueprint.css` has one display for both light and dark, and `nineties.css`
   has a light display only. The others switch between light and dark following
   the OS setting.
+- Every page, including the 404 page, ends with a line "Powered by Tsuzuri"
+  (in every language), linking to the Tsuzuri website. It is
+  `<p class="tzr-updated tzr-powered">`, after the repository information
+  line. There is no setting to turn it off.
 
 ## 8. Publishing
 

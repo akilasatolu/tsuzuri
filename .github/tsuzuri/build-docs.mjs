@@ -112,6 +112,11 @@ const LLMS_ORIGIN_RE = /^https?:\/\/[^\s()<>[\]"']{1,200}$/;
 // 空にしてよい(消したページ・画像が残らないように)。"." で始まるので公開サイトには含まれない。
 const BUILD_MARKER = ".tsuzuri-build";
 
+// ページ本文の最後に付ける「Powered by Tsuzuri」の行(404 を含む全ページ。リポジトリ情報の行の後ろ)。
+// 製品名を含む決まった表示なので、ページの言語によらず同じ文言にする(i18n.mjs の表には入れない)
+const POWERED_BY_HTML =
+  '<p class="tzr-updated tzr-powered">Powered by <a class="tzr-powered-link" href="https://akilasatolu.github.io/tsuzuri/">Tsuzuri</a></p>\n';
+
 // 日本語の文を途中で改行したとき、表示に余計な空白が入らないよう、前後がどちらも全角文字
 // (漢字・かな・長音「ー」や中黒「・」を含む記号・全角文字)の改行を取り除く
 // (markdown-it-cjk-breaks と同じ考え方)。描画後のHTMLにかけるので、**強調**やリンクの直後の
@@ -963,6 +968,8 @@ async function main() {
         : "",
     ].filter(Boolean);
     if (repoInfo.length) bodyHtml += `<p class="tzr-updated tzr-repo-info">${repoInfo.join(" · ")}</p>\n`;
+    // 「Powered by Tsuzuri」(404 を含む全ページの最後。リポジトリ情報があればその下の行)
+    bodyHtml += POWERED_BY_HTML;
 
     // 言語切り替え(多言語の、集めたページだけ。404 には出さない)。翻訳が無い言語はその言語のトップへ、
     // トップも無い言語は出さない(renderLangSwitch が href の空の言語を除く)

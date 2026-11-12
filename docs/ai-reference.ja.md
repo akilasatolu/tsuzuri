@@ -543,6 +543,10 @@ order: 1
   (`.github/tsuzuri/styles/` の中のファイル名)。
 - `blueprint.css` はライトとダークで同じ表示、`nineties.css` はライト表示だけです。
   ほかは OS の設定に合わせてライトとダークが切り替わります。
+- 404 ページを含むすべてのページの末尾に「Powered by Tsuzuri」の行が表示されます
+  (どの言語でも同じ)。Tsuzuri のサイトへのリンクです。
+  `<p class="tzr-updated tzr-powered">` で、リポジトリ情報の行の後ろにあります。
+  消す設定はありません。
 
 ## 8. 公開
 

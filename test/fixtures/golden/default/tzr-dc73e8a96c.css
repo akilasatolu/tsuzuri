@@ -221,6 +221,8 @@
 
   /* 最終更新日(LAST_UPDATED=true のとき) */
   .tzr-updated { margin-top: 32px; font-size: 0.85em; opacity: 0.7; }
+  /* 「Powered by Tsuzuri」の行。すぐ上がリポジトリ情報の行なら、間を詰めて続けて見せる */
+  .tzr-repo-info + .tzr-powered { margin-top: 0; }
 
   /* サイト内検索(ナビの上部。検索欄と結果はスクリプトが作る) */
   .tzr-search { margin: 10px 0 4px; }

@@ -205,7 +205,8 @@ OGP画像を読み込まないため)。リポジトリの外を指すパスは�
 英語のページでは「GitHub repository · Version: v1.2.3 · License: MIT」、日本語のページでは
 「GitHub リポジトリ · バージョン: v1.2.3 · ライセンス: MIT」のように表示されます。404ページにも表示され、
 `NAV_ENABLED=false`でも表示されます。最終更新日・編集リンクとは別の行です。3つとも設定しなければ、
-ページには何も加わりません。
+この行は表示されません。この行の後ろには、設定によらず「Powered by Tsuzuri」の行が表示されます
+([機能](./features.ja.md#powered-by-tsuzuri)参照)。
 
 リンク先はリポジトリのURLで、編集リンクと同じ方法で求めます。GitHub Actionsではワークフローが
 動いているリポジトリから、手元ではgitの`origin`から作ります。URLが分からないとき(`origin`が無い、
