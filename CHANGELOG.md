@@ -33,6 +33,8 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+## [1.44.0] - 2026-11-23
+
 ### Changed
 
 - The scrollbars of the sidebar and the page now have a transparent background, so only the bar is shown. The bar color follows the text color of the custom style. Scrollbars of code blocks and tables are unchanged. A `scrollbar-color` in your custom style takes priority. If it is written only on `html` and you want it on every element, write it on `*`, because the value is no longer inherited past `body`. To go back to the browser's default, write `:root, body > nav { scrollbar-color: auto; }` in your custom style. A custom style that uses `::-webkit-scrollbar` for the sidebar or the page needs this line too, because browsers ignore `::-webkit-scrollbar` while `scrollbar-color` is set.
