@@ -1,7 +1,6 @@
 ---
 title: ギャラリー
 description: Tsuzuriのスタイルの見た目を実際のページで比較でき、ダウンロードもできるギャラリー
-order: 0
 toc: false
 ---
 
