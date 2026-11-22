@@ -65,6 +65,13 @@
   main th, main td { border: 1px solid var(--border); padding: 6px 10px; }
   main a { color: var(--accent); }
 
+  /* サイドバーとページ全体のスクロールバーは、背景を透明にしてバーだけを見せる。バーの色は文字色から決める
+     (--fg のないスタイルでは、配色に合う CanvasText)。scrollbar-color は子孫に継承されるので、
+     コードブロックや表などに広がらないよう body で auto に戻す。カスタムスタイルの指定が必ず勝つよう、
+     :where() で詳細度を 0 にする。元に戻すときは、カスタムスタイルで :root, body > nav { scrollbar-color: auto; } と書く */
+  :where(:root, body > nav) { scrollbar-color: color-mix(in srgb, var(--fg, CanvasText) 35%, transparent) transparent; }
+  :where(body) { scrollbar-color: auto; }
+
   /* サイト内ナビゲーション(NAV_ENABLED=true のときだけ body 直下に出力される)。
      広い画面では左側に固定したサイドバー、狭い画面では本文の上に「メニュー」ボタンを置き、
      押すとページ一覧が開く(JavaScriptは使わず、チェックボックスとラベルで開閉する)。

@@ -33,6 +33,16 @@ Every release section has an English block, then a line `<!-- ja -->`, then a Ja
 
 ## [Unreleased]
 
+### Changed
+
+- The scrollbars of the sidebar and the page now have a transparent background, so only the bar is shown. The bar color follows the text color of the custom style. Scrollbars of code blocks and tables are unchanged. A `scrollbar-color` in your custom style takes priority. If it is written only on `html` and you want it on every element, write it on `*`, because the value is no longer inherited past `body`. To go back to the browser's default, write `:root, body > nav { scrollbar-color: auto; }` in your custom style. A custom style that uses `::-webkit-scrollbar` for the sidebar or the page needs this line too, because browsers ignore `::-webkit-scrollbar` while `scrollbar-color` is set.
+
+<!-- ja -->
+
+### 変更
+
+- サイドバーとページ全体のスクロールバーの背景を透明にし、バーだけを表示するようにした。バーの色はカスタムスタイルの文字色に合わせる。コードブロックと表のスクロールバーは変えていない。カスタムスタイルに書いた `scrollbar-color` が優先される。`html` だけに書いていて、すべての要素に効かせたいときは、`*` に書く(値が `body` より先に継承されなくなったため)。ブラウザの標準の表示に戻すときは、カスタムスタイルに `:root, body > nav { scrollbar-color: auto; }` と書く。サイドバーやページに `::-webkit-scrollbar` を使っているカスタムスタイルも、この行が必要になる(`scrollbar-color` が指定されていると、ブラウザは `::-webkit-scrollbar` を無視するため)。
+
 ## [1.43.0] - 2026-11-12
 
 ### Added

@@ -55,6 +55,21 @@ describe("表のセルの最小幅の CSS", () => {
   });
 });
 
+// サイドバーとページ全体のスクロールバーの背景を透明にする指定(ベース。すべてのスタイルに効く)。
+// カスタムスタイルの指定が勝つよう、:where() で詳細度を 0 にしている
+const SCROLLBAR_TRANSPARENT =
+  ":where(:root, body > nav) { scrollbar-color: color-mix(in srgb, var(--fg, CanvasText) 35%, transparent) transparent; }";
+// scrollbar-color の継承を止め、コードブロックや表のスクロールバーを変えない指定
+const SCROLLBAR_NOT_INHERITED = ":where(body) { scrollbar-color: auto; }";
+
+describe("スクロールバーの CSS", () => {
+  test("base.css: サイドバーとページのスクロールバーの背景を透明にし、ほかの要素に継承させない", () => {
+    const css = readCss("base");
+    assert.equal(countOf(css, SCROLLBAR_TRANSPARENT), 1);
+    assert.equal(countOf(css, SCROLLBAR_NOT_INHERITED), 1);
+  });
+});
+
 describe("styles/README.md", () => {
   test("default と、ベース(base.css)・カスタムスタイルの使い方が載っている", () => {
     const readme = fs.readFileSync(path.join(STYLES_DIR, "README.md"), "utf-8");
